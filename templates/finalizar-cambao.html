@@ -1,0 +1,320 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamneto Pintura</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Apontamento pintura - Finalizar cambão</h1>
+        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- tabela gerar cambão -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Finalizar cambão</h6>
+                    <!-- <div class="form-group">
+                        <label for="dataCarga">Data da carga</label>
+                        <input type="date" name="browser" id="dataCarga" class="form-control">
+                    </div> -->
+                </div>
+                <br>
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <div class="form-row">
+                        <!-- <div class="col-sm">
+                            <div class="form-group">
+                                <label for="dataCarga">Data da carga</label>
+                                <input type="date" id="dataCarga" class="form-control" data-column="1">
+                            </div>
+                        </div> -->
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="cor">Cor</label>
+                                <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
+                                <input list="listaCor"  id="cor" class="form-control" data-column="5">
+                                <datalist id="listaCor">
+                                </datalist>                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data da carga</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data da carga</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Status</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                {% if sheet_data %}
+                                    {% for data in sheet_data %}
+                                    <tr>
+                                        <td>{{ data[0] }}</td>
+                                        <td>{{ data[8] }}</td>
+                                        <td>{{ data[1] }}</td>
+                                        <td>{{ data[2] }}</td>
+                                        <td>{{ data[3] }}</td>
+                                        <td>{{ data[4] }}</td>
+                                        <td>{{ data[5] }}</td>
+                                        <td>{{ data[6] }}</td>
+                                        <td>{{ data[7] }}</td>
+                                        <td>
+                                            <input type="checkbox" class="form-control">
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7">Nenhum dado disponível</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- Content Column -->
+        <div class="col-lg-12 mb-4">
+
+            <!-- Botão para enviar os itens apontados -->
+            <button id="enviarBtn" type="button" class="btn btn-success">Enviar</button>
+            
+        </div>
+
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Script tabela JQuery -->
+
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="static/js/demo/datatables-demo.js"></script>
+
+<!-- Script campos de filtro -->
+
+<script>
+    $(document).ready(function () {
+        var table = $('#dataTable').DataTable();
+
+        // Função para obter valores únicos de uma coluna
+        function getUniqueColumnValues(columnIndex) {
+            return table.column(columnIndex, { search: 'applied' }).data().unique().sort().toArray();
+        }
+
+        // Função para popular as opções de um datalist
+        function populateDatalistOptions(datalistId, columnIndex) {
+            var datalist = $('#' + datalistId);
+            datalist.empty(); // Limpa as opções existentes
+
+            var uniqueValues = getUniqueColumnValues(columnIndex);
+
+            // Adiciona as opções ao datalist
+            uniqueValues.forEach(function (value) {
+                datalist.append('<option value="' + value + '">');
+            });
+
+            console.log(uniqueValues);
+        }
+
+        // // Função para aplicar o filtro com base na data
+        // function applyDateFilter() {
+        //     var columnIndex = $('#dataCarga').data('column');
+        //     var filterValue = $('#dataCarga').val();
+
+        //     console.log('Column Index:', columnIndex);
+        //     console.log('Filter Value:', filterValue);
+
+        //     // Formata a data usando Moment.js
+        //     // if (filterValue === '') {
+        //     //     filterValue = moment().format('DD/MM/YYYY');
+        //     // } else {
+        //     //     filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
+        //     // }
+
+        //     filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
+
+        //     // Define o filtro na coluna específica
+        //     table.column(columnIndex).search(filterValue).draw();
+
+        //     populateDatalistOptions('listaCor', 5);
+        // }
+
+        function applyColorFilter() {
+            var columnIndex = $('#cor').data('column');
+            var filterValue = $('#cor').val();
+
+            console.log('Column Index:', columnIndex);
+            console.log('Filter Value:', filterValue);
+
+            // Define o filtro na coluna específica
+            table.column(columnIndex).search(filterValue).draw();
+        }
+
+        // Carrega as opções do datalist quando a página é carregada
+        populateDatalistOptions('listaCor', 5);
+
+        // Aplica o filtro ao carregar a página
+        // applyDateFilter();
+
+        // Adiciona campos de entrada para filtrar por coluna
+        // $('#dataCarga').on('input', function () {
+        //     applyDateFilter();
+        // });
+
+        $('#cor').on('input', function () {
+            applyColorFilter();
+            populateDatalistOptions('listaCor', 5);
+        });
+    });
+</script>
+
+<!-- Script botão de enviar -->
+
+<script>
+    $(document).ready(function () {
+        // Adicione um manipulador de clique ao botão de envio
+        $('.btn-success').on('click', function () {
+            // Obtém as linhas com a coluna 5 diferente de vazio
+            showLoading();
+            var linhas = [];
+            $('#dataTable tbody tr').each(function () {
+                // var qt_produzida = $(this).find('td:eq(9) input').val().trim(); // Obtém o valor da coluna 5
+                // console.log(qt_produzida);
+                if ($(this).find('td:eq(9) input').prop('checked')) {
+                    // Obtém os valores das outras colunas se necessário
+                    var chave = $(this).find('td:eq(0)').text().trim();
+                    var data = $(this).find('td:eq(1)').text().trim();
+                    var codigo = $(this).find('td:eq(2)').text().trim();
+                    var descricao = $(this).find('td:eq(3)').text().trim();
+                    var qt_planejada = $(this).find('td:eq(4)').text().trim();
+                    var cor = $(this).find('td:eq(5)').text().trim();
+                    if (cor === 'Azul') {
+                        cor = 'AN';
+                    } else if (cor === 'Cinza') {
+                        cor = 'CO';
+                    } else if (cor === 'Laranja') {
+                        cor = 'LC';
+                    } else if (cor === 'Verde') {
+                        cor = 'VJ'
+                    } else if (cor === 'Vermelho') {
+                        cor = 'VM'
+                    } else if (cor === 'Amarelo') {
+                        cor = 'AV'
+                    }
+                    
+                    var qt_produzida = $(this).find('td:eq(6)').text().trim();
+                    var cambao = $(this).find('td:eq(7)').text().trim();
+                    var tipo = $(this).find('td:eq(8)').text().trim();
+
+                    // Adiciona os dados da linha ao array
+                    linhas.push({ chave:chave, data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo});
+
+                }
+                else {
+                    return;
+                }
+            });
+            
+            console.log(linhas)
+
+            // Envia os dados para o backend
+            $.ajax({
+                type: 'POST',
+                url: '/receber-dados-finalizar-cambao',
+                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                data: JSON.stringify({ linhas: linhas }),
+                success: function (data) {
+                    console.log('Solicitação POST bem-sucedida:', data);
+                    hideLoading();
+                    location.reload();
+                },
+                error: function (error) {
+                    console.error('Erro na solicitação POST:', error);
+                    // Adiciona um pequeno atraso antes de chamar hideLoading()
+                    hideLoading();
+                    location.reload();
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Script tratar data -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<!-- Script tela de carregamento -->
+
+<script>
+    function showLoading() {
+        $('#loading').show();
+    }
+
+    function hideLoading() {
+        $('#loading').hide();
+    }
+</script>
+
+{% endblock %}
