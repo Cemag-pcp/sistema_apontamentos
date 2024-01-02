@@ -264,11 +264,17 @@ def gerar_cambao_peca_fora_do_planejamento():
     today = datetime.now().date()
     
     data_carga_formatada = datetime.strptime(data['dataCarga'], '%Y-%m-%d').strftime('%d/%m/%Y')
-
     
+    # Se caso o usuário informar apenas o primeiro nome do conjunto
+    try:
+        codigo = data['peca'].split(' - ')[0]
+        descricao = data['peca'].split(' - ')[1]
+    except IndexError:
+        descricao = ''
+
     sql_insert = "insert into pcp.ordens_pintura (codigo,peca,qt_planejada,cor,qt_apontada,cambao,tipo,data_carga,data_finalizada) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-    cur.execute(sql_insert,(data['peca'].split(' - ')[0],
-                            data['peca'].split(' - ')[1],
+    cur.execute(sql_insert,(codigo,
+                            descricao,
                             data['quantidade'],
                             data['cor'],
                             data['quantidade'],

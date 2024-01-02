@@ -83,6 +83,8 @@
                                     <th>Descrição</th>
                                     <th>Qt. planejada</th>
                                     <th>Qt. produzida</th>
+                                    <th>Operador</th>
+                                    <th>Observação</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -93,6 +95,8 @@
                                     <th>Descrição</th>
                                     <th>Qt. planejada</th>
                                     <th>Qt. produzida</th>
+                                    <th>Operador</th>
+                                    <th>Observação</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -106,6 +110,16 @@
                                         <td>{{ data[4] }}</td>
                                         <td>
                                             <input class="form-control" id='prod' type="number">
+                                        </td>
+                                        <td>
+                                            <select class="form-control" id='selectOperador'>
+                                                <option selected hidden>Operador</option>
+                                                <option>123</option>
+                                                <option>123</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <textarea class="form-control" id='textObservacao'></textarea>
                                         </td>
                                     </tr>
                                     {% endfor %}
