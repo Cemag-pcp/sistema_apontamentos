@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify,redirect, url_for,fla
 import pandas as pd
 import time
 import datetime
-import cachetools
 import psycopg2  # pip install psycopg2
 import psycopg2.extras 
 from psycopg2.extras import execute_values
@@ -10,11 +9,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "apontamentopintura"
-
-cache_get_sheet = cachetools.LRUCache(maxsize=128)
-cache_tipos_tinta = cachetools.LRUCache(maxsize=128)
-cache_producao_finalizada = cachetools.LRUCache(maxsize=128)
-cache_itens_pintura = cachetools.LRUCache(maxsize=128)
 
 DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
