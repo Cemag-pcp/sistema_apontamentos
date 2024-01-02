@@ -27,6 +27,161 @@
                 <!-- Card Header - Dropdown -->
                 <div
                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Planejamento de produção para o dia {{ today }}</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col"> 
+                            <div class="card shadow mb-4" style="height: 300px; overflow-y: auto;">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: yellow;"></div>
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Amarelo</h6>
+                                </div> -->
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                        {% for data in data_pecas_planejada %}
+                                            {% if data[5] == 'AV' %}
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h5 class="mb-1">{{data[3]}} - {{data[4]}}</h5>
+                                            </div>
+                                                <small>Quantidade: </strong>{{data[7]}}</strong></small>
+                                                <small>Tipo: </strong>{{data[8]}}</strong></small>
+                                                <small>Data da carga: <strong>{{data[1]}}</strong></small>
+                                            <hr>    
+                                            {% endif %}
+                                        {% endfor %}              
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: blue;"></div>
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Azul</h6>
+                                </div> -->
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                        {% for data in data_pecas_planejada %}
+                                            {% if data[5] == 'AN' %}
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h5 class="mb-1">{{data[3]}} - {{data[4]}}</h5>
+                                            </div>
+                                                <small>Quantidade: </strong>{{data[7]}}</strong></small>
+                                                <small>Tipo: </strong>{{data[8]}}</strong></small>
+                                                <small>Data da carga: <strong>{{data[1]}}</strong></small>
+                                            <hr>      
+                                            {% endif %}
+                                        {% endfor %}              
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" style="height: 400px; overflow-y: auto;">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:gray;"></div>
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Cinza</h6>
+                                </div> -->
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                        {% for data in data_pecas_planejada %}
+                                            {% if data[5] == 'CO' %}
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h5 class="mb-1">{{data[3]}} - {{data[4]}}</h5>
+                                            </div>
+                                                <small>Quantidade: </strong>{{data[7]}}</strong></small>
+                                                <small>Tipo: </strong>{{data[8]}}</strong></small>
+                                                <small>Data da carga: <strong>{{data[1]}}</strong></small>
+                                            <hr>      
+                                            {% endif %}
+                                        {% endfor %}              
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" style="height: 400px; overflow-y: auto;">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:orange;"></div>
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Laranja</h6>
+                                </div> -->
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                        {% for data in data_pecas_planejada %}
+                                            {% if data[5] == 'LC' %}
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h5 class="mb-1">{{data[3]}} - {{data[4]}}</h5>
+                                            </div>
+                                                <small>Quantidade: </strong>{{data[7]}}</strong></small>
+                                                <small>Tipo: </strong>{{data[8]}}</strong></small>
+                                                <small>Data da carga: <strong>{{data[1]}}</strong></small>
+                                            <hr>        
+                                            {% endif %}
+                                        {% endfor %}              
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" style="height: 400px; overflow-y: auto;">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: green;"></div>
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Verde</h6>
+                                </div> -->
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                        {% for data in data_pecas_planejada %}
+                                            {% if data[5] == 'VJ' %}
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h5 class="mb-1">{{data[3]}} - {{data[4]}}</h5>
+                                            </div>
+                                                <small>Quantidade: </strong>{{data[7]}}</strong></small>
+                                                <small>Tipo: </strong>{{data[8]}}</strong></small>
+                                                <small>Data da carga: <strong>{{data[1]}}</strong></small>
+                                            <hr>         
+                                            {% endif %}
+                                        {% endfor %}              
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" style="height: 400px; overflow-y: auto;">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div>
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Vermelho</h6>
+                                </div> -->
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                        {% for data in data_pecas_planejada %}
+                                            {% if data[5] == 'VM' %}
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h5 class="mb-1">{{data[3]}} - {{data[4]}}</h5>
+                                            </div>
+                                                <small>Quantidade: </strong>{{data[7]}}</strong></small>
+                                                <small>Tipo: </strong>{{data[8]}}</strong></small>
+                                                <small>Data da carga: <strong>{{data[1]}}</strong></small>
+                                            <hr>          
+                                            {% endif %}
+                                        {% endfor %}              
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Area Chart -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Apontamentos pendentes (Peças em processo)</h6>
                 </div>
                 <!-- Card Body -->
@@ -38,9 +193,9 @@
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Amarelo</h6>
                                 </div> -->
-                                <div class="card-body">
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
                                     <div class="list-group">
-                                        {% for data in datas %}
+                                        {% for data in data_pecas_processo %}
                                             {% if cor == 'AV' %}
                                             <div class="d-flex w-100 justify-content-between">
                                                 <h5 class="mb-1">{{data[2]}}</h5>
@@ -61,9 +216,9 @@
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Azul</h6>
                                 </div> -->
-                                <div class="card-body">
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
                                     <div class="list-group">
-                                        {% for data in datas %}
+                                        {% for data in data_pecas_processo %}
                                             {% if data[4] == 'AN' %}
                                             <div class="d-flex w-100 justify-content-between">
                                                 <h5 class="mb-1">{{data[2]}}</h5>
@@ -84,9 +239,9 @@
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Cinza</h6>
                                 </div> -->
-                                <div class="card-body">
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
                                     <div class="list-group">
-                                        {% for data in datas %}
+                                        {% for data in data_pecas_processo %}
                                             {% if cor == 'CO' %}
                                             <div class="d-flex w-100 justify-content-between">
                                                 <h5 class="mb-1">{{data[2]}}</h5>
@@ -107,9 +262,9 @@
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Laranja</h6>
                                 </div> -->
-                                <div class="card-body">
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
                                     <div class="list-group">
-                                        {% for data in datas %}
+                                        {% for data in data_pecas_processo %}
                                             {% if data[4] == 'LC' %}
                                             <div class="d-flex w-100 justify-content-between">
                                                 <h5 class="mb-1">{{data[2]}}</h5>
@@ -130,9 +285,9 @@
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Verde</h6>
                                 </div> -->
-                                <div class="card-body">
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
                                     <div class="list-group">
-                                        {% for data in datas %}
+                                        {% for data in data_pecas_processo %}
                                             {% if data[4] == 'VJ' %}
                                             <div class="d-flex w-100 justify-content-between">
                                                 <h5 class="mb-1">{{data[2]}}</h5>
@@ -153,9 +308,9 @@
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Vermelho</h6>
                                 </div> -->
-                                <div class="card-body">
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
                                     <div class="list-group">
-                                        {% for data in datas %}
+                                        {% for data in data_pecas_processo %}
                                             {% if data[4] == 'VM' %}
                                             <div class="d-flex w-100 justify-content-between">
                                                 <h5 class="mb-1">{{data[2]}}</h5>

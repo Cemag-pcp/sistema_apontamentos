@@ -72,6 +72,7 @@
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
                                     <th>Tipo</th>
+                                    <th>Códificação</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -86,6 +87,7 @@
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
                                     <th>Tipo</th>
+                                    <th>Códificação</th>
                                     <th>Status</th>
                                 </tr>
                             </tfoot>
@@ -102,6 +104,7 @@
                                         <td>{{ data[5] }}</td>
                                         <td>{{ data[6] }}</td>
                                         <td>{{ data[7] }}</td>
+                                        <td>{{ data[11] }}</td>
                                         <td>
                                             <input type="checkbox" class="form-control">
                                         </td>
@@ -288,6 +291,7 @@
                 success: function (data) {
                     console.log('Solicitação POST bem-sucedida:', data);
                     hideLoading();
+                    showAndHideSuccessAlert('Salvo.', 2000);
                     location.reload();
                 },
                 error: function (error) {
@@ -314,6 +318,33 @@
 
     function hideLoading() {
         $('#loading').hide();
+    }
+</script>
+
+<!-- Script de alertas (Depois jogar em um arquivo.js) -->
+
+<script>
+    function showAndHideAlert(message, duration) {
+        const alertBox = $('#alertBox');
+        alertBox.html(`<strong>Danger!</strong> ${message}`);
+        alertBox.slideDown();
+
+        setTimeout(function () {
+            alertBox.slideUp();
+        }, duration);
+    }
+
+</script>
+
+<script>
+    function showAndHideSuccessAlert(message, duration) {
+        const successAlert = $('#successAlert');
+        successAlert.html(message);
+        successAlert.slideDown();
+
+        setTimeout(function () {
+            successAlert.slideUp();
+        }, duration);
     }
 </script>
 

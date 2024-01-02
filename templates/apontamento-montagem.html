@@ -85,6 +85,7 @@
                                     <th>Qt. produzida</th>
                                     <th>Operador</th>
                                     <th>Observação</th>
+                                    <th>Codificação</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -97,6 +98,7 @@
                                     <th>Qt. produzida</th>
                                     <th>Operador</th>
                                     <th>Observação</th>
+                                    <th>Codificação</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -121,6 +123,7 @@
                                         <td>
                                             <textarea class="form-control" id='textObservacao'></textarea>
                                         </td>
+                                        <td>{{ data[6] }}</td>
                                     </tr>
                                     {% endfor %}
                             
@@ -388,6 +391,7 @@
                 success: function (data) {
                     console.log('Solicitação POST bem-sucedida:', data);
                     hideLoading();
+                    showAndHideSuccessAlert('Salvo.', 2000);
                     location.reload();
                 },
                 error: function (error) {
@@ -399,6 +403,7 @@
             });
         });
     });
+    
 </script>
 
 <!-- Script tratar data -->

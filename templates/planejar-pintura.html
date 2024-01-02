@@ -35,7 +35,6 @@
                         <label for="dataCarga">Data da carga</label>
                         <input type="date" name="browser" id="dataCarga" class="form-control">
                     </div> -->
-                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">Peça fora do sequenciamento</button>
                 </div>
                 <br>
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -73,6 +72,7 @@
                                     <th>Cambão</th>
                                     <th>Tipo</th>
                                     <th>Códificação</th>
+                                    <th>Planejar</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -86,6 +86,7 @@
                                     <th>Cambão</th>
                                     <th>Tipo</th>
                                     <th>Códificação</th>
+                                    <th>Planejar</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -109,6 +110,9 @@
                                             </select>
                                         </td>
                                         <td>{{ data[8] }}</td>
+                                        <td>
+                                            <input type="checkbox" class="form-control">
+                                        </td>
                                     </tr>
                                     {% endfor %}
                             
@@ -125,12 +129,12 @@
             </div>
         </div>
         
-        <!-- Modal peça fora do sequenciamento -->
+        <!-- Modal confirmar planejamento -->
         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Gerar cambão para peça fora do sequenciamento</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Confirmar planejamento</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -139,62 +143,15 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="form-floating mb-3">
-                                <label for="userInput">Peça</label>
+                                <label for="userInput">Data do planejamento</label>
                                 <!-- <input class="form-control" type="text" id="inputPeca"> Peça -->
-                                <input class="form-control" type="text" id="userInput" oninput="showSuggestions()">
-                                <ul id="suggestions" class="custom-dropdown-menu"></ul>
+                                <input class="form-control" type="date" id="dataPlanejamento">
                             </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6 col-md-4">
-                            <div class="form-floating mb-3">
-                                <label for="inputCambao">Cambão</label>
-                                <input class="form-control" type="number" id="inputCambao"> <!-- Cambão -->
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4">
-                            <div class="form-floating mb-3">
-                                <label for="selectCor">Cor</label>
-                                <select class="custom-select" id="selectCor"> <!-- Cor -->
-                                    <option selected hidden>Escolha a cor</option>
-                                    <option value="AN">Azul</option>
-                                    <option value="AV">Amarelo</option>
-                                    <option value="VJ">Verde</option>
-                                    <option value="VM">Vermelho</option>
-                                    <option value="CO">Cinza</option>
-                                    <option value="LC">Laranja</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4">
-                            <div class="form-floating mb-3">
-                                <label for="selectTipo">Tipo</label>
-                                <select class="custom-select" id="selectTipo"> <!-- Tipo -->
-                                    <option selected hidden>Escolha o tipo</option>
-                                    <option value="PÓ">PÓ</option>
-                                    <option value="PU">PU</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6"> 
-                            <div class="form-floating mb-3">
-                                <label for="inputData">Data da carga</label>
-                                <input class="form-control" type="date" id="inputData"> <!-- Data da carga -->
-                            </div>
-                        </div>
-                        <div class="col-6"> 
-                            <div class="form-floating mb-3">
-                                <label for="inputQuantidade">Quantidade</label>
-                                <input class="form-control" type="number" id="inputQuantidade"> <!-- Quantidade -->
-                            </div>
-                        </div>  
                     </div>
                 </div>
                 <div class="modal-footer">
-                <button id="btnSalvar" type="button" class="btn btn-primary">Salvar</button>
+                    <button id="enviarBtn" type="button" class="btn btn-success">Enviar</button>
                 </div>
             </div>
             </div>
@@ -209,7 +166,7 @@
         <div class="col-lg-12 mb-4">
 
             <!-- Botão para enviar os itens apontados -->
-            <button id="enviarBtn" type="button" class="btn btn-success">Enviar</button>
+            <button type="button" class="btn btn-info">Confirmar</button>
             
         </div>
 
@@ -328,75 +285,6 @@
     });
 </script>
 
-<!-- Script botão de enviar -->
-
-<script>
-    $(document).ready(function () {
-        // Adicione um manipulador de clique ao botão de envio
-        $('.btn-success').on('click', function () {
-            // Obtém as linhas com a coluna 5 diferente de vazio
-            showLoading();
-            var linhas = [];
-            $('#dataTable tbody tr').each(function () {
-                var qt_produzida = $(this).find('td:eq(5) input').val(); // Obtém o valor da coluna 5
-                console.log(qt_produzida);
-                if (qt_produzida !== '') {
-                    // Obtém os valores das outras colunas se necessário
-                    var data = $(this).find('td:eq(0)').text().trim();
-                    var codigo = $(this).find('td:eq(1)').text().trim();
-                    var descricao = $(this).find('td:eq(2)').text().trim();
-                    var qt_planejada = $(this).find('td:eq(3)').text().trim();
-                    var cor = $(this).find('td:eq(4)').text().trim();
-                    if (cor === 'Azul') {
-                        cor = 'AN';
-                    } else if (cor === 'Cinza') {
-                        cor = 'CO';
-                    } else if (cor === 'Laranja') {
-                        cor = 'LC';
-                    } else if (cor === 'Verde') {
-                        cor = 'VJ'
-                    } else if (cor === 'Vermelho') {
-                        cor = 'VM'
-                    } else if (cor === 'Amarelo') {
-                        cor = 'AV'
-                    }
-                    
-                    var cambao = $(this).find('td:eq(6) input').val().trim();
-                    var tipo = $(this).find('td:eq(7) select').val();
-                    var celula = $(this).find('td:eq(8)').val();
-                    // ... Adicione outras colunas conforme necessário
-
-                    // Adiciona os dados da linha ao array
-                    linhas.push({ data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo,celula:celula});
-                }
-                else {
-                    return;
-                }
-            });
-
-            // Envia os dados para o backend
-            $.ajax({
-                type: 'POST',
-                url: '/send_gerar',
-                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
-                data: JSON.stringify({ linhas: linhas }),
-                success: function (data) {
-                    console.log('Solicitação POST bem-sucedida:', data);
-                    hideLoading();
-                    showAndHideSuccessAlert('Salvo.', 2000);
-                    location.reload();
-                },
-                error: function (error) {
-                    console.error('Erro na solicitação POST:', error);
-                    // Adiciona um pequeno atraso antes de chamar hideLoading()
-                    hideLoading();
-                    location.reload();
-                }
-            });
-        });
-    });
-</script>
-
 <!-- Script tratar data -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
@@ -499,58 +387,6 @@
 
 </script>
 
-<!-- Script para enviar informações de peça fora do sequenciamento para o backend -->
-
-<script>
-    $(document).ready(function () {
-        $('#btnSalvar').on('click', function () {
-            showLoading();
-            // Coletar dados do formulário
-            const peca = $('#userInput').val();
-            const cambao = $('#inputCambao').val();
-            const cor = $('#selectCor').val();
-            const tipo = $('#selectTipo').val();
-            const dataCarga = $('#inputData').val();
-            const quantidade = $('#inputQuantidade').val();
-
-            if (peca === '' || cor === '' || tipo === '' || dataCarga === '' || quantidade === '') {
-                hideLoading();
-                showAndHideAlert('Preencha todos os campos.', 2000);
-                return;
-            }
-
-            // Criar objeto com os dados
-            const dados = {
-                peca: peca,
-                cambao: cambao,
-                cor: cor,
-                tipo: tipo,
-                dataCarga: dataCarga,
-                quantidade: quantidade
-            };
-
-            // Enviar dados para o backend
-            $.ajax({
-                url: '/gerar-cambao-peca-fora-do-planejamento',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(dados),
-                success: function (response) {
-                    // Tratar a resposta do backend, se necessário
-                    console.log(response);
-                    hideLoading();
-                    showAndHideSuccessAlert('Salvo.', 2000);
-                    location.reload();
-                },
-                error: function (err) {
-                    console.error('Erro ao enviar dados para o backend', err);
-                    hideLoading();
-                }
-            });
-        });
-    });
-</script>
-
 <!-- Script de alertas (Depois jogar em um arquivo.js) -->
 
 <script>
@@ -576,6 +412,147 @@
             successAlert.slideUp();
         }, duration);
     }
+</script>
+
+<!-- Script botão de enviar -->
+
+<script>
+    $(document).ready(function () {
+        // Adicione um manipulador de clique ao botão de envio
+        $('.btn-success').on('click', function () {
+            var dataPlanejamento = $('#dataPlanejamento').val();
+            
+            // Obtém as linhas com a coluna 5 diferente de vazio
+            showLoading();
+            var linhas = [];
+            
+            $('#dataTable tbody tr').each(function () {
+                // var qt_produzida = $(this).find('td:eq(9) input').val().trim(); // Obtém o valor da coluna 5
+                // console.log(qt_produzida);
+                
+                if ($(this).find('td:eq(9) input').prop('checked')) {
+                    // Obtém os valores das outras colunas se necessário
+                    var data = $(this).find('td:eq(0)').text().trim();
+                    var codigo = $(this).find('td:eq(1)').text().trim();
+                    var descricao = $(this).find('td:eq(2)').text().trim();
+                    var qt_planejada = $(this).find('td:eq(3)').text().trim();
+                    var cor = $(this).find('td:eq(4)').text().trim();
+                    if (cor === 'Azul') {
+                        cor = 'AN';
+                    } else if (cor === 'Cinza') {
+                        cor = 'CO';
+                    } else if (cor === 'Laranja') {
+                        cor = 'LC';
+                    } else if (cor === 'Verde') {
+                        cor = 'VJ'
+                    } else if (cor === 'Vermelho') {
+                        cor = 'VM'
+                    } else if (cor === 'Amarelo') {
+                        cor = 'AV'
+                    }
+                    
+                    var qt_produzida = $(this).find('td:eq(5) input').val().trim();
+                    var tipo = $(this).find('td:eq(7) select').val();
+                    var codificacao = $(this).find('td:eq(8)').val();
+
+                    // Adiciona os dados da linha ao array
+                    linhas.push({data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,tipo:tipo,dataPlanejamento:dataPlanejamento,codificacao:codificacao});
+
+                }
+                else {
+                    return;
+                }
+            
+            });
+            
+            if (dataPlanejamento.length === 0) {
+                hideLoading();
+                showAndHideAlert('Preencha o campo de data.', 2000)
+            }
+            else {
+                // Envia os dados para o backend
+                $.ajax({
+                    type: 'POST',
+                    url: '/receber-dados-planejamento',
+                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                    data: JSON.stringify({ linhas: linhas }),
+                    success: function (data) {
+                        console.log('Solicitação POST bem-sucedida:', data);
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        location.reload();
+                    },
+                    error: function (error) {
+                        console.error('Erro na solicitação POST:', error);
+                        // Adiciona um pequeno atraso antes de chamar hideLoading()
+                        hideLoading();
+                        location.reload();
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<!-- Script botão de confirmar -->
+
+<script>
+    $(document).ready(function () {
+        // Adicione um manipulador de clique ao botão de envio
+        $('.btn-info').on('click', function () {
+            var dataPlanejamento = $('#dataPlanejamento').val();
+            
+            // Obtém as linhas com a coluna 5 diferente de vazio
+            var linhas = [];
+            
+            $('#dataTable tbody tr').each(function () {
+                // var qt_produzida = $(this).find('td:eq(9) input').val().trim(); // Obtém o valor da coluna 5
+                // console.log(qt_produzida);
+                
+                if ($(this).find('td:eq(9) input').prop('checked')) {
+                    // Obtém os valores das outras colunas se necessário
+                    var data = $(this).find('td:eq(0)').text().trim();
+                    var codigo = $(this).find('td:eq(1)').text().trim();
+                    var descricao = $(this).find('td:eq(2)').text().trim();
+                    var qt_planejada = $(this).find('td:eq(3)').text().trim();
+                    var cor = $(this).find('td:eq(4)').text().trim();
+                    if (cor === 'Azul') {
+                        cor = 'AN';
+                    } else if (cor === 'Cinza') {
+                        cor = 'CO';
+                    } else if (cor === 'Laranja') {
+                        cor = 'LC';
+                    } else if (cor === 'Verde') {
+                        cor = 'VJ'
+                    } else if (cor === 'Vermelho') {
+                        cor = 'VM'
+                    } else if (cor === 'Amarelo') {
+                        cor = 'AV'
+                    }
+                    
+                    var qt_produzida = $(this).find('td:eq(5) input').val().trim();
+                    var tipo = $(this).find('td:eq(7) select').val();
+
+                    // Adiciona os dados da linha ao array
+                    linhas.push({data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,tipo:tipo,dataPlanejamento:dataPlanejamento});
+
+                }
+                else {
+                    return;
+                }
+            
+            });
+            
+
+            if (linhas.length > 0) {
+                $('#exampleModal').modal('show');
+            }
+            else {
+                showAndHideAlert('Escolha algum item da tabela.', 2000)
+            }
+        });
+    
+    });
 </script>
 
 {% endblock %}
