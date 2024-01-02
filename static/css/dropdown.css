@@ -1,0 +1,33 @@
+.custom-dropdown-menu {
+    display: none;
+    position: absolute;
+    box-sizing: border-box;
+    padding: 8px 0;
+    list-style: none;
+    z-index: 1000;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 98%;
+}
+
+.custom-dropdown-menu li {
+    margin: 0;
+}
+
+.custom-dropdown-menu a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.3s;
+}
+
+.custom-dropdown-menu a:hover {
+    background-color: #f5f5f5;
+}

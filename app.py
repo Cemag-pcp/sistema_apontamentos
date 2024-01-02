@@ -1,9 +1,6 @@
 from flask import Flask, render_template, request, jsonify,redirect, url_for,flash, Blueprint
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 import time
-from gspread_formatting import CellFormat, format_cell_range
 import datetime
 import cachetools
 import psycopg2  # pip install psycopg2
@@ -27,6 +24,10 @@ DB_PASS = "15512332"
 
 def dados_finalizar_cambao():
 
+    """
+    Função para buscar os dados gerados pelo gerador de cambão
+    """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -45,6 +46,10 @@ def dados_finalizar_cambao():
 
 
 def dados_sequenciamento():
+
+    """
+    Função para buscar os dados do sequenciamento de pintura
+    """
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
@@ -76,8 +81,48 @@ def dados_sequenciamento():
     return df
 
 
+def dados_sequenciamento_montagem():
+
+    """
+    Função para buscar os dados do sequenciamento de montagem
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = """SELECT
+                gerador_ordens_montagem.*,
+                COALESCE(ordens_montagem.qt_apontada, 0) as qt_apontada,
+                ABS(gerador_ordens_montagem.qt_planejada - COALESCE(ordens_montagem.qt_apontada, 0)) as restante
+            FROM
+                pcp.gerador_ordens_montagem
+            LEFT JOIN (
+                SELECT
+                    data_carga,
+                    codigo,
+                    SUM(qt_apontada) as qt_apontada
+                FROM
+                    pcp.ordens_montagem
+                GROUP BY
+                    data_carga, codigo
+            ) ordens_montagem
+            ON
+                concat(gerador_ordens_montagem.data_carga, gerador_ordens_montagem.codigo) = concat(ordens_montagem.data_carga, ordens_montagem.codigo)
+            order by id desc
+            LIMIT 500;"""
+
+    df = pd.read_sql_query(sql,conn)
+
+    return df
+
+
 @app.route('/gerar-cambao', methods=['GET','POST'])
 def gerar_cambao():
+
+    """
+    Rota para página de gerar cambão
+    """
 
     table = dados_sequenciamento()
     table['qt_produzida'] = ''
@@ -93,6 +138,10 @@ def gerar_cambao():
 
 @app.route('/send_gerar', methods=['GET','POST'])
 def gerar_planilha():
+    
+    """
+    Rota para receber a resposta da geração de cambão
+    """
 
     # dados = request.get_json()
     
@@ -124,15 +173,13 @@ def gerar_planilha():
 
     return redirect(url_for("gerar_cambao"))
 
-   
-@app.route('/gerar-cambao-peca-fora-do-planejamento', methods=['POST'])
-def gerar_cambao_peca_fora_do_planejamento():
-
-    return redirect(url_for('gerar_cambao'))
-
 
 @app.route('/finalizar-cambao', methods=['GET','POST'])
 def finalizar_cambao():
+
+    """
+    Rota para mostrar página de finalizar cambão
+    """
 
     table = dados_finalizar_cambao()
 
@@ -143,6 +190,10 @@ def finalizar_cambao():
 
 @app.route("/receber-dados-finalizar-cambao", methods=['POST'])
 def receber_dados_finalizar_cambao():
+
+    """
+    Rota para receber informações da finalização do cambão
+    """
 
     dados_recebidos = request.json['linhas']
 
@@ -167,6 +218,10 @@ def receber_dados_finalizar_cambao():
 @app.route("/dashboard")
 def dashboard():
 
+    """
+    Rota para mostrar página de dashboard
+    """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                     password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -177,6 +232,177 @@ def dashboard():
     data = cur.fetchall()
 
     return render_template("painel.html", datas=data)
+
+   
+@app.route('/gerar-cambao-peca-fora-do-planejamento', methods=['POST'])
+def gerar_cambao_peca_fora_do_planejamento():
+
+    """
+    Rota para receber peças que estavam fora do sequenciamento
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    data = request.json
+    
+    print(data)
+
+    today = datetime.now().date()
+    
+    data_carga_formatada = datetime.strptime(data['dataCarga'], '%Y-%m-%d').strftime('%d/%m/%Y')
+
+    
+    sql_insert = "insert into pcp.ordens_pintura (codigo,peca,qt_planejada,cor,qt_apontada,cambao,tipo,data_carga,data_finalizada) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    cur.execute(sql_insert,(data['peca'].split(' - ')[0],
+                            data['peca'].split(' - ')[1],
+                            data['quantidade'],
+                            data['cor'],
+                            data['quantidade'],
+                            data['cambao'],
+                            data['tipo'],
+                            data_carga_formatada,
+                            today)
+                            )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return redirect(url_for('gerar_cambao'))
+
+
+@app.route("/sugestao-pecas")
+def mostrar_sugestao_peca():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select distinct(concat(codigo,' - ', peca)) from pcp.ordens_pintura"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    return jsonify(data)
+
+
+@app.route('/apontar-montagem', methods=['GET','POST'])
+def apontar_montagem():
+
+    """
+    Rota para página de apontamento de montagem
+    """
+
+    table = dados_sequenciamento_montagem()
+    table['qt_produzida'] = ''
+    table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
+    table = table[['data_carga','celula','codigo','peca','restante','qt_produzida']]
+
+    sheet_data = table.values.tolist()
+
+    return render_template('apontamento-montagem.html', sheet_data=sheet_data)
+
+
+@app.route('/salvar-apontamento-montagem', methods=['GET','POST'])
+def salvar_apontamento_montagem():
+    
+    """
+    Rota para receber a resposta da geração de cambão
+    """
+
+    # dados = request.get_json()
+    
+    dados_recebidos = request.json['linhas']
+
+    print(dados_recebidos)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Lista de tuplas contendo os dados a serem inseridos
+    values = [(linha['celula'], linha['codigo'], linha['descricao'], linha['prod'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date()) for linha in dados_recebidos]
+
+    print(values)
+
+    # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
+    query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao) VALUES %s"""
+
+    # Use execute_values para inserir várias linhas de uma vez
+    execute_values(cur, query, values)
+
+    # Comitar as alterações
+    conn.commit()
+
+    # Fechar a conexão
+    cur.close()
+    conn.close()
+
+    return redirect(url_for("gerar_cambao"))
+
+
+@app.route('/gerar-apontamento-peca-fora-do-planejamento-montagem', methods=['POST'])
+def gerar_apontamento_peca_fora_do_planejamento_montagem():
+
+    """
+    Rota para receber peças que estavam fora do sequenciamento de montagem
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+    
+    print(data)
+
+    # pesquisar peça para buscar célula
+    codigo = data['peca'].split(' - ')[0]
+    sql_pesquisa = "select celula from pcp.gerador_ordens_montagem where codigo = %s"
+
+    cur.execute(sql_pesquisa, (codigo,))
+    celula = cur.fetchall()
+    if len(celula) > 0:
+        celula = celula[0][0]
+    else:
+        celula = ""    
+
+    today = datetime.now().date()
+    
+    data_carga_formatada = datetime.strptime(data['dataCarga'], '%Y-%m-%d').strftime('%d/%m/%Y')
+    
+    sql_insert = "insert into pcp.ordens_montagem (celula,codigo,peca,qt_apontada,data_carga,data_finalizacao) values (%s,%s,%s,%s,%s,%s)"
+    cur.execute(sql_insert,(celula,
+                            data['peca'].split(' - ')[0],
+                            data['peca'].split(' - ')[1],
+                            data['quantidade'],
+                            data_carga_formatada,
+                            today)
+                            )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return redirect(url_for('gerar_cambao'))
+
+
+@app.route("/sugestao-pecas-montagem")
+def mostrar_sugestao_peca_montagem():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select distinct(concat(codigo,' - ', peca)) from pcp.gerador_ordens_montagem"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    return jsonify(data)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

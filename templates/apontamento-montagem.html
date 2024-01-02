@@ -7,6 +7,18 @@
 {% block links %}
 <!-- Custom styles for this page -->
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
+
+<style>
+    /* Adicione algum estilo para o ícone "x" dentro do campo */
+    .clear-icon {
+        cursor: pointer;
+        position: absolute;
+        right: 30px;
+        top: 46%;
+        z-index: 999; /* Certifica-se de que está sobre outros elementos */
+    }
+</style>
 
 {% endblock %}
 
@@ -16,7 +28,7 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Apontamento pintura - Gerar cambão</h1>
+        <h1 class="h3 mb-0 text-gray-800">Apontamento montagem</h1>
         <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                 class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
     </div>
@@ -48,11 +60,12 @@
                         </div>
                         <div class="col-sm">
                             <div class="form-group">
-                                <label for="cor">Cor</label>
+                                <label for="celula">Célula</label>
                                 <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
-                                <input list="listaCor"  id="cor" class="form-control" data-column="4">
-                                <datalist id="listaCor">
-                                </datalist>                            
+                                <input id="celula" class="form-control" data-column="1" style="width: 250px;">
+                                <span class="clear-icon">x</span>
+                                <ul id="listaCelulas" class="custom-dropdown-menu">
+                                </ul>
                             </div>
                         </div>
                     </div>
@@ -65,25 +78,21 @@
                             <thead>
                                 <tr>
                                     <th>Data</th>
+                                    <th>Célula</th>
                                     <th>Código</th>
                                     <th>Descrição</th>
                                     <th>Qt. planejada</th>
-                                    <th>Cor</th>
                                     <th>Qt. produzida</th>
-                                    <th>Cambão</th>
-                                    <th>Tipo</th>
                                 </tr>
                             </thead>
                             <tfoot>
                                 <tr>
                                     <th>Data</th>
+                                    <th>Célula</th>
                                     <th>Código</th>
                                     <th>Descrição</th>
                                     <th>Qt. planejada</th>
-                                    <th>Cor</th>
                                     <th>Qt. produzida</th>
-                                    <th>Cambão</th>
-                                    <th>Tipo</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -97,14 +106,6 @@
                                         <td>{{ data[4] }}</td>
                                         <td>
                                             <input class="form-control" id='prod' type="number">
-                                        </td>
-                                        <td><input class="form-control" id='cambao' type="number" value="{{ data[6] }}"></td>
-                                        <td>
-                                            <select class="form-control" id='tipo' type="text" value="">
-                                                <option value=""></option>
-                                                <option value="PÓ">PÓ</option>
-                                                <option value="PU">PU</option>
-                                            </select>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -144,50 +145,18 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-6 col-md-4">
-                            <div class="form-floating mb-3">
-                                <label for="inputCambao">Cambão</label>
-                                <input class="form-control" type="number" id="inputCambao"> <!-- Cambão -->
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4">
-                            <div class="form-floating mb-3">
-                                <label for="selectCor">Cor</label>
-                                <select class="custom-select" id="selectCor"> <!-- Cor -->
-                                    <option selected hidden>Escolha a cor</option>
-                                    <option value="AN">Azul</option>
-                                    <option value="AV">Amarelo</option>
-                                    <option value="VJ">Verde</option>
-                                    <option value="VM">Vermelho</option>
-                                    <option value="CO">Cinza</option>
-                                    <option value="LC">Laranja</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4">
-                            <div class="form-floating mb-3">
-                                <label for="selectTipo">Tipo</label>
-                                <select class="custom-select" id="selectTipo"> <!-- Tipo -->
-                                    <option selected hidden>Escolha o tipo</option>
-                                    <option value="PÓ">PÓ</option>
-                                    <option value="PU">PU</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6"> 
+                        <div class="col-6">
                             <div class="form-floating mb-3">
                                 <label for="inputData">Data da carga</label>
                                 <input class="form-control" type="date" id="inputData"> <!-- Data da carga -->
                             </div>
                         </div>
-                        <div class="col-6"> 
+                        <div class="col-6">
                             <div class="form-floating mb-3">
                                 <label for="inputQuantidade">Quantidade</label>
                                 <input class="form-control" type="number" id="inputQuantidade"> <!-- Quantidade -->
                             </div>
-                        </div>  
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -253,6 +222,7 @@
 
 <script>
     $(document).ready(function () {
+
         var table = $('#dataTable').DataTable();
 
         // Função para obter valores únicos de uma coluna
@@ -261,18 +231,41 @@
         }
 
         // Função para popular as opções de um datalist
-        function populateDatalistOptions(datalistId, columnIndex) {
-            var datalist = $('#' + datalistId);
-            datalist.empty(); // Limpa as opções existentes
+        function populateDatalistOptions(inputId, datalistId, columnIndex) {
+            var ulList = $('#' + datalistId);
+            ulList.empty(); // Limpa as opções existentes
 
             var uniqueValues = getUniqueColumnValues(columnIndex);
 
-            // Adiciona as opções ao datalist
+            // Adiciona as opções à lista
             uniqueValues.forEach(function (value) {
-                datalist.append('<option value="' + value + '">');
+                ulList.append('<li value="' + value + '">' + value + '</li>');
             });
 
+            // Adiciona manipulador de eventos para os itens da lista
+            ulList.on('click', 'li', function () {
+                var selectedValue = $(this).attr('value');
+                $('#' + inputId).val(selectedValue); // Preenche o input com o valor selecionado
+                ulList.hide(); // Oculta a lista após a seleção
+                console.log(selectedValue);
+                applyCelulaFilter(selectedValue);
+            });
             console.log(uniqueValues);
+        }
+
+        // Função para exibir a lista ao clicar no input
+        function showListOnInputClick(inputId, datalistId, columnIndex) {
+            $('#' + inputId).on('click', function () {
+                $('#' + datalistId).show(); // Exibe a lista ao receber clicar
+                populateDatalistOptions(inputId, datalistId, columnIndex);
+            });
+
+            $('#' + inputId).on('blur', function () {
+                // Adicione alguma lógica de ocultar a lista se necessário
+                setTimeout(function() {
+                    $('#' + datalistId).hide(); // Oculta a lista após um pequeno atraso
+                }, 100);
+            });
         }
 
         // Função para aplicar o filtro com base na data
@@ -293,12 +286,12 @@
             // Define o filtro na coluna específica
             table.column(columnIndex).search(filterValue).draw();
 
-            populateDatalistOptions('listaCor', 4);
+            populateDatalistOptions('celula', 'listaCelulas', 1);
         }
 
         function applyColorFilter() {
-            var columnIndex = $('#cor').data('column');
-            var filterValue = $('#cor').val();
+            var columnIndex = $('#celula').data('column');
+            var filterValue = $('#celula').val();
 
             console.log('Column Index:', columnIndex);
             console.log('Filter Value:', filterValue);
@@ -307,8 +300,16 @@
             table.column(columnIndex).search(filterValue).draw();
         }
 
+        function applyCelulaFilter(selectedValue) { 
+            var columnIndex = $('#celula').data('column');
+
+            // Define o filtro na coluna específica
+            table.column(columnIndex).search(selectedValue).draw();
+        }
+
         // Carrega as opções do datalist quando a página é carregada
-        populateDatalistOptions('listaCor', 4);
+        populateDatalistOptions('celula', 'listaCelulas', 1);
+        showListOnInputClick('celula', 'listaCelulas', 1);
 
         // Aplica o filtro ao carregar a página
         applyDateFilter();
@@ -318,10 +319,20 @@
             applyDateFilter();
         });
 
-        $('#cor').on('input', function () {
+        $('#celula').on('input', function () {
             applyColorFilter();
-            populateDatalistOptions('listaCor', 4);
         });
+
+        function limparCampoCelula() {
+            $('#celula').val('');
+            applyCelulaFilter('');
+        }
+
+        // Adiciona o evento de clique ao ícone "x" para limpar o campo 'celula'
+        $('.clear-icon').on('click', function () {
+            limparCampoCelula();
+        });
+
     });
 </script>
 
@@ -340,31 +351,14 @@
                 if (qt_produzida !== '') {
                     // Obtém os valores das outras colunas se necessário
                     var data = $(this).find('td:eq(0)').text().trim();
-                    var codigo = $(this).find('td:eq(1)').text().trim();
-                    var descricao = $(this).find('td:eq(2)').text().trim();
-                    var qt_planejada = $(this).find('td:eq(3)').text().trim();
-                    var cor = $(this).find('td:eq(4)').text().trim();
-                    if (cor === 'Azul') {
-                        cor = 'AN';
-                    } else if (cor === 'Cinza') {
-                        cor = 'CO';
-                    } else if (cor === 'Laranja') {
-                        cor = 'LC';
-                    } else if (cor === 'Verde') {
-                        cor = 'VJ'
-                    } else if (cor === 'Vermelho') {
-                        cor = 'VM'
-                    } else if (cor === 'Amarelo') {
-                        cor = 'AV'
-                    }
-                    
-                    var cambao = $(this).find('td:eq(6) input').val().trim();
-                    var tipo = $(this).find('td:eq(7) select').val();
+                    var celula = $(this).find('td:eq(1)').text().trim();
+                    var codigo = $(this).find('td:eq(2)').text().trim();
+                    var descricao = $(this).find('td:eq(3)').text().trim();                   
 
                     // ... Adicione outras colunas conforme necessário
 
                     // Adiciona os dados da linha ao array
-                    linhas.push({ data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo});
+                    linhas.push({ data:data,celula:celula,codigo:codigo,descricao:descricao,prod:qt_produzida});
                 }
                 else {
                     return;
@@ -374,7 +368,7 @@
             // Envia os dados para o backend
             $.ajax({
                 type: 'POST',
-                url: '/send_gerar',
+                url: '/salvar-apontamento-montagem',
                 contentType: 'application/json',  // Define o tipo de conteúdo como JSON
                 data: JSON.stringify({ linhas: linhas }),
                 success: function (data) {
@@ -406,6 +400,80 @@
 
     function hideLoading() {
         $('#loading').hide();
+    }
+</script>
+
+<!-- Script para enviar informações de peça fora do sequenciamento para o backend -->
+
+<script>
+    $(document).ready(function () {
+        $('#btnSalvar').on('click', function () {
+            showLoading();
+            // Coletar dados do formulário
+            const peca = $('#userInput').val();
+            const dataCarga = $('#inputData').val();
+            const quantidade = $('#inputQuantidade').val();
+
+            if (peca === '' || dataCarga === '' || quantidade === '') {
+                $('.alert').alert()
+                hideLoading();
+                showAndHideAlert('Preencha todos os campos.', 2000);
+                return;
+            }
+
+            // Criar objeto com os dados
+            const dados = {
+                peca: peca,
+                dataCarga: dataCarga,
+                quantidade: quantidade
+            };
+
+            // Enviar dados para o backend
+            $.ajax({
+                url: '/gerar-apontamento-peca-fora-do-planejamento-montagem',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(dados),
+                success: function (response) {
+                    // Tratar a resposta do backend, se necessário
+                    console.log(response);
+                    hideLoading();
+                    showAndHideSuccessAlert('Salvo.', 2000);
+                    location.reload();
+                },
+                error: function (err) {
+                    console.error('Erro ao enviar dados para o backend', err);
+                    hideLoading();
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Script de alertas (Depois jogar em um arquivo.js) -->
+
+<script>
+    function showAndHideAlert(message, duration) {
+        const alertBox = $('#alertBox');
+        alertBox.html(`<strong>Danger!</strong> ${message}`);
+        alertBox.slideDown();
+
+        setTimeout(function () {
+            alertBox.slideUp();
+        }, duration);
+    }
+
+</script>
+
+<script>
+    function showAndHideSuccessAlert(message, duration) {
+        const successAlert = $('#successAlert');
+        successAlert.html(message);
+        successAlert.slideDown();
+
+        setTimeout(function () {
+            successAlert.slideUp();
+        }, duration);
     }
 </script>
 
@@ -442,7 +510,7 @@
     // Função para obter dados brutos do backend
     function fetchSuggestionsData() {
         $.ajax({
-            url: '/sugestao-pecas',
+            url: '/sugestao-pecas-montagem',
             method: 'GET',
             success: function (data) {
                 suggestionsData = data.map(row => row[Object.keys(row)[0]]);
@@ -493,86 +561,6 @@
         $('#suggestions').css('display', filteredSuggestions.length ? 'block' : 'none');
     }
 
-</script>
-
-<!-- Script para enviar informações de peça fora do sequenciamento para o backend -->
-
-<script>
-    $(document).ready(function () {
-        $('#btnSalvar').on('click', function () {
-            showLoading();
-            // Coletar dados do formulário
-            const peca = $('#userInput').val();
-            const cambao = $('#inputCambao').val();
-            const cor = $('#selectCor').val();
-            const tipo = $('#selectTipo').val();
-            const dataCarga = $('#inputData').val();
-            const quantidade = $('#inputQuantidade').val();
-
-            if (peca === '' || cambao === '' || cor === '' || tipo === '' || dataCarga === '' || quantidade === '') {
-                $('.alert').alert()
-                hideLoading();
-                showAndHideAlert('Preencha todos os campos.', 2000);
-                return;
-            }
-
-            // Criar objeto com os dados
-            const dados = {
-                peca: peca,
-                cambao: cambao,
-                cor: cor,
-                tipo: tipo,
-                dataCarga: dataCarga,
-                quantidade: quantidade
-            };
-
-            // Enviar dados para o backend
-            $.ajax({
-                url: '/gerar-cambao-peca-fora-do-planejamento',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(dados),
-                success: function (response) {
-                    // Tratar a resposta do backend, se necessário
-                    console.log(response);
-                    hideLoading();
-                    showAndHideSuccessAlert('Salvo.', 2000);
-                    location.reload();
-                },
-                error: function (err) {
-                    console.error('Erro ao enviar dados para o backend', err);
-                    hideLoading();
-                }
-            });
-        });
-    });
-</script>
-
-<!-- Script de alertas (Depois jogar em um arquivo.js) -->
-
-<script>
-    function showAndHideAlert(message, duration) {
-        const alertBox = $('#alertBox');
-        alertBox.html(`<strong>Danger!</strong> ${message}`);
-        alertBox.slideDown();
-
-        setTimeout(function () {
-            alertBox.slideUp();
-        }, duration);
-    }
-
-</script>
-
-<script>
-    function showAndHideSuccessAlert(message, duration) {
-        const successAlert = $('#successAlert');
-        successAlert.html(message);
-        successAlert.slideDown();
-
-        setTimeout(function () {
-            successAlert.slideUp();
-        }, duration);
-    }
 </script>
 
 {% endblock %}
