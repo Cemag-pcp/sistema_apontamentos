@@ -110,6 +110,24 @@ def dados_sequenciamento_montagem():
 
     return df
 
+@app.route('/', methods=['GET','POST'])
+def gerar_cambao_temporario():
+
+    """
+    Rota para página de gerar cambão
+    """
+
+    table = dados_sequenciamento()
+    table['qt_produzida'] = ''
+    table['cambao'] = ''
+    table['tipo'] = ''
+    table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
+    table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo']]
+
+    sheet_data = table.values.tolist()
+
+    return render_template('gerar-cambao.html', sheet_data=sheet_data)
+
 
 @app.route('/gerar-cambao', methods=['GET','POST'])
 def gerar_cambao():
