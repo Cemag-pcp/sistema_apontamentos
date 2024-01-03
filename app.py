@@ -178,7 +178,7 @@ def gerar_cambao():
     return render_template('gerar-cambao.html', sheet_data=sheet_data)
 
 
-@app.route('/send_gerar', methods=['GET','POST'])
+@app.route('/send_gerar', methods=['POST'])
 def gerar_planilha():
     
     """
@@ -213,7 +213,17 @@ def gerar_planilha():
     cur.close()
     conn.close()
 
-    return redirect(url_for("gerar_cambao"))
+    table = dados_sequenciamento()
+    table['qt_produzida'] = ''
+    table['cambao'] = ''
+    table['tipo'] = ''
+    table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
+    table['codificacao'] = table.apply(criar_codificacao, axis=1)
+
+    table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao']]
+    sheet_data = table.values.tolist()
+
+    return jsonify({"linhas": sheet_data})
 
 
 @app.route('/finalizar-cambao', methods=['GET','POST'])
@@ -224,8 +234,11 @@ def finalizar_cambao():
     """
 
     table = dados_finalizar_cambao()
-    table['codificacao'] = table.apply(criar_codificacao, axis=1)
-    
+    if len(table) > 0:
+        table['codificacao'] = table.apply(criar_codificacao, axis=1)
+    else:
+        table['codificacao'] = ''
+
     sheet_data = table.values.tolist()
 
     return render_template('finalizar-cambao.html', sheet_data=sheet_data)
@@ -284,6 +297,38 @@ def dashboard():
     today = datetime.now().date().strftime("%d/%m/%Y")
 
     return render_template("painel.html", data_pecas_processo=data_pecas_processo, data_pecas_planejada=data_pecas_planejada, today=today)
+
+
+@app.route("/atualizar-dashboard")
+def atualizar_dashboard():
+
+    """
+    Rota para retornar dados para atualização do dashboard
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = 'SELECT * FROM pcp.ordens_pintura WHERE status IS NULL'
+
+    cur.execute(sql)
+    data_pecas_processo = cur.fetchall()
+
+    today = datetime.now().date().strftime("%Y-%m-%d")
+
+    sql = 'SELECT * FROM pcp.planejamento_pintura where data_planejamento = %s'
+
+    cur.execute(sql, (today,))
+    data_pecas_planejada = cur.fetchall()
+
+    today = datetime.now().date().strftime("%d/%m/%Y")
+
+    return jsonify({
+        'data_pecas_processo': data_pecas_processo,
+        'data_pecas_planejada': data_pecas_planejada,
+        'today': today
+    })
 
    
 @app.route('/gerar-cambao-peca-fora-do-planejamento', methods=['POST'])

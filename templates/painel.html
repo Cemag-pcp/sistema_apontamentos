@@ -1,7 +1,7 @@
 {% extends 'sidebar.html' %}
 
 {% block meta %}
-<meta http-equiv="refresh" content="5">
+<!-- <meta http-equiv="refresh" content="5"> -->
 {% endblock %}
 
 {% block title %}
@@ -33,7 +33,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col"> 
-                            <div class="card shadow mb-4" style="height: 300px; overflow-y: auto;">
+                            <div class="card shadow mb-4" id="cardAmareloPlanejada">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: yellow;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Amarelo</h6>
@@ -56,7 +56,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4">
+                            <div class="card shadow mb-4" id="cardAzulPlanejada">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: blue;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Azul</h6>
@@ -79,7 +79,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4" style="height: 400px; overflow-y: auto;">
+                            <div class="card shadow mb-4" id="cardCinzaPlanejada">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:gray;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Cinza</h6>
@@ -102,7 +102,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4" style="height: 400px; overflow-y: auto;">
+                            <div class="card shadow mb-4" id="cardLaranjaPlanejada">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:orange;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Laranja</h6>
@@ -125,7 +125,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4" style="height: 400px; overflow-y: auto;">
+                            <div class="card shadow mb-4" id="cardVerdePlanejada">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: green;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Verde</h6>
@@ -148,7 +148,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4" style="height: 400px; overflow-y: auto;">
+                            <div class="card shadow mb-4" id="cardVermelhoPlanejada">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Vermelho</h6>
@@ -188,7 +188,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col"> 
-                            <div class="card shadow mb-4">
+                            <div class="card shadow mb-4" id="cardAmareloPendente">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: yellow;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Amarelo</h6>
@@ -211,7 +211,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4">
+                            <div class="card shadow mb-4" id="cardAzulPendente">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: blue;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Azul</h6>
@@ -234,7 +234,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4">
+                            <div class="card shadow mb-4" id="cardCinzaPendente">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:gray;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Cinza</h6>
@@ -257,7 +257,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4">
+                            <div class="card shadow mb-4" id="cardLaranjaPendente">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:orange;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Laranja</h6>
@@ -280,7 +280,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4">
+                            <div class="card shadow mb-4" id="cardVerdePendente">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: green;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Verde</h6>
@@ -303,7 +303,7 @@
                             </div>
                         </div>
                         <div class="col"> 
-                            <div class="card shadow mb-4">
+                            <div class="card shadow mb-4" id="cardVermelhoPendente">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div>
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Vermelho</h6>
@@ -334,5 +334,92 @@
 {% endblock %}
 
 {% block scripts %}
+
+<script>
+    // Função para atualizar os dados
+    function atualizarDados() {
+        // Realiza uma solicitação AJAX para o endpoint '/dados_planejamento' (ajuste o nome do endpoint conforme necessário)
+        $.ajax({
+            type: 'GET',
+            url: '/atualizar-dashboard',
+            success: function (data) {
+                // Atualiza os dados em cada card
+
+                // Peças pendentes finalização
+                atualizarCardPecasPendente('#cardAmareloPendente', data.data_pecas_processo, 'AL');
+                atualizarCardPecasPendente('#cardAzulPendente', data.data_pecas_processo,'AN');
+                atualizarCardPecasPendente('#cardCinzaPendente', data.data_pecas_processo, 'CO');
+                atualizarCardPecasPendente('#cardLaranjaPendente', data.data_pecas_processo, 'LC');
+                atualizarCardPecasPendente('#cardVerdePendente', data.data_pecas_processo, 'VJ');
+                atualizarCardPecasPendente('#cardVermelhoPendente', data.data_pecas_processo, 'VM');
+                
+                // Peças planejadas
+                atualizarCardPecasPlanejada('#cardAmareloPlanejada', data.data_pecas_planejada, 'AL');
+                atualizarCardPecasPlanejada('#cardAzulPlanejada', data.data_pecas_planejada, 'AN');
+                atualizarCardPecasPlanejada('#cardCinzaPlanejada', data.data_pecas_planejada, 'CO');
+                atualizarCardPecasPlanejada('#cardLaranjaPlanejada', data.data_pecas_planejada, 'LC');
+                atualizarCardPecasPlanejada('#cardVerdePlanejada', data.data_pecas_planejada, 'VJ');
+                atualizarCardPecasPlanejada('#cardVermelhoPlanejada', data.data_pecas_planejada, 'VM');
+                console.log(data.data_pecas_processo)
+            },
+            error: function (error) {
+                console.error('Erro na solicitação AJAX:', error);
+            }
+        });
+    }
+
+    // Função para atualizar um card específico
+    function atualizarCardPecasPendente(cardId, dados, cor) {
+        var card = $(cardId + ' .list-group');
+        card.empty(); // Limpa os dados existentes
+        
+        var dadosFiltrados = dados.filter(function (linha) {
+            return linha[4] === cor; // 4 é o índice da coluna 'cor'
+        });
+
+        // Adiciona os novos dados ao card
+        for (var i = 0; i < dadosFiltrados.length; i++) {
+            card.append(`
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">${dadosFiltrados[i][2]}</h5>
+                </div>
+                <small>Quantidade: <strong>${dadosFiltrados[i][5]}</strong></small>
+                <small>Tipo: <strong>${dadosFiltrados[i][7]}</strong></small>
+                <small>Data da carga: <strong>${dadosFiltrados[i][8]}</strong></small>
+                <hr>
+            `);
+        }
+    }
+
+    function atualizarCardPecasPlanejada(cardId, dados, cor) {
+        var card = $(cardId + ' .list-group');
+        card.empty(); // Limpa os dados existentes
+
+        var dadosFiltrados = dados.filter(function (linha) {
+            return linha[5] === cor; // 4 é o índice da coluna 'cor'
+        });
+
+        // Adiciona os novos dados ao card
+        for (var i = 0; i < dadosFiltrados.length; i++) {
+            card.append(`
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">${dadosFiltrados[i][3]} - ${dadosFiltrados[i][4]}</h5>
+                </div>
+                <small>Quantidade: <strong>${dadosFiltrados[i][7]}</strong></small>
+                <small>Tipo: <strong>${dadosFiltrados[i][8]}</strong></small>
+                <small>Data da carga: <strong>${dadosFiltrados[i][1]}</strong></small>
+                <hr>
+            `);
+        }
+    }
+
+    // Chama a função de atualização a cada 2 segundos
+    setInterval(atualizarDados, 2000);
+
+    // Certifique-se de chamar a função uma vez para exibir os dados inicialmente
+    // atualizarCardPecasPendente();
+    // atualizarCardPecasPlanejada();
+
+</script>
 
 {% endblock %}

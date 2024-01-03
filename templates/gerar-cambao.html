@@ -275,7 +275,6 @@
                 datalist.append('<option value="' + value + '">');
             });
 
-            console.log(uniqueValues);
         }
 
         // Função para aplicar o filtro com base na data
@@ -283,8 +282,6 @@
             var columnIndex = $('#dataCarga').data('column');
             var filterValue = $('#dataCarga').val();
 
-            console.log('Column Index:', columnIndex);
-            console.log('Filter Value:', filterValue);
 
             // Formata a data usando Moment.js
             if (filterValue === '') {
@@ -303,8 +300,6 @@
             var columnIndex = $('#cor').data('column');
             var filterValue = $('#cor').val();
 
-            console.log('Column Index:', columnIndex);
-            console.log('Filter Value:', filterValue);
 
             // Define o filtro na coluna específica
             table.column(columnIndex).search(filterValue).draw();
@@ -339,7 +334,6 @@
             var linhas = [];
             $('#dataTable tbody tr').each(function () {
                 var qt_produzida = $(this).find('td:eq(5) input').val(); // Obtém o valor da coluna 5
-                console.log(qt_produzida);
                 if (qt_produzida !== '') {
                     // Obtém os valores das outras colunas se necessário
                     var data = $(this).find('td:eq(0)').text().trim();
@@ -367,7 +361,7 @@
                     // ... Adicione outras colunas conforme necessário
 
                     // Adiciona os dados da linha ao array
-                    linhas.push({ data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo,celula:celula});
+                    linhas.push({ data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo,celula:celula });
                 }
                 else {
                     return;
@@ -381,20 +375,21 @@
                 contentType: 'application/json',  // Define o tipo de conteúdo como JSON
                 data: JSON.stringify({ linhas: linhas }),
                 success: function (data) {
-                    console.log('Solicitação POST bem-sucedida:', data);
                     hideLoading();
                     showAndHideSuccessAlert('Salvo.', 2000);
+                    console.log(data);
                     location.reload();
                 },
                 error: function (error) {
                     console.error('Erro na solicitação POST:', error);
                     // Adiciona um pequeno atraso antes de chamar hideLoading()
                     hideLoading();
-                    location.reload();
+                    // location.reload();
                 }
             });
         });
     });
+
 </script>
 
 <!-- Script tratar data -->
@@ -450,7 +445,6 @@
             method: 'GET',
             success: function (data) {
                 suggestionsData = data.map(row => row[Object.keys(row)[0]]);
-                console.log('Dados brutos do Backend:', suggestionsData);
             },
             error: function (err) {
                 console.error('Erro ao obter dados brutos do backend', err);
@@ -467,7 +461,6 @@
     function showSuggestions() {
         const userInput = document.getElementById('userInput').value.toLowerCase();
 
-        console.log('User Input:', userInput);
 
         // Limpar sugestões anteriores
         $('#suggestions').empty();
@@ -477,7 +470,6 @@
             suggestion.toLowerCase().includes(userInput)
         );
 
-        console.log('Sugestões Filtradas:', filteredSuggestions);
 
         // Exibir sugestões filtradas na lista
         filteredSuggestions.forEach(suggestion => {
@@ -537,7 +529,6 @@
                 data: JSON.stringify(dados),
                 success: function (response) {
                     // Tratar a resposta do backend, se necessário
-                    console.log(response);
                     hideLoading();
                     showAndHideSuccessAlert('Salvo.', 2000);
                     location.reload();

@@ -245,7 +245,7 @@
             $('#dataTable tbody tr').each(function () {
                 // var qt_produzida = $(this).find('td:eq(9) input').val().trim(); // Obtém o valor da coluna 5
                 // console.log(qt_produzida);
-                if ($(this).find('td:eq(9) input').prop('checked')) {
+                if ($(this).find('td:eq(10) input').prop('checked')) {
                     // Obtém os valores das outras colunas se necessário
                     var chave = $(this).find('td:eq(0)').text().trim();
                     var data = $(this).find('td:eq(1)').text().trim();
@@ -289,7 +289,6 @@
                 contentType: 'application/json',  // Define o tipo de conteúdo como JSON
                 data: JSON.stringify({ linhas: linhas }),
                 success: function (data) {
-                    console.log('Solicitação POST bem-sucedida:', data);
                     hideLoading();
                     showAndHideSuccessAlert('Salvo.', 2000);
                     location.reload();
@@ -298,11 +297,12 @@
                     console.error('Erro na solicitação POST:', error);
                     // Adiciona um pequeno atraso antes de chamar hideLoading()
                     hideLoading();
-                    location.reload();
+                    // location.reload();
                 }
             });
         });
     });
+
 </script>
 
 <!-- Script tratar data -->
