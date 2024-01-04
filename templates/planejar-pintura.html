@@ -1,7 +1,7 @@
 {% extends 'sidebar.html' %}
 
 {% block title %}
-<title>Apontamneto Pintura</title>
+<title>Apontamento Pintura</title>
 {% endblock %}
 
 {% block links %}
@@ -30,7 +30,7 @@
                 <!-- Card Header - Dropdown -->
                 <div
                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Gerar Cambão</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Planejamento</h6>
                     <!-- <div class="form-group">
                         <label for="dataCarga">Data da carga</label>
                         <input type="date" name="browser" id="dataCarga" class="form-control">
@@ -71,7 +71,7 @@
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th>Códificação</th>
+                                    <th>Codificação</th>
                                     <th>Planejar</th>
                                 </tr>
                             </thead>
@@ -85,7 +85,7 @@
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th>Códificação</th>
+                                    <th>Codificação</th>
                                     <th>Planejar</th>
                                 </tr>
                             </tfoot>
@@ -453,7 +453,7 @@
                     
                     var qt_produzida = $(this).find('td:eq(5) input').val().trim();
                     var tipo = $(this).find('td:eq(7) select').val();
-                    var codificacao = $(this).find('td:eq(8)').val();
+                    var codificacao = $(this).find('td:eq(8)').text().trim();
 
                     // Adiciona os dados da linha ao array
                     linhas.push({data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,tipo:tipo,dataPlanejamento:dataPlanejamento,codificacao:codificacao});

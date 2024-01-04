@@ -598,21 +598,79 @@ def receber_dados_planejamento():
         for dado in dados_recebidos:
             data = datetime.strptime(dado['data'],'%d/%m/%Y').strftime('%Y-%m-%d')
             # Construir e executar a consulta UPDATE
-            
-            query = ("insert into pcp.planejamento_pintura (data_carga,data_planejamento,codigo,peca,cor,qt_planejada,qt_produzida,tipo) values (%s,%s,%s,%s,%s,%s,%s,%s)")
+            if dado['prod'] == '':
+                dado['prod'] = dado['qt_itens']
+
+            query = ("insert into pcp.planejamento_pintura (data_carga,data_planejamento,codigo,peca,cor,qt_planejada,qt_produzida,tipo,codificacao) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)")
             cursor.execute(query, (data,
                                    dado['dataPlanejamento'],
                                    dado['codigo'],
                                    dado['descricao'],
                                    dado['cor'],
                                    dado['qt_itens'],
-                                   dado['prod'],
-                                   dado['tipo']))
+                                   dado['prod'] if 'prod' in dado else None,
+                                   dado['tipo'],
+                                   dado['codificacao']))
 
         # Commit para aplicar as alterações
         conn.commit()
 
     return redirect(url_for("planejar_pintura"))
+
+
+@app.route('/planejar-montagem', methods=['GET','POST'])
+def planejar_montagem():
+
+    """
+    Rota para página planejamento da montagem
+    """
+
+    table = dados_sequenciamento_montagem()
+    table['qt_produzida'] = ''
+    table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
+    table['codificacao'] = table.apply(criar_codificacao, axis=1)
+
+    table = table[['data_carga','codigo','peca','restante','qt_produzida','codificacao','celula']]
+    sheet_data = table.values.tolist()
+
+    return render_template('planejar-montagem.html', sheet_data=sheet_data)
+
+
+@app.route("/receber-dados-planejamento-montagem", methods=['POST'])
+def receber_dados_planejamento_montagem():
+
+    """
+    Rota para receber informações do planejamento de montagem
+    """
+
+    dados_recebidos = request.json['linhas']
+
+    print(dados_recebidos)
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+
+    with conn.cursor() as cursor:
+        for dado in dados_recebidos:
+            data = datetime.strptime(dado['data'],'%d/%m/%Y').strftime('%Y-%m-%d')
+            # Construir e executar a consulta UPDATE
+            if dado['prod'] == '':
+                dado['prod'] = dado['qt_itens']
+
+            query = ("insert into pcp.planejamento_montagem (data_carga,data_planejamento,codigo,peca,qt_planejada,qt_produzida,codificacao,celula) values (%s,%s,%s,%s,%s,%s,%s,%s)")
+            cursor.execute(query, (data,
+                                   dado['dataPlanejamento'],
+                                   dado['codigo'],
+                                   dado['descricao'],
+                                   dado['qt_itens'],
+                                   dado['prod'] if 'prod' in dado else None,
+                                   dado['codificacao'],
+                                   dado['celula']))
+
+        # Commit para aplicar as alterações
+        conn.commit()
+
+    return redirect(url_for("planejar_montagem"))
 
 
 @app.route("/api/publica/apontamento/pintura")
@@ -629,6 +687,7 @@ def api_apontamento_pintura():
 
     return jsonify(data)
 
+
 @app.route("/api/publica/apontamento/montagem")
 def api_apontamento_montagem():
 
@@ -642,6 +701,44 @@ def api_apontamento_montagem():
     data = cur.fetchall()
 
     return jsonify(data)
+
+
+@app.route("/painel-montagem")
+def painel_montagem():
+
+    """
+    Rota para mostrar página de painel de montagem
+    """
+
+    today = datetime.now().date().strftime("%d/%m/%Y")
+
+    return render_template("painel-montagem.html", today=today)
+
+
+@app.route("/atualizar-painel-montagem")
+def atualizar_painel_montagem():
+
+    """
+    Rota para retornar dados para atualização do painel montagem
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    today = datetime.now().date().strftime("%Y-%m-%d")
+
+    sql = 'SELECT * FROM pcp.planejamento_montagem where data_planejamento = %s'
+
+    cur.execute(sql, (today,))
+    data_pecas_planejada = cur.fetchall()
+
+    today = datetime.now().date().strftime("%d/%m/%Y")
+
+    return jsonify({
+        'data_pecas_planejada': data_pecas_planejada,
+        'today': today
+    })
 
 
 if __name__ == '__main__':
