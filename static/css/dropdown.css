@@ -16,6 +16,11 @@
     width: 98%;
 }
 
+/* Adicione a propriedade 'position' para posicionar em relação ao input */
+.position-relative {
+    position: relative;
+}
+
 .custom-dropdown-menu li {
     margin: 0;
 }

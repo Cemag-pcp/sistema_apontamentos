@@ -16,9 +16,7 @@ DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
 
-
 cache_historico_pintura = cachetools.LRUCache(maxsize=128)
-
 
 def dados_finalizar_cambao():
 
@@ -438,12 +436,12 @@ def salvar_apontamento_montagem():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Lista de tuplas contendo os dados a serem inseridos
-    values = [(linha['celula'], linha['codigo'], linha['descricao'], linha['prod'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date()) for linha in dados_recebidos]
-
-    print(values)
+    values = [(linha['celula'], linha['codigo'], linha['descricao'], linha['prod'],
+                datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(),
+                linha['operador'], linha['obs'], linha['codificacao'],'Sequenciamento') for linha in dados_recebidos]
 
     # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
-    query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao) VALUES %s"""
+    query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem) VALUES %s"""
 
     # Use execute_values para inserir várias linhas de uma vez
     execute_values(cur, query, values)
@@ -488,14 +486,18 @@ def gerar_apontamento_peca_fora_do_planejamento_montagem():
     
     data_carga_formatada = datetime.strptime(data['dataCarga'], '%Y-%d-%m').strftime('%d/%m/%Y')
     
-    sql_insert = "insert into pcp.ordens_montagem (celula,codigo,peca,qt_apontada,data_carga,data_finalizacao) values (%s,%s,%s,%s,%s,%s)"
+    sql_insert = "insert into pcp.ordens_montagem (celula,codigo,peca,qt_apontada,data_carga,data_finalizacao,operador,observacao,origem) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
     cur.execute(sql_insert,(celula,
                             data['peca'].split(' - ')[0],
                             data['peca'].split(' - ')[1],
                             data['quantidade'],
                             data_carga_formatada,
-                            today)
-                )
+                            today,
+                            data['operador'],
+                            data['obs'],
+                            'Fora do sequenciamento'
+                        )
+    )
 
     conn.commit()
     cur.close()
@@ -512,6 +514,21 @@ def mostrar_sugestao_peca_montagem():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     sql = "select distinct(concat(codigo,' - ', peca)) from pcp.gerador_ordens_montagem"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    return jsonify(data)
+
+
+@app.route("/sugestao-operadores-montagem")
+def mostrar_sugestao_operadores_montagem():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select distinct(concat(matricula,' - ', nome)) from pcp.operadores_montagem"
 
     cur.execute(sql)
     data = cur.fetchall()
