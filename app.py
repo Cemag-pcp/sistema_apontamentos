@@ -615,5 +615,34 @@ def receber_dados_planejamento():
     return redirect(url_for("planejar_pintura"))
 
 
+@app.route("/api/publica/apontamento/pintura")
+def api_apontamento_pintura():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select * from pcp.ordens_pintura where data_carga > '2024-01-01'"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    return jsonify(data)
+
+@app.route("/api/publica/apontamento/montagem")
+def api_apontamento_montagem():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select * from pcp.ordens_montagem where data_carga > '2024-01-01'"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    return jsonify(data)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
