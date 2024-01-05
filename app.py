@@ -137,23 +137,14 @@ def dados_historico_pintura():
     return df
 
 
-@app.route('/', methods=['GET','POST'])
-def gerar_cambao_temporario():
+@app.route('/', methods=['GET'])
+def pagina_inicial():
 
     """
-    Rota para página de gerar cambão
+    Rota para página inicial
     """
 
-    table = dados_sequenciamento()
-    table['qt_produzida'] = ''
-    table['cambao'] = ''
-    table['tipo'] = ''
-    table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
-    table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo']]
-
-    sheet_data = table.values.tolist()
-
-    return render_template('gerar-cambao.html', sheet_data=sheet_data)
+    return render_template('pagina-branco.html')
 
 
 @app.route('/gerar-cambao', methods=['GET','POST'])
