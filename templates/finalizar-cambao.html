@@ -159,6 +159,8 @@
 
 <script>
     $(document).ready(function () {
+
+        
         var table = $('#dataTable').DataTable();
 
         // Função para obter valores únicos de uma coluna
@@ -230,6 +232,10 @@
             applyColorFilter();
             populateDatalistOptions('listaCor', 5);
         });
+    });
+
+    $('#dataTable').dataTable({
+        'iDisplayLength': 1000
     });
 </script>
 
@@ -319,6 +325,7 @@
     function hideLoading() {
         $('#loading').hide();
     }
+    
 </script>
 
 <!-- Script de alertas (Depois jogar em um arquivo.js) -->

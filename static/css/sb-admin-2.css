@@ -9841,6 +9841,32 @@ a:focus {
   font-weight: 800;
 }
 
+/* Estilos para o botão de rolar para baixo */
+.scroll-to-down {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  display: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  text-align: center;
+  color: #fff;
+  background: rgba(90, 92, 105, 0.5);
+  line-height: 46px;
+}
+
+.scroll-to-down:focus, .scroll-to-down:hover {
+  color: white;
+}
+
+.scroll-to-down:hover {
+  background: #5a5c69;
+}
+
+.scroll-to-down i {
+  font-weight: 800;
+}
+
 @-webkit-keyframes growIn {
   0% {
     transform: scale(0.9);

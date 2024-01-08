@@ -260,6 +260,11 @@
         $('#dataCarga').val(today);
         // Restante do seu código...
     });
+
+    $('#dataTable').dataTable({
+        'iDisplayLength': 1000
+    });
+
 </script>
 
 <script>
@@ -382,57 +387,59 @@
 
 <script>
     $(document).ready(function () {
-        // Adicione um manipulador de clique ao botão de envio
         $('.btn-success').on('click', function () {
-            // Obtém as linhas com a coluna 5 diferente de vazio
-            showLoading();
+            // showLoading();
             var linhas = [];
-            $('#dataTable tbody tr').each(function () {
-                var qt_produzida = $(this).find('td:eq(5) input').val(); // Obtém o valor da coluna 5
-                console.log(qt_produzida);
+
+            // Acesse a API do DataTables
+            var dataTable = $('#dataTable').DataTable();
+
+            // Itere sobre todas as páginas
+            dataTable.rows().every(function () {
+                var qt_produzida = this.data()[5].trim();
+                
                 if (qt_produzida !== '') {
-                    // Obtém os valores das outras colunas se necessário
-                    var data = $(this).find('td:eq(0)').text().trim();
-                    var celula = $(this).find('td:eq(1)').text().trim();
-                    var codigo = $(this).find('td:eq(2)').text().trim();
-                    var descricao = $(this).find('td:eq(3)').text().trim();                   
-                    var operador = $(this).find('td:eq(6) input').val();
-                    var obs = $(this).find('td:eq(7) textarea').val();
-                    var codificacao = $(this).find('td:eq(8)').text().trim();
+                    console.log(qt_produzida);
+                    var data = this.data()[0].trim();
+                    var celula = this.data()[1].trim();
+                    var codigo = this.data()[2].trim();
+                    var descricao = this.data()[3].trim();
+                    var operador = this.data()[6];
+                    var obs = this.data()[7].trim();
+                    var codificacao = this.data()[8].trim();
 
-                    // Adiciona os dados da linha ao array
-                    linhas.push({ data:data,celula:celula,codigo:codigo,descricao:descricao,prod:qt_produzida,
-                                    operador:operador, obs:obs, codificacao:codificacao });
-
-                    console.log(linhas);    
-                }   
-                else {
-                    return;
+                    linhas.push({
+                        data: data,
+                        celula: celula,
+                        codigo: codigo,
+                        descricao: descricao,
+                        prod: qt_produzida,
+                        operador: operador,
+                        obs: obs,
+                        codificacao: codificacao
+                    });
                 }
             });
 
-            // Envia os dados para o backend
-            $.ajax({
-                type: 'POST',
-                url: '/salvar-apontamento-montagem',
-                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
-                data: JSON.stringify({ linhas: linhas }),
-                success: function (data) {
-                    console.log('Solicitação POST bem-sucedida:', data);
-                    hideLoading();
-                    showAndHideSuccessAlert('Salvo.', 2000);
-                    location.reload();
-                },
-                error: function (error) {
-                    console.error('Erro na solicitação POST:', error);
-                    // Adiciona um pequeno atraso antes de chamar hideLoading()
-                    hideLoading();
-                    location.reload();
-                }
-            });
+            // $.ajax({
+            //     type: 'POST',
+            //     url: '/salvar-apontamento-montagem',
+            //     contentType: 'application/json',
+            //     data: JSON.stringify({ linhas: linhas }),
+            //     success: function (data) {
+            //         console.log('Solicitação POST bem-sucedida:', data);
+            //         hideLoading();
+            //         showAndHideSuccessAlert('Salvo.', 2000);
+            //         location.reload();
+            //     },
+            //     error: function (error) {
+            //         console.error('Erro na solicitação POST:', error);
+            //         hideLoading();
+            //         location.reload();
+            //     }
+            // });
         });
-    });
-    
+    });    
 </script>
 
 <!-- Script tratar data -->

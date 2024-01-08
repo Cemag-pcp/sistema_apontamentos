@@ -385,6 +385,10 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
+    <div class="scroll-to-down rounded" id="scrollToDownBtn">
+        <i class="fas fa-angle-down"></i>
+    </div>
+
     <!-- Logout Modal-->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -424,6 +428,25 @@
     {% block scripts %}
 
     {% endblock %}
+
+    <script>
+        $(document).ready(function () {
+            // Adiciona um evento de rolagem para mostrar/ocultar o botão
+            $(window).scroll(function () {
+                if ($(this).scrollTop() < 500) {
+                    $('#scrollToDownBtn').fadeIn();
+                } else {
+                    $('#scrollToDownBtn').fadeOut();
+                }
+            });
+
+            // Adiciona o evento de clique ao botão para rolar para baixo
+            $('#scrollToDownBtn').click(function () {
+                $('html, body').animate({ scrollTop: $(document).height() }, 'slow');
+                return false;
+            });
+        });
+    </script>
 
 </body>
 

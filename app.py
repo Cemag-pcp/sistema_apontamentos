@@ -433,12 +433,12 @@ def salvar_apontamento_montagem():
 
     print(values)
 
-    for dado in values:
-        # Construir e executar a consulta INSERT
-        query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-        cur.execute(query, dado)
+    # for dado in values:
+    #     # Construir e executar a consulta INSERT
+    #     query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+    #     cur.execute(query, dado)
     
-    conn.commit()
+    # conn.commit()
 
     # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
     # query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem) VALUES %s"""
