@@ -413,7 +413,7 @@ def apontar_montagem():
 def salvar_apontamento_montagem():
     
     """
-    Rota para receber a resposta da geração de cambão
+    Rota para receber a resposta do apontamento de montagem
     """
 
     # dados = request.get_json()
@@ -431,18 +431,27 @@ def salvar_apontamento_montagem():
                 datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(),
                 linha['operador'], linha['obs'], linha['codificacao'],'Sequenciamento') for linha in dados_recebidos]
 
-    # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
-    query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem) VALUES %s"""
+    print(values)
 
-    # Use execute_values para inserir várias linhas de uma vez
-    execute_values(cur, query, values)
-
-    # Comitar as alterações
+    for dado in values:
+        # Construir e executar a consulta INSERT
+        query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+        cur.execute(query, dado)
+    
     conn.commit()
 
-    # Fechar a conexão
-    cur.close()
-    conn.close()
+    # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
+    # query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem) VALUES %s"""
+
+    # # Use execute_values para inserir várias linhas de uma vez
+    # execute_values(cur, query, values)
+
+    # # Comitar as alterações
+    # conn.commit()
+
+    # # Fechar a conexão
+    # cur.close()
+    # conn.close()
 
     return redirect(url_for("gerar_cambao"))
 
