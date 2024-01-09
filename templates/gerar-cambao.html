@@ -43,14 +43,14 @@
                         <div class="col-sm">
                             <div class="form-group">
                                 <label for="dataCarga">Data da carga</label>
-                                <input type="date" id="dataCarga" class="form-control" data-column="0">
+                                <input type="date" id="dataCarga" class="form-control" data-column="1">
                             </div>
                         </div>
                         <div class="col-sm">
                             <div class="form-group">
                                 <label for="cor">Cor</label>
                                 <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
-                                <input list="listaCor"  id="cor" class="form-control" data-column="4">
+                                <input list="listaCor"  id="cor" class="form-control" data-column="5">
                                 <datalist id="listaCor">
                                 </datalist>                            
                             </div>
@@ -64,6 +64,7 @@
                         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
+                                    <th style="display: none;">Chave</th>
                                     <th>Data</th>
                                     <th>Código</th>
                                     <th>Descrição</th>
@@ -77,6 +78,7 @@
                             </thead>
                             <tfoot>
                                 <tr>
+                                    <th style="display: none;">Chave</th>
                                     <th>Data</th>
                                     <th>Código</th>
                                     <th>Descrição</th>
@@ -92,15 +94,16 @@
                                 {% if sheet_data %}
                                     {% for data in sheet_data %}
                                     <tr>
-                                        <td>{{ data[0] }}</td>
+                                        <td style="display: none;">{{ data[0] }}</td>
                                         <td>{{ data[1] }}</td>
                                         <td>{{ data[2] }}</td>
                                         <td>{{ data[3] }}</td>
                                         <td>{{ data[4] }}</td>
+                                        <td>{{ data[5] }}</td>
                                         <td>
                                             <input class="form-control" id='prod' type="number">
                                         </td>
-                                        <td><input class="form-control" id='cambao' type="number" value="{{ data[6] }}"></td>
+                                        <td><input class="form-control" id='cambao' type="number" value="{{ data[7] }}"></td>
                                         <td>
                                             <select class="form-control" id='tipo' type="text" value="">
                                                 <option value=""></option>
@@ -108,7 +111,7 @@
                                                 <option value="PU">PU</option>
                                             </select>
                                         </td>
-                                        <td>{{ data[8] }}</td>
+                                        <td>{{ data[9] }}</td>
                                     </tr>
                                     {% endfor %}
                             
@@ -254,7 +257,7 @@
     });
 
     $('#dataTable').dataTable({
-        'iDisplayLength': 1000
+        'iDisplayLength': 150
     });
 </script>
 
@@ -297,7 +300,7 @@
             // Define o filtro na coluna específica
             table.column(columnIndex).search(filterValue).draw();
 
-            populateDatalistOptions('listaCor', 4);
+            populateDatalistOptions('listaCor', 5);
         }
 
         function applyColorFilter() {
@@ -310,7 +313,7 @@
         }
 
         // Carrega as opções do datalist quando a página é carregada
-        populateDatalistOptions('listaCor', 4);
+        populateDatalistOptions('listaCor', 5);
 
         // Aplica o filtro ao carregar a página
         applyDateFilter();
@@ -322,7 +325,7 @@
 
         $('#cor').on('input', function () {
             applyColorFilter();
-            populateDatalistOptions('listaCor', 4);
+            populateDatalistOptions('listaCor', 5);
         });
     });
 </script>
@@ -337,14 +340,15 @@
             showLoading();
             var linhas = [];
             $('#dataTable tbody tr').each(function () {
-                var qt_produzida = $(this).find('td:eq(5) input').val(); // Obtém o valor da coluna 5
+                var qt_produzida = $(this).find('td:eq(6) input').val(); // Obtém o valor da coluna 5
                 if (qt_produzida !== '') {
                     // Obtém os valores das outras colunas se necessário
-                    var data = $(this).find('td:eq(0)').text().trim();
-                    var codigo = $(this).find('td:eq(1)').text().trim();
-                    var descricao = $(this).find('td:eq(2)').text().trim();
-                    var qt_planejada = $(this).find('td:eq(3)').text().trim();
-                    var cor = $(this).find('td:eq(4)').text().trim();
+                    var chave = $(this).find('td:eq(0)').text().trim();
+                    var data = $(this).find('td:eq(1)').text().trim();
+                    var codigo = $(this).find('td:eq(2)').text().trim();
+                    var descricao = $(this).find('td:eq(3)').text().trim();
+                    var qt_planejada = $(this).find('td:eq(4)').text().trim();
+                    var cor = $(this).find('td:eq(5)').text().trim();
                     if (cor === 'Azul') {
                         cor = 'AN';
                     } else if (cor === 'Cinza') {
@@ -359,13 +363,13 @@
                         cor = 'AV'
                     }
                     
-                    var cambao = $(this).find('td:eq(6) input').val().trim();
-                    var tipo = $(this).find('td:eq(7) select').val();
-                    var celula = $(this).find('td:eq(8)').val();
+                    var cambao = $(this).find('td:eq(7) input').val().trim();
+                    var tipo = $(this).find('td:eq(8) select').val();
+                    var celula = $(this).find('td:eq(9)').val();
                     // ... Adicione outras colunas conforme necessário
 
                     // Adiciona os dados da linha ao array
-                    linhas.push({ data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo,celula:celula });
+                    linhas.push({ data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo,celula:celula,chave:chave });
                 }
                 else {
                     return;

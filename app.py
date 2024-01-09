@@ -52,11 +52,34 @@ def dados_sequenciamento():
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = """select *
-            from pcp.gerador_ordens_pintura
-            order by id desc
-            limit 500;"""
-
+    sql = """select 	t3.id,
+                        t3.data_carga,
+                        t3.codigo,
+                        t3.peca,
+                        coalesce((qt_planejada - qt_apontada),qt_planejada) as restante,
+                        t3.cor,
+                        t3.celula
+                from (
+                select 	t1.id,
+                        t1.data_carga,
+                        t1.codigo,
+                        t1.peca,
+                        t1.qt_planejada,
+                        t1.cor,
+                        t1.celula,
+                        sum(qt_apontada) as qt_apontada
+                from pcp.gerador_ordens_pintura as t1
+                left join pcp.ordens_pintura as t2 on t1.id = t2.chave
+                group by 	t1.id,
+                            chave,
+                            t1.data_carga,
+                            t1.codigo,
+                            t1.peca,
+                            t1.qt_planejada,
+                            t1.cor,
+                            t1.celula
+                order by t1.data_carga desc limit 500) as t3"""
+    
     df = pd.read_sql_query(sql,conn)
 
     return df
@@ -146,7 +169,7 @@ def gerar_cambao():
     table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
 
-    table = table[['data_carga','codigo','peca','qt_planejada','cor','qt_produzida','cambao','tipo','codificacao']]
+    table = table[['id','data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao']]
     sheet_data = table.values.tolist()
 
     return render_template('gerar-cambao.html', sheet_data=sheet_data)
@@ -170,12 +193,12 @@ def gerar_planilha():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Lista de tuplas contendo os dados a serem inseridos
-    values = [(linha['codigo'], linha['descricao'], linha['qt_itens'], linha['cor'], linha['prod'], linha['cambao'], linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(), linha['celula']) for linha in dados_recebidos]
+    values = [(linha['codigo'], linha['descricao'], linha['qt_itens'], linha['cor'], linha['prod'], linha['cambao'], linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(), linha['celula'], linha['chave']) for linha in dados_recebidos]
 
     print(values)
 
     # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
-    query = """INSERT INTO pcp.ordens_pintura (codigo, peca, qt_planejada, cor, qt_apontada, cambao, tipo, data_carga, data_finalizada, celula) VALUES %s"""
+    query = """INSERT INTO pcp.ordens_pintura (codigo, peca, qt_planejada, cor, qt_apontada, cambao, tipo, data_carga, data_finalizada, celula, chave) VALUES %s"""
 
     # Use execute_values para inserir várias linhas de uma vez
     execute_values(cur, query, values)
@@ -387,7 +410,7 @@ def apontar_montagem():
     table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
 
-    table = table[['data_carga','celula','codigo','peca','restante','qt_produzida','codificacao']]
+    table = table[['data_carga','celula','codigo','peca','qt_planejada','qt_produzida','codificacao']]
 
     sheet_data = table.values.tolist()
 
@@ -615,7 +638,7 @@ def planejar_montagem():
     table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
 
-    table = table[['data_carga','codigo','peca','restante','qt_produzida','codificacao','celula']]
+    table = table[['data_carga','codigo','peca','qt_planejada','qt_produzida','codificacao','celula']]
     sheet_data = table.values.tolist()
 
     return render_template('planejar-montagem.html', sheet_data=sheet_data)
