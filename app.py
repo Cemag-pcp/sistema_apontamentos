@@ -52,26 +52,10 @@ def dados_sequenciamento():
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = """SELECT
-                gerador_ordens_pintura.*,
-                COALESCE(ordens_pintura.qt_apontada, 0) as qt_apontada,
-                ABS(gerador_ordens_pintura.qt_planejada - COALESCE(ordens_pintura.qt_apontada, 0)) as restante
-            FROM
-                pcp.gerador_ordens_pintura
-            LEFT JOIN (
-                SELECT
-                    data_carga,
-                    codigo,
-                    SUM(qt_apontada) as qt_apontada
-                FROM
-                    pcp.ordens_pintura
-                GROUP BY
-                    data_carga, codigo
-            ) ordens_pintura
-            ON
-                concat(gerador_ordens_pintura.data_carga, gerador_ordens_pintura.codigo) = concat(ordens_pintura.data_carga, ordens_pintura.codigo)
+    sql = """select *
+            from pcp.gerador_ordens_pintura
             order by id desc
-            LIMIT 500;"""
+            limit 500;"""
 
     df = pd.read_sql_query(sql,conn)
 
@@ -112,6 +96,7 @@ def dados_sequenciamento_montagem():
     df = pd.read_sql_query(sql,conn)
 
     return df
+
 
 # Função para criar a nova coluna 'codificacao'
 def criar_codificacao(row):
@@ -161,7 +146,7 @@ def gerar_cambao():
     table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
 
-    table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao']]
+    table = table[['data_carga','codigo','peca','qt_planejada','cor','qt_produzida','cambao','tipo','codificacao']]
     sheet_data = table.values.tolist()
 
     return render_template('gerar-cambao.html', sheet_data=sheet_data)
