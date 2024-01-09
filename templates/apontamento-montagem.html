@@ -421,23 +421,23 @@
                 }
             });
 
-            // $.ajax({
-            //     type: 'POST',
-            //     url: '/salvar-apontamento-montagem',
-            //     contentType: 'application/json',
-            //     data: JSON.stringify({ linhas: linhas }),
-            //     success: function (data) {
-            //         console.log('Solicitação POST bem-sucedida:', data);
-            //         hideLoading();
-            //         showAndHideSuccessAlert('Salvo.', 2000);
-            //         location.reload();
-            //     },
-            //     error: function (error) {
-            //         console.error('Erro na solicitação POST:', error);
-            //         hideLoading();
-            //         location.reload();
-            //     }
-            // });
+            $.ajax({
+                type: 'POST',
+                url: '/salvar-apontamento-montagem',
+                contentType: 'application/json',
+                data: JSON.stringify({ linhas: linhas }),
+                success: function (data) {
+                    console.log('Solicitação POST bem-sucedida:', data);
+                    hideLoading();
+                    showAndHideSuccessAlert('Salvo.', 2000);
+                    location.reload();
+                },
+                error: function (error) {
+                    console.error('Erro na solicitação POST:', error);
+                    hideLoading();
+                    location.reload();
+                }
+            });
         });
     });    
 </script>
