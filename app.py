@@ -693,6 +693,10 @@ def api_apontamento_pintura():
     cur.execute(sql)
     data = cur.fetchall()
 
+    for linha in data:
+        linha[8] = linha[8].strftime("%d/%m/%Y")
+        linha[9] = linha[9].strftime("%d/%m/%Y")
+
     return jsonify(data)
 
 
@@ -708,6 +712,10 @@ def api_apontamento_montagem():
     cur.execute(sql)
     data = cur.fetchall()
 
+    for linha in data:
+        linha[5] = linha[5].strftime("%d/%m/%Y")
+        linha[6] = linha[6].strftime("%d/%m/%Y")
+        
     return jsonify(data)
 
 
