@@ -706,12 +706,10 @@ def api_apontamento_montagem():
                     password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select * from pcp.ordens_montagem where data_carga > '2024-01-01' order by data_finalizacao asc"
+    sql = "select * from pcp.ordens_montagem where data_carga > '2024-01-01' order by id asc"
 
     cur.execute(sql)
     data = cur.fetchall()
-
-    pd.DataFrame(data)
 
     for linha in data:
         linha[5] = linha[5].strftime("%d/%m/%Y")
