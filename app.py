@@ -490,9 +490,10 @@ def gerar_apontamento_peca_fora_do_planejamento_montagem():
         celula = ""    
 
     today = datetime.now().date()
-    
-    data_carga_formatada = datetime.strptime(data['dataCarga'], '%Y-%d-%m').strftime('%d/%m/%Y')
-    
+    print(data['dataCarga'])
+    # data_carga_formatada = datetime.strptime(data['dataCarga'], '%Y-%d-%m').strftime('%d/%m/%Y')
+    data_carga_formatada = datetime.strptime(data['dataCarga'], '%Y-%m-%d')
+        
     sql_insert = "insert into pcp.ordens_montagem (celula,codigo,peca,qt_apontada,data_carga,data_finalizacao,operador,observacao,origem) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
     cur.execute(sql_insert,(celula,
                             data['peca'].split(' - ')[0],
