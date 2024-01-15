@@ -61,7 +61,7 @@ def dados_sequenciamento():
                         t3.celula
                 from (
                 select 	t1.id,
-                        t1.data_carga,
+						t1.data_carga,
                         t1.codigo,
                         t1.peca,
                         t1.qt_planejada,
@@ -71,8 +71,7 @@ def dados_sequenciamento():
                 from pcp.gerador_ordens_pintura as t1
                 left join pcp.ordens_pintura as t2 on t1.id = t2.chave
                 group by 	t1.id,
-                            chave,
-                            t1.data_carga,
+							t1.data_carga,
                             t1.codigo,
                             t1.peca,
                             t1.qt_planejada,
@@ -707,10 +706,12 @@ def api_apontamento_montagem():
                     password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select * from pcp.ordens_montagem where data_carga > '2024-01-01'"
+    sql = "select * from pcp.ordens_montagem where data_carga > '2024-01-01' order by data_finalizacao asc"
 
     cur.execute(sql)
     data = cur.fetchall()
+
+    pd.DataFrame(data)
 
     for linha in data:
         linha[5] = linha[5].strftime("%d/%m/%Y")
