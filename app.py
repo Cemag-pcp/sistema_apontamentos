@@ -688,7 +688,7 @@ def api_apontamento_pintura():
                     password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select * from pcp.ordens_pintura where data_carga > '2024-01-01'"
+    sql = "select * from pcp.ordens_pintura where data_carga > '2024-01-01' order by id asc"
 
     cur.execute(sql)
     data = cur.fetchall()
