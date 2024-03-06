@@ -816,23 +816,16 @@ def api_planejamento_pintura_csv():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Lógica para obter dados da tabela
-    query = """ SELECT DISTINCT t1.*, t2.celula as celula_nova
-                FROM pcp.ordens_pintura AS t1
-                LEFT JOIN (
-                    SELECT DISTINCT codigo, celula
-                    FROM pcp.gerador_ordens_pintura
-                    WHERE celula NOT IN ('QUALIDADE','CILINDRO')
-                ) AS t2
-                ON t1.codigo = t2.codigo
-                WHERE t1.data_carga > '2024-02-29' ORDER BY id;
+    query = """ SELECT * FROM pcp.gerador_ordens_pintura
+                WHERE data_carga > '2024-02-29' ORDER BY id;
             """
     
     df = pd.read_sql_query(query, conn)
 
-    df['celula_nova'] = df['celula_nova'].astype(str)
+    df['celula'] = df['celula'].astype(str)
     df['data_carga'] = pd.to_datetime(df['data_carga'],format="%Y-%m-%d").dt.strftime("%d%m%Y")
 
-    df['codificacao'] = df.apply(lambda row: 'EIS' if 'EIXO SIMPLES' in row['celula_nova'] else ('EIC' if 'EIXO COMPLETO' in row['celula_nova'] else row['celula_nova'][:3]), axis=1) + df['data_carga'].str.replace('-', '')
+    df['codificacao'] = df.apply(lambda row: 'EIS' if 'EIXO SIMPLES' in row['celula'] else ('EIC' if 'EIXO COMPLETO' in row['celula'] else row['celula'][:3]), axis=1) + df['data_carga'].str.replace('-', '')
 
     df['data_carga'] = pd.to_datetime(df['data_carga'],format="%d%m%Y").dt.strftime("%Y-%m-%d")
 
@@ -855,8 +848,25 @@ def api_apontamento_pintura_csv():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Lógica para obter dados da tabela
-    query = "SELECT * FROM pcp.ordens_pintura WHERE data_carga > '2024-02-29' ORDER BY id asc;"
+    query = """SELECT DISTINCT t1.*, t2.celula as celula_nova
+                FROM pcp.ordens_pintura AS t1
+                LEFT JOIN (
+                    SELECT DISTINCT codigo, celula
+                    FROM pcp.gerador_ordens_pintura
+                    WHERE celula NOT IN ('QUALIDADE','CILINDRO')
+                ) AS t2
+                ON t1.codigo = t2.codigo
+                WHERE t1.data_carga > '2024-02-29' ORDER BY id;
+            """
+    
     df = pd.read_sql_query(query, conn)
+
+    df['celula'] = df['celula'].astype(str)
+    df['data_carga'] = pd.to_datetime(df['data_carga'],format="%Y-%m-%d").dt.strftime("%d%m%Y")
+
+    df['codificacao'] = df.apply(lambda row: 'EIS' if 'EIXO SIMPLES' in row['celula'] else ('EIC' if 'EIXO COMPLETO' in row['celula'] else row['celula'][:3]), axis=1) + df['data_carga'].str.replace('-', '')
+
+    df['data_carga'] = pd.to_datetime(df['data_carga'],format="%d%m%Y").dt.strftime("%Y-%m-%d")
 
     # Fecha a conexão com o PostgreSQL
     conn.close()
