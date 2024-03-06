@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify,redirect, url_for,flash, Blueprint
+from flask import Flask, render_template, request, jsonify,redirect, url_for,flash, Blueprint,send_file
 import pandas as pd
 import time
 import datetime
@@ -755,6 +755,118 @@ def atualizar_painel_montagem():
         'data_pecas_planejada': data_pecas_planejada,
         'today': today
     })
+
+
+@app.route("/api/planejamento/montagem")
+def api_planejamento_montagem_csv():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Lógica para obter dados da tabela
+    query = "SELECT * FROM pcp.gerador_ordens_montagem WHERE data_carga > '2024-02-29' ORDER BY id asc;"
+    df = pd.read_sql_query(query, conn)
+
+    df['celula'] = df['celula'].astype(str)
+    df['data_carga'] = pd.to_datetime(df['data_carga'],format="%Y-%m-%d").dt.strftime("%d%m%Y")
+
+    df['codificacao'] = df.apply(lambda row: 'EIS' if 'EIXO SIMPLES' in row['celula'] else ('EIC' if 'EIXO COMPLETO' in row['celula'] else row['celula'][:3]), axis=1) + df['data_carga'].str.replace('-', '')
+
+    df['data_carga'] = pd.to_datetime(df['data_carga'],format="%d%m%Y").dt.strftime("%Y-%m-%d")
+
+    # Fecha a conexão com o PostgreSQL
+    conn.close()
+
+    # Salva os dados em um arquivo CSV temporário
+    temp_file_path = 'planejamento_apontamento.csv'
+    df.to_csv(temp_file_path, index=False)
+
+    # Retorna o arquivo CSV como resposta
+    return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='planejamento_montagem.csv')
+
+
+@app.route("/api/apontamento/montagem")
+def api_apontamento_montagem_csv():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Lógica para obter dados da tabela
+    query = "SELECT * FROM pcp.ordens_montagem WHERE data_carga > '2024-02-29' ORDER BY id asc;"
+    df = pd.read_sql_query(query, conn)
+
+    # Fecha a conexão com o PostgreSQL
+    conn.close()
+
+    # Salva os dados em um arquivo CSV temporário
+    temp_file_path = 'apontamento_montagem.csv'
+    df.to_csv(temp_file_path, index=False)
+
+    # Retorna o arquivo CSV como resposta
+    return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='apontamento_montagem.csv')
+
+
+@app.route("/api/planejamento/pintura")
+def api_planejamento_pintura_csv():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Lógica para obter dados da tabela
+    query = """ SELECT DISTINCT t1.*, t2.celula as celula_nova
+                FROM pcp.ordens_pintura AS t1
+                LEFT JOIN (
+                    SELECT DISTINCT codigo, celula
+                    FROM pcp.gerador_ordens_pintura
+                    WHERE celula NOT IN ('QUALIDADE','CILINDRO')
+                ) AS t2
+                ON t1.codigo = t2.codigo
+                WHERE t1.data_carga > '2024-02-29' ORDER BY id;
+            """
+    
+    df = pd.read_sql_query(query, conn)
+
+    df['celula_nova'] = df['celula_nova'].astype(str)
+    df['data_carga'] = pd.to_datetime(df['data_carga'],format="%Y-%m-%d").dt.strftime("%d%m%Y")
+
+    df['codificacao'] = df.apply(lambda row: 'EIS' if 'EIXO SIMPLES' in row['celula_nova'] else ('EIC' if 'EIXO COMPLETO' in row['celula_nova'] else row['celula_nova'][:3]), axis=1) + df['data_carga'].str.replace('-', '')
+
+    df['data_carga'] = pd.to_datetime(df['data_carga'],format="%d%m%Y").dt.strftime("%Y-%m-%d")
+
+    # Fecha a conexão com o PostgreSQL
+    conn.close()
+
+    # Salva os dados em um arquivo CSV temporário
+    temp_file_path = 'planejamento_apontamento.csv'
+    df.to_csv(temp_file_path, index=False)
+
+    # Retorna o arquivo CSV como resposta
+    return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='planejamento_pintura.csv')
+
+
+@app.route("/api/apontamento/pintura")
+def api_apontamento_pintura_csv():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Lógica para obter dados da tabela
+    query = "SELECT * FROM pcp.ordens_pintura WHERE data_carga > '2024-02-29' ORDER BY id asc;"
+    df = pd.read_sql_query(query, conn)
+
+    # Fecha a conexão com o PostgreSQL
+    conn.close()
+
+    # Salva os dados em um arquivo CSV temporário
+    temp_file_path = 'apontamento_pintura.csv'
+    df.to_csv(temp_file_path, index=False)
+
+    # Retorna o arquivo CSV como resposta
+    return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='apontamento_pintura.csv')
 
 
 if __name__ == '__main__':
