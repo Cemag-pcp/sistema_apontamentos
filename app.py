@@ -861,10 +861,10 @@ def api_apontamento_pintura_csv():
     
     df = pd.read_sql_query(query, conn)
 
-    df['celula'] = df['celula'].astype(str)
+    df['celula_nova'] = df['celula_nova'].astype(str)
     df['data_carga'] = pd.to_datetime(df['data_carga'],format="%Y-%m-%d").dt.strftime("%d%m%Y")
 
-    df['codificacao'] = df.apply(lambda row: 'EIS' if 'EIXO SIMPLES' in row['celula'] else ('EIC' if 'EIXO COMPLETO' in row['celula'] else row['celula'][:3]), axis=1) + df['data_carga'].str.replace('-', '')
+    df['codificacao'] = df.apply(lambda row: 'EIS' if 'EIXO SIMPLES' in row['celula_nova'] else ('EIC' if 'EIXO COMPLETO' in row['celula_nova'] else row['celula_nova'][:3]), axis=1) + df['data_carga'].str.replace('-', '')
 
     df['data_carga'] = pd.to_datetime(df['data_carga'],format="%d%m%Y").dt.strftime("%Y-%m-%d")
 
