@@ -27,6 +27,7 @@
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/loading.css') }}">
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/dropdown.css') }}">
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/alert.css') }}">
+    <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
 
     {% block links %}
     
@@ -105,6 +106,12 @@
                 </div>
             </li>
 
+            <hr class="sidebar-divider">
+
+            <div class="sidebar-heading">
+                Inspeção
+            </div>
+
             <!-- Divider -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseQuality"
@@ -116,7 +123,8 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Funções:</h6>
-                        <a class="collapse-item" href="inspecao">Inspeção / Reinspeção</a>
+                        <a class="collapse-item" href="inspecao">Inspeção - Pintura</a>
+                        <a class="collapse-item" href="">Inspeção - Montagem</a>
                     </div>
                 </div>
             </li>

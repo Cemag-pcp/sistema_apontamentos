@@ -12,7 +12,7 @@
 
 {% block containerFluid %}
 
-<div class="container-fluid">
+<div class="container-fluid f-14">
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -59,20 +59,17 @@
                 <!-- Card Body -->
                 <div class="card-body">
                     <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
-                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <table class="table table-bordered" id="dataTableInspecao" width="100%" cellspacing="0" style="font-size: 14px;">
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Data Finalizada</th>
                                     <th>Código</th>
                                     <th>Descrição</th>
-                                    <th>Qt. planejada</th>
                                     <th>Cor</th>
                                     <th>Qt. produzida</th>
-                                    <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th>Codificação</th>
-                                    <th>Execução</th>
+                                    <th>Exec</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -81,28 +78,41 @@
                                     <th>Data Finalizada</th>
                                     <th>Código</th>
                                     <th>Descrição</th>
-                                    <th>Qt. planejada</th>
                                     <th>Cor</th>
                                     <th>Qt. produzida</th>
-                                    <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th>Codificação</th>
-                                    <th>Execução</th>
+                                    <th>Exec</th>
                                 </tr>
                             </tfoot>
                             <tbody>
+                                {% for inpecao in inspecoes %}
                                 <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>{{inpecao[0]}}</td>
+                                    <td>{{inpecao[1]}}</td>
+                                    <td>{{inpecao[2]}}</td>
+                                    <td>{{inpecao[3]}}</td>
+                                    <td>{{inpecao[4]}}</td>
+                                    <td>{{inpecao[5]}}</td>
+                                    <td>{{inpecao[6]}}</td>
+                                    <td style="align-items: center;">
+                                        <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
+                                            <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
+                                                <i class="fa-solid fa-angle-down"></i>
+                                            </a>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalInspecao(
+                                                    '{{inpecao[0]}}',
+                                                    '{{inpecao[1]}}',
+                                                    '{{inpecao[3]}}',
+                                                    '{{inpecao[5]}}',
+                                                )"> 
+                                                    Status
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -161,7 +171,7 @@
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th>Codificação</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -175,7 +185,7 @@
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th>Codificação</th>
+                                    <th></th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -199,6 +209,79 @@
 
     </div>
 
+    <!-- Modal Vídeo -->
+    <div class="modal fade" data-backdrop="static" id="inspecaoModal" tabindex="-1" role="dialog" aria-labelledby="inspecaoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inspecaoModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4" style="font-size: 14px;">
+                    <div class="row">
+                        <div class="col-sm-4 mb-4">
+                            <label for="data_inspecao">Data Finalizada:</label>
+                            <input type="text" name="data_inspecao" id="data_inspecao" class="form-control" readonly="readonly">    
+                        </div>
+                        <div class="col-sm-8 mb-4">
+                            <label for="data_inspecao">Data Inspeção:</label>
+                            <input type="text" name="data_inspecao" id="data_inspecao" class="form-control" readonly="readonly">    
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12 mb-4">
+                            <label for="peca_inspecionada">Peça:</label>
+                            <input type="text" name="peca_inspecionada" id="peca_inspecionada" class="form-control" readonly="readonly">    
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-4">
+                            <label>Quantidade Produzida:</label>
+                            <input id="qtd_produzida" type="number" name="qtd_produzida" value="" class="form-control" readonly="readonly">
+                        </div>
+                        <div class="col-sm-4 mb-4">
+                            <label>N° total de conformidades:</label>
+                            <input type="number" id="n_conformidades" name="n_conformidades" value="" class="form-control">
+                        </div>
+                        <div class="col-sm-4 mb-4">
+                            <label>N° total de não conformidades:</label>
+                            <input type="number" id="n_nao_conformidades" name="n_nao_conformidades" value="" class="form-control" readonly="readonly">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="coluna_causa" class="col-sm-4 mb-4">
+                            <label>Causa:</label>
+                            <select name="causa_reinspecao" id="causa_reinspecao" class="form-control" disabled>
+                                <option value="" selected hidden disabled></option>
+                                <option value="Causa A">Causa A</option>
+                                <option value="Causa B">Causa B</option>
+                                <option value="Causa C">Causa C</option>
+                                <option value="Causa D">Causa D</option>
+                                <option value="Causa E">Causa E</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-8 mb-4">
+                            <label>Inspetor:</label>
+                            <select name="inspetor" id="inspetor" class="form-control">
+                                <option value="" selected hidden disabled></option>
+                                <option value="inspetor A">inspetor A</option>
+                                <option value="inspetor B">inspetor B</option>
+                                <option value="inspetor C">inspetor C</option>
+                                <option value="inspetor D">inspetor D</option>
+                                <option value="inspetor E">inspetor E</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="loading" id="loading" style="display: none;">
         <div class="spinner-border text-primary" role="status">
@@ -219,5 +302,36 @@
 <script src="static/js/demo/datatables-demo.js"></script>
 
 <!-- Script campos de filtro -->
+
+<script>
+
+    function modalInspecao(id, data, peca, qtd_produzida) {
+
+        // Configurar o conteúdo do modal com os parâmetros recebidos
+        $('#inspecaoModalLabel').text(id)
+        $('#data_inspecao').val(data);
+        $('#peca_inspecionada').val(peca);
+        $('#qtd_produzida').val(qtd_produzida);
+
+        // Exibir o modal
+        $('#inspecaoModal').modal('show');
+
+    }
+
+    $('#n_conformidades').on('input',function() {
+
+        var n_conformidades_value = $('#n_conformidades').val();
+        var qtd_produzida_value = $('#qtd_produzida').val();
+
+        console.log(n_conformidades_value)
+
+        if(n_conformidades_value >= qtd_produzida_value || n_conformidades_value < 0 || n_conformidades_value === '') {
+            $("#causa_reinspecao").prop('disabled', true);
+        } else {
+            $("#causa_reinspecao").prop('disabled', false);
+        }
+    })
+
+</script>
 
 {% endblock %}

@@ -143,7 +143,7 @@ def dados_historico_pintura():
 
     return df
 
-def dados_a_inspecionar():
+def dados_a_inspecionar_pintura():
 
     """
     Função para buscar os dados gerados pelo gerador de cambão
@@ -154,9 +154,8 @@ def dados_a_inspecionar():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     sql = """SELECT *
-            FROM pcp.ordens_pintura
-            WHERE status = 'OK' and data_finalizada >= '2024-03-08'
-            ORDER BY id desc"""
+        FROM pcp.pecas_inspecao
+        WHERE setor = 'Pintura' """
 
     cur.execute(sql)
 
@@ -614,8 +613,11 @@ def inspecao():
     """
     Rota para página de inspecao
     """
+    inspecoes =  dados_a_inspecionar_pintura()
 
-    return render_template('inspecao.html')
+    print(inspecoes)
+
+    return render_template('inspecao.html',inspecoes=inspecoes)
 
 
 @app.route("/receber-dados-planejamento", methods=['POST'])
