@@ -143,6 +143,27 @@ def dados_historico_pintura():
 
     return df
 
+def dados_a_inspecionar():
+
+    """
+    Função para buscar os dados gerados pelo gerador de cambão
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = """SELECT *
+            FROM pcp.ordens_pintura
+            WHERE status = 'OK' and data_finalizada >= '2024-03-08'
+            ORDER BY id desc"""
+
+    cur.execute(sql)
+
+    data = cur.fetchall()
+
+    return data
+
 
 @app.route('/', methods=['GET'])
 def pagina_inicial():
@@ -586,6 +607,15 @@ def planejar_pintura():
     sheet_data = table.values.tolist()
 
     return render_template('planejar-pintura.html', sheet_data=sheet_data)
+
+@app.route('/inspecao', methods=['GET'])
+def inspecao():
+
+    """
+    Rota para página de inspecao
+    """
+
+    return render_template('inspecao.html')
 
 
 @app.route("/receber-dados-planejamento", methods=['POST'])

@@ -1,0 +1,223 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Pintura</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Controle de Qualidade - Inspeção / Reinspeção</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- tabela gerar cambão -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Inspeção</h6>
+                    <!-- <div class="form-group">
+                        <label for="dataCarga">Data da carga</label>
+                        <input type="date" name="browser" id="dataCarga" class="form-control">
+                    </div> -->
+                </div>
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <div class="form-row">
+                        <!-- <div class="col-sm">
+                            <div class="form-group">
+                                <label for="dataCarga">Data da carga</label>
+                                <input type="date" id="dataCarga" class="form-control" data-column="1">
+                            </div>
+                        </div> -->
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="cor">Cor</label>
+                                <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
+                                <input list="listaCor"  id="cor" class="form-control" data-column="5">
+                                <datalist id="listaCor">
+                                </datalist>                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data Finalizada</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Codificação</th>
+                                    <th>Execução</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data Finalizada</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Codificação</th>
+                                    <th>Execução</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <!-- tabela gerar cambão -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Reinspeção</h6>
+                    <!-- <div class="form-group">
+                        <label for="dataCarga">Data da carga</label>
+                        <input type="date" name="browser" id="dataCarga" class="form-control">
+                    </div> -->
+                </div>
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <div class="form-row">
+                        <!-- <div class="col-sm">
+                            <div class="form-group">
+                                <label for="dataCarga">Data da carga</label>
+                                <input type="date" id="dataCarga" class="form-control" data-column="1">
+                            </div>
+                        </div> -->
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="cor">Cor</label>
+                                <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
+                                <input list="listaCor"  id="cor" class="form-control" data-column="5">
+                                <datalist id="listaCor">
+                                </datalist>                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data Finalizada</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Codificação</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data Finalizada</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Codificação</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Script tabela JQuery -->
+
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="static/js/demo/datatables-demo.js"></script>
+
+<!-- Script campos de filtro -->
+
+{% endblock %}
