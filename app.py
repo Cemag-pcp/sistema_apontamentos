@@ -163,6 +163,49 @@ def dados_a_inspecionar_pintura():
 
     return data
 
+def inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = """INSERT INTO pcp.pecas_reinspecao 
+                     (id, data_reinspecao,nao_conformidades, causa_reinspecao, inspetor,setor) 
+                     VALUES (%s,%s, %s, %s, %s,'Pintura')"""
+    values = (
+        id_inspecao,
+        data_inspecao,
+        n_nao_conformidades,
+        causa_reinspecao,
+        inspetor
+    )
+
+    cur.execute(sql, values)
+
+    conn.commit()
+
+def inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = """INSERT INTO pcp.pecas_inspecao 
+                     (id, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
+                     VALUES (%s, %s, %s, %s, %s, %s, 'Pintura')"""
+    values = (
+        id_inspecao,
+        data_inspecao,
+        n_conformidades,
+        inspetor,
+        n_conformidades,
+        inspetor
+    )
+
+    cur.execute(sql, values)
+
+    conn.commit()
+
 
 @app.route('/', methods=['GET'])
 def pagina_inicial():
@@ -273,19 +316,31 @@ def receber_dados_finalizar_cambao():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                     password=DB_PASS, host=DB_HOST)
-
     with conn.cursor() as cursor:
         for dado in dados_recebidos:
-            # Construir e executar a consulta UPDATE
+
+            #  Construir e executar a consulta UPDATE
             
             query = ("UPDATE pcp.ordens_pintura SET status = 'OK' WHERE id = %s")
             cursor.execute(query, (str(dado['chave']),))
+    
+            sql = """INSERT INTO pcp.pecas_inspecao 
+                     (id, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
+                     VALUES (%s, NOW(),%s, %s, %s, %s, %s, 'Pintura')"""
+            values = (
+                dado['chave'],
+                dado['codigo'],
+                dado['descricao'],
+                dado['cor'],
+                dado['prod'],
+                dado['tipo']
+            )
+            cursor.execute(sql, values)
 
         # Commit para aplicar as alterações
         conn.commit()
 
     return redirect(url_for("finalizar_cambao"))
-
 
 @app.route("/dashboard")
 def dashboard():
@@ -607,15 +662,29 @@ def planejar_pintura():
 
     return render_template('planejar-pintura.html', sheet_data=sheet_data)
 
-@app.route('/inspecao', methods=['GET'])
+@app.route('/inspecao', methods=['GET','POST'])
 def inspecao():
 
     """
     Rota para página de inspecao
     """
-    inspecoes =  dados_a_inspecionar_pintura()
+    if request.method == 'POST':
 
-    print(inspecoes)
+        data = request.get_json()
+
+        id_inspecao = data['id_inspecao']
+        data_inspecao = data['data_inspecao']
+        n_nao_conformidades = data['n_nao_conformidades']
+        n_conformidades = data['n_conformidades_value']
+        causa_reinspecao = data['causa_reinspecao']
+        inspetor = data['inspetor']
+
+        if n_nao_conformidades != "":
+            inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
+        else:
+            inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
+
+    inspecoes = dados_a_inspecionar_pintura()
 
     return render_template('inspecao.html',inspecoes=inspecoes)
 

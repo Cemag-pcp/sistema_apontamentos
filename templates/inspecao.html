@@ -104,6 +104,7 @@
                                                     '{{inpecao[0]}}',
                                                     '{{inpecao[1]}}',
                                                     '{{inpecao[3]}}',
+                                                    '{{inpecao[4]}}',
                                                     '{{inpecao[5]}}',
                                                 )"> 
                                                     Status
@@ -171,7 +172,6 @@
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th></th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -185,7 +185,6 @@
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th></th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -221,19 +220,24 @@
                 </div>
                 <div class="modal-body p-4" style="font-size: 14px;">
                     <div class="row">
-                        <div class="col-sm-4 mb-4">
-                            <label for="data_inspecao">Data Finalizada:</label>
-                            <input type="text" name="data_inspecao" id="data_inspecao" class="form-control" readonly="readonly">    
+                        <input type="date" name="id_peca" id="id_peca" class="form-control" readonly="readonly" style="display: none;"> 
+                        <div class="col-sm-6 mb-4">
+                            <label for="data_finalizada">Data Finalizada:</label>
+                            <input type="date" name="data_finalizada" id="data_finalizada" class="form-control" readonly="readonly">    
                         </div>
-                        <div class="col-sm-8 mb-4">
+                        <div class="col-sm-6 mb-4">
                             <label for="data_inspecao">Data Inspeção:</label>
                             <input type="text" name="data_inspecao" id="data_inspecao" class="form-control" readonly="readonly">    
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-sm-12 mb-4">
+                        <div class="col-sm-10 mb-4">
                             <label for="peca_inspecionada">Peça:</label>
                             <input type="text" name="peca_inspecionada" id="peca_inspecionada" class="form-control" readonly="readonly">    
+                        </div>
+                        <div class="col-sm-2 mb-4">
+                            <label for="cor_inspecionada">Cor:</label>
+                            <input type="text" name="cor_inspecionada" id="cor_inspecionada" class="form-control" readonly="readonly">    
                         </div>
                     </div>
                     <div class="row">
@@ -251,8 +255,8 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div id="coluna_causa" class="col-sm-4 mb-4">
-                            <label>Causa:</label>
+                        <div id="coluna_causa" class="col-sm-6 mb-4">
+                            <label>Causa das <strong>não conformidades:</strong></label>
                             <select name="causa_reinspecao" id="causa_reinspecao" class="form-control" disabled>
                                 <option value="" selected hidden disabled></option>
                                 <option value="Causa A">Causa A</option>
@@ -262,7 +266,7 @@
                                 <option value="Causa E">Causa E</option>
                             </select>
                         </div>
-                        <div class="col-sm-8 mb-4">
+                        <div class="col-sm-6 mb-4">
                             <label>Inspetor:</label>
                             <select name="inspetor" id="inspetor" class="form-control">
                                 <option value="" selected hidden disabled></option>
@@ -276,7 +280,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary">Enviar</button>
+                    <button id="envio_inspecao" class="btn btn-primary">Enviar</button>
                 </div>
             </div>
         </div>
@@ -305,14 +309,23 @@
 
 <script>
 
-    function modalInspecao(id, data, peca, qtd_produzida) {
+    function modalInspecao(id, data, peca, cor,qtd_produzida) {
+
+        const timeElapsed = Date.now();
+        const today = new Date(timeElapsed);
 
         // Configurar o conteúdo do modal com os parâmetros recebidos
-        $('#inspecaoModalLabel').text(id)
-        $('#data_inspecao').val(data);
+        $('#inspecaoModalLabel').text(id);
+        $('#data_finalizada').val(data);
         $('#peca_inspecionada').val(peca);
+        $('#cor_inspecionada').val(cor);
         $('#qtd_produzida').val(qtd_produzida);
-
+        $('#data_inspecao').val(today.toLocaleDateString());
+        $('#n_conformidades').val('');
+        $('#inspetor').val('');
+        $("#causa_reinspecao").val('');
+        $('#n_nao_conformidades').val('');
+        
         // Exibir o modal
         $('#inspecaoModal').modal('show');
 
@@ -320,16 +333,60 @@
 
     $('#n_conformidades').on('input',function() {
 
-        var n_conformidades_value = $('#n_conformidades').val();
-        var qtd_produzida_value = $('#qtd_produzida').val();
+        let n_conformidades_value = parseInt($('#n_conformidades').val(), 10);
+        let qtd_produzida_value = parseInt($('#qtd_produzida').val(), 10);
 
-        console.log(n_conformidades_value)
+        $('#n_nao_conformidades').val(qtd_produzida_value - n_conformidades_value);
 
         if(n_conformidades_value >= qtd_produzida_value || n_conformidades_value < 0 || n_conformidades_value === '') {
             $("#causa_reinspecao").prop('disabled', true);
+            $("#causa_reinspecao").val('');
+            $('#n_nao_conformidades').val('');
         } else {
             $("#causa_reinspecao").prop('disabled', false);
         }
+    })
+
+    $('#envio_inspecao').on('click',function(){
+        $("#loading-overlay").show();
+
+        let n_conformidades_value = $('#n_conformidades').val();
+        let inspetor = $('#inspetor').val();
+        let qtd_produzida_value = $('#qtd_produzida').val();
+        let causa_reinspecao =  $("#causa_reinspecao").val();
+        
+        if(n_conformidades_value === "" || inspetor === null || n_conformidades_value < 0 || n_conformidades_value > qtd_produzida_value){
+            alert("Preencha todos os campos corretamente")
+            console.log("if")
+            $("#loading-overlay").hide();
+            return
+        } else if(n_conformidades_value >= 0 && n_conformidades_value < qtd_produzida_value && causa_reinspecao === null){
+            alert("Preencha todos os campos corretamente")
+            console.log("else if")
+            $("#loading-overlay").hide();
+            return
+        }
+
+        let id_inspecao =  $('#inspecaoModalLabel').text();
+        let data_inspecao = $('#data_inspecao').val();
+        let n_nao_conformidades = $('#n_nao_conformidades').val();
+
+        $.ajax({
+            url: '/inspecao',
+            type: 'POST',  // Alterado para POST
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'id_inspecao': id_inspecao ,'data_inspecao':data_inspecao,'n_conformidades_value':n_conformidades_value,
+            'n_nao_conformidades':n_nao_conformidades,'causa_reinspecao':causa_reinspecao,'inspetor':inspetor}),  // Enviando um objeto JSON
+            success: function(response) {
+                $("#loading-overlay").hide();
+                location.reload()
+            },
+            error: function(error) {
+                console.log(error);
+                $("#loading-overlay").hide();
+            }
+        });
     })
 
 </script>
