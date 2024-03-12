@@ -143,7 +143,7 @@ def dados_historico_pintura():
 
     return df
 
-def dados_a_inspecionar_pintura():
+def dados_inspecionar_reinspecionar():
 
     """
     Função para buscar os dados gerados pelo gerador de cambão
@@ -153,21 +153,43 @@ def dados_a_inspecionar_pintura():
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = """SELECT *
-        FROM pcp.pecas_inspecao
-        WHERE setor = 'Pintura' """
+    inspecao = """SELECT *
+                FROM pcp.pecas_inspecao
+                ORDER BY id desc"""
+    
+    cur.execute(inspecao)
 
-    cur.execute(sql)
+    data_inspecao = cur.fetchall()
 
-    data = cur.fetchall()
+    inspecaionados= """SELECT i.*, op.peca,op.cor,op.tipo
+                FROM pcp.pecas_inspecionadas as i
+                LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id"""
 
-    return data
+    cur.execute(inspecaionados)
+
+    data_inspecionadas = cur.fetchall()
+
+    reinspecao = """SELECT r.*, op.peca,op.cor,op.tipo
+                FROM pcp.pecas_reinspecao as r
+                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id """
+
+    cur.execute(reinspecao)
+
+    data_reinspecao = cur.fetchall()
+
+    return data_inspecao,data_reinspecao,data_inspecionadas
 
 def inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    delete_table_inspecao = f"""DELETE 
+                            FROM pcp.pecas_inspecao 
+                            WHERE id = {id_inspecao}"""
+    
+    cur.execute(delete_table_inspecao)
 
     sql = """INSERT INTO pcp.pecas_reinspecao 
                      (id, data_reinspecao,nao_conformidades, causa_reinspecao, inspetor,setor) 
@@ -184,20 +206,26 @@ def inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reins
 
     conn.commit()
 
+    print("inserir_reinspecao")
+
 def inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = """INSERT INTO pcp.pecas_inspecao 
-                     (id, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
-                     VALUES (%s, %s, %s, %s, %s, %s, 'Pintura')"""
+    delete_table_inspecao = f"""DELETE 
+                            FROM pcp.pecas_inspecao 
+                            WHERE id = {id_inspecao}"""
+    
+    cur.execute(delete_table_inspecao)
+
+    sql = """INSERT INTO pcp.pecas_inspecionadas 
+                     (id_inspecao, data_inspecao,total_conformidades, inspetor, setor) 
+                     VALUES (%s, %s, %s, %s,'Pintura')"""
     values = (
         id_inspecao,
         data_inspecao,
-        n_conformidades,
-        inspetor,
         n_conformidades,
         inspetor
     )
@@ -205,6 +233,8 @@ def inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor):
     cur.execute(sql, values)
 
     conn.commit()
+
+    print("inserir_inspecionados")
 
 
 @app.route('/', methods=['GET'])
@@ -678,15 +708,21 @@ def inspecao():
         n_conformidades = data['n_conformidades_value']
         causa_reinspecao = data['causa_reinspecao']
         inspetor = data['inspetor']
+        qtd_produzida = data['qtd_produzida']
 
-        if n_nao_conformidades != "":
+        if n_conformidades != "0" and n_conformidades != qtd_produzida:
+            inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
+            inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
+        elif n_nao_conformidades != "":
             inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
         else:
             inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
 
-    inspecoes = dados_a_inspecionar_pintura()
+        return jsonify("Success")
 
-    return render_template('inspecao.html',inspecoes=inspecoes)
+    inspecoes,reinspecoes,inspecionadas = dados_inspecionar_reinspecionar()
+
+    return render_template('inspecao.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
 
 @app.route("/receber-dados-planejamento", methods=['POST'])
