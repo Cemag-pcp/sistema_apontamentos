@@ -236,6 +236,44 @@ def inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor):
 
     print("inserir_inspecionados")
 
+def alterar_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor):
+
+    # conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+    #                     password=DB_PASS, host=DB_HOST)
+    # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # if n_conformidades != "0" and n_conformidades != qtd_produzida:
+    #     inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
+    #     inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
+    # elif n_nao_conformidades != "":
+    #     inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
+    # else:
+    #     inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
+
+
+    # delete_table_inspecao = f"""DELETE 
+    #                         FROM pcp.pecas_inspecao 
+    #                         WHERE id = {id_inspecao}"""
+    
+    # cur.execute(delete_table_inspecao)
+
+    # sql = """INSERT INTO pcp.pecas_reinspecao 
+    #                  (id, data_reinspecao,nao_conformidades, causa_reinspecao, inspetor,setor) 
+    #                  VALUES (%s,%s, %s, %s, %s,'Pintura')"""
+    # values = (
+    #     id_inspecao,
+    #     data_inspecao,
+    #     n_nao_conformidades,
+    #     causa_reinspecao,
+    #     inspetor
+    # )
+
+    # cur.execute(sql, values)
+
+    # conn.commit()
+
+    print("inserir_reinspecao")
+
 
 @app.route('/', methods=['GET'])
 def pagina_inicial():
@@ -704,21 +742,33 @@ def inspecao():
 
         id_inspecao = data['id_inspecao']
         data_inspecao = data['data_inspecao']
+        data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
+
+        # Converter de volta para string no formato desejado
+        data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
+
         n_nao_conformidades = data['n_nao_conformidades']
         n_conformidades = data['n_conformidades_value']
         causa_reinspecao = data['causa_reinspecao']
         inspetor = data['inspetor']
         qtd_produzida = data['qtd_produzida']
 
-        if n_conformidades != "0" and n_conformidades != qtd_produzida:
-            inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
-            inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
-        elif n_nao_conformidades != "":
-            inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
+        # Identificar se veio do modal de reinspecoes ou não
+        modal_reinspecao = data['reinspecao']
+        if modal_reinspecao:
+            alterar_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor)
+            return jsonify("Success")
+        
         else:
-            inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
+            if n_conformidades != "0" and n_conformidades != qtd_produzida:
+                inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
+                inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
+            elif n_nao_conformidades != "":
+                inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
+            else:
+                inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
 
-        return jsonify("Success")
+            return jsonify("Success")
 
     inspecoes,reinspecoes,inspecionadas = dados_inspecionar_reinspecionar()
 

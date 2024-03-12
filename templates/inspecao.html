@@ -157,9 +157,9 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Data Reinspeção</th>
+                                    <th>Data Inspeção Anterior</th>
                                     <th>Peca</th>
-                                    <th>Não Conformidade</th>
+                                    <th class="text-truncate" data-toggle="tooltip" data-placement="top" title="N° de Conformidades" style="max-width: 60px;">Não Conformidade</th>
                                     <th>Causa Reinspecao</th>
                                     <th>Inspetor</th>
                                     <th>Setor</th>
@@ -171,7 +171,7 @@
                                     <th>#</th>
                                     <th>Data Reinspeção</th>
                                     <th>Peca</th>
-                                    <th>Não Conformidade</th>
+                                    <th class="text-truncate" data-toggle="tooltip" data-placement="top" title="N° de Conformidades" style="max-width: 60px;">Não Conformidade</th>
                                     <th>Causa Reinspecao</th>
                                     <th>Inspetor</th>
                                     <th>Setor</th>
@@ -194,13 +194,14 @@
                                                 <i class="fa-solid fa-angle-down"></i>
                                             </a>
                                             <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                                <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalInspecao(
+                                                <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalReinspecao(
                                                     '{{reinspecao[0]}}',
                                                     '{{reinspecao[1]}}',
-                                                    '{{reinspecao[3]}}',
-                                                    '{{reinspecao[4]}}',
-                                                    '{{reinspecao[5]}}',
-                                                )"> 
+                                                    '{{reinspecao[6]}}',
+                                                    '{{reinspecao[7]}}',
+                                                    '{{reinspecao[2]}}',
+                                                    '{{reinspecao[4]}}'
+                                                )">
                                                     Inspeção
                                                 </a>
                                             </div>
@@ -372,6 +373,83 @@
         </div>
     </div>
 
+    <div class="modal fade" data-backdrop="static" id="reinspecaoModal" tabindex="-1" role="dialog" aria-labelledby="reinspecaoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reinspecaoModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4" style="font-size: 14px;">
+                    <div class="row">
+                        <input type="date" name="id_peca" id="id_peca" class="form-control" readonly="readonly" style="display: none;"> 
+                        <div class="col-sm-6 mb-4">
+                            <label for="data_inspecao_anterior">Data da inspeção anterior:</label>
+                            <input type="date" name="data_inspecao_anterior" id="data_inspecao_anterior" class="form-control" readonly="readonly">    
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label for="data_nova_inspecao">Data da nova inspeção:</label>
+                            <input type="text" name="data_nova_inspecao" id="data_nova_inspecao" class="form-control" readonly="readonly">    
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-10 mb-4">
+                            <label for="peca_reinspecionada">Peça:</label>
+                            <input type="text" name="peca_reinspecionada" id="peca_reinspecionada" class="form-control" readonly="readonly">    
+                        </div>
+                        <div class="col-sm-2 mb-4">
+                            <label for="cor_reinspecionada">Cor:</label>
+                            <input type="text" name="cor_reinspecionada" id="cor_reinspecionada" class="form-control" readonly="readonly">    
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-4">
+                            <label>Quantidade Total de Peças:</label>
+                            <input id="qtd_produzida_reinspecao" type="number" name="qtd_produzida_reinspecao" value="" class="form-control" readonly="readonly">
+                        </div>
+                        <div class="col-sm-4 mb-4">
+                            <label>N° total de conformidades:</label>
+                            <input type="number" id="n_conformidades_reinspecao" name="n_conformidades" value="" class="form-control">
+                        </div>
+                        <div class="col-sm-4 mb-4">
+                            <label>N° total de não conformidades:</label>
+                            <input type="number" id="n_nao_conformidades_reinspecao" name="n_nao_conformidades" value="" class="form-control" readonly="readonly">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="coluna_causa_nova" class="col-sm-6 mb-4">
+                            <label>Causa das <strong>não conformidades:</strong></label>
+                            <select name="causa_nova_reinspecao" id="causa_nova_reinspecao" class="form-control" disabled>
+                                <option value="" selected hidden disabled></option>
+                                <option value="Causa A">Causa A</option>
+                                <option value="Causa B">Causa B</option>
+                                <option value="Causa C">Causa C</option>
+                                <option value="Causa D">Causa D</option>
+                                <option value="Causa E">Causa E</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>Inspetor:</label>
+                            <select name="inspetor_reinspecao" id="inspetor_reinspecao" class="form-control">
+                                <option value="" selected hidden disabled></option>
+                                <option value="inspetor A">inspetor A</option>
+                                <option value="inspetor B">inspetor B</option>
+                                <option value="inspetor C">inspetor C</option>
+                                <option value="inspetor D">inspetor D</option>
+                                <option value="inspetor E">inspetor E</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="envio_reinspecao" class="btn btn-primary">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="loading" id="loading" style="display: none;">
         <div class="spinner-border text-primary" role="status">
             <span class="sr-only">Loading...</span>
@@ -389,120 +467,6 @@
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="static/js/demo/datatables-demo.js"></script>
-
-<!-- Script campos de filtro -->
-
-<script>
-
-    function modalInspecao(id, data, peca, cor,qtd_produzida) {
-
-        const timeElapsed = Date.now();
-        const today = new Date(timeElapsed);
-
-        // Configurar o conteúdo do modal com os parâmetros recebidos
-        $('#inspecaoModalLabel').text(id);
-        $('#data_finalizada').val(data);
-        $('#peca_inspecionada').val(peca);
-        $('#cor_inspecionada').val(cor);
-        $('#qtd_produzida').val(qtd_produzida);
-        $('#data_inspecao').val(today.toLocaleDateString());
-        $('#n_conformidades').val('');
-        $('#inspetor').val('');
-        $("#causa_reinspecao").val('');
-        $('#n_nao_conformidades').val('');
-        
-        // Exibir o modal
-        $('#inspecaoModal').modal('show');
-
-    }
-
-    $('#n_conformidades').on('input',function() {
-
-        let n_conformidades_value = parseInt($('#n_conformidades').val(), 10);
-        let qtd_produzida_value = parseInt($('#qtd_produzida').val(), 10);
-
-        $('#n_nao_conformidades').val(qtd_produzida_value - n_conformidades_value);
-
-        if(n_conformidades_value >= qtd_produzida_value || n_conformidades_value < 0 || n_conformidades_value === '') {
-            $("#causa_reinspecao").prop('disabled', true);
-            $("#causa_reinspecao").val('');
-            $('#n_nao_conformidades').val('');
-        } else {
-            $("#causa_reinspecao").prop('disabled', false);
-        }
-    })
-
-    $('#envio_inspecao').one('click',function(){
-
-        $("#loading").show();
-
-        let n_conformidades_value = $('#n_conformidades').val();
-        let inspetor = $('#inspetor').val();
-        let qtd_produzida_value = $('#qtd_produzida').val();
-        let causa_reinspecao =  $("#causa_reinspecao").val();
-        
-        if(n_conformidades_value === "" || inspetor === null || n_conformidades_value < 0 || n_conformidades_value > qtd_produzida_value){
-            alert("Preencha todos os campos corretamente")
-            console.log("if")
-            $("#loading").hide();
-            return
-        } else if(n_conformidades_value >= 0 && n_conformidades_value < qtd_produzida_value && causa_reinspecao === null){
-            alert("Preencha todos os campos corretamente")
-            console.log("else if")
-            $("#loading").hide();
-            return
-        }
-
-        let id_inspecao =  $('#inspecaoModalLabel').text();
-        let data_inspecao = $('#data_inspecao').val();
-        let n_nao_conformidades = $('#n_nao_conformidades').val();
-
-        $.ajax({
-            url: '/inspecao',
-            type: 'POST',  // Alterado para POST
-            dataType: 'json',
-            contentType: 'application/json',
-            data: JSON.stringify({ 'id_inspecao': id_inspecao ,'data_inspecao':data_inspecao,'n_conformidades_value':n_conformidades_value,
-            'n_nao_conformidades':n_nao_conformidades,'causa_reinspecao':causa_reinspecao,'inspetor':inspetor,'qtd_produzida':qtd_produzida_value}),  // Enviando um objeto JSON
-            success: function(response) {
-                window.location.reload();
-                console.log("success")
-                $("#loading").hide();
-            },
-            error: function(error) {
-                console.log(error);
-                $("#loading").hide();
-            }
-        });
-    })
-
-</script>
-
-<script>
-    $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
-    })
-
-    function changeTab(tabName) {
-        // Ocultar todas as tabelas
-        var tables = document.querySelectorAll('.card-body');
-        tables.forEach(function(table) {
-            table.style.display = 'none';
-        });
-
-        // Mostrar a tabela correspondente à aba clicada
-        document.getElementById(tabName + 'Table').style.display = 'block';
-
-        // Remover a classe "active" de todas as abas
-        var tabs = document.querySelectorAll('.nav-link');
-        tabs.forEach(function(tab) {
-            tab.classList.remove('active');
-        });
-
-        // Adicionar a classe "active" à aba clicada
-        var clickedTab = document.querySelector('[onclick="changeTab(\'' + tabName + '\')"]');
-        clickedTab.classList.add('active');
-    }
-</script>
+<script src="/static/js/qualidade/inspecao.js"></script>
 
 {% endblock %}
