@@ -243,7 +243,7 @@ def alterar_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,qtd_produzi
     if n_conformidades == "0":
 
         sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                SET data_reinspecao = CURRENT_DATE, causa_reinspecao = %s, inspetor = %s
+                SET causa_reinspecao = %s, inspetor = %s
                 WHERE id = %s """
         
         values = (
@@ -288,7 +288,7 @@ def alterar_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,qtd_produzi
     elif n_conformidades > "0" and n_conformidades < qtd_produzida:
 
         sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                SET data_reinspecao = CURRENT_DATE, nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s
+                SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s
                 WHERE id = %s """
         
         values = (
