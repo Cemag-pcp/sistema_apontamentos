@@ -870,6 +870,35 @@ def inspecao():
     return render_template('inspecao.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
 
+@app.route('/solda',methods=['GET','POST'])
+def solda():
+    
+    return render_template('solda.html')
+
+@app.route('/conjuntos', methods=['POST'])
+def listar_conjuntos():
+    """
+    Função para buscar conjuntos disponíveis
+    """
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+
+    conjunto = data['conjuntos']
+
+    sql = f"""SELECT DISTINCT descricao
+            FROM pcp.base_pecas_sequenciamento
+            WHERE celula = '{conjunto}'"""
+
+    cur.execute(sql)
+
+    data = cur.fetchall()
+
+    return jsonify(data)
+
 @app.route("/receber-dados-planejamento", methods=['POST'])
 def receber_dados_planejamento():
 

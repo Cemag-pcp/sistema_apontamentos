@@ -1,0 +1,380 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Pintura</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid f-14" style="font-size: 12px;">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h4 mb-0 text-gray-800">Inspeção Solda</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- tabela gerar cambão -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" onclick="changeTab('inspecionadosSolda')" style="cursor: pointer;">Inspecionados</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="changeTab('reinspecionadosSolda')" style="cursor: pointer;">Reinspecão</a>
+                        </li>
+                    </ul>
+                    <button type="button" class="btn btn-info" style="font-size: 12px;" onclick="modalInspecionarConjunto()">Inspecionar Conjunto  <i class="fa-solid fa-plus"></i></button>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body" id="inspecionadosSoldaTable" style="display: block;">
+                    <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
+                        <table class="table table-bordered" id="dataTableInspecao" width="100%" cellspacing="0" style="font-size: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data Finalizada</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Tipo</th>
+                                    <th>Exec</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data Finalizada</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Tipo</th>
+                                    <th>Exec</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body" id="reinspecionadosSoldaTable" style="display: none;">
+                    <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
+                        <table class="table table-bordered" id="dataTableInspecionados" width="100%" cellspacing="0" style="font-size: 12px;">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data Inspecao</th>
+                                    <th>Peca</th>
+                                    <th class="text-truncate" data-toggle="tooltip" data-placement="top" title="N° de Conformidades" style="max-width: 60px;">N° de Conformidades</th>
+                                    <th>Cor</th>
+                                    <th>Tipo</th>
+                                    <th>Inspetor</th>
+                                    <th>Setor</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data Inspecao</th>
+                                    <th>Peca</th>
+                                    <th class="text-truncate" data-toggle="tooltip" data-placement="top" title="N° de Conformidades" style="max-width: 60px;">N° de Conformidades</th>
+                                    <th style="max-width: 50px;">Cor</th>
+                                    <th style="max-width: 50px;">Tipo</th>
+                                    <th>Inspetor</th>
+                                    <th>Setor</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Vídeo -->
+    <div class="modal fade" data-backdrop="static" id="inspecionarConjunto" tabindex="-1" role="dialog" aria-labelledby="inspecionarConjuntoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inspecionarConjuntoLabel">Inspeção</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4" style="font-size: 14px;">
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>Data da inspeção</label>
+                            <input type="text" class="form-control" name="data_inspecao_solda" id="data_inspecao_solda" style="font-size: 12px;" disabled>
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>Inspetor</label>
+                            <select class="form-control" name="inspetorSolda" id="inspetorSolda" style="font-size: 12px;">
+                                <option value="" selected hidden disabled></option>
+                                <option value="Leônidas">Leônidas</option>
+                                <option value="Severiano">Severiano</option>
+                                <option value="Marcelo">Marcelo</option>
+                                <option value="Henrique">Henrique</option>
+                                <option value="Guthemberg">Guthemberg</option>
+                                <option value="Elenilson">Elenilson</option>
+                                <option value="Estefane">Estefane</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>Selecione o conjunto</label>
+                            <select class="form-control" name="selectConjunto" id="selectConjunto" style="font-size: 12px;">
+                                <option value="" selected hidden disabled></option>
+                                <option value="CHASSI">CHASSI</option>
+                                <option value="CUBO DE RODA">CUBO DE RODA</option>
+                                <option value="QUALIDADE">QUALIDADE</option>
+                                <option value="CILINDRO 2">CILINDRO 2</option>
+                                <option value="PLAT. TANQUE. CAÇAM.">PLAT. TANQUE. CAÇAM.</option>
+                                <option value="FUEIRO">FUEIRO</option>
+                                <option value="EIXO SIMPLES">EIXO SIMPLES</option>
+                                <option value="CONJ INTERMED">CONJ INTERMED</option>
+                                <option value="EIXO COMPLETO">EIXO COMPLETO</option>
+                                <option value="CILINDRO">CILINDRO</option>
+                                <option value="Carpintaria">Carpintaria</option>
+                                <option value="LATERAL">LATERAL</option>
+                                <option value="ESTAMPARIA">ESTAMPARIA</option>
+                                <option value="IÇAMENTO">IÇAMENTO</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>Conjunto</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control"  id="inputConjunto" autocomplete="off" aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;">
+                                <ul class="dropdown-list" id="listConjunto" style="font-size: 12px;">
+                                </ul>
+                            </div>                            
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>N° peças inspecionadas</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control"  id="inputPecasInspecionadasSolda" style="font-size: 12px;">
+                            </div>  
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>N° conformidades</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control"  id="inputConformidadesSolda" style="font-size: 12px;">
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>N° não conformidades</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control"  id="inputNaoConformidadesSolda" style="font-size: 12px;" disabled>
+                            </div>  
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>Não conformidade</label>
+                            <div class="input-group">
+                                <select class="form-control" name="inputNaoConformidadesSolda" id="inputNaoConformidadesSolda" style="font-size: 12px;">
+                                    <option value="" selected hidden disabled></option>
+                                    <option value="Retrabalho">Retrabalho</option>
+                                    <option value="Sucata">Sucata</option>
+                                </select>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>Causa</label>
+                            <div class="input-group">
+                                <select class="form-control" name="causaSolda" id="causaSolda" style="font-size: 12px;" >
+                                    <option value="" selected hidden disabled></option>
+                                    <option value="Faltando Solda">Faltando Solda</option>
+                                    <option value="Porosidade">Porosidade</option>
+                                    <option value="Solda não conforme (robô)">Solda não conforme (robô)</option>
+                                    <option value="Solda deslocada">Solda deslocada</option>
+                                    <option value="Medida não conforme">Medida não conforme</option>
+                                    <option value="Solda sem penetração">Solda sem penetração</option>
+                                    <option value="Excesso de respingo">Excesso de respingo</option>
+                                    <option value="Excesso de rebarba">Excesso de rebarba</option>
+                                    <option value="Excesso de solda">Excesso de solda</option>
+                                    <option value="Mordedura">Mordedura</option>
+                                    <option value="Erro de montagem">Erro de montagem</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>  
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>Outro motivo</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control"  id="" style="font-size: 12px;" disabled>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>Origem</label>
+                            <div class="input-group">
+                                <select class="form-control" name="" id="" style="font-size: 12px;">
+                                    <option value="" selected hidden disabled></option>
+                                    <option value="Corte">Corte</option>
+                                    <option value="Estamparia">Estamparia</option>
+                                    <option value="Usinagem">Usinagem</option>
+                                    <option value="Fornecedor">Fornecedor</option>
+                                    <option value="Solda">Solda</option>
+                                </select>
+                            </div>  
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>Observação</label>
+                            <div class="input-group">
+                                <textarea class="form-control" name="observacaoSolda" id="observacaoSolda" cols="5" rows="1" style="font-size: 12px;"></textarea>
+                            </div>  
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="envio_inspecao_solda" class="btn btn-primary">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" data-backdrop="static" id="reinspecaoModal" tabindex="-1" role="dialog" aria-labelledby="reinspecaoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reinspecaoModalLabel"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4" style="font-size: 14px;">
+                    <div class="row">
+                        <input type="date" name="id_peca" id="id_peca" class="form-control" readonly="readonly" style="display: none;"> 
+                        <div class="col-sm-6 mb-4">
+                            <label for="data_inspecao_anterior">Data da inspeção anterior:</label>
+                            <input type="date" name="data_inspecao_anterior" id="data_inspecao_anterior" class="form-control" readonly="readonly">    
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label for="data_nova_inspecao">Data da nova inspeção:</label>
+                            <input type="text" name="data_nova_inspecao" id="data_nova_inspecao" class="form-control" readonly="readonly">    
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-10 mb-4">
+                            <label for="peca_reinspecionada">Peça:</label>
+                            <input type="text" name="peca_reinspecionada" id="peca_reinspecionada" class="form-control" readonly="readonly">    
+                        </div>
+                        <div class="col-sm-2 mb-4">
+                            <label for="cor_reinspecionada">Cor:</label>
+                            <input type="text" name="cor_reinspecionada" id="cor_reinspecionada" class="form-control" readonly="readonly">    
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-4">
+                            <label>Quantidade Total de Peças:</label>
+                            <input id="qtd_produzida_reinspecao" type="number" name="qtd_produzida_reinspecao" value="" class="form-control" readonly="readonly">
+                        </div>
+                        <div class="col-sm-4 mb-4">
+                            <label>N° total de conformidades:</label>
+                            <input type="number" id="n_conformidades_reinspecao" name="n_conformidades" value="" class="form-control">
+                        </div>
+                        <div class="col-sm-4 mb-4">
+                            <label>N° total de não conformidades:</label>
+                            <input type="number" id="n_nao_conformidades_reinspecao" name="n_nao_conformidades" value="" class="form-control" readonly="readonly">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="coluna_causa_nova" class="col-sm-6 mb-4">
+                            <label>Causa das <strong>não conformidades:</strong></label>
+                            <select name="causa_nova_reinspecao" id="causa_nova_reinspecao" class="form-control" disabled>
+                                <option value="" selected hidden disabled></option>
+                                <option value="Causa A">Causa A</option>
+                                <option value="Causa B">Causa B</option>
+                                <option value="Causa C">Causa C</option>
+                                <option value="Causa D">Causa D</option>
+                                <option value="Causa E">Causa E</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>Inspetor:</label>
+                            <select name="inspetor_reinspecao" id="inspetor_reinspecao" class="form-control">
+                                <option value="" selected hidden disabled></option>
+                                <option value="inspetor A">inspetor A</option>
+                                <option value="inspetor B">inspetor B</option>
+                                <option value="inspetor C">inspetor C</option>
+                                <option value="inspetor D">inspetor D</option>
+                                <option value="inspetor E">inspetor E</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="envio_reinspecao" class="btn btn-primary">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Script tabela JQuery -->
+
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="static/js/demo/datatables-demo.js"></script>
+<script src="static/js/qualidade/inspecao-solda.js"></script>
+<script src="static/js/qualidade/inspecao-pintura.js"></script>
+
+
+{% endblock %}
