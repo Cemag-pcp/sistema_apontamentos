@@ -43,42 +43,32 @@
                 <!-- Card Body -->
                 <div class="card-body" id="inspecionadosSoldaTable" style="display: block;">
                     <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
-                        <table class="table table-bordered" id="dataTableInspecao" width="100%" cellspacing="0" style="font-size: 12px;">
+                        <table class="table table-bordered" id="dataTableInspecionadosSolda" width="100%" cellspacing="0" style="font-size: 12px;">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Data Finalizada</th>
-                                    <th>Código</th>
-                                    <th>Descrição</th>
-                                    <th>Cor</th>
-                                    <th>Qt. produzida</th>
-                                    <th>Tipo</th>
-                                    <th>Exec</th>
+                                    <th>Data Inspeção</th>
+                                    <th>Conjunto</th>
+                                    <th>Inspetor</th>
+                                    <th>N° Total Conformidades</th>
                                 </tr>
                             </thead>
                             <tfoot>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Data Finalizada</th>
-                                    <th>Código</th>
-                                    <th>Descrição</th>
-                                    <th>Cor</th>
-                                    <th>Qt. produzida</th>
-                                    <th>Tipo</th>
-                                    <th>Exec</th>
+                                    <th>Data Inspeção</th>
+                                    <th>Conjunto</th>
+                                    <th>Inspetor</th>
+                                    <th>N° Total Conformidades</th>
                                 </tr>
                             </tfoot>
                             <tbody>
+                                {% for inspecao_solda in inspecoes_solda %}
                                 <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>{{inspecao_solda[1]}}</td>
+                                    <td>{{inspecao_solda[6]}}</td>
+                                    <td>{{inspecao_solda[3]}}</td>
+                                    <td>{{inspecao_solda[2]}}</td>
                                 </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -86,42 +76,63 @@
                 <!-- Card Body -->
                 <div class="card-body" id="reinspecionadosSoldaTable" style="display: none;">
                     <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
-                        <table class="table table-bordered" id="dataTableInspecionados" width="100%" cellspacing="0" style="font-size: 12px;">
+                        <table class="table table-bordered" id="dataTableReinspecaoSolda" width="100%" cellspacing="0" style="font-size: 12px;">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Data Inspecao</th>
-                                    <th>Peca</th>
-                                    <th class="text-truncate" data-toggle="tooltip" data-placement="top" title="N° de Conformidades" style="max-width: 60px;">N° de Conformidades</th>
-                                    <th>Cor</th>
-                                    <th>Tipo</th>
+                                    <th>Data Inspeção</th>
+                                    <th>Conjunto</th>
                                     <th>Inspetor</th>
-                                    <th>Setor</th>
+                                    <th>N° Não Conformidade</th>
+                                    <th>Tipo de Não Conformidade</th>
+                                    <th>Causa</th>
+                                    <th>Exec.</th>
                                 </tr>
                             </thead>
                             <tfoot>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Data Inspecao</th>
-                                    <th>Peca</th>
-                                    <th class="text-truncate" data-toggle="tooltip" data-placement="top" title="N° de Conformidades" style="max-width: 60px;">N° de Conformidades</th>
-                                    <th style="max-width: 50px;">Cor</th>
-                                    <th style="max-width: 50px;">Tipo</th>
+                                    <th>Data Inspeção</th>
+                                    <th>Conjunto</th>
                                     <th>Inspetor</th>
-                                    <th>Setor</th>
+                                    <th>N° Não Conformidade</th>
+                                    <th>Tipo de Não conformidade</th>
+                                    <th>Causa</th>
+                                    <th>Exec.</th>
                                 </tr>
                             </tfoot>
                             <tbody>
+                                {% for reinspecao_solda in reinspecoes_solda %}
                                 <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>{{reinspecao_solda[1]}}</td>
+                                    <td>{{reinspecao_solda[6]}}</td>
+                                    <td>{{reinspecao_solda[4]}}</td>
+                                    <th>{{reinspecao_solda[2]}}</th>
+                                    <td>{{reinspecao_solda[7]}}</td>
+                                    <td>{{reinspecao_solda[3]}}</td>
+                                    <td>
+                                        <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
+                                            <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
+                                                <i class="fa-solid fa-angle-down"></i>
+                                            </a>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalReinspecaoSolda(
+                                                    '{{reinspecao_solda[0]}}',
+                                                    '{{reinspecao_solda[1]}}',
+                                                    '{{reinspecao_solda[2]}}',
+                                                    '{{reinspecao_solda[3]}}',
+                                                    '{{reinspecao_solda[4]}}',
+                                                    '{{reinspecao_solda[6]}}',
+                                                    '{{reinspecao_solda[7]}}',
+                                                    '{{reinspecao_solda[8]}}',
+                                                    '{{reinspecao_solda[9]}}',
+                                                    '{{reinspecao_solda[10]}}'
+                                                )">
+                                                    Reinspeção
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -214,7 +225,7 @@
                         <div class="col-sm-6 mb-4">
                             <label>Não conformidade</label>
                             <div class="input-group">
-                                <select class="form-control" name="inputNaoConformidadesSolda" id="inputNaoConformidadesSolda" style="font-size: 12px;">
+                                <select class="form-control desabilitado" name="selectNaoConformidadesSolda" id="selectNaoConformidadesSolda" style="font-size: 12px;">
                                     <option value="" selected hidden disabled></option>
                                     <option value="Retrabalho">Retrabalho</option>
                                     <option value="Sucata">Sucata</option>
@@ -226,7 +237,7 @@
                         <div class="col-sm-6 mb-4">
                             <label>Causa</label>
                             <div class="input-group">
-                                <select class="form-control" name="causaSolda" id="causaSolda" style="font-size: 12px;" >
+                                <select class="form-control desabilitado" name="causaSolda" id="causaSolda" style="font-size: 12px;" >
                                     <option value="" selected hidden disabled></option>
                                     <option value="Faltando Solda">Faltando Solda</option>
                                     <option value="Porosidade">Porosidade</option>
@@ -246,7 +257,7 @@
                         <div class="col-sm-6 mb-4">
                             <label>Outro motivo</label>
                             <div class="input-group">
-                                <input type="number" class="form-control"  id="" style="font-size: 12px;" disabled>
+                                <input type="text" class="form-control desabilitado" autocomplete="off"  id="outraCausaSolda" style="font-size: 12px;" disabled>
                             </div>  
                         </div>
                     </div>
@@ -254,7 +265,7 @@
                         <div class="col-sm-6 mb-4">
                             <label>Origem</label>
                             <div class="input-group">
-                                <select class="form-control" name="" id="" style="font-size: 12px;">
+                                <select class="form-control" name="origemInspecaoSolda" id="origemInspecaoSolda" style="font-size: 12px;">
                                     <option value="" selected hidden disabled></option>
                                     <option value="Corte">Corte</option>
                                     <option value="Estamparia">Estamparia</option>
@@ -267,7 +278,7 @@
                         <div class="col-sm-6 mb-4">
                             <label>Observação</label>
                             <div class="input-group">
-                                <textarea class="form-control" name="observacaoSolda" id="observacaoSolda" cols="5" rows="1" style="font-size: 12px;"></textarea>
+                                <textarea class="form-control desabilitado" name="observacaoSolda" id="observacaoSolda" cols="5" rows="1" style="font-size: 12px;"></textarea>
                             </div>  
                         </div>
                     </div>
@@ -279,78 +290,127 @@
         </div>
     </div>
 
-    <div class="modal fade" data-backdrop="static" id="reinspecaoModal" tabindex="-1" role="dialog" aria-labelledby="reinspecaoModalLabel" aria-hidden="true">
+    <div class="modal fade" data-backdrop="static" id="reinspecaoModalSolda" tabindex="-1" role="dialog" aria-labelledby="reinspecaoModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="reinspecaoModalLabel"></h5>
+                    <h5 class="modal-title" id="inspecionarConjuntoLabel">Reinspeção</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body p-4" style="font-size: 14px;">
                     <div class="row">
-                        <input type="date" name="id_peca" id="id_peca" class="form-control" readonly="readonly" style="display: none;"> 
                         <div class="col-sm-6 mb-4">
-                            <label for="data_inspecao_anterior">Data da inspeção anterior:</label>
-                            <input type="date" name="data_inspecao_anterior" id="data_inspecao_anterior" class="form-control" readonly="readonly">    
+                            <label>Data da reinspeção</label>
+                            <input type="text" class="form-control" name="data_reinspecao_solda" id="data_reinspecao_solda" style="font-size: 12px;" disabled>
                         </div>
                         <div class="col-sm-6 mb-4">
-                            <label for="data_nova_inspecao">Data da nova inspeção:</label>
-                            <input type="text" name="data_nova_inspecao" id="data_nova_inspecao" class="form-control" readonly="readonly">    
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-10 mb-4">
-                            <label for="peca_reinspecionada">Peça:</label>
-                            <input type="text" name="peca_reinspecionada" id="peca_reinspecionada" class="form-control" readonly="readonly">    
-                        </div>
-                        <div class="col-sm-2 mb-4">
-                            <label for="cor_reinspecionada">Cor:</label>
-                            <input type="text" name="cor_reinspecionada" id="cor_reinspecionada" class="form-control" readonly="readonly">    
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-4 mb-4">
-                            <label>Quantidade Total de Peças:</label>
-                            <input id="qtd_produzida_reinspecao" type="number" name="qtd_produzida_reinspecao" value="" class="form-control" readonly="readonly">
-                        </div>
-                        <div class="col-sm-4 mb-4">
-                            <label>N° total de conformidades:</label>
-                            <input type="number" id="n_conformidades_reinspecao" name="n_conformidades" value="" class="form-control">
-                        </div>
-                        <div class="col-sm-4 mb-4">
-                            <label>N° total de não conformidades:</label>
-                            <input type="number" id="n_nao_conformidades_reinspecao" name="n_nao_conformidades" value="" class="form-control" readonly="readonly">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div id="coluna_causa_nova" class="col-sm-6 mb-4">
-                            <label>Causa das <strong>não conformidades:</strong></label>
-                            <select name="causa_nova_reinspecao" id="causa_nova_reinspecao" class="form-control" disabled>
+                            <label>Inspetor</label>
+                            <select class="form-control" name="inspetorSoldaReinspecao" id="inspetorSoldaReinspecao" style="font-size: 12px;" disabled>
                                 <option value="" selected hidden disabled></option>
-                                <option value="Causa A">Causa A</option>
-                                <option value="Causa B">Causa B</option>
-                                <option value="Causa C">Causa C</option>
-                                <option value="Causa D">Causa D</option>
-                                <option value="Causa E">Causa E</option>
+                                <option value="Leônidas">Leônidas</option>
+                                <option value="Severiano">Severiano</option>
+                                <option value="Marcelo">Marcelo</option>
+                                <option value="Henrique">Henrique</option>
+                                <option value="Guthemberg">Guthemberg</option>
+                                <option value="Elenilson">Elenilson</option>
+                                <option value="Estefane">Estefane</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-sm-6 mb-4">
-                            <label>Inspetor:</label>
-                            <select name="inspetor_reinspecao" id="inspetor_reinspecao" class="form-control">
-                                <option value="" selected hidden disabled></option>
-                                <option value="inspetor A">inspetor A</option>
-                                <option value="inspetor B">inspetor B</option>
-                                <option value="inspetor C">inspetor C</option>
-                                <option value="inspetor D">inspetor D</option>
-                                <option value="inspetor E">inspetor E</option>
-                            </select>
+                            <label>Conjunto</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control"  id="inputConjuntoReinspecao" autocomplete="off" aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
+                            </div>                            
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>N° peças inspecionadas</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control"  id="inputPecasReinspecionadasSolda" style="font-size: 12px;" disabled>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>N° conformidades</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control"  id="inputReinspecionadasConformidadesSolda" style="font-size: 12px;">
+                            </div>  
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>N° não conformidades</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control"  id="inputReinspecionadasNaoConformidadesSolda" style="font-size: 12px;" disabled>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>Não conformidade</label>
+                            <div class="input-group">
+                                <select class="form-control desabilitado" name="selectReinspecionadasNaoConformidadesSolda" id="selectReinspecionadasNaoConformidadesSolda" style="font-size: 12px;">
+                                    <option value="" selected hidden disabled></option>
+                                    <option value="Retrabalho">Retrabalho</option>
+                                    <option value="Sucata">Sucata</option>
+                                </select>
+                            </div>  
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>Causa</label>
+                            <div class="input-group">
+                                <select class="form-control desabilitado" name="causaSoldaReinspecionadas" id="causaSoldaReinspecionadas" style="font-size: 12px;" >
+                                    <option value="" selected hidden disabled></option>
+                                    <option value="Faltando Solda">Faltando Solda</option>
+                                    <option value="Porosidade">Porosidade</option>
+                                    <option value="Solda não conforme (robô)">Solda não conforme (robô)</option>
+                                    <option value="Solda deslocada">Solda deslocada</option>
+                                    <option value="Medida não conforme">Medida não conforme</option>
+                                    <option value="Solda sem penetração">Solda sem penetração</option>
+                                    <option value="Excesso de respingo">Excesso de respingo</option>
+                                    <option value="Excesso de rebarba">Excesso de rebarba</option>
+                                    <option value="Excesso de solda">Excesso de solda</option>
+                                    <option value="Mordedura">Mordedura</option>
+                                    <option value="Erro de montagem">Erro de montagem</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>Outro motivo</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control desabilitado" autocomplete="off"  id="outraCausaSoldaReinspecionadas" style="font-size: 12px;" disabled>
+                            </div>  
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label>Origem</label>
+                            <div class="input-group">
+                                <select class="form-control" name="origemInspecaoSoldaReinspecionadas" id="origemInspecaoSoldaReinspecionadas" style="font-size: 12px;">
+                                    <option value="" selected hidden disabled></option>
+                                    <option value="Corte">Corte</option>
+                                    <option value="Estamparia">Estamparia</option>
+                                    <option value="Usinagem">Usinagem</option>
+                                    <option value="Fornecedor">Fornecedor</option>
+                                    <option value="Solda">Solda</option>
+                                </select>
+                            </div>  
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label>Observação</label>
+                            <div class="input-group">
+                                <textarea class="form-control desabilitado" name="observacaoSoldaReinspecionadas" id="observacaoSoldaReinspecionadas" cols="5" rows="1" style="font-size: 12px;"></textarea>
+                            </div>  
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="envio_reinspecao" class="btn btn-primary">Enviar</button>
+                    <button id="envio_reinspecao_Solda" class="btn btn-primary">Enviar</button>
                 </div>
             </div>
         </div>
@@ -375,6 +435,7 @@
 <script src="static/js/demo/datatables-demo.js"></script>
 <script src="static/js/qualidade/inspecao-solda.js"></script>
 <script src="static/js/qualidade/inspecao-pintura.js"></script>
+<script src="static/js/qualidade/reinspecao-solda.js"></script>
 
 
 {% endblock %}

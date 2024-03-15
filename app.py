@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify,redirect, url_for,flash, Blueprint,send_file
 import pandas as pd
 import time
+import uuid
 import datetime
 import psycopg2  # pip install psycopg2
 import psycopg2.extras 
@@ -119,7 +120,12 @@ def dados_sequenciamento_montagem():
 
     return df
 
+def gerar_id_aleatorio():
 
+    x = str(uuid.uuid4())
+
+    return x
+    
 # Função para criar a nova coluna 'codificacao'
 def criar_codificacao(row):
     if row['celula'] == 'EIXO SIMPLES':
@@ -143,6 +149,9 @@ def dados_historico_pintura():
 
     return df
 
+def formatar_data(data):
+    return data.strftime('%d/%m/%Y')
+
 def dados_inspecionar_reinspecionar():
 
     """
@@ -163,7 +172,8 @@ def dados_inspecionar_reinspecionar():
 
     inspecaionados= """SELECT i.*, op.peca,op.cor,op.tipo
                 FROM pcp.pecas_inspecionadas as i
-                LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id"""
+                LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id::varchar
+                WHERE i.setor = 'Pintura' """
 
     cur.execute(inspecaionados)
 
@@ -171,7 +181,8 @@ def dados_inspecionar_reinspecionar():
 
     reinspecao = """SELECT r.*, op.peca,op.cor,op.tipo
                 FROM pcp.pecas_reinspecao as r
-                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id """
+                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
+                WHERE r.setor = 'Pintura'"""
 
     cur.execute(reinspecao)
 
@@ -179,27 +190,51 @@ def dados_inspecionar_reinspecionar():
 
     return data_inspecao,data_reinspecao,data_inspecionadas
 
-def inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor):
+def inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor,setor,
+                       conjunto_especifico='',tipo_nao_conformidade='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    delete_table_inspecao = f"""DELETE 
-                            FROM pcp.pecas_inspecao 
-                            WHERE id = {id_inspecao}"""
-    
-    cur.execute(delete_table_inspecao)
+    id_inspecao = str(id_inspecao)
 
-    sql = """INSERT INTO pcp.pecas_reinspecao 
-                     (id,nao_conformidades, causa_reinspecao, inspetor,setor) 
-                     VALUES (%s, %s, %s, %s,'Pintura')"""
-    values = (
-        id_inspecao,
-        n_nao_conformidades,
-        causa_reinspecao,
-        inspetor
-    )
+    if setor == 'Pintura':
+
+        delete_table_inspecao = f"""DELETE 
+                                FROM pcp.pecas_inspecao 
+                                WHERE id = '{id_inspecao}'"""
+        
+        cur.execute(delete_table_inspecao)
+
+        sql = """INSERT INTO pcp.pecas_reinspecao 
+                        (id,nao_conformidades, causa_reinspecao, inspetor,setor) 
+                        VALUES (%s, %s, %s, %s, %s)"""
+        values = (
+            id_inspecao,
+            n_nao_conformidades,
+            causa_reinspecao,
+            inspetor,
+            setor
+        )
+
+    elif setor == 'Solda':
+
+        sql = """INSERT INTO pcp.pecas_reinspecao 
+                        (id,nao_conformidades, causa_reinspecao, inspetor,setor,conjunto,tipo_nao_conformidade,outra_causa,origem,observacao) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+        values = (
+            id_inspecao,
+            n_nao_conformidades,
+            causa_reinspecao,
+            inspetor,
+            setor,
+            conjunto_especifico,
+            tipo_nao_conformidade,
+            outraCausaSolda,
+            origemInspecaoSolda,
+            observacaoSolda
+        )
 
     cur.execute(sql, values)
 
@@ -207,26 +242,47 @@ def inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reins
 
     print("inserir_reinspecao")
 
-def inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor):
+def inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor,
+                          conjunto_especifico='',origemInspecaoSolda='',observacaoSolda=''):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    delete_table_inspecao = f"""DELETE 
-                            FROM pcp.pecas_inspecao 
-                            WHERE id = {id_inspecao}"""
-    
-    cur.execute(delete_table_inspecao)
+    id_inspecao = str(id_inspecao)
 
-    sql = """INSERT INTO pcp.pecas_inspecionadas 
-                     (id_inspecao,total_conformidades, inspetor, setor,num_inspecao) 
-                     VALUES (%s, %s, %s,'Pintura',0)"""
-    values = (
-        id_inspecao,
-        n_conformidades,
-        inspetor
-    )
+    if setor == 'Pintura':
+
+        delete_table_inspecao = f"""DELETE 
+                                FROM pcp.pecas_inspecao 
+                                WHERE id = '{id_inspecao}'"""
+        
+        cur.execute(delete_table_inspecao)
+
+        sql = """INSERT INTO pcp.pecas_inspecionadas 
+                        (id_inspecao,total_conformidades, inspetor, setor,num_inspecao) 
+                        VALUES (%s, %s, %s,%s,0)"""
+        values = (
+            id_inspecao,
+            n_conformidades,
+            inspetor,
+            setor
+        )
+    
+    elif setor == 'Solda':
+
+        sql = """INSERT INTO pcp.pecas_inspecionadas 
+                        (id_inspecao,total_conformidades, inspetor, setor,num_inspecao,conjunto,origem,observacao) 
+                        VALUES (%s, %s, %s,%s,0,%s,%s,%s)"""
+        values = (
+            id_inspecao,
+            n_conformidades,
+            inspetor,
+            setor,
+            conjunto_especifico,
+            origemInspecaoSolda,
+            observacaoSolda
+        )
 
     cur.execute(sql, values)
 
@@ -234,141 +290,315 @@ def inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor):
 
     print("inserir_inspecionados")
 
-def alterar_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor):
+def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor,setor,
+                       conjunto_especifico='',tipo_nao_conformidade='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    if n_conformidades == "0":
+    id_inspecao = str(id_inspecao)
 
-        sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                SET causa_reinspecao = %s, inspetor = %s
-                WHERE id = %s """
+    if setor == 'Pintura':
+
+        if n_conformidades == "0":
+
+            sql_uptdade = """UPDATE pcp.pecas_reinspecao 
+                    SET causa_reinspecao = %s, inspetor = %s
+                    WHERE id = %s """
+            
+            values = (
+                causa_reinspecao,
+                inspetor,
+                id_inspecao
+            )
+
+            cur.execute(sql_uptdade, values)
+
+            sql_insert = """DO $$
+                            BEGIN
+                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, 
+                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                        );
+                                ELSE
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, 0);
+                                END IF;
+                            END $$;
+                        """
+
+            values = (
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor,
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor
+            )
+
+            cur.execute(sql_insert, values)
+
+        elif n_conformidades > "0" and n_conformidades < qtd_produzida:
+
+            sql_uptdade = """UPDATE pcp.pecas_reinspecao 
+                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s
+                    WHERE id = %s """
+            
+            values = (
+                n_nao_conformidades,
+                causa_reinspecao,
+                inspetor,
+                id_inspecao
+            )
+
+            cur.execute(sql_uptdade, values)
+
+            sql_insert = """DO $$
+                            BEGIN
+                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, 
+                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                        );
+                                ELSE
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, 0);
+                                END IF;
+                            END $$;
+                        """
+
+            values = (
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor,
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor
+            )
+
+            cur.execute(sql_insert, values)
+
+        elif n_conformidades == qtd_produzida:
+
+            sql_insert = """DO $$
+                            BEGIN
+                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, 
+                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                        );
+                                ELSE
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, 0);
+                                END IF;
+                            END $$;
+                        """
+
+            values = (
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor,
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor
+            )
+
+            cur.execute(sql_insert, values)
+
+            delete_table_inspecao = f"""DELETE 
+                                FROM pcp.pecas_reinspecao 
+                                WHERE id = '{id_inspecao}'"""
         
-        values = (
-            causa_reinspecao,
-            inspetor,
-            id_inspecao
-        )
+            cur.execute(delete_table_inspecao)
 
-        cur.execute(sql_uptdade, values)
+    elif setor == 'Solda':
 
-        sql_insert = """DO $$
-                        BEGIN
-                            IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                INSERT INTO pcp.pecas_inspecionadas
-                                    (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                VALUES 
-                                    (%s, %s, %s, 'Pintura', 
-                                        (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
-                                    );
-                            ELSE
-                                INSERT INTO pcp.pecas_inspecionadas
-                                    (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                VALUES 
-                                    (%s, %s, %s, 'Pintura', 0);
-                            END IF;
-                        END $$;
-                    """
+        if n_conformidades == "0":
 
-        values = (
-            id_inspecao,
-            id_inspecao,
-            n_conformidades,
-            inspetor,
-            id_inspecao,
-            id_inspecao,
-            n_conformidades,
-            inspetor
-        )
+            sql_uptdade = """UPDATE pcp.pecas_reinspecao 
+                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, tipo_nao_conformidade = %s,
+                    outra_causa = %s, origem = %s, observacao = %s
+                    WHERE id = %s """
 
-        cur.execute(sql_insert, values)
+            values = (
+                n_nao_conformidades,
+                causa_reinspecao,
+                inspetor,
+                tipo_nao_conformidade,
+                outraCausaSolda,
+                origemInspecaoSolda,
+                observacaoSolda,
+                id_inspecao
+            )
 
-    elif n_conformidades > "0" and n_conformidades < qtd_produzida:
+            cur.execute(sql_uptdade, values)
 
-        sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s
-                WHERE id = %s """
+            sql_insert = """DO $$
+                            BEGIN
+                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, conjunto, origem, observacao, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s));
+                                ELSE
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, conjunto, origem, observacao, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, %s, %s, %s, 0);
+                                END IF;
+                            END $$;
+                        """
+            
+            values = (
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor,
+                conjunto_especifico,
+                origemInspecaoSolda,
+                observacaoSolda,
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor,
+                conjunto_especifico,
+                origemInspecaoSolda,
+                observacaoSolda
+            )
+
+            cur.execute(sql_insert, values)
+
+        elif n_conformidades > "0" and n_conformidades < qtd_produzida:
+
+            sql_uptdade = """UPDATE pcp.pecas_reinspecao 
+                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, tipo_nao_conformidade = %s,
+                    outra_causa = %s, origem = %s, observacao = %s
+                    WHERE id = %s """
+            # conjunto_especifico='',tipo_nao_conformidade='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''
+            values = (
+                n_nao_conformidades,
+                causa_reinspecao,
+                inspetor,
+                tipo_nao_conformidade,
+                outraCausaSolda,
+                origemInspecaoSolda,
+                observacaoSolda,
+                id_inspecao
+            )
+
+            cur.execute(sql_uptdade, values)
+
+            sql_insert = """DO $$
+                            BEGIN
+                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, conjunto, origem, observacao, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s));
+                                ELSE
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, conjunto, origem, observacao, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, %s, %s, %s, 0);
+                                END IF;
+                            END $$;
+                        """
+            
+            values = (
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor,
+                conjunto_especifico,
+                origemInspecaoSolda,
+                observacaoSolda,
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor,
+                conjunto_especifico,
+                origemInspecaoSolda,
+                observacaoSolda
+            )
+
+            cur.execute(sql_insert, values)
+
+        elif n_conformidades == qtd_produzida:
+
+            sql_insert = """DO $$
+                            BEGIN
+                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, conjunto, origem, observacao, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s));
+                                ELSE
+                                    INSERT INTO pcp.pecas_inspecionadas
+                                        (id_inspecao, total_conformidades, inspetor, setor, conjunto, origem, observacao, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, %s, %s, %s, %s, 0);
+                                END IF;
+                            END $$;
+                        """
+            
+            values = (
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor,
+                conjunto_especifico,
+                origemInspecaoSolda,
+                observacaoSolda,
+                id_inspecao,
+                id_inspecao,
+                n_conformidades,
+                inspetor,
+                setor,
+                conjunto_especifico,
+                origemInspecaoSolda,
+                observacaoSolda
+            )
+
+            cur.execute(sql_insert, values)
+
+            delete_table_inspecao = f"""DELETE 
+                                FROM pcp.pecas_reinspecao 
+                                WHERE id = '{id_inspecao}'"""
         
-        values = (
-            n_nao_conformidades,
-            causa_reinspecao,
-            inspetor,
-            id_inspecao
-        )
-
-        cur.execute(sql_uptdade, values)
-
-        sql_insert = """DO $$
-                        BEGIN
-                            IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                INSERT INTO pcp.pecas_inspecionadas
-                                    (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                VALUES 
-                                    (%s, %s, %s, 'Pintura', 
-                                        (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
-                                    );
-                            ELSE
-                                INSERT INTO pcp.pecas_inspecionadas
-                                    (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                VALUES 
-                                    (%s, %s, %s, 'Pintura', 0);
-                            END IF;
-                        END $$;
-                    """
-
-        values = (
-            id_inspecao,
-            id_inspecao,
-            n_conformidades,
-            inspetor,
-            id_inspecao,
-            id_inspecao,
-            n_conformidades,
-            inspetor
-        )
-
-        cur.execute(sql_insert, values)
-
-    elif n_conformidades == qtd_produzida:
-
-        sql_insert = """DO $$
-                        BEGIN
-                            IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                INSERT INTO pcp.pecas_inspecionadas
-                                    (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                VALUES 
-                                    (%s, %s, %s,'Pintura', 
-                                        (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
-                                    );
-                            ELSE
-                                INSERT INTO pcp.pecas_inspecionadas
-                                    (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                VALUES 
-                                    (%s, %s, %s,'Pintura', 0);
-                            END IF;
-                        END $$;
-                    """
-
-        values = (
-            id_inspecao,
-            id_inspecao,
-            n_conformidades,
-            inspetor,
-            id_inspecao,
-            id_inspecao,
-            n_conformidades,
-            inspetor
-        )
-
-        cur.execute(sql_insert, values)
-
-        delete_table_inspecao = f"""DELETE 
-                            FROM pcp.pecas_reinspecao 
-                            WHERE id = {id_inspecao}"""
+            cur.execute(delete_table_inspecao)
     
-        cur.execute(delete_table_inspecao)
+    print('alterar_reinspecao')
 
     conn.commit()
 
@@ -849,19 +1079,20 @@ def inspecao():
         causa_reinspecao = data['causa_reinspecao']
         inspetor = data['inspetor']
         qtd_produzida = data['qtd_produzida']
+        setor = 'Pintura'
 
         # Identificar se veio do modal de reinspecoes ou não
         modal_reinspecao = data['reinspecao']
         if modal_reinspecao:
-            alterar_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor)
+            alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor,setor)
             return jsonify("Success")
         
         else:
             if n_conformidades != qtd_produzida:
-                inserir_reinspecao(id_inspecao,data_inspecao,n_nao_conformidades,causa_reinspecao,inspetor)
-                inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
+                inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor,setor)
+                inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor)
             else:
-                inserir_inspecionados(id_inspecao,data_inspecao,n_conformidades,inspetor)
+                inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor)
 
             return jsonify("Success")
 
@@ -869,11 +1100,85 @@ def inspecao():
 
     return render_template('inspecao.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
-
-@app.route('/solda',methods=['GET','POST'])
+@app.route('/inspecao-solda',methods=['GET','POST'])
 def solda():
+
+    if request.method == 'POST':
+
+        data = request.get_json()
+
+        data_inspecao = data['data_inspecao']
+        data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
+
+        # Converter de volta para string no formato desejado
+        data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
+        
+        inspetor = data['inspetor']
+        conjunto_especifico = data['conjunto_especifico']
+        num_pecas = data['num_pecas']
+        num_conformidades = data['num_conformidades']
+        num_nao_conformidades = data['num_nao_conformidades']
+        tipo_nao_conformidade = data['tipo_nao_conformidade']
+        causaSolda = data['causaSolda']
+        outraCausaSolda = data['outraCausaSolda']
+        origemInspecaoSolda = data['origemInspecaoSolda']
+        observacaoSolda = data['observacaoSolda']
+        setor = 'Solda'
+        reinspecao = data['modal_reinspecao_solda']
+
+        try:
+            id_inspecao_solda = data['id_inspecao_solda']
+        except:
+            id_inspecao_solda = gerar_id_aleatorio()
+
+        if reinspecao:
+            alterar_reinspecao(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,causaSolda,inspetor,setor,
+                               conjunto_especifico,tipo_nao_conformidade,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
+            return jsonify("Success")
+        
+        else:
+            if num_conformidades != num_pecas:
+                inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,causaSolda,inspetor,setor,conjunto_especifico,
+                                   tipo_nao_conformidade,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
+                inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetor,setor,conjunto_especifico,
+                                      origemInspecaoSolda,observacaoSolda)
+            else:
+                inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetor,setor,conjunto_especifico,
+                                      origemInspecaoSolda,observacaoSolda)
+
+            return jsonify("Success")
+        
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query_inspecao = """SELECT *
+            FROM pcp.pecas_inspecionadas
+            WHERE setor = 'Solda'"""
     
-    return render_template('solda.html')
+    cur.execute(query_inspecao)
+
+    inspecoes_solda = cur.fetchall()
+
+    for item in inspecoes_solda:
+        if isinstance(item[1], datetime):
+            item[1] = formatar_data(item[1])
+
+    print(inspecoes_solda)
+
+    query_reinspecao = """SELECT *
+            FROM pcp.pecas_reinspecao
+            WHERE setor = 'Solda'"""
+    
+    cur.execute(query_reinspecao)
+
+    reinspecoes_solda = cur.fetchall()
+
+    for item in reinspecoes_solda:
+        if isinstance(item[1], datetime):
+            item[1] = formatar_data(item[1])
+    
+    return render_template('inspecao-solda.html',inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda)
 
 @app.route('/conjuntos', methods=['POST'])
 def listar_conjuntos():
