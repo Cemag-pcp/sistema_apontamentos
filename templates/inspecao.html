@@ -117,7 +117,6 @@
                                     <th>Cor</th>
                                     <th>Tipo</th>
                                     <th>Inspetor</th>
-                                    <th>Setor</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -129,7 +128,6 @@
                                     <th style="max-width: 50px;">Cor</th>
                                     <th style="max-width: 50px;">Tipo</th>
                                     <th>Inspetor</th>
-                                    <th>Setor</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -137,12 +135,11 @@
                                 <tr>
                                     <td>{{inspecionada[0]}}</td>
                                     <td class = data_inspecao>{{inspecionada[1]}}</td>
-                                    <td>{{inspecionada[6]}}</td>
+                                    <td>{{inspecionada[9]}}</td>
                                     <td>{{inspecionada[2]}}</td>
-                                    <td>{{inspecionada[7]}}</td>
-                                    <td>{{inspecionada[8]}}</td>
+                                    <td>{{inspecionada[10]}}</td>
+                                    <td>{{inspecionada[11]}}</td>
                                     <td>{{inspecionada[3]}}</td>
-                                    <td>{{inspecionada[4]}}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -162,7 +159,7 @@
                                     <th class="text-truncate" data-toggle="tooltip" data-placement="top" title="N° de Conformidades" style="max-width: 60px;">Não Conformidade</th>
                                     <th>Causa Reinspecao</th>
                                     <th>Inspetor</th>
-                                    <th>Setor</th>
+                                    <th>Cor</th>
                                     <th>Exec</th>
                                 </tr>
                             </thead>
@@ -174,7 +171,7 @@
                                     <th class="text-truncate" data-toggle="tooltip" data-placement="top" title="N° de Conformidades" style="max-width: 60px;">Não Conformidade</th>
                                     <th>Causa Reinspecao</th>
                                     <th>Inspetor</th>
-                                    <th>Setor</th>
+                                    <td>Cor</td>
                                     <th>Exec</th>
                                 </tr>
                             </tfoot>
@@ -183,11 +180,11 @@
                                 <tr>
                                     <td>{{reinspecao[0]}}</td>
                                     <td>{{reinspecao[1]}}</td>
-                                    <td>{{reinspecao[6]}}</td>
+                                    <td>{{reinspecao[11]}}</td>
                                     <td>{{reinspecao[2]}}</td>
                                     <td>{{reinspecao[3]}}</td>
                                     <td>{{reinspecao[4]}}</td>
-                                    <td>{{reinspecao[5]}}</td>
+                                    <td>{{reinspecao[12]}}</td>
                                     <td>
                                         <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
                                             <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
@@ -197,8 +194,8 @@
                                                 <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalReinspecao(
                                                     '{{reinspecao[0]}}',
                                                     '{{reinspecao[1]}}',
-                                                    '{{reinspecao[6]}}',
-                                                    '{{reinspecao[7]}}',
+                                                    '{{reinspecao[11]}}',
+                                                    '{{reinspecao[12]}}',
                                                     '{{reinspecao[2]}}',
                                                     '{{reinspecao[4]}}'
                                                 )">
