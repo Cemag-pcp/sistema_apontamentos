@@ -6,7 +6,8 @@
 
 {% block links %}
 <!-- Custom styles for this page -->
-<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
 
 {% endblock %}
 
@@ -28,14 +29,14 @@
         <div class="col-xl-12">
             <div class="card shadow mb-4">
                 <!-- Card Header - Dropdown -->
-                <div
-                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Gerar Cambão</h6>
                     <!-- <div class="form-group">
                         <label for="dataCarga">Data da carga</label>
                         <input type="date" name="browser" id="dataCarga" class="form-control">
                     </div> -->
-                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">Peça fora do sequenciamento</button>
+                    <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">Peça fora
+                        do sequenciamento</button>
                 </div>
                 <br>
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -50,14 +51,14 @@
                             <div class="form-group">
                                 <label for="cor">Cor</label>
                                 <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
-                                <input list="listaCor"  id="cor" class="form-control" data-column="5">
+                                <input list="listaCor" id="cor" class="form-control" data-column="5">
                                 <datalist id="listaCor">
-                                </datalist>                            
+                                </datalist>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Card Body -->
                 <div class="card-body">
                     <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
@@ -65,7 +66,8 @@
                             <thead>
                                 <tr>
                                     <th style="display: none;">Chave</th>
-                                    <th>Data</th>
+                                    <th>Data da carga</th>
+                                    <th>Data planejada</th>
                                     <th>Código</th>
                                     <th>Descrição</th>
                                     <th>Qt. planejada</th>
@@ -79,7 +81,8 @@
                             <tfoot>
                                 <tr>
                                     <th style="display: none;">Chave</th>
-                                    <th>Data</th>
+                                    <th>Data da carga</th>
+                                    <th>Data planejada</th>
                                     <th>Código</th>
                                     <th>Descrição</th>
                                     <th>Qt. planejada</th>
@@ -92,116 +95,152 @@
                             </tfoot>
                             <tbody>
                                 {% if sheet_data %}
-                                    {% for data in sheet_data %}
-                                    <tr>
-                                        <td style="display: none;">{{ data[0] }}</td>
-                                        <td>{{ data[1] }}</td>
-                                        <td>{{ data[2] }}</td>
-                                        <td>{{ data[3] }}</td>
-                                        <td>{{ data[4] }}</td>
-                                        <td>{{ data[5] }}</td>
-                                        <td>
-                                            <input class="form-control" id='prod' type="number">
-                                        </td>
-                                        <td><input class="form-control" id='cambao' type="number" value="{{ data[7] }}"></td>
-                                        <td>
-                                            <select class="form-control" id='tipo' type="text" value="">
-                                                <option value=""></option>
-                                                <option value="PÓ">PÓ</option>
-                                                <option value="PU">PU</option>
-                                            </select>
-                                        </td>
-                                        <td>{{ data[9] }}</td>
-                                    </tr>
-                                    {% endfor %}
-                            
+                                {% for data in sheet_data %}
+                                <tr>
+                                    <td style="display: none;">{{ data[0] }}</td>
+                                    <td>{{ data[1] }}</td>
+                                    <td>{{ data[2] }}</td>
+                                    <td>{{ data[3] }}</td>
+                                    <td>{{ data[4] }}</td>
+                                    <td>{{ data[5] }}</td>
+                                    <td>{{ data[6] }}</td>
+                                    <td>
+                                        <input class="form-control" id='prod' type="number">
+                                    </td>
+                                    <td><input class="form-control" id='cambao' type="number" value="{{ data[7] }}">
+                                    </td>
+                                    <td>
+                                        <select class="form-control" id='tipo' type="text" value="">
+                                            <option value=""></option>
+                                            <option value="PÓ">PÓ</option>
+                                            <option value="PU">PU</option>
+                                        </select>
+                                    </td>
+                                    <td>{{ data[10] }}</td>
+                                </tr>
+                                {% endfor %}
+
                                 {% else %}
-                                    <tr>
-                                        <td colspan="7">Nenhum dado disponível</td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="7">Nenhum dado disponível</td>
+                                </tr>
                                 {% endif %}
                             </tbody>
                         </table>
                     </div>
                 </div>
-                
+
             </div>
         </div>
-        
+
         <!-- Modal peça fora do sequenciamento -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Gerar cambão para peça fora do sequenciamento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="form-floating mb-3">
-                                <label for="userInput">Peça</label>
-                                <!-- <input class="form-control" type="text" id="inputPeca"> Peça -->
-                                <input class="form-control" type="text" id="userInput" oninput="showSuggestions()">
-                                <ul id="suggestions" class="custom-dropdown-menu"></ul>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Gerar cambão para peça fora do sequenciamento
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <label for="userInput">Peça</label>
+                                    <!-- <input class="form-control" type="text" id="inputPeca"> Peça -->
+                                    <input class="form-control" type="text" id="userInput" oninput="showSuggestions()">
+                                    <ul id="suggestions" class="custom-dropdown-menu"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 col-md-4">
+                                <div class="form-floating mb-3">
+                                    <label for="inputCambao">Cambão</label>
+                                    <input class="form-control" type="number" id="inputCambao"> <!-- Cambão -->
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-floating mb-3">
+                                    <label for="selectCor">Cor</label>
+                                    <select class="custom-select" id="selectCor"> <!-- Cor -->
+                                        <option selected hidden>Escolha a cor</option>
+                                        <option value="AN">Azul</option>
+                                        <option value="AV">Amarelo</option>
+                                        <option value="VJ">Verde</option>
+                                        <option value="VM">Vermelho</option>
+                                        <option value="CO">Cinza</option>
+                                        <option value="LC">Laranja</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4">
+                                <div class="form-floating mb-3">
+                                    <label for="selectTipo">Tipo</label>
+                                    <select class="custom-select" id="selectTipo"> <!-- Tipo -->
+                                        <option selected hidden>Escolha o tipo</option>
+                                        <option value="PÓ">PÓ</option>
+                                        <option value="PU">PU</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-floating mb-3">
+                                    <label for="inputData">Data da carga</label>
+                                    <input class="form-control" type="date" id="inputData"> <!-- Data da carga -->
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-floating mb-3">
+                                    <label for="inputQuantidade">Quantidade</label>
+                                    <input class="form-control" type="number" id="inputQuantidade"> <!-- Quantidade -->
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-6 col-md-4">
-                            <div class="form-floating mb-3">
-                                <label for="inputCambao">Cambão</label>
-                                <input class="form-control" type="number" id="inputCambao"> <!-- Cambão -->
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4">
-                            <div class="form-floating mb-3">
-                                <label for="selectCor">Cor</label>
-                                <select class="custom-select" id="selectCor"> <!-- Cor -->
-                                    <option selected hidden>Escolha a cor</option>
-                                    <option value="AN">Azul</option>
-                                    <option value="AV">Amarelo</option>
-                                    <option value="VJ">Verde</option>
-                                    <option value="VM">Vermelho</option>
-                                    <option value="CO">Cinza</option>
-                                    <option value="LC">Laranja</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4">
-                            <div class="form-floating mb-3">
-                                <label for="selectTipo">Tipo</label>
-                                <select class="custom-select" id="selectTipo"> <!-- Tipo -->
-                                    <option selected hidden>Escolha o tipo</option>
-                                    <option value="PÓ">PÓ</option>
-                                    <option value="PU">PU</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-6"> 
-                            <div class="form-floating mb-3">
-                                <label for="inputData">Data da carga</label>
-                                <input class="form-control" type="date" id="inputData"> <!-- Data da carga -->
-                            </div>
-                        </div>
-                        <div class="col-6"> 
-                            <div class="form-floating mb-3">
-                                <label for="inputQuantidade">Quantidade</label>
-                                <input class="form-control" type="number" id="inputQuantidade"> <!-- Quantidade -->
-                            </div>
-                        </div>  
+                    <div class="modal-footer">
+                        <button id="btnSalvar" type="button" class="btn btn-primary">Salvar</button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                <button id="btnSalvar" type="button" class="btn btn-primary">Salvar</button>
-                </div>
-            </div>
             </div>
         </div>
+
+        <!-- Modal operador -->
+        <div class="modal fade" id="operadorIniciarCambao" tabindex="-1" role="dialog"
+            aria-labelledby="operadorIniciarCambaoLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="operadorIniciarCambaoLabel">Qual operador?
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <select class="form-control" name="selectOperadorIniciarCambao"
+                                    id="selectOperadorIniciarCambao">
+                                    <option value=""></option>
+                                    <option value="Lucas">Lucas</option>
+                                    <option value="Fábio">Fábio</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnSalvar" type="button" class="btn btn-success">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
     </div>
 
@@ -212,8 +251,8 @@
         <div class="col-lg-12 mb-4">
 
             <!-- Botão para enviar os itens apontados -->
-            <button id="enviarBtn" type="button" class="btn btn-success">Enviar</button>
-            
+            <button id="abrirModalOperadorInicioCambao" type="button" class="btn btn-primary">Enviar</button>
+
         </div>
 
     </div>
@@ -330,6 +369,14 @@
     });
 </script>
 
+<!-- Script para abrir modal de gerar cambão -->
+
+<script>
+    document.getElementById('abrirModalOperadorInicioCambao').addEventListener('click', function () {
+        $('#operadorIniciarCambao').modal('show');
+    })
+</script>
+
 <!-- Script botão de enviar -->
 
 <script>
@@ -337,64 +384,74 @@
         // Adicione um manipulador de clique ao botão de envio
         $('.btn-success').on('click', function () {
             // Obtém as linhas com a coluna 5 diferente de vazio
-            showLoading();
             var linhas = [];
-            $('#dataTable tbody tr').each(function () {
-                var qt_produzida = $(this).find('td:eq(6) input').val(); // Obtém o valor da coluna 5
-                if (qt_produzida !== '') {
-                    // Obtém os valores das outras colunas se necessário
-                    var chave = $(this).find('td:eq(0)').text().trim();
-                    var data = $(this).find('td:eq(1)').text().trim();
-                    var codigo = $(this).find('td:eq(2)').text().trim();
-                    var descricao = $(this).find('td:eq(3)').text().trim();
-                    var qt_planejada = $(this).find('td:eq(4)').text().trim();
-                    var cor = $(this).find('td:eq(5)').text().trim();
-                    if (cor === 'Azul') {
-                        cor = 'AN';
-                    } else if (cor === 'Cinza') {
-                        cor = 'CO';
-                    } else if (cor === 'Laranja') {
-                        cor = 'LC';
-                    } else if (cor === 'Verde') {
-                        cor = 'VJ'
-                    } else if (cor === 'Vermelho') {
-                        cor = 'VM'
-                    } else if (cor === 'Amarelo') {
-                        cor = 'AV'
+
+            var operador = $('#selectOperadorIniciarCambao').val();
+
+            if (operador === '') {
+                alert('Insira um operador');
+                return;
+            } else {
+                showLoading();
+            
+                $('#dataTable tbody tr').each(function () {
+                    var qt_produzida = $(this).find('td:eq(7) input').val(); // Obtém o valor da coluna 5
+                    if (qt_produzida !== '') {
+                        // Obtém os valores das outras colunas se necessário
+                        var chave = $(this).find('td:eq(0)').text().trim();
+                        var data = $(this).find('td:eq(1)').text().trim();
+                        var codigo = $(this).find('td:eq(3)').text().trim();
+                        var descricao = $(this).find('td:eq(4)').text().trim();
+                        var qt_planejada = $(this).find('td:eq(5)').text().trim();
+                        var cor = $(this).find('td:eq(6)').text().trim();
+                        if (cor === 'Azul') {
+                            cor = 'AN';
+                        } else if (cor === 'Cinza') {
+                            cor = 'CO';
+                        } else if (cor === 'Laranja') {
+                            cor = 'LC';
+                        } else if (cor === 'Verde') {
+                            cor = 'VJ'
+                        } else if (cor === 'Vermelho') {
+                            cor = 'VM'
+                        } else if (cor === 'Amarelo') {
+                            cor = 'AV'
+                        }
+                        var cambao = $(this).find('td:eq(8) input').val().trim();
+                        var tipo = $(this).find('td:eq(9) select').val();
+                        var celula = $(this).find('td:eq(10)').val();
+
+                        // Adiciona os dados da linha ao array
+                        linhas.push({ data: data, codigo: codigo, descricao: descricao, cor: cor, qt_itens: qt_planejada, prod: qt_produzida, cambao: cambao, tipo: tipo, celula: celula, chave: chave, operador: operador });
                     }
-                    
-                    var cambao = $(this).find('td:eq(7) input').val().trim();
-                    var tipo = $(this).find('td:eq(8) select').val();
-                    var celula = $(this).find('td:eq(9)').val();
-                    // ... Adicione outras colunas conforme necessário
+                    else {
+                        return;
+                    }
+                });
 
-                    // Adiciona os dados da linha ao array
-                    linhas.push({ data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo,celula:celula,chave:chave });
-                }
-                else {
-                    return;
-                }
-            });
+                // Envia os dados para o backend
+                $.ajax({
+                    type: 'POST',
+                    url: '/gerar-cambao-pintura',
+                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                    data: JSON.stringify({ linhas: linhas }),
+                    success: function (data) {
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        console.log(data);
+                        location.reload();
+                    },
+                    error: function (error) {
+                        console.error('Erro na solicitação POST:', error);
+                        // Adiciona um pequeno atraso antes de chamar hideLoading()
+                        hideLoading();
+                        // location.reload();
+                    }
+                });
 
-            // Envia os dados para o backend
-            $.ajax({
-                type: 'POST',
-                url: '/send_gerar',
-                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
-                data: JSON.stringify({ linhas: linhas }),
-                success: function (data) {
-                    hideLoading();
-                    showAndHideSuccessAlert('Salvo.', 2000);
-                    console.log(data);
-                    location.reload();
-                },
-                error: function (error) {
-                    console.error('Erro na solicitação POST:', error);
-                    // Adiciona um pequeno atraso antes de chamar hideLoading()
-                    hideLoading();
-                    // location.reload();
-                }
-            });
+            }
+
+
         });
     });
 

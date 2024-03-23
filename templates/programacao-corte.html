@@ -1,0 +1,1180 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Montagem</title>
+{% endblock %}
+
+{% block links %}
+
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Planejar Corte</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <div class="row">
+
+        <!-- tabela iniciar apontamento -->
+        <div class="col-xl-12 mb-2">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Iniciar Processo</h6>
+                    <div class="btn-group" role="group" aria-label="Criar OP">
+                        <button id="btnModalDuplicarOP" type="button" class="btn btn-sm btn-sucess" data-toggle="modal"
+                            data-target="#modalDuplicarOP">Duplicar OP</button>
+                        <button id="btnModalOpLaser" type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                            data-target="#modalOpLaser">Criar OP Laser</button>
+                        <button id="btnModalOpPlasma" type="button" class="btn btn-sm btn-warning" data-toggle="modal"
+                            data-target="#modalOpPlasma">Criar OP Plasma</button>
+                    </div>
+                </div>
+                <br>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-sm-4">
+                            <label for="opFilter">OP:</label>
+                            <input class="form-control" type="text" id="opFilter">
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="maquinaFilter">Máquina</label>
+                            <select class="form-control" name="maquinaFilter" id="maquinaFilter">
+                                <option value=""></option>
+                                <option value="Plasma">Plasma</option>
+                                <option value="Laser">Laser</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-4 align-self-end">
+                            <button id="btnFilter" class="btn btn-primary">Filtrar</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Data criada</th>
+                                    <th scope="col">OP</th>
+                                    <th scope="col">Espessura</th>
+                                    <th scope="col">Chapa</th>
+                                    <th scope="col">Quantidade chapas</th>
+                                    <th scope="col">Máquina</th>
+                                    <th scope="col">Último status</th>
+                                    <th scope="col">Iniciar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bodyTablePlanejadas">
+
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="9">
+                                        <nav aria-label="Page navigation example">
+                                            <ul class="pagination justify-content-end" id="pagination">
+                                                <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                            </ul>
+                                        </nav>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Painel de cards "em processo" e "interrompidas" -->
+    <!-- <div class="row">
+
+        <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças em processo</h6>
+                </div>
+                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
+                    <div class="row" id="cardsContainer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças interrompidas</h6>
+                </div>
+                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
+                    <div class="row" id="cardsContainerInterrompida">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> -->
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- Modal criar op laser -->
+        <div class="modal fade" id="modalOpLaser" tabindex="-1" role="dialog" aria-labelledby="modalOpLaserLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalOpLaser">Gerar apontamento para peça fora do
+                            planejamento</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-sm-4">
+                                <label for="comprimentoLaser">Comprimento</label>
+                                <input type="number" class="form-control" id="comprimentoLaser">
+                            </div>
+                            <div class="col-sm-4">
+                                <label for="larguraLaser">Largura</label>
+                                <input type="number" class="form-control" id="larguraLaser">
+                            </div>
+                            <div class="col-sm-4">
+                                <label for="espessuraLaser">Espessura</label>
+                                <select class="form-control" name="nameEspessuraLaser" id="espessuraLaser">
+                                    <option></option>
+                                    <option value="14">14</option>
+                                    <option value="13">13</option>
+                                    <option value="12">12</option>
+                                    <option value="11">11</option>
+                                    <option value="5/32">5/32</option>
+                                    <option value="3/16">3/16</option>
+                                    <option value="1/4">1/4</option>
+                                    <option value="5/16">5/16</option>
+                                    <option value="3/8">3/8</option>
+                                    <option value="1/2">1/2</option>
+                                    <option value="5/8">5/8</option>
+                                    <option value="3/4">3/4</option>
+                                    <option value="1">1</option>
+                                    <option value="3,35">3,35</option>
+                                    <option value="20">20</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="input-group mb-3">
+                                    <div class="custom-file">
+                                        <label for="inputGroupFile02">Inserir arquivo</label>
+                                        <input type="file" class="custom-file-input" id="inputGroupFile02"
+                                            onchange="mostrarNomeArquivo('inputGroupFile02')">
+                                        <label class="custom-file-label" for="inputGroupFile02">Escolha um
+                                            arquivo</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="buttonCriarOpLaser" type="button" class="btn btn-sm btn-primary">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal criar op plasma -->
+        <div id="modalOpPlasma" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Criar OP plasma</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="input-group mb-3">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="inputGroupFile01"
+                                    onchange="mostrarNomeArquivo('inputGroupFile01')">
+                                <label class="custom-file-label" for="inputGroupFile01">Escolha um arquivo</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="buttonCriarOpPlasma" class="btn btn-sm btn-primary">Criar</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal visualizar peças dentro da op -->
+        <div class="modal fade" id="modalVisualizarPecas" tabindex="-1" role="dialog"
+            aria-labelledby="modalVisualizarPecasLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalVisualizarPecasLabel">Peças dentro da op</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;" class="modal-body" id="bodyModalVisualizarPecas">
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnPlanejar" type="button" class="btn btn-sm btn-primary">Planejar</button>
+                        <button id="btnConfirmarDuplicacao" type="button"
+                            class="btn btn-sm btn-primary">Duplicar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal finalizar apontamento -->
+        <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1" role="dialog"
+            aria-labelledby="modalExecucaoApontamentoLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalExecucaoApontamentoLabel">Apontar peça</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: 400px; overflow-y: auto;" id="bodyModalFinalizar">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnFinalizarOrdem" type="button" class="btn btn-sm btn-primary">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal confirmar inicio -->
+        <div class="modal fade" id="modalConfirmarInicioProducao" tabindex="-1" role="dialog"
+            aria-labelledby="modalConfirmarInicioProducaoLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalConfirmarInicioProducaoLabel">Iniciar</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="labelConfirmar">Confirmar início da produção?</p>
+                        <p id="pecaTextoModalIniciar"></p>
+                        <input id="retornarPecaProducao" style="display: none;">
+                    </div>
+                    <div class="modal-footer">
+                        <button id="confimarInicioProducao" type="button" class="btn btn-sm btn-success">Sim</button>
+                        <button id="confimarRetornoProducao" type="button" class="btn btn-sm btn-success">Sim</button>
+                        <button id="desistirInicioProducao" type="button" class="btn btn-sm btn-danger">Não</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal motivo de interrompido -->
+        <div class="modal fade" id="modalMotivoInterrompido" tabindex="-1" role="dialog"
+            aria-labelledby="modalMotivoInterrompidoLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalMotivoInterrompidoLabel">Escolha o motivo da parada</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" id="idPecaInterromper" style="display: none;">
+                        <select class="form-control" name="motivosParada" id="idMotivosParada">
+                            <option>Manutenção</option>
+                            <option>Limpeza</option>
+                            <option>Falta de peça</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="enviarMotivo" type="button" class="btn btn-sm btn-success">Enviar</button>
+                        <button id="desistirMotivo" type="button" class="btn btn-sm btn-danger">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal duplicar OP -->
+        <div class="modal fade" id="modalDuplicarOP" tabindex="-1" role="dialog" aria-labelledby="modalDuplicarOPLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalDuplicarOP">Gerar apontamento para peça fora do
+                            planejamento</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-sm-2">
+                                <label for="opDuplicar">Op</label>
+                                <input class="form-control" type="text" id="odDuplicar">
+                            </div>
+                            <div class="col-sm-4">
+                                <label for="pecaDuplicar">Peça</label>
+                                <input class="form-control" type="text" id="pecaDuplicar">
+                            </div>
+                            <div class="col-sm-2">
+                                <label for="maquinaDuplicar">Máquina</label>
+                                <input class="form-control" type="text" id="maquinaDuplicar">
+                            </div>
+                            <div class="col-sm-2 align-self-end">
+                                <button class="btn btn-sucess" id="btnFiltraDuplicarOp">Filtrar</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Op</th>
+                                        <th scope="col">Peças</th>
+                                        <th scope="col">Qt. peças</th>
+                                        <th scope="col">Chapa</th>
+                                        <th scope="col">Espessura</th>
+                                        <th scope="col">Qt. chapas</th>
+                                        <th scope="col">Máquina</th>
+                                        <th scope="col">Duplicar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyDuplicarOp">
+
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="9">
+                                            <nav aria-label="Page navigation example">
+                                                <ul class="pagination justify-content-end" id="paginationDuplicada">
+                                                    <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                </ul>
+                                            </nav>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</div>
+
+<div id="alertBox" class="alert alert-danger">
+    <strong>Erro!</strong> Preencha todos os campos.
+</div>
+
+<div id="successAlert" class="alert alert-success" role="alert">
+    Salvo!
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Script tabela JQuery -->
+
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="static/js/demo/datatables-demo.js"></script>
+
+<!-- Script para carregar arquiuvo e enviar plasma -->
+
+<script>
+    $(document).ready(function () {
+        $("#buttonCriarOpPlasma").click(function () {
+            var formData = new FormData();
+            var fileInput = document.getElementById('inputGroupFile01');
+            var file = fileInput.files[0];
+            var fileName = file.name;
+            formData.append('file', file, fileName);
+
+            showLoading();
+
+            $.ajax({
+                url: '/upload-plasma',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert(response.message);
+                    hideLoading();
+                    $('#inputGroupFile01').val('');
+                    $('#modalOpPlasma').modal('hide');
+
+                },
+                error: function (xhr, status, error) {
+                    alert('Erro ao enviar o arquivo: ' + error);
+                    $('modalOpPlasma').modal('hide');
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Script para mostrar nome do arquivo ao inserir -->
+
+<script>
+    function mostrarNomeArquivo(inputFileId) {
+        var inputFile = document.getElementById(inputFileId);
+        var fileName = inputFile.files[0].name;
+        var label = inputFile.nextElementSibling; // Obtém o elemento irmão seguinte (neste caso, o elemento de rótulo)
+        label.textContent = fileName; // Atualiza o texto do rótulo com o nome do arquivo
+    }
+</script>
+
+<!-- Script de loading -->
+
+<script>
+    function showLoading() {
+        $('#loading').show();
+    }
+
+    function hideLoading() {
+        $('#loading').hide();
+    }
+</script>
+
+<!-- Script para receber abertura de op laser -->
+
+<script>
+
+    document.getElementById('buttonCriarOpLaser').addEventListener('click', function () {
+
+        var comprimentoLaser = $('#comprimentoLaser').val();
+        var larguraLaser = $('#larguraLaser').val();
+        var espessuraLaser = $('#espessuraLaser option:selected').text();
+        var formData = new FormData();
+        var fileInput = document.getElementById('inputGroupFile02');
+        var file = fileInput.files[0];
+
+        if (!file || comprimentoLaser === '' || larguraLaser === '' || espessuraLaser === '') {
+            alert("Preencha todos os campos.");
+            return;
+        };
+
+        var fileName = file.name;
+
+        formData.append('file', file, fileName);
+        formData.append('comprimentoLaser', comprimentoLaser);
+        formData.append('larguraLaser', larguraLaser);
+        formData.append('espessuraLaser', espessuraLaser);
+
+        $.ajax({
+            url: '/upload-laser',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                alert(response.message);
+                hideLoading();
+                $('#inputGroupFile02').val('');
+                $('#modalOpLaser').modal('hide');
+
+            },
+            error: function (xhr, status, error) {
+                alert('Erro ao enviar o arquivo: ' + error);
+                $('modalOpLaser').modal('hide');
+            }
+        });
+
+
+    });
+
+</script>
+
+<!-- Script para iniciar tabela -->
+
+<script>
+
+    function buscarPecas(op,funcao) {
+
+        showLoading();
+
+        $.ajax({
+            url: '/buscar-pecas-dentro-op',
+            method: 'GET',
+            contentType: 'application/json',
+            data: { 'op': op },
+            success: function (data) {
+                hideLoading();
+                console.log(data.data);
+                console.log(data.status_atual);
+
+                $("#modalVisualizarPecas").css("z-index", parseInt($("#modalDuplicarOP").css("z-index")) + 1);
+                $("#modalVisualizarPecas").modal('show'); // Exibe o modal
+
+                var content = '<div class="row mb-3"><div class="col-sm-3"><label for="opModal">Op</label><input class="form-control" id="opModal" value="' + data.data[0][0] + '" readonly></div>'
+                content += '<div class="col-sm-6"><label for="espessuraModal">Espessura</label><input class="form-control" id="espessuraModal" value="' + data.data[0][3] + '" readonly></div>'
+                content += '<div class="col-sm-3"><label for="chapaModal">Chapas</label><input class="form-control" id="chapaModal" value="' + data.data[0][5] + '"></div></div>'
+                content += '<div class="row mb-3"><div class="col-sm-8"><label for="qtChapasModal">Descrição da chapa</label><input class="form-control" id="qtChapasModal" value="' + data.data[0][4] + '" readonly=True></div>'
+                content += '<div class="col-sm-4"><label for="aproveitamentoModal">Aprov.</label><input class="form-control" id="aproveitamentoModal" value="' + data.data[0][6] + '" readonly></div></div>'
+                content += '<div class="row mb-3"><div class="col-sm-4"><label for="dataPlanejamento">Data planej.</label><input type="date" class="form-control" id="dataPlanejamento"></div>'
+
+                if (funcao === 'Duplicar') {
+                    content += '<div class="col-sm-4"><label for="maquinaDuplicarOp">Máquina</label><select class="form-control" id="maquinaDuplicarOp"><option></option><option>Laser</option><option>Plasma</option></select></div>'
+                }
+
+                if (data.status_atual) {
+                    content += '<div class="col-sm-4" style="align-self: self-end;color: red;"><p>Ordem ja está ' + data.status_atual + '!</p></div>'
+                    $('#btnPlanejar').prop('disabled', true);
+                } else {
+                    $('#btnPlanejar').prop('disabled', false);
+                }
+
+                content += '</div>'
+
+                content += '<table class="table table-bordered"><thead><tr><th>Peça</th><th>Qt.Peças</th></tr></thead><tbody>';
+
+                valoresAntigos = [];
+
+                data.data.forEach(peca => {
+                    content += '<tr>';
+                    content += '<td>' + peca[1] + '</td>';
+                    content += '<td class="qtPecas">' + peca[2] + '</td>';
+                    content += '</tr>';
+
+                    valoresAntigos.push(peca[2]);
+                });
+
+                content += '</tbody></table>';
+
+                $('#bodyModalVisualizarPecas').empty();
+                $('#bodyModalVisualizarPecas').html(content);
+
+                var antigoValorChapa = $('#chapaModal').val()
+
+                // Evento de alteração para o campo chapaModal
+                $('#chapaModal').change(function () {
+                    var novoValorChapa = $(this).val();
+                    $('.qtPecas').each(function (index) {
+                        var valorAntigo = valoresAntigos[index];
+                        console.log(valorAntigo);
+                        var qtPecas = $(this).text();
+                        var valorRecalculado = (valorAntigo * novoValorChapa) / antigoValorChapa;
+                        $(this).text(valorRecalculado);
+                    });
+                });
+
+            },
+            error: function (err) {
+                console.error('Erro:', err);
+                hideLoading();
+            }
+        });
+
+    }
+
+    function formatarDataSemHora(dataString) {
+        var data = new Date(dataString);
+        var dia = ("0" + data.getDate()).slice(-2);
+        var mes = ("0" + (data.getMonth() + 1)).slice(-2);
+        var ano = data.getFullYear();
+        return dia + '/' + mes + '/' + ano;
+    }
+
+    // $(document).ready(function () {
+    //     setInterval(preencherTabela, 1000);
+
+    // Função para iniciar um item
+    function iniciar(op) {
+        $('#modalConfirmarInicioProducao').modal('show');
+        $('#pecaTextoModalIniciar').text(op);
+
+        var botaoRetornar = $('#confimarRetornoProducao');
+        botaoRetornar.hide();
+
+        var botaoIniciar = $('#confimarInicioProducao');
+        botaoIniciar.show();
+
+        botaoIniciar.off('click').on('click', function () {
+            showLoading();
+
+            $.ajax({
+                type: 'POST',
+                url: '/api/pecas-em-processo-planejamento/corte',
+                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                data: JSON.stringify({ op: op }),
+                success: function (data) {
+                    console.log('Solicitação POST bem-sucedida:', data);
+                    showAndHideSuccessAlert('Salvo.', 2000);
+                    $('#modalConfirmarInicioProducao').modal('hide');
+                    hideLoading();
+                },
+                error: function (error) {
+                    console.error('Erro na solicitação POST:', error);
+                    // Adiciona um pequeno atraso antes de chamar hideLoading()
+                    hideLoading();
+                    // location.reload();
+                }
+            });
+
+        });
+    }
+
+    // Função para preencher a tabela com os dados da página atual
+    // Variáveis de paginação
+    var rowsPerPage = 10;
+
+    $(document).ready(function () {
+        // Quando o botão de filtro é clicado
+
+
+        $('#btnFilter').click(function () {
+            var opFilterValue = $('#opFilter').val(); // Obter o valor do filtro OP
+            var maquinaFilter = $('#maquinaFilter option:selected').text();
+            updateTable(1, opFilterValue, maquinaFilter); // Atualizar a tabela com o filtro OP
+        });
+    });
+
+    // Função para preencher a tabela com os dados da página atual
+    function updateTable(currentPage, opFilter, maquinaFilter) {
+        showLoading();
+        $.ajax({
+            url: '/planejamento-corte-programacao',
+            type: 'GET',
+            data: { page: currentPage, op: opFilter, maquina: maquinaFilter }, // Envie o filtro OP para o servidor
+            success: function (response) {
+                var data = response.data;
+                var totalPages = response.total_pages;
+
+                $('#bodyTablePlanejadas').empty(); // Limpa o corpo da tabela
+
+                // Preenche a tabela com os dados da página atual
+                data.forEach(function (item) {
+                    var row = '<tr>' +
+                        '<td>' + formatarDataSemHora(item[4]) + '</td>' + // data
+                        '<td>' + item[0] + '</td>' + // op
+                        '<td>' + item[3] + '</td>' + // espessura
+                        '<td>' + item[2] + '</td>' + // tamanho da chapa
+                        '<td>' + item[1] + '</td>' + // qt chapa
+                        '<td>' + item[5] + '</td>' + // máquina
+                        '<td>' + item[6] + '</td>' + // status
+                        '<td><button type="button" class="btn btn-dark btn-sm btn-pecas">Peças</button></td>' +
+                        '</tr>';
+
+                    var newRow = $(row).appendTo('#bodyTablePlanejadas');
+                    (function (item) {
+                        newRow.find('.btn-pecas').click(function () {
+
+                            var botaoRetornar = $('#btnPlanejar');
+                            botaoRetornar.show();
+
+                            var botaoIniciar = $('#btnConfirmarDuplicacao');
+                            botaoIniciar.hide();
+
+                            var funcao = 'Planejar';
+
+                            buscarPecas(item[0], funcao);
+                        });
+                    })(item);
+                });
+
+                // Atualiza a paginação
+                updatePagination(totalPages, currentPage, opFilter, maquinaFilter);
+                hideLoading();
+            },
+            error: function (error) {
+                console.error('Erro ao obter os dados:', error);
+            }
+        });
+    }
+
+    function updatePagination(totalPages, currentPage, opFilter, maquinaFilter) {
+        var pagination = $('#pagination');
+        pagination.empty();
+
+        // Botão "Anterior"
+        var prevButton = '<li class="page-item"><a class="page-link" id="prevButton">Previous</a></li>';
+        pagination.append(prevButton);
+        $('#prevButton').click(function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable(currentPage, opFilter, maquinaFilter);
+                updatePagination(totalPages, currentPage,); // Atualiza a paginação após a mudança de página
+            }
+        });
+
+        // Números das páginas
+        var startPage, endPage;
+        if (totalPages <= 5) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (currentPage <= 3) {
+                startPage = 1;
+                endPage = 5;
+            } else if (currentPage + 2 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
+            }
+        }
+
+        for (var i = startPage; i <= endPage; i++) {
+            var listItem;
+            if (i === currentPage) {
+                listItem = $('<li class="page-item active"><a class="page-link">' + i + '</a></li>');
+            } else {
+                listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+            }
+            pagination.append(listItem);
+            listItem.click(function () {
+                currentPage = parseInt($(this).text());
+                updateTable(currentPage, opFilter, maquinaFilter);
+                updatePagination(totalPages, currentPage); // Atualiza a paginação após a mudança de página
+            });
+        }
+
+        // Adiciona reticências antes e depois dos números de página, se necessário
+        if (startPage > 1) {
+            pagination.prepend('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+        if (endPage < totalPages) {
+            pagination.append('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+
+        // Botão "Próximo"
+        var nextButton = '<li class="page-item"><a class="page-link" id="nextButton">Next</a></li>';
+        pagination.append(nextButton);
+        $('#nextButton').click(function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTable(currentPage, opFilter, maquinaFilter);
+                updatePagination(totalPages, currentPage); // Atualiza a paginação após a mudança de página
+            }
+        });
+    }
+
+    // Inicia a tabela e a paginação na página 1
+    updateTable(1, '', '');
+
+</script>
+
+<!-- Script alerta -->
+
+<script>
+    function showAndHideSuccessAlert(message, duration) {
+        const successAlert = $('#successAlert');
+        successAlert.html(message);
+        successAlert.slideDown();
+
+        setTimeout(function () {
+            successAlert.slideUp();
+        }, duration);
+    }
+</script>
+
+<script>
+    function showAndHideAlert(message, duration) {
+        const alertBox = $('#alertBox');
+        alertBox.html(`<strong>Danger!</strong> ${message}`);
+        alertBox.slideDown();
+
+        setTimeout(function () {
+            alertBox.slideUp();
+        }, duration);
+    }
+
+</script>
+
+<!-- Interromper processo -->
+
+<script>
+
+    function interromperProcesso(id) {
+
+        $('#modalMotivoInterrompido').modal('show');
+
+        $('#idPecaInterromper').val(id);
+
+    }
+
+    $(document).ready(function () {
+        $('#enviarMotivo').on('click', function () {
+            idPecaInterromper = $('#idPecaInterromper').val();
+            motivoInterrompido = $('#idMotivosParada option:selected').text();
+
+            showLoading();
+
+            $.ajax({
+                type: 'POST',
+                url: '/api/pecas-interrompida/corte',
+                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                data: JSON.stringify({ id: idPecaInterromper, motivo: motivoInterrompido }),
+                success: function (data) {
+                    hideLoading();
+                    showAndHideSuccessAlert('Salvo.', 2000);
+                    $('#modalMotivoInterrompido').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro na solicitação POST:', error);
+                    hideLoading();
+                    $('#modalMotivoInterrompido').modal('hide');
+                }
+            });
+        });
+
+        $('#desistirMotivo').on('click', function () {
+            $('#modalMotivoInterrompido').modal('hide');
+        })
+    });
+
+</script>
+
+<!-- Retornar op -->
+
+<script>
+
+    function retornarPeca(id) {
+
+        $('#modalConfirmarInicioProducao').modal('show');
+        document.getElementById('modalConfirmarInicioProducaoLabel').textContent = 'Retorno'
+        document.getElementById('pecaTextoModalIniciar').textContent = ''
+        document.getElementById('labelConfirmar').textContent = 'Confirmar retorno para produção?'
+
+        $('#retornarPecaProducao').val(id);
+
+        var botaoRetornar = document.getElementById('confimarRetornoProducao');
+        botaoRetornar.style.display = 'block';
+
+        var botaoIniciar = document.getElementById('confimarInicioProducao');
+        botaoIniciar.style.display = 'none';
+
+    }
+
+    $(document).ready(function () {
+        $('#confimarRetornoProducao').on('click', function () {
+            idPecaRetornar = $('#retornarPecaProducao').val();
+            console.log(idPecaRetornar);
+
+            showLoading();
+
+            $.ajax({
+                type: 'POST',
+                url: '/api/pecas-retornou/corte',
+                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                data: JSON.stringify({ id: idPecaRetornar }),
+                success: function (data) {
+                    hideLoading();
+                    showAndHideSuccessAlert('Salvo.', 2000);
+                    $('#modalConfirmarInicioProducao').modal('hide');
+                },
+                error: function (error) {
+                    console.error('Erro na solicitação POST:', error);
+                    hideLoading();
+                    $('#modalConfirmarInicioProducao').modal('hide');
+                }
+            });
+        });
+    });
+
+
+    $(document).ready(function () {
+        $('#desistirInicioProducao').on('click', function () {
+            $('#modalConfirmarInicioProducao').modal('hide');
+        })
+    })
+
+</script>
+
+<!-- Acionar planejamento de ordem -->
+<script>
+
+    $('#btnPlanejar').click(function () {
+        // Recolha os dados da tabela
+        showLoading();
+
+        // Recolha os dados da tabela
+        // var tabelaData = [];
+        // $('#bodyModalVisualizarPecas tbody tr').each(function () {
+        //     var rowData = [];
+        //     $(this).find('td').each(function () {
+        //         rowData.push($(this).text());
+        //     });
+        //     tabelaData.push(rowData);
+        // });
+
+        // Recolher outros dados dentro do modal
+        var op = $('#opModal').val();
+        // var espessura = $('#espessuraModal').val();
+        // var chapas = $('#chapaModal').val();
+        // var descricaoChapa = $('#qtChapasModal').val();
+        // var aproveitamento = $('#aproveitamentoModal').val();
+        var dataPlanejada = $('#dataPlanejamento').val();
+
+        if (dataPlanejada === '') {
+            alert('Preencha a data de planejamento.')
+            hideLoading();
+            return;
+        }
+
+        // Construir o objeto JSON com os dados da tabela e os dados coletados
+        var dadosParaEnviar = {
+            // tabela: tabelaData,
+            op: op,
+            // espessura: espessura,
+            // qt_chapa: chapas,
+            // descricaoChapa: descricaoChapa,
+            // aproveitamento: aproveitamento,
+            dataPlanejada: dataPlanejada
+        };
+
+        // Envie os dados para o backend via AJAX
+        $.ajax({
+            url: '/planejar-op/corte',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dadosParaEnviar),
+            success: function (response) {
+                // Lógica de sucesso aqui
+                console.log('Tabela enviada com sucesso');
+                $('#modalVisualizarPecas').modal('hide');
+                hideLoading();
+                updateTable(1, '', '');
+            },
+            error: function (err) {
+                console.error('Erro:', err);
+                // Lógica de erro aqui
+                hideLoading();
+            }
+        });
+    });
+
+</script>
+
+<!-- Adicionar tabela de peças dentro do modal de duplicar -->
+<script>
+
+    var rowsPerPage = 10;
+
+    $(document).ready(function () {
+        // Quando o botão de filtro é clicado
+
+        $('#btnFiltraDuplicarOp').click(function () {
+            var opDuplicar = $('#opDuplicar').val(); // Obter o valor do filtro OP
+            var pecaDuplicar = $('#pecaDuplicar').val();
+            updateTableDuplicarOp(1, opDuplicar, pecaDuplicar); // Atualizar a tabela com o filtro OP
+        });
+    });
+
+    // Função para preencher a tabela com os dados da página atual
+    function updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar) {
+        showLoading();
+        $.ajax({
+            url: '/consultar-op-criada/corte',
+            type: 'GET',
+            data: { page: currentPage, op: opDuplicar, peca: pecaDuplicar }, // Envie o filtro OP para o servidor
+            success: function (response) {
+                var data = response.data;
+                var totalPages = response.total_pages;
+
+                $('#bodyDuplicarOp').empty(); // Limpa o corpo da tabela
+
+                // Preenche a tabela com os dados da página atual
+                data.forEach(function (item) {
+                    var row = '<tr>' +
+                        '<td>' + item[1] + '</td>' + // op
+                        '<td>' + item[2] + '</td>' + // peça
+                        '<td>' + item[3] + '</td>' + // quantidad peça
+                        '<td>' + item[7] + '</td>' + // espessura
+                        '<td>' + item[9] + '</td>' + // tamanho chapa
+                        '<td>' + item[10] + '</td>' + // quantidade chapa
+                        '<td>' + item[12] + '</td>' + // maquina
+                        '<td><button type="button" class="btn btn-dark btn-sm btn-pecas">Duplicar</button></td>' +
+                        '</tr>';
+
+                    var newRow = $(row).appendTo('#bodyDuplicarOp');
+                    (function (item) {
+                        newRow.find('.btn-pecas').click(function () {
+                            var botaoRetornar = $('#btnPlanejar');
+                            botaoRetornar.hide();
+
+                            var botaoIniciar = $('#btnConfirmarDuplicacao');
+                            botaoIniciar.show();
+
+                            var campoEscolherMaquinaDuplicar = $('#maquinaDuplicarOp');
+                            campoEscolherMaquinaDuplicar.show();
+
+                            var funcao = 'Duplicar';
+
+                            buscarPecas(item[1], funcao);
+                        });
+                    })(item);
+                });
+
+                // Atualiza a paginação
+                updatePaginationDuplicaOp(totalPages, currentPage, opDuplicar, pecaDuplicar);
+                hideLoading();
+            },
+            error: function (error) {
+                console.error('Erro ao obter os dados:', error);
+            }
+        });
+    }
+
+    function updatePaginationDuplicaOp(totalPages, currentPage, opDuplicar, pecaDuplicar) {
+        var pagination = $('#paginationDuplicada');
+        pagination.empty();
+
+        // Botão "Anterior"
+        var prevButton = '<li class="page-item"><a class="page-link" id="prevButtonDuplicar">Previous</a></li>';
+        pagination.append(prevButton);
+        $('#prevButton').click(function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar);
+                updatePaginationDuplicaOp(totalPages, currentPage,); // Atualiza a paginação após a mudança de página
+            }
+        });
+
+        // Números das páginas
+        var startPage, endPage;
+        if (totalPages <= 5) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (currentPage <= 3) {
+                startPage = 1;
+                endPage = 5;
+            } else if (currentPage + 2 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
+            }
+        }
+
+        for (var i = startPage; i <= endPage; i++) {
+            var listItem;
+            if (i === currentPage) {
+                listItem = $('<li class="page-item active"><a class="page-link">' + i + '</a></li>');
+            } else {
+                listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+            }
+            pagination.append(listItem);
+            listItem.click(function () {
+                currentPage = parseInt($(this).text());
+                updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar);
+                updatePaginationDuplicaOp(totalPages, currentPage); // Atualiza a paginação após a mudança de página
+            });
+        }
+
+        // Adiciona reticências antes e depois dos números de página, se necessário
+        if (startPage > 1) {
+            pagination.prepend('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+        if (endPage < totalPages) {
+            pagination.append('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+
+        // Botão "Próximo"
+        var nextButton = '<li class="page-item"><a class="page-link" id="nextButtonDuplicar">Next</a></li>';
+        pagination.append(nextButton);
+        $('#nextButton').click(function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar);
+                updatePaginationDuplicaOp(totalPages, currentPage); // Atualiza a paginação após a mudança de página
+            }
+        });
+    }
+
+    // Inicia a tabela e a paginação na página 1
+    // updateTableDuplicarOp(1, '', '');
+
+
+</script>
+
+<!-- Script ara confirmar duplicação de op -->
+
+<script>
+
+    $('#btnConfirmarDuplicacao').click(function () {
+        // Recolha os dados da tabela
+        showLoading();
+
+
+        // Recolher outros dados dentro do modal
+        var op = $('#opModal').val();
+        var qtChapas = $('#chapaModal').val();
+        var dataPlanejada = $('#dataPlanejamento').val();
+        var maquinaDuplicarOp = $('#maquinaDuplicarOp option:selected').text();
+
+        if (dataPlanejada === '' || qtChapas === '' || maquinaDuplicarOp === '') {
+            alert('Preencha todos os campos.')
+            hideLoading();
+            return;
+        }
+
+        // Construir o objeto JSON com os dados da tabela e os dados coletados
+        var dadosParaEnviar = {
+            op: op,
+            qtChapas: qtChapas,
+            dataPlanejada: dataPlanejada,
+            maquinaDuplicarOp: maquinaDuplicarOp
+        };
+
+        // Envie os dados para o backend via AJAX
+        $.ajax({
+            url: '/duplicar-op/corte',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dadosParaEnviar),
+            success: function (response) {
+                // Lógica de sucesso aqui
+                console.log('Tabela enviada com sucesso');
+                $('#modalVisualizarPecas').modal('hide');
+                hideLoading();
+                updateTable(1, '', '');
+            },
+            error: function (err) {
+                console.error('Erro:', err);
+                // Lógica de erro aqui
+                hideLoading();
+            }
+        });
+    });
+
+</script>
+
+{% endblock %}

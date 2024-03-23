@@ -42,7 +42,7 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Apontamento montagem</h1>
+        <h1 class="h3 mb-0 text-gray-800">Apontamento Estamparia</h1>
         <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                 class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
     </div>
@@ -55,57 +55,31 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <div class="row mb-2">
-                            <div class="col mb-2"><button id="filterChassi" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'CHASSI')">CHASSI</button></div>
-                            <div class="col mb-2"><button id="filterEixoCompleto" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'EIXO COMPLETO')">EIXO COMPLETO</button></div>
-                            <div class="col mb-2"><button id="filterEixoSimples" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'EIXO SIMPLES')">EIXO
-                                    SIMPLES</button></div>
-                            <div class="col mb-2"><button id="filterConjInterm" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'CONJ INTERMED')">CONJ INTERMED</button></div>
-                            <div class="col mb-2"><button id="filterEstamparia" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'ESTAMPARIA')">ESTAMPARIA</button></div>
-                            <div class="col mb-2"><button id="filterCilindro" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'CILINDRO')">CILINDRO</button></div>
-                            <div class="col mb-2"><button id="filterPlat" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'PLAT. TANQUE. CAÇAM.')">PLAT. TANQUE.
-                                    CAÇAM.</button>
-                            </div>
-                            <div class="col mb-2"><button id="filterFueiro" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'FUEIRO')">FUEIRO</button></div>
-                            <div class="col mb-2"><button id="filterIcamento" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'IÇAMENTO')">IÇAMENTO</button></div>
-                            <div class="col mb-2"><button id="filterCuboDeRoda" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'CUBO DE RODA')">CUBO
-                                    DE RODA</button></div>
+                            <input style="display: none;" id="maquinaEscolhida">
                         </div>
                         <div class="row mb-2">
-                            <div class="col-sm-6">
+                            <div class="col mb-2"><button id="filterChassi" type="button"
+                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                                    onclick="applyMaquinaFilter(this, 'Viradeira 3')">Viradeira 3</button></div>
+                            <div class="col mb-2"><button id="filterEixoCompleto" type="button"
+                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                                    onclick="applyMaquinaFilter(this, 'Viradeira 4')">Viradeira 4</button></div>
+                            <div class="col mb-2"><button id="filterEixoSimples" type="button"
+                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                                    onclick="applyMaquinaFilter(this, 'Viradeira 5')">Viradeira 5</button></div>
+                        </div>
+                        <div class="row mb-2">
+                            <!-- <div class="col-sm-6">
                                 <div class="form-group">
                                     <label for="dataCarga">Data planejada</label>
                                     <input type="date" id="dataCarga" class="form-control" data-column="0">
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="col-sm" style="display: none;">
                                 <div class="form-group">
-                                    <label for="celula">Célula</label>
+                                    <label for="maquina">Máquina</label>
                                     <div class="position-relative">
-                                        <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
-                                        <input id="celula" class="form-control" data-column="2" style="width: 250px;">
-                                        <span id="clear-lista-celula" class="clear-icon-operador">x</span>
-                                        <ul id="listaCelulas" class="custom-dropdown-menu">
-                                        </ul>
+                                        <input id="maquina" class="form-control" data-column="2" style="width: 250px;">
                                     </div>
                                 </div>
                             </div>
@@ -116,70 +90,57 @@
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Iniciar Processo</h6>
                     <button id="btnModalPecaFora" type="button" class="btn btn-info" data-toggle="modal"
-                        data-target="#modalPecaFora">Peça
-                        fora planejamento</button>
+                        data-target="#modalPecaFora">Iniciar peça fora do planejamento</button>
+                    <button id="btnModalPecaFora" type="button" class="btn btn-warning" data-toggle="modal"
+                        data-target="#modalPlanejarPeca">Planejar peça</button>
                 </div>
                 <br>
                 <!-- Card Body -->
                 <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-sm-2">
+                            <!-- <label for="codigoPecaEstamparia">Código</label>
+                            <input class="form-control" type="text" id="codigoPecaEstamparia"> -->
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" placeholder="Código"
+                                    aria-label="Código" aria-describedby="clear-codigo" id="codigoPecaEstamparia">
+                                <button class="btn btn-outline-secondary" type="button"
+                                    id="clear-codigo">X</button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="table-responsive">
-                        <table class="table table-bordered display nowrap table-responsive-sm" id="dataTable"
-                            style="width:100%">
+                        <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Data da carga</th>
-                                    <th>Data planejada</th>
-                                    <th style="display: none;">Célula</th>
-                                    <th>Código</th>
-                                    <th>Descrição</th>
-                                    <th>Qt. planejada</th>
-                                    <th>Iniciar</th>
-                                    <th style="display: none;">codificacao</th>
-                                    <th style="display: none;">id</th>
+                                    <th scope="col" style="display: none;">chave</th>
+                                    <th scope="col">Data Planejamento</th>
+                                    <th scope="col">Código</th>
+                                    <th scope="col">Descrição</th>
+                                    <th scope="col">Quantidade planjeada</th>
+                                    <th scope="col">Máquina</th>
+                                    <th style="display: none;" scope="col">Origem</th>
+                                    <th style="display: none;" scope="col">Chave</th>
+                                    <th scope="col">Iniciar</th>
                                 </tr>
                             </thead>
+                            <tbody id="bodyTablePlanejadas">
+
+                            </tbody>
                             <tfoot>
                                 <tr>
-                                    <th>Data da carga</th>
-                                    <th>Data planejada</th>
-                                    <th style="display: none;">Célula</th>
-                                    <th>Código</th>
-                                    <th>Descrição</th>
-                                    <th>Qt. planejada</th>
-                                    <th>Iniciar</th>
-                                    <th style="display: none;">codificacao</th>
-                                    <th style="display: none;">id</th>
+                                    <td colspan="9">
+                                        <nav aria-label="Page navigation example">
+                                            <ul class="pagination justify-content-end" id="pagination">
+                                                <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                            </ul>
+                                        </nav>
+                                    </td>
                                 </tr>
                             </tfoot>
-                            <tbody>
-                                {% if sheet_data %}
-                                {% for data in sheet_data %}
-                                <tr>
-                                    <td>{{ data[0] }}</td>
-                                    <td>{{ data[1] }}</td>
-                                    <td style="display: none;">{{ data[2] }}</td>
-                                    <td>{{ data[3] }}</td>
-                                    <td>{{ data[4] }}</td>
-                                    <td>{{ data[5] }}</td>
-                                    <td><button id="btnIniciarProducao" type="button" class="btn btn-info"
-                                            data-toggle="modal"
-                                            data-target="#modalConfirmarInicioProducao">Iniciar</button>
-                                    </td>
-                                    <td style="display: none;">{{ data[7] }}</td>
-                                    <td style="display: none;">{{ data[8] }}</td>
-                                </tr>
-                                {% endfor %}
-
-                                {% else %}
-                                <tr>
-                                    <td colspan="7">Nenhum dado disponível</td>
-                                </tr>
-                                {% endif %}
-                            </tbody>
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -218,14 +179,14 @@
     <!-- Content Row -->
     <div class="row">
 
-        <!-- Modal peça fora do sequenciamento -->
+        <!-- Modal peça fora do planejamento -->
         <div class="modal fade" id="modalPecaFora" tabindex="-1" role="dialog" aria-labelledby="modalPecaForaLabel"
             aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="modalPecaForaLabel">Gerar apontamento para peça fora do
-                            sequenciamento</h5>
+                            planejamento</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -237,7 +198,7 @@
                                     <label for="userInput">Peça</label>
                                     <div class="position-relative">
                                         <input class="form-control" type="text" id="userInput"
-                                            oninput="showSuggestionsPecas()">
+                                            oninput="showSuggestionsPecas_()">
                                         <span id="peca-modal" class="clear-icon-operador">x</span>
                                         <ul id="suggestionsPecas" class="custom-dropdown-menu"></ul>
                                     </div>
@@ -247,8 +208,8 @@
                         <div class="row">
                             <div class="col-sm">
                                 <div class="form-floating mb-3">
-                                    <label for="inputData">Data da carga</label>
-                                    <input class="form-control" type="date" id="inputData"> <!-- Data da carga -->
+                                    <label for="inputData">Data do planejamento</label>
+                                    <input class="form-control" type="date" id="inputData">
                                 </div>
                             </div>
                             <div class="col-sm">
@@ -260,34 +221,98 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col-sm-12 mb-2">
-                                <label for="celulaModalForaSequenciamento">Célula</label>
+                                <label for="maquinaForaDoPlanejado">Máquina</label>
                                 <div class="position-relative">
-                                    <select class="form-control" id="celulaModalForaSequenciamento">
-                                        <option></option>
-                                        <option>LATERAL</option>
-                                        <option>EIXO COMPLETO</option>
-                                        <option>EIXO SIMPLES</option>
-                                        <option>CONJ INTERMED</option>
-                                        <option>ESTAMPARIA</option>
-                                        <option>CILINDRO</option>
-                                        <option>PLAT. TANQUE. CAÇAM.</option>
-                                        <option>CHASSI</option>
-                                        <option>FUEIRO</option>
-                                        <option>IÇAMENTO</option>
-                                        <option>CUBO DE RODA</option>
-                                    </select>
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label class="btn btn-outline-secondary">
+                                            <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 3">
+                                            Viradeira 3
+                                        </label>
+                                        <label class="btn btn-outline-secondary">
+                                            <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 4">
+                                            Viradeira 4
+                                        </label>
+                                        <label class="btn btn-outline-secondary">
+                                            <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 5">
+                                            Viradeira 5
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <label for="textAreaObservacao">Observação</label>
-                                <textarea class="form-control" id='textAreaObservacao'></textarea>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button id="btnSalvar" type="button" class="btn btn-primary">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal planejar produção -->
+        <div class="modal fade" id="modalPlanejarPeca" tabindex="-1" role="dialog"
+            aria-labelledby="modalPlanejarPecaLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalPlanejarPecaLabel">Planejar peças</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <label for="userInput_">Peça</label>
+                                    <div class="position-relative">
+                                        <input class="form-control" type="text" id="userInput_"
+                                            oninput="showSuggestionsPecas()">
+                                        <span id="peca-modal" class="clear-icon-operador"
+                                            onclick="clearInput()">x</span>
+                                        <ul id="suggestionsPecas_" class="custom-dropdown-menu" style="display: none;">
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="form-floating mb-3">
+                                    <label for="inputData_">Data do planejamento</label>
+                                    <input class="form-control" type="date" id="inputData_">
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="form-floating mb-3">
+                                    <label for="inputQuantidade_">Quantidade</label>
+                                    <input class="form-control" type="number" id="inputQuantidade_"> <!-- Quantidade -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-12 mb-2">
+                                <label for="maquinaForaDoPlanejado_">Máquina</label>
+                                <div class="position-relative">
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label class="btn btn-outline-secondary">
+                                            <input type="radio" name="maquinaForaDoPlanejado_" value="Viradeira 3">
+                                            Viradeira 3
+                                        </label>
+                                        <label class="btn btn-outline-secondary">
+                                            <input type="radio" name="maquinaForaDoPlanejado_" value="Viradeira 4">
+                                            Viradeira 4
+                                        </label>
+                                        <label class="btn btn-outline-secondary">
+                                            <input type="radio" name="maquinaForaDoPlanejado_" value="Viradeira 5">
+                                            Viradeira 5
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnSalvarPlanejamento" type="button" class="btn btn-primary">Salvar</button>
                     </div>
                 </div>
             </div>
@@ -472,165 +497,174 @@
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="static/js/demo/datatables-demo.js"></script>
 
-<!-- Scripts campos de filtro -->
+<!-- Scripts para iniciar tabela -->
 
 <script>
-    $(document).ready(function () {
-        // Obtém a data de hoje no formato 'YYYY-MM-DD'
-        var today = moment().format('DD/MM/YYYY');
+    // $(document).ready(function () {
+    //     setInterval(preencherTabela, 1000);
 
-        // Define o valor padrão para o campo de data
-        $('#dataCarga').val(today);
-        // Restante do seu código...
-    });
+    // Função para iniciar um item
+    function iniciar(chave, codigo, descricao) {
+        $('#modalConfirmarInicioProducao').modal('show');
+        $('#pecaTextoModalIniciar').text(codigo + ' - ' + descricao);
 
-    $('#dataTable').dataTable({
-        lengthMenu: [
-            [10, 25, 50, -1],
-            [10, 25, 50, 'All']
-        ]
-    });
+        var botaoRetornar = $('#confimarRetornoProducao');
+        botaoRetornar.hide();
 
-</script>
+        var botaoIniciar = $('#confimarInicioProducao');
+        botaoIniciar.show();
 
-<script>
-    $(document).ready(function () {
+        botaoIniciar.off('click').on('click', function () {
+            showLoading();
 
-        var table = $('#dataTable').DataTable();
-
-        // Função para obter valores únicos de uma coluna
-        function getUniqueColumnValues(columnIndex) {
-            return table.column(columnIndex, { search: 'applied' }).data().unique().sort().toArray();
-        }
-
-        // Função para popular as opções de um datalist
-        // function populateDatalistOptions(inputId, datalistId, columnIndex) {
-        //     var ulList = $('#' + datalistId);
-        //     ulList.empty(); // Limpa as opções existentes
-
-        //     var uniqueValues = getUniqueColumnValues(columnIndex);
-
-        //     // Adiciona as opções à lista
-        //     uniqueValues.forEach(function (value) {
-        //         ulList.append('<li value="' + value + '">' + value + '</li>');
-        //     });
-
-        //     // Adiciona manipulador de eventos para os itens da lista
-        //     ulList.on('click', 'li', function () {
-        //         var selectedValue = $(this).attr('value');
-        //         $('#' + inputId).val(selectedValue); // Preenche o input com o valor selecionado
-        //         ulList.hide(); // Oculta a lista após a seleção
-        //         console.log(selectedValue);
-        //         applyCelulaFilter(selectedValue);
-        //     });
-        //     console.log(uniqueValues);
-        // }
-
-        // Função para exibir a lista ao clicar no input
-        function showListOnInputClick(inputId, datalistId, columnIndex) {
-            $('#' + inputId).on('click', function () {
-                $('#' + datalistId).show(); // Exibe a lista ao receber clicar
-                populateDatalistOptions(inputId, datalistId, columnIndex);
+            $.ajax({
+                type: 'POST',
+                url: '/api/pecas-em-processo-planejamento/estamparia',
+                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                data: JSON.stringify({ chave: chave }),
+                success: function (data) {
+                    console.log('Solicitação POST bem-sucedida:', data);
+                    showAndHideSuccessAlert('Salvo.', 2000);
+                    $('#modalConfirmarInicioProducao').modal('hide');
+                    hideLoading();
+                },
+                error: function (error) {
+                    console.error('Erro na solicitação POST:', error);
+                    // Adiciona um pequeno atraso antes de chamar hideLoading()
+                    hideLoading();
+                    // location.reload();
+                }
             });
 
-            $('#' + inputId).on('blur', function () {
-                // Adicione alguma lógica de ocultar a lista se necessário
-                setTimeout(function () {
-                    $('#' + datalistId).hide(); // Oculta a lista após um pequeno atraso
-                }, 100);
-            });
-        }
+        });
+    }
 
-        // Função para aplicar o filtro com base na data
-        function applyDateFilter() {
-            var columnIndex = $('#dataCarga').data('column');
-            var filterValue = $('#dataCarga').val();
+    // Variáveis de paginação
+    var currentPage = 1;
+    var rowsPerPage = 10;
 
-            // Formata a data usando Moment.js
-            if (filterValue === '') {
-                filterValue = moment().format('DD/MM/YYYY');
-            } else {
-                filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
+    // Função para preencher a tabela com os dados da página atual
+    function updateTable() {
+        $.ajax({
+            url: '/planejamento-estamparia',
+            type: 'GET',
+            success: function (data) {
+                $('#bodyTablePlanejadas').empty(); // Limpa o corpo da tabela
+
+                var maquinaSelecionada = document.getElementById('maquinaEscolhida').value.trim();
+                var codigo_peca_estamparia = document.getElementById('codigoPecaEstamparia').value.trim();
+
+                // Verifica se a máquina selecionada está vazia
+                if (maquinaSelecionada !== '') {
+                    // Filtra os dados com base na máquina selecionada
+                    data = data.filter(peca => peca[5] === maquinaSelecionada);
+                }
+
+                if (codigo_peca_estamparia !== '') {
+                    // Filtra os dados com base na máquina selecionada
+                    data = data.filter(peca => peca[2] === codigo_peca_estamparia);
+                }
+
+                // Calcula o índice inicial e final dos dados da página atual
+                var startIndex = (currentPage - 1) * rowsPerPage;
+                var endIndex = startIndex + rowsPerPage;
+                var currentPageData = data.slice(startIndex, endIndex);
+
+                // Preenche a tabela com os dados da página atual
+                currentPageData.forEach(function (item) {
+                    var row = '<tr>' +
+                        '<td style="display: none;">' + item[0] + '</td>' +
+                        '<td>' + formatarDataSemHora(item[1]) + '</td>' +
+                        '<td>' + item[2] + '</td>' +
+                        '<td>' + item[3] + '</td>' +
+                        '<td>' + item[4] + '</td>' +
+                        '<td>' + item[5] + '</td>' +
+                        '<td style="display: none;">' + item[6] + '</td>' +
+                        '<td style="display: none;">' + item[8] + '</td>' +
+                        '<td><button type="button" class="btn btn-info btn-iniciar">Iniciar</button></td>' +
+                        '</tr>';
+                    var newRow = $(row).appendTo('#bodyTablePlanejadas');
+                    // Captura o valor do item dentro do escopo da função de clique
+                    (function (item) {
+                        newRow.find('.btn-iniciar').click(function () {
+                            iniciar(item[8], item[2], item[3]);
+                        });
+                    })(item);
+                });
+
+                // Atualiza a paginação
+                updatePagination(data.length);
+            },
+            error: function (error) {
+                console.error('Erro ao obter os dados:', error);
             }
+        });
+    }
 
-            // Define o filtro na coluna específica
-            table.column(columnIndex).search(filterValue).draw();
+    // Função para atualizar a paginação
+    function updatePagination(totalRows) {
+        var totalPages = Math.ceil(totalRows / rowsPerPage);
+        var pagination = $('#pagination');
+        pagination.empty();
 
-            // populateDatalistOptions('celula', 'listaCelulas', 2);
-        }
-
-        function applyColorFilter() {
-            var columnIndex = $('#celula').data('column');
-            var filterValue = $('#celula').val();
-
-            console.log('Column Index:', columnIndex);
-            console.log('Filter Value:', filterValue);
-
-            // Define o filtro na coluna específica
-            table.column(columnIndex).search(filterValue).draw();
-        }
-
-        function applyCelulaFilter(selectedValue) {
-
-            var columnIndex = $('#celula').data('column');
-
-            // Define o filtro na coluna específica
-            table.column(columnIndex).search(selectedValue).draw();
-        }
-
-        // Carrega as opções do datalist quando a página é carregada
-        // populateDatalistOptions('celula', 'listaCelulas', 2);
-        showListOnInputClick('celula', 'listaCelulas', 2);
-
-        // Aplica o filtro ao carregar a página
-        applyDateFilter();
-
-        // Adiciona campos de entrada para filtrar por coluna
-        $('#dataCarga').on('input', function () {
-            applyDateFilter();
+        // Botão "Anterior"
+        var prevButton = '<li class="page-item"><a class="page-link" id="prevButton">Previous</a></li>';
+        pagination.append(prevButton);
+        $('#prevButton').click(function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTable();
+            }
         });
 
-        $('#celula').on('input', function () {
-            applyColorFilter();
-        });
-
-        function limparCampoCelula() {
-            $('#celula').val('');
-            applyCelulaFilter('');
+        // Números das páginas
+        for (var i = 1; i <= totalPages; i++) {
+            var listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+            if (i === currentPage) {
+                listItem.addClass('active');
+            }
+            pagination.append(listItem);
+            listItem.click(function () {
+                currentPage = parseInt($(this).text());
+                updateTable();
+            });
         }
 
-        // Adiciona o evento de clique ao ícone "x" para limpar o campo 'celula'
-        $('#clear-lista-celula').on('click', function () {
-            limparCampoCelula();
+        // Botão "Próximo"
+        var nextButton = '<li class="page-item"><a class="page-link" id="nextButton">Next</a></li>';
+        pagination.append(nextButton);
+        $('#nextButton').click(function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTable();
+            }
         });
+    }
 
-    });
+    // Chamada inicial para preencher a tabela
+    setInterval(updateTable, 1000);
+
 </script>
 
 <script>
-    var table = $('#dataTable').DataTable();
 
     // Variável para armazenar o estado do filtro
     var filterActive = false;
 
-    function applyCelulaFilter(button, selectedValue) {
-        var columnIndex = $('#celula').data('column');
-
+    function applyMaquinaFilter(button, selectedValue) {
 
         // Se o filtro estiver ativo e o valor do botão for o mesmo que o filtro atual, desative o filtro
         if (filterActive && $(button).hasClass('active')) {
-            table.column(columnIndex).search('').draw();
             $(button).removeClass('active'); // Remova a classe active do botão
             filterActive = false; // Marque o filtro como inativo
-            $('#celula').val('');
+            $('#maquinaEscolhida').val('');
             $('.btn').removeClass('active');
         } else {
             // Defina o filtro na coluna específica
             $('.btn').removeClass('active');
-            table.column(columnIndex).search(selectedValue).draw();
             $(button).addClass('active'); // Adicione a classe active ao botão
             filterActive = true; // Marque o filtro como ativo
-            $('#celula').val(selectedValue);
+            $('#maquinaEscolhida').val(selectedValue);
         }
     }
 </script>
@@ -716,36 +750,45 @@
     $(document).ready(function () {
         $('#btnSalvar').on('click', function () {
             showLoading();
-            // Coletar dados do formulário
             const peca = $('#userInput').val();
-            const dataCarga = $('#inputData').val();
+            const dataPlanejamento = $('#inputData').val();
             const quantidade = $('#inputQuantidade').val();
-            const operador = $('#operadorInputModal').val();
-            const obs = $('#textAreaObservacao').val();
-            const celulaModalForaSequenciamento = $('#celulaModalForaSequenciamento option:selected').text();
 
-            if (peca === '' || dataCarga === '' || quantidade === '' || celulaModalForaSequenciamento === '') {
+            var selectedMaquina = document.querySelector('input[name="maquinaForaDoPlanejado"]:checked');
+
+            if (selectedMaquina) {
+                selectedMaquina = selectedMaquina.value;
+            } else {
+                selectedMaquina = '';
+            }
+
+            if (peca === '' || dataPlanejamento === '' || quantidade === '' || selectedMaquina === '') {
                 $('.alert').alert()
                 hideLoading();
                 showAndHideAlert('Preencha todos os campos.', 2000);
                 return;
             }
 
+            if (peca.split(' - ')[1]) {
+                descricao = peca.split(' - ')[1];
+            } else {
+                descricao = '';
+            }
+
             // Criar objeto com os dados
             const dados = {
                 peca: peca.split(' - ')[0],
-                descricao: peca.split(' - ')[1],
-                dataCarga: dataCarga,
+                descricao: descricao,
+                dataPlanejamento: dataPlanejamento,
                 qtPlanejada: quantidade,
                 codificacao: '',
-                celula: celulaModalForaSequenciamento,
-                chave: '',
-                origem: 'Fora do sequenciamento'
+                origem: 'Fora do sequenciamento',
+                selectedMaquina: selectedMaquina,
             };
 
             // Enviar dados para o backend
             $.ajax({
-                url: '/api/pecas-em-processo/montagem',
+                url: '/api/pecas-em-processo/estamparia',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(dados),
@@ -755,6 +798,81 @@
                     hideLoading();
                     showAndHideSuccessAlert('Salvo.', 2000);
                     $('#modalPecaFora').modal('hide');
+                },
+                error: function (err) {
+                    console.error('Erro ao enviar dados para o backend', err);
+                    hideLoading();
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Script para enviar informações de peça planejada-->
+
+<script>
+    $(document).ready(function () {
+        $('#btnSalvarPlanejamento').on('click', function () {
+            var peca_ = $('#userInput_').val();
+            var dataPlanejamento_ = $('#inputData_').val();
+            var quantidade_ = $('#inputQuantidade_').val();
+
+            var selectedMaquina_ = document.querySelector('input[name="maquinaForaDoPlanejado_"]:checked');
+
+            if (selectedMaquina_) {
+                selectedMaquina_ = selectedMaquina_.value;
+            } else {
+                selectedMaquina_ = '';
+            }
+
+            console.log(peca_, dataPlanejamento_, quantidade_, selectedMaquina_);
+
+            if (peca_ === '' || dataPlanejamento_ === '' || quantidade_ === '' || selectedMaquina_ === '') {
+                $('.alert').alert()
+                hideLoading();
+                showAndHideAlert('Preencha todos os campos.', 2000);
+                return;
+            }
+
+            var descricao = peca_.split(' - ')[1];
+            if (!descricao) {
+                descricao = '';
+            }
+
+            // Criar objeto com os dados
+            const dados = {
+                peca: peca_.split(' - ')[0],
+                descricao: descricao,
+                dataPlanejamento: dataPlanejamento_,
+                qtPlanejada: quantidade_,
+                codificacao: '',
+                origem: 'Sequenciamento',
+                selectedMaquina: selectedMaquina_,
+            };
+
+            // Enviar dados para o backend
+            $.ajax({
+                url: '/api/planejar-pecas/estamparia',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(dados),
+                success: function (response) {
+                    // Tratar a resposta do backend, se necessário
+                    console.log(response);
+                    hideLoading();
+                    showAndHideSuccessAlert('Salvo.', 2000);
+                    $('#modalPecaFora').modal('hide');
+
+                    $('#userInput_').val('');
+                    $('#inputData_').val('');
+                    $('#inputQuantidade_').val('');
+
+                    var radios = document.querySelectorAll('input[name="maquinaForaDoPlanejado_"]');
+
+                    radios.forEach(function (radio) {
+                        radio.checked = false;
+                    });
+
                 },
                 error: function (err) {
                     console.error('Erro ao enviar dados para o backend', err);
@@ -792,103 +910,173 @@
     }
 </script>
 
-<!-- Script para lista input peças dentro do modal -->
+<!-- Script para lista input peças dentro do modal de peças fora do planejamento -->
 
 <script>
 
-    // Função para ocultar a lista
-    function hideSuggestionsPecas() {
-        $('#suggestionsPecas').css('display', 'none');
-    }
+    $(document).ready(function () {
+        // Evento de clique no input para mostrar a lista de sugestões
+        $('#userInput').click(function (event) {
+            event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+            showSuggestionsPecas_();
+        });
 
-    // Adicionar um event listener para cliques no documento
-    $(document).on('click', function (event) {
-        const clickedElement = $(event.target);
+        // Evento de clique no ícone de limpar para limpar o campo de entrada e esconder a lista de sugestões
+        $('#peca-modal').click(function (event) {
+            event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+            clearInput();
+        });
 
-        // Verificar se o clique foi fora da lista e do campo de entrada
-        if (!clickedElement.closest('#suggestionsPecas, #userInput').length) {
-            hideSuggestionsPecas();
-        }
-    });
-
-    // Adicionar um event listener para o input para ocultar a lista quando estiver vazio
-    $('#userInput').on('input', function () {
-        const userInput = $(this).val().trim();
-
-        if (!userInput.length) {
-            hideSuggestionsPecas();
-        }
-    });
-
-    $('#userInput').on('click', function () {
-        showSuggestionsPecas();
-    });
-
-    // Variável para armazenar os dados brutos do backend
-    let suggestionsDataPecaModal = [];
-
-    // Função para obter dados brutos do backend
-    function fetchSuggestionsDataTeste() {
-        $.ajax({
-            url: '/sugestao-pecas-montagem',
-            method: 'GET',
-            success: function (data) {
-                suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
-                console.log('Dados brutos do Backend modal:', suggestionsDataPecaModal);
-            },
-            error: function (err) {
-                console.error('Erro ao obter dados brutos do backend', err);
+        // Evento de clique fora da lista de sugestões para escondê-la
+        $(document).click(function (event) {
+            var suggestionsList = $('#suggestionsPecas');
+            if (!$(event.target).closest('#userInput').length) {
+                suggestionsList.hide();
             }
         });
-    }
 
-    // Chamar a função de obter dados brutos assim que a página carregar
-    $(document).ready(function () {
+        // Evento de clique em um item da lista de sugestões para preencher o campo de entrada e esconder a lista
+        $('#suggestionsPecas').on('click', 'li', function () {
+            $('#userInput').val($(this).text());
+            $('#suggestionsPecas').hide();
+        });
+
+        // Evento de entrada para filtrar as sugestões enquanto o usuário digita
+        $('#userInput').on('input', function () {
+            showSuggestionsPecas_();
+        });
+
+        // Função para mostrar sugestões ao digitar
+        function showSuggestionsPecas_() {
+            var input = $('#userInput').val().toLowerCase();
+            var suggestionsList = $('#suggestionsPecas');
+            suggestionsList.empty(); // Limpa a lista de sugestões
+
+            // Filtra os dados com base no texto de entrada
+            var filteredData = suggestionsDataPecaModal.filter(item => item.toLowerCase().includes(input));
+
+            // Preenche a lista de sugestões com os itens filtrados
+            filteredData.forEach(item => {
+                $('<li>').text(item).appendTo(suggestionsList);
+            });
+
+            // Mostra a lista de sugestões
+            suggestionsList.show();
+        }
+
+        // Função para limpar o campo de entrada e ocultar a lista de sugestões
+        function clearInput() {
+            $('#userInput').val('');
+            $('#suggestionsPecas').hide();
+        }
+
+        // Variável para armazenar os dados brutos do backend
+        var suggestionsDataPecaModal = [];
+
+        // Função para obter os dados brutos do backend
+        function fetchSuggestionsDataTeste() {
+            $.ajax({
+                url: '/sugestao-pecas-estamparia',
+                method: 'GET',
+                success: function (data) {
+                    suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
+                    console.log('Dados brutos do Backend modal:', suggestionsDataPecaModal);
+                },
+                error: function (err) {
+                    console.error('Erro ao obter dados brutos do backend', err);
+                }
+            });
+        }
+
+        // Chama a função para obter os dados brutos do backend
         fetchSuggestionsDataTeste();
     });
 
-    // Função para exibir sugestões filtradas
-    function showSuggestionsPecas() {
-        const userInput = document.getElementById('userInput').value.toLowerCase();
 
-        console.log('User Input:', userInput);
+</script>
 
-        // Limpar sugestões anteriores
-        $('#suggestionsPecas').empty();
+<!-- Script para lista input peças dentro do modal de planejar peças -->
 
-        // Filtrar sugestões com base no texto inserido pelo usuário
-        const filteredSuggestions = suggestionsDataPecaModal.filter(suggestion =>
-            suggestion.toLowerCase().includes(userInput)
-        );
+<script>
 
-        console.log('Sugestões Filtradas:', filteredSuggestions);
-
-        // Exibir sugestões filtradas na lista
-        filteredSuggestions.forEach(suggestion => {
-            const li = $('<li>');
-            const a = $('<a>').attr('href', '#').text(suggestion);
-            a.on('click', function (event) {
-                event.preventDefault();
-                // Ação ao selecionar uma sugestão (pode ser ajustada conforme necessário)
-                $('#userInput').val(suggestion);
-                hideSuggestionsPecas();
-            });
-            li.append(a);
-            $('#suggestionsPecas').append(li);
+    $(document).ready(function () {
+        // Evento de clique no input para mostrar a lista de sugestões
+        $('#userInput_').click(function (event) {
+            event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+            showSuggestionsPecas();
         });
 
-        // Exibir a lista se houver sugestões filtradas, ocultar caso contrário
-        $('#suggestionsPecas').css('display', filteredSuggestions.length ? 'block' : 'none');
-    }
+        // Evento de clique no ícone de limpar para limpar o campo de entrada e esconder a lista de sugestões
+        $('#peca-modal').click(function (event) {
+            event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+            clearInput();
+        });
 
-    function limparCampoPecaModal() {
-        $('#userInput').val('');
-    }
+        // Evento de clique fora da lista de sugestões para escondê-la
+        $(document).click(function (event) {
+            var suggestionsList = $('#suggestionsPecas_');
+            if (!$(event.target).closest('#userInput_').length) {
+                suggestionsList.hide();
+            }
+        });
 
-    // Adiciona o evento de clique ao ícone "x" para limpar o campo 'celula'
-    $('#peca-modal').on('click', function () {
-        limparCampoPecaModal();
+        // Evento de clique em um item da lista de sugestões para preencher o campo de entrada e esconder a lista
+        $('#suggestionsPecas_').on('click', 'li', function () {
+            $('#userInput_').val($(this).text());
+            $('#suggestionsPecas_').hide();
+        });
+
+        // Evento de entrada para filtrar as sugestões enquanto o usuário digita
+        $('#userInput_').on('input', function () {
+            showSuggestionsPecas();
+        });
+
+        // Função para mostrar sugestões ao digitar
+        function showSuggestionsPecas() {
+            var input = $('#userInput_').val().toLowerCase();
+            var suggestionsList = $('#suggestionsPecas_');
+            suggestionsList.empty(); // Limpa a lista de sugestões
+
+            // Filtra os dados com base no texto de entrada
+            var filteredData = suggestionsDataPecaModal.filter(item => item.toLowerCase().includes(input));
+
+            // Preenche a lista de sugestões com os itens filtrados
+            filteredData.forEach(item => {
+                $('<li>').text(item).appendTo(suggestionsList);
+            });
+
+            // Mostra a lista de sugestões
+            suggestionsList.show();
+        }
+
+        // Função para limpar o campo de entrada e ocultar a lista de sugestões
+        function clearInput() {
+            $('#userInput_').val('');
+            $('#suggestionsPecas_').hide();
+        }
+
+        // Variável para armazenar os dados brutos do backend
+        var suggestionsDataPecaModal = [];
+
+        // Função para obter os dados brutos do backend
+        function fetchSuggestionsDataTeste() {
+            $.ajax({
+                url: '/sugestao-pecas-estamparia',
+                method: 'GET',
+                success: function (data) {
+                    suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
+                    console.log('Dados brutos do Backend modal:', suggestionsDataPecaModal);
+                },
+                error: function (err) {
+                    console.error('Erro ao obter dados brutos do backend', err);
+                }
+            });
+        }
+
+        // Chama a função para obter os dados brutos do backend
+        fetchSuggestionsDataTeste();
     });
+
 
 </script>
 
@@ -1155,82 +1343,19 @@
     });
 </script>
 
-<!-- Script para confirmar inicio da produção -->
-
-<script>
-    $(document).on('click', '#btnIniciarProducao', function () {
-        // Obter os dados da linha da tabela
-        var rowData = $(this).closest('tr').find('td').map(function () {
-            return $(this).text();
-        }).get();
-
-        var botaoRetornar = document.getElementById('confimarRetornoProducao');
-        botaoRetornar.style.display = 'none';
-
-        var botaoIniciar = document.getElementById('confimarInicioProducao');
-        botaoIniciar.style.display = 'block';
-
-        document.getElementById('pecaTextoModalIniciar').textContent = (rowData[2] + " - " + rowData[3]);
-
-        // Associar o evento de clique ao botão #confimarInicioProducao dentro do evento de clique do botão #btnIniciarProducao
-        $('#confimarInicioProducao').off('click').on('click', function () {
-
-            // Criar objeto com os dados
-            const dados = {
-                peca: rowData[3],
-                descricao: rowData[4],
-                dataCarga: rowData[0],
-                celula: rowData[2],
-                qtPlanejada: rowData[5],
-                codificacao: rowData[7],
-                chave: rowData[8],
-                origem: 'Sequenciamento'
-            };
-
-            showLoading();
-
-            $.ajax({
-                url: '/api/pecas-em-processo/montagem',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(dados),
-                success: function (response) {
-                    // Tratar a resposta do backend, se necessário
-                    console.log(response);
-                    hideLoading();
-                    showAndHideSuccessAlert('Salvo.', 2000);
-                    $('#modalConfirmarInicioProducao').modal('hide');
-                },
-                error: function (err) {
-                    console.error('Erro ao enviar dados para o backend', err);
-
-                    hideLoading();
-                }
-            });
-        });
-
-    });
-
-    // Associar o evento de clique ao botão #desistirInicioProducao
-    $('#desistirInicioProducao').on('click', function () {
-        // Fechar o modal após a confirmação (opcional)
-        $('#modalConfirmarInicioProducao').modal('hide');
-    });
-</script>
-
 <!-- Script para iniciar ou finalizar produção e listar peças em processo -->
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
         function chamarAPI() {
-            fetch("/api/consulta-pecas-em-processo/montagem")
+            fetch("/api/consulta-pecas-em-processo/estamparia")
                 .then(response => response.json())
                 .then(data => {
                     // Limpa o conteúdo atual dos cards
                     document.getElementById('cardsContainer').innerHTML = "";
 
-                    var celulaEscolhida = document.getElementById('celula').value;
+                    var celulaEscolhida = document.getElementById('maquinaEscolhida').value;
 
                     console.log(celulaEscolhida);
 
@@ -1287,13 +1412,13 @@
         }
 
         function chamarAPIInterrompidas() {
-            fetch("/api/consulta-pecas-interrompidas/montagem")
+            fetch("/api/consulta-pecas-interrompidas/estamparia")
                 .then(response => response.json())
                 .then(data => {
                     // Limpa o conteúdo atual dos cards
                     document.getElementById('cardsContainerInterrompida').innerHTML = "";
 
-                    var celulaEscolhida = document.getElementById('celula').value;
+                    var celulaEscolhida = document.getElementById('maquinaEscolhida').value;
 
                     if (celulaEscolhida === '') {
                         // Se a célula escolhida estiver vazia, não há necessidade de filtrar os dados
@@ -1339,47 +1464,6 @@
             });
         }
 
-        // function chamarAPIInterrompidas() {
-        //     fetch("/api/consulta-pecas-interrompidas/montagem")
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             console.log(data);
-
-        //             // Limpa o conteúdo atual dos cards
-        //             document.getElementById('cardsContainerInterrompida').innerHTML = "";
-
-        //             data.forEach(peca => {
-        //                 var cardHtml = `
-        //                 <div class="col-sm-6 mb-2">
-        //                     <div class="card shadow mb-4">
-        //                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        //                             <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-        //                             <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
-        //                         </div>
-        //                         <div class="card-body">
-        //                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
-        //                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
-        //                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Motivo:</strong> ${peca[12]}</small></h6>
-        //                         </div>
-        //                         <div class="card-footer">
-        //                             <button type="button" class="btn btn-info btn-retornar-producao"
-        //                                 onclick="retornarPeca(${peca[0]})">Retornar
-        //                             </button>
-        //                         </div>
-        //                     </div>
-        //                 </div>`;
-
-        //                 document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
-
-        //                 // Atualiza o contador imediatamente ao carregar a página
-        //                 const dataInicial = new Date(formatarData(peca[3]));
-        //                 atualizarContador(dataInicial, peca[0]);
-        //             });
-        //         })
-        //         .catch(error => console.error('Erro ao chamar a API:', error));
-        // }
-
-        // Chama a API imediatamente ao carregar a página
         chamarAPI();
         chamarAPIInterrompidas();
 
@@ -1393,6 +1477,14 @@
         return data.toISOString().slice(0, 16);
     }
 
+    function formatarDataSemHora(dataString) {
+        var data = new Date(dataString);
+        var dia = ("0" + data.getDate()).slice(-2);
+        var mes = ("0" + (data.getMonth() + 1)).slice(-2);
+        var ano = data.getFullYear();
+        return dia + '/' + mes + '/' + ano;
+    }
+
     // Função para finalizar a peça e mostrar informações
     function finalizarPeca(id) {
         // Exemplo: Mostrar informações em um alerta
@@ -1404,19 +1496,18 @@
         };
 
         $.ajax({
-            url: '/consulta-id-em-processo',
+            url: '/consulta-id-em-processo/estamparia',
             method: 'GET',
             contentType: 'application/json',
             data: $.param(dados),
             success: function (data) {
-                console.log(data);
                 $('#nomePecaApontada').val(data[0][1] + " - " + data[0][2]);
                 $('#inputQuantidadePlanejada').val(data[0][7]);
                 $('#dataHoraInicio').val(formatarData(data[0][3]));
                 $('#codificacaoOrdem').val(data[0][4]);
                 $('#celulaOrdem').val(data[0][8]);
                 $('#dataCargaFinalizacao').val(data[0][5]);
-                $('#idPecaEmProcesso').val(data[0][0]);
+                $('#idPecaEmProcesso').val(data[0][11]);
                 $('#origemPecaEmProcesso').val(data[0][13]);
 
                 $('#inputQuantidadeRealizada').val();
@@ -1437,6 +1528,8 @@
     }
 
     function atualizarContador(dataInicial, id_peca) {
+
+        console.log(dataInicial);
 
         const agora = new Date();
         const diferenca = agora.getTime() - dataInicial.getTime();
@@ -1475,8 +1568,15 @@
             idPecaEmProcesso = $('#idPecaEmProcesso').val();
             origem = $('#origemPecaEmProcesso').val();
 
+            if (pecaFinalizada.split(' - ')[1]) {
+                descricao = pecaFinalizada.split(' - ')[1];
+            } else {
+                descricao = '';
+            }
+
             dados = {
-                codigo: pecaFinalizada,
+                codigo: pecaFinalizada.split(' - ')[0],
+                descricao: descricao,
                 qtdePlanejada: quantidadePlanejada,
                 codificacao: codificacao,
                 celula: celula,
@@ -1504,7 +1604,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: '/finalizar-peca-em-processo',
+                url: '/finalizar-peca-em-processo/estamparia',
                 contentType: 'application/json',  // Define o tipo de conteúdo como JSON
                 data: JSON.stringify(dados),
                 success: function (data) {
@@ -1542,7 +1642,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: '/api/pecas-interrompida/montagem',
+                url: '/api/pecas-interrompida/estamparia',
                 contentType: 'application/json',  // Define o tipo de conteúdo como JSON
                 data: JSON.stringify({ id: idPecaInterromper, motivo: motivoInterrompido }),
                 success: function (data) {
@@ -1595,7 +1695,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: '/api/pecas-retornou/montagem',
+                url: '/api/pecas-retornou/estamparia',
                 contentType: 'application/json',  // Define o tipo de conteúdo como JSON
                 data: JSON.stringify({ id: idPecaRetornar }),
                 success: function (data) {
@@ -1631,6 +1731,14 @@
     // Adiciona o evento de clique ao ícone "x" para limpar o campo 'celula'
     $('#operador-modal-finalizar').on('click', function () {
         limparCampoOperadorModal_finalizar();
+    });
+</script>
+
+<script>
+    document.getElementById('clear-codigo').addEventListener('click', function(){
+
+        $('#codigoPecaEstamparia').val('');
+
     });
 </script>
 
