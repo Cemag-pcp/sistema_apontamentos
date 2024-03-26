@@ -14,6 +14,10 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 <style>
+    .lista-celulaHistorico,
+    .lista-mpHistorico,
+    .lista-conjuntoHistorico,
+    .lista-pecaHistorico,
     .lista-mat-prima,
     .lista-celula,
     .lista-conjunto,
@@ -32,6 +36,10 @@
         /* Ajuste para compensar a borda */
     }
 
+    .lista-celulaHistorico li,
+    .lista-mpHistorico li,
+    .lista-conjuntoHistorico li,
+    .lista-pecaHistorico li,
     .lista-mat-prima li,
     .lista-celula li,
     .lista-conjunto li,
@@ -40,6 +48,10 @@
         cursor: pointer;
     }
 
+    .lista-celulaHistorico li:hover,
+    .lista-mpHistorico li:hover,
+    .lista-conjuntoHistorico li:hover,
+    .lista-pecaHistorico li:hover,
     .lista-mat-prima li:hover,
     .lista-celula li:hover,
     .lista-conjunto li:hover,
@@ -70,85 +82,86 @@
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
                     <div class="btn-group" role="group" aria-label="Criar OP">
-                        <button id="btnModalDuplicarOP" type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                            data-target="#modalDuplicarOP">Histórico</button>
-                        <!-- <button id="btnModalOpLaser" type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                            data-target="#modalOpLaser">Criar OP Laser</button>
-                        <button id="btnModalOpPlasma" type="button" class="btn btn-sm btn-warning" data-toggle="modal"
-                            data-target="#modalOpPlasma">Criar OP Plasma</button> -->
+                        <button id="btnModalHistoricoLevantamento" type="button" class="btn btn-sm btn-info mr-2"
+                            data-toggle="modal" data-target="#modalHistoricoLevantamento">Histórico</button>
+                        <button id="btnModalCarretasCadastradas" type="button" class="btn btn-sm btn-secondary"
+                            data-toggle="modal" data-target="#modalCarretasCadastradas">Carretas</button>
                     </div>
                 </div>
                 <br>
                 <!-- Card Body -->
                 <div class="card-body">
                     <div class="row mb-3">
-                        <div class="col-sm-4">
+                        <div class="col-md-3 col-sm-6">
                             <label for="dataLevantamentoInicial">Data inicial:</label>
                             <input class="form-control" type="date" id="dataLevantamentoInicial">
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-md-3 col-sm-6">
                             <label for="dataLevantamentoFinal">Data final:</label>
                             <input class="form-control" type="date" id="dataLevantamentoFinal">
                         </div>
-                        <div class="col-sm-4">
+                    </div>
+                    <div class="row mb-3" style="display: none;" id="row2-filters">
+                        <div class="col-md-3 col-sm-6 mb-3">
                             <label for="conjuntoLevantamento">Conjunto</label>
                             <input class="form-control" type="text" id="conjuntoLevantamento">
-                            <ul class="lista-conjunto" style="display: none;">
+                            <ul class="lista-conjunto" style="display: none;"></ul>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-sm-4">
+                        <div class="col-md-3 col-sm-6 mb-3">
                             <label for="celulaLevantamento">Célula</label>
                             <input class="form-control" type="text" id="celulaLevantamento">
-                            <ul class="lista-celula" style="display: none;">
-
+                            <ul class="lista-celula" style="display: none;"></ul>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-md-3 col-sm-6 mb-3">
                             <label for="pecaLevantamento">Peça</label>
                             <input class="form-control" type="text" id="pecaLevantamento">
-                            <ul class="lista-peca" style="display: none;">
+                            <ul class="lista-peca" style="display: none;"></ul>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-md-3 col-sm-6 mb-3">
                             <label for="mpLevantamento">Mat.Prima</label>
                             <input class="form-control" type="text" id="mpLevantamento">
-                            <ul class="lista-mat-prima" style="display: none;">
+                            <ul class="lista-mat-prima" style="display: none;"></ul>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4 align-self-end">
-                            <button id="btnFilterLevantamento" class="btn btn-primary">Filtrar</button>
+                            <button id="btnFilterLevantamento" class="btn btn-primary"><i
+                                    class="fas fa-search"></i></button>
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Célula</th>
-                                    <th scope="col">Conjunto</th>
-                                    <th scope="col">Código</th>
-                                    <th scope="col">Descrição</th>
-                                    <th scope="col">Qt.Necessária</th>
-                                    <th scope="col">Mat.Prima</th>
-                                    <th scope="col">Qt.Físico</th>
-                                    <th scope="col">Obs</th>
-                                    <th scope="col">Solicitar</th>
-                                </tr>
-                            </thead>
-                            <tbody id="bodyTableLevantamento">
-
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="9">
-                                        <nav aria-label="Page navigation example">
-                                            <ul class="pagination justify-content-end" id="paginationDuplicada">
-                                                <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
-                                            </ul>
-                                        </nav>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="col-2 d-none d-md-table-cell">Célula</th>
+                                            <th scope="col" class="d-none d-md-table-cell">Conjunto</th>
+                                            <th scope="col">Código</th>
+                                            <th scope="col" class="col-2">Descrição</th>
+                                            <th scope="col" class="col-1">Qt.Necessária</th>
+                                            <th scope="col" class="col-2 d-none d-md-table-cell">Mat.Prima</th>
+                                            <th scope="col" class="col-1">Qt.Físico</th>
+                                            <th scope="col" class="col-md-2">Observação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyTableLevantamento">
+                                        <!-- Seus dados da tabela serão inseridos aqui -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9">
+                                                <nav aria-label="Page navigation example">
+                                                    <ul class="pagination justify-content-end" id="paginationDuplicada">
+                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                    </ul>
+                                                </nav>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -189,193 +202,38 @@
     <div class="row">
 
         <!-- Modal criar op laser -->
-        <div class="modal fade" id="modalOpLaser" tabindex="-1" role="dialog" aria-labelledby="modalOpLaserLabel"
-            aria-hidden="true">
+        <div class="modal fade" id="modalCarretasCadastradas" tabindex="-1" role="dialog"
+            aria-labelledby="modalCarretasCadastradasLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="TittleModalOpLaser">Histórico de levantamento</h5>
+                        <h5 class="modal-title" id="TittleModalCarretasCadastradas">Carretas cadastradas na base</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-sm-4">
-                                <label for="comprimentoLaser">Comprimento</label>
-                                <input type="number" class="form-control" id="comprimentoLaser">
-                            </div>
-                            <div class="col-sm-4">
-                                <label for="larguraLaser">Largura</label>
-                                <input type="number" class="form-control" id="larguraLaser">
-                            </div>
-                            <div class="col-sm-4">
-                                <label for="espessuraLaser">Espessura</label>
-                                <select class="form-control" name="nameEspessuraLaser" id="espessuraLaser">
-                                    <option></option>
-                                    <option value="14">14</option>
-                                    <option value="13">13</option>
-                                    <option value="12">12</option>
-                                    <option value="11">11</option>
-                                    <option value="5/32">5/32</option>
-                                    <option value="3/16">3/16</option>
-                                    <option value="1/4">1/4</option>
-                                    <option value="5/16">5/16</option>
-                                    <option value="3/8">3/8</option>
-                                    <option value="1/2">1/2</option>
-                                    <option value="5/8">5/8</option>
-                                    <option value="3/4">3/4</option>
-                                    <option value="1">1</option>
-                                    <option value="3,35">3,35</option>
-                                    <option value="20">20</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="input-group mb-3">
-                                    <div class="custom-file">
-                                        <label for="inputGroupFile02">Inserir arquivo</label>
-                                        <input type="file" class="custom-file-input" id="inputGroupFile02"
-                                            onchange="mostrarNomeArquivo('inputGroupFile02')">
-                                        <label class="custom-file-label" for="inputGroupFile02">Escolha um
-                                            arquivo</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="modal-body" style="max-height: 500px; overflow-y:auto;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Carreta</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bodyCarretasCadastradas">
+
+                            </tbody>
+                        </table>
                     </div>
                     <div class="modal-footer">
-                        <button id="buttonCriarOpLaser" type="button" class="btn btn-sm btn-primary">Salvar</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal criar op plasma -->
-        <div id="modalOpPlasma" class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Criar OP plasma</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="input-group mb-3">
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="inputGroupFile01"
-                                    onchange="mostrarNomeArquivo('inputGroupFile01')">
-                                <label class="custom-file-label" for="inputGroupFile01">Escolha um arquivo</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" id="buttonCriarOpPlasma" class="btn btn-sm btn-primary">Criar</button>
-                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Fechar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal visualizar peças dentro da op -->
-        <div class="modal fade" id="modalVisualizarPecas" tabindex="-1" role="dialog"
-            aria-labelledby="modalVisualizarPecasLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalVisualizarPecasLabel">Peças dentro da op</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div style="max-height: 400px; overflow-y: auto;" class="modal-body" id="bodyModalVisualizarPecas">
-                    </div>
-                    <div class="modal-footer">
-                        <button id="btnPlanejar" type="button" class="btn btn-sm btn-primary">Planejar</button>
-                        <button id="btnConfirmarDuplicacao" type="button"
-                            class="btn btn-sm btn-primary">Duplicar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal finalizar apontamento -->
-        <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1" role="dialog"
-            aria-labelledby="modalExecucaoApontamentoLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalExecucaoApontamentoLabel">Apontar peça</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body" style="max-height: 400px; overflow-y: auto;" id="bodyModalFinalizar">
-
-                    </div>
-                    <div class="modal-footer">
-                        <button id="btnFinalizarOrdem" type="button" class="btn btn-sm btn-primary">Confirmar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal confirmar inicio -->
-        <div class="modal fade" id="modalConfirmarInicioProducao" tabindex="-1" role="dialog"
-            aria-labelledby="modalConfirmarInicioProducaoLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalConfirmarInicioProducaoLabel">Iniciar</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p id="labelConfirmar">Confirmar início da produção?</p>
-                        <p id="pecaTextoModalIniciar"></p>
-                        <input id="retornarPecaProducao" style="display: none;">
-                    </div>
-                    <div class="modal-footer">
-                        <button id="confimarInicioProducao" type="button" class="btn btn-sm btn-success">Sim</button>
-                        <button id="confimarRetornoProducao" type="button" class="btn btn-sm btn-success">Sim</button>
-                        <button id="desistirInicioProducao" type="button" class="btn btn-sm btn-danger">Não</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal motivo de interrompido -->
-        <div class="modal fade" id="modalMotivoInterrompido" tabindex="-1" role="dialog"
-            aria-labelledby="modalMotivoInterrompidoLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalMotivoInterrompidoLabel">Escolha o motivo da parada</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="text" id="idPecaInterromper" style="display: none;">
-                        <select class="form-control" name="motivosParada" id="idMotivosParada">
-                            <option>Manutenção</option>
-                            <option>Limpeza</option>
-                            <option>Falta de peça</option>
-                        </select>
-                    </div>
-                    <div class="modal-footer">
-                        <button id="enviarMotivo" type="button" class="btn btn-sm btn-success">Enviar</button>
-                        <button id="desistirMotivo" type="button" class="btn btn-sm btn-danger">Fechar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="modalDuplicarOP" tabindex="-1" role="dialog" aria-labelledby="modalDuplicarOPLabel"
-            aria-hidden="true">
+        <!-- Modal histórico de levantamento -->
+        <div class="modal fade" id="modalHistoricoLevantamento" tabindex="-1" role="dialog"
+            aria-labelledby="modalHistoricoLevantamentoLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -386,25 +244,29 @@
                     </div>
                     <div class="modal-body" style="max-height: 700px; overflow-y: auto;">
                         <div class="row mb-3">
-                            <div class="col-sm-2">
+                            <div class="col-sm-2 col-sm-6 mb-3">
                                 <label for="dataSolicitacaoLevantamento">Data da carga</label>
                                 <input class="form-control" type="date" id="dataSolicitacaoLevantamento">
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-2 col-sm-6 mb-3">
                                 <label for="celulaSolicitacaoLevantamento">Célula</label>
                                 <input class="form-control" type="text" id="celulaSolicitacaoLevantamento">
+                                <ul class="lista-celulaHistorico" style="display: none;">
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-2 col-sm-6 mb-3">
                                 <label for="matPrimaSolicitacaoLevantamento">Mat. Prima</label>
                                 <input class="form-control" type="text" id="matPrimaSolicitacaoLevantamento">
+                                <ul class="lista-mpHistorico" style="display: none;">
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-2 col-sm-6 mb-3">
                                 <label for="conjuntoSolicitacaoLevantamento">Conjunto</label>
                                 <input class="form-control" type="text" id="conjuntoSolicitacaoLevantamento">
+                                <ul class="lista-conjuntoHistorico" style="display: none;">
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-2 col-sm-6 mb-3">
                                 <label for="pecaSolicitacaoLevantamento">Peça</label>
                                 <input class="form-control" type="text" id="pecaSolicitacaoLevantamento">
+                                <ul class="lista-pecaHistorico" style="display: none;">
                             </div>
 
                         </div>
@@ -426,7 +288,7 @@
                                         <th scope="col">Obs</th>
                                     </tr>
                                 </thead>
-                                <tbody id="bodyTableHistorico" >
+                                <tbody id="bodyTableHistorico">
 
                                 </tbody>
                                 <tfoot>
@@ -440,6 +302,7 @@
                                         </td>
                                     </tr>
                                 </tfoot>
+
                             </table>
                         </div>
                     </div>
@@ -477,54 +340,7 @@
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="static/js/demo/datatables-demo.js"></script>
 
-<!-- Script para carregar arquiuvo e enviar plasma -->
-
-<script>
-    $(document).ready(function () {
-        $("#buttonCriarOpPlasma").click(function () {
-            var formData = new FormData();
-            var fileInput = document.getElementById('inputGroupFile01');
-            var file = fileInput.files[0];
-            var fileName = file.name;
-            formData.append('file', file, fileName);
-
-            showLoading();
-
-            $.ajax({
-                url: '/upload-plasma',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    alert(response.message);
-                    hideLoading();
-                    $('#inputGroupFile01').val('');
-                    $('#modalOpPlasma').modal('hide');
-
-                },
-                error: function (xhr, status, error) {
-                    alert('Erro ao enviar o arquivo: ' + error);
-                    $('modalOpPlasma').modal('hide');
-                }
-            });
-        });
-    });
-</script>
-
-<!-- Script para mostrar nome do arquivo ao inserir -->
-
-<script>
-    function mostrarNomeArquivo(inputFileId) {
-        var inputFile = document.getElementById(inputFileId);
-        var fileName = inputFile.files[0].name;
-        var label = inputFile.nextElementSibling; // Obtém o elemento irmão seguinte (neste caso, o elemento de rótulo)
-        label.textContent = fileName; // Atualiza o texto do rótulo com o nome do arquivo
-    }
-</script>
-
 <!-- Script de loading -->
-
 <script>
     function showLoading() {
         $('#loading').show();
@@ -535,57 +351,7 @@
     }
 </script>
 
-<!-- Script para receber abertura de op laser -->
-
-<script>
-
-    document.getElementById('buttonCriarOpLaser').addEventListener('click', function () {
-
-        var comprimentoLaser = $('#comprimentoLaser').val();
-        var larguraLaser = $('#larguraLaser').val();
-        var espessuraLaser = $('#espessuraLaser option:selected').text();
-        var formData = new FormData();
-        var fileInput = document.getElementById('inputGroupFile02');
-        var file = fileInput.files[0];
-
-        if (!file || comprimentoLaser === '' || larguraLaser === '' || espessuraLaser === '') {
-            alert("Preencha todos os campos.");
-            return;
-        };
-
-        var fileName = file.name;
-
-        formData.append('file', file, fileName);
-        formData.append('comprimentoLaser', comprimentoLaser);
-        formData.append('larguraLaser', larguraLaser);
-        formData.append('espessuraLaser', espessuraLaser);
-
-        $.ajax({
-            url: '/upload-laser',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                alert(response.message);
-                hideLoading();
-                $('#inputGroupFile02').val('');
-                $('#modalOpLaser').modal('hide');
-
-            },
-            error: function (xhr, status, error) {
-                alert('Erro ao enviar o arquivo: ' + error);
-                $('modalOpLaser').modal('hide');
-            }
-        });
-
-
-    });
-
-</script>
-
-<!-- Script para iniciar tabela -->
-
+<!-- Script solicitar peça para levantamento -->
 <script>
 
     function solicitarPeca(dados) {
@@ -800,8 +566,7 @@
 
 </script>
 
-<!-- Script alerta -->
-
+<!-- Scripts alerta -->
 <script>
     function showAndHideSuccessAlert(message, duration) {
         const successAlert = $('#successAlert');
@@ -827,177 +592,13 @@
 
 </script>
 
-<!-- Interromper processo -->
-
-<script>
-
-    function interromperProcesso(id) {
-
-        $('#modalMotivoInterrompido').modal('show');
-
-        $('#idPecaInterromper').val(id);
-
-    }
-
-    $(document).ready(function () {
-        $('#enviarMotivo').on('click', function () {
-            idPecaInterromper = $('#idPecaInterromper').val();
-            motivoInterrompido = $('#idMotivosParada option:selected').text();
-
-            showLoading();
-
-            $.ajax({
-                type: 'POST',
-                url: '/api/pecas-interrompida/corte',
-                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
-                data: JSON.stringify({ id: idPecaInterromper, motivo: motivoInterrompido }),
-                success: function (data) {
-                    hideLoading();
-                    showAndHideSuccessAlert('Salvo.', 2000);
-                    $('#modalMotivoInterrompido').modal('hide');
-                },
-                error: function (error) {
-                    console.error('Erro na solicitação POST:', error);
-                    hideLoading();
-                    $('#modalMotivoInterrompido').modal('hide');
-                }
-            });
-        });
-
-        $('#desistirMotivo').on('click', function () {
-            $('#modalMotivoInterrompido').modal('hide');
-        })
-    });
-
-</script>
-
-<!-- Retornar op -->
-
-<script>
-
-    function retornarPeca(id) {
-
-        $('#modalConfirmarInicioProducao').modal('show');
-        document.getElementById('modalConfirmarInicioProducaoLabel').textContent = 'Retorno'
-        document.getElementById('pecaTextoModalIniciar').textContent = ''
-        document.getElementById('labelConfirmar').textContent = 'Confirmar retorno para produção?'
-
-        $('#retornarPecaProducao').val(id);
-
-        var botaoRetornar = document.getElementById('confimarRetornoProducao');
-        botaoRetornar.style.display = 'block';
-
-        var botaoIniciar = document.getElementById('confimarInicioProducao');
-        botaoIniciar.style.display = 'none';
-
-    }
-
-    $(document).ready(function () {
-        $('#confimarRetornoProducao').on('click', function () {
-            idPecaRetornar = $('#retornarPecaProducao').val();
-            console.log(idPecaRetornar);
-
-            showLoading();
-
-            $.ajax({
-                type: 'POST',
-                url: '/api/pecas-retornou/corte',
-                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
-                data: JSON.stringify({ id: idPecaRetornar }),
-                success: function (data) {
-                    hideLoading();
-                    showAndHideSuccessAlert('Salvo.', 2000);
-                    $('#modalConfirmarInicioProducao').modal('hide');
-                },
-                error: function (error) {
-                    console.error('Erro na solicitação POST:', error);
-                    hideLoading();
-                    $('#modalConfirmarInicioProducao').modal('hide');
-                }
-            });
-        });
-    });
-
-
-    $(document).ready(function () {
-        $('#desistirInicioProducao').on('click', function () {
-            $('#modalConfirmarInicioProducao').modal('hide');
-        })
-    })
-
-</script>
-
-<!-- Acionar planejamento de ordem -->
-<script>
-
-    $('#btnPlanejar').click(function () {
-        // Recolha os dados da tabela
-        showLoading();
-
-        // Recolha os dados da tabela
-        // var tabelaData = [];
-        // $('#bodyModalVisualizarPecas tbody tr').each(function () {
-        //     var rowData = [];
-        //     $(this).find('td').each(function () {
-        //         rowData.push($(this).text());
-        //     });
-        //     tabelaData.push(rowData);
-        // });
-
-        // Recolher outros dados dentro do modal
-        var op = $('#opModal').val();
-        // var espessura = $('#espessuraModal').val();
-        // var chapas = $('#chapaModal').val();
-        // var descricaoChapa = $('#qtChapasModal').val();
-        // var aproveitamento = $('#aproveitamentoModal').val();
-        var dataPlanejada = $('#dataPlanejamento').val();
-
-        if (dataPlanejada === '') {
-            alert('Preencha a data de planejamento.')
-            hideLoading();
-            return;
-        }
-
-        // Construir o objeto JSON com os dados da tabela e os dados coletados
-        var dadosParaEnviar = {
-            // tabela: tabelaData,
-            op: op,
-            // espessura: espessura,
-            // qt_chapa: chapas,
-            // descricaoChapa: descricaoChapa,
-            // aproveitamento: aproveitamento,
-            dataPlanejada: dataPlanejada
-        };
-
-        // Envie os dados para o backend via AJAX
-        $.ajax({
-            url: '/planejar-op/corte',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(dadosParaEnviar),
-            success: function (response) {
-                // Lógica de sucesso aqui
-                console.log('Tabela enviada com sucesso');
-                $('#modalVisualizarPecas').modal('hide');
-                hideLoading();
-                updateTable(1, '', '');
-            },
-            error: function (err) {
-                console.error('Erro:', err);
-                // Lógica de erro aqui
-                hideLoading();
-            }
-        });
-    });
-
-</script>
-
+<!-- Script para gerar listas dentro do input -->
 <script>
 
     function listaMp(id, classe, matPrimaDisponivel) {
 
-        // Manipulador de evento para exibir a lista e filtrar conforme você digita
-        $('#' + id).on('input', function () {
+        // Manipulador de evento para exibir a lista ao clicar dentro do input
+        $('#' + id).on('click', function () {
             var valorInput = $(this).val().toLowerCase();
             var listaFiltrada = matPrimaDisponivel.filter(function (material) {
                 return material.toLowerCase().includes(valorInput);
@@ -1030,7 +631,7 @@
 
 </script>
 
-<!-- Adicionar tabela de peças dentro do modal de duplicar -->
+<!-- Tabela inicial de levantamento -->
 <script>
 
     var rowsPerPage = 10;
@@ -1038,6 +639,7 @@
     $(document).ready(function () {
         // Quando o botão de filtro é clicado
         $('#btnFilterLevantamento').click(function () {
+
             var dataLevantamentoInicialStr = $('#dataLevantamentoInicial').val(); // Obter o valor do filtro OP
             var dataLevantamentoFinalStr = $('#dataLevantamentoFinal').val(); // Obter o valor do filtro OP
             var conjuntoLevantamento = $('#conjuntoLevantamento').val();
@@ -1049,6 +651,9 @@
                 alert('Preencha as datas de início e fim.');
                 return;
             }
+
+            // $('#col-conjunto').show();
+            $('#row2-filters').show();
 
             // Converter as strings de data em objetos de data
             var dataLevantamentoInicial = new Date(dataLevantamentoInicialStr);
@@ -1082,31 +687,32 @@
             data: { page: currentPage, data: dataLevantamento, conjunto: conjuntoLevantamento, celula: celulaLevantamento, peca: pecaLevantamento, mp: mp }, // Envie o filtro OP para o servidor
             success: function (response) {
 
-                console.log(response)
-
                 var data = response.data;
                 var totalPages = response.total_pages;
+                var carretasCadastradas = response.carretas_na_base;
+
                 listaMp('mpLevantamento', 'lista-mat-prima', response.matprima);
                 listaMp('pecaLevantamento', 'lista-peca', response.pecas);
                 listaMp('celulaLevantamento', 'lista-celula', response.celula);
                 listaMp('conjuntoLevantamento', 'lista-conjunto', response.conjunto);
 
                 $('#bodyTableLevantamento').empty(); // Limpa o corpo da tabela
+                $('#bodyCarretasCadastradas').empty();
 
                 dados = [];
 
                 // Preenche a tabela com os dados da página atual
                 data.forEach(function (item) {
                     var row = '<tr>' +
-                        '<td>' + item[0] + '</td>' + // celula
-                        '<td>' + item[1] + '</td>' + // conjunto
+                        '<td class="d-none d-md-table-cell">' + item[0] + '</td>' + // celula
+                        '<td class="d-none d-md-table-cell">' + item[1] + '</td>' + // conjunto
                         '<td>' + item[2] + '</td>' + // peça
                         '<td>' + item[3] + '</td>' + // descricao
-                        '<td>' + item[5] + '</td>' + // quantidade
-                        '<td>' + item[4] + '</td>' + // mat prima
-                        '<td><input type="number" class="form-control"></td>' + // mat prima
-                        '<td><input type="text" class="form-control"></td>' + // mat prima
-                        '<td><button type="button" class="btn btn-dark btn-sm btn-pecas">Solicitar</button></td>' +
+                        '<td class="text-truncate">' + item[5] + '</td>' + // quantidade
+                        '<td class="d-none d-md-table-cell">' + item[4] + '</td>' + // mat prima
+                        '<td><input type="number" class="form-control"></td>' + // quantidade fisica
+                        '<td><textarea row="3" cols="20" type="text" class="form-control"></textarea></td>' + // obs
+                        '<td><button type="button" class="btn btn-dark btn-sm btn-pecas"><i class="fa fa-paper-plane" aria-hidden="true"></i></button></td>' +
                         '</tr>';
 
                     var newRow = $(row).appendTo('#bodyTableLevantamento');
@@ -1141,7 +747,7 @@
                                     item[5], // quantidade
                                     item[4], // mat prima
                                     quantidadeInserida, // quantidade inserida
-                                    newRow.find('input[type="text"]').val(),
+                                    newRow.find('textarea').val(), // observação
                                     dataInicio,// descrição adicional inserida
                                     dataFinal// descrição adicional inserida
 
@@ -1151,6 +757,23 @@
                         });
                     })(item);
                 });
+
+                carretasCadastradas.forEach(function (item) {
+                    var statusIcon = (item[1] === '') ? 'checked' : 'x';
+                    var rowBodyCarretasCadastradas = '<tr>' +
+                        '<td>' + item[0] + '</td>' + // carreta
+                        '<td>' + getStatusIcon(statusIcon) + '</td>' + // status
+                        '</tr>';
+                    var newRowBodyCarretasCadastradas = $(rowBodyCarretasCadastradas).appendTo('#bodyCarretasCadastradas');
+                });
+
+                function getStatusIcon(icon) {
+                    if (icon === 'checked') {
+                        return '<i style="color:red;" class="fas fa-times"></i>'; // Exemplo de ícone de x (você pode substituir pelo ícone desejado)
+                    } else {
+                        return '<i style="color:green;" class="fas fa-check"></i>'; // Exemplo de ícone de check (você pode substituir pelo ícone desejado)
+                    }
+                }
 
                 // Atualiza a paginação
                 updatePaginationDuplicaOp(totalPages, currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
@@ -1237,60 +860,7 @@
 
 </script>
 
-<!-- Script ara confirmar duplicação de op -->
-
-<script>
-
-    $('#btnConfirmarDuplicacao').click(function () {
-        // Recolha os dados da tabela
-        showLoading();
-
-
-        // Recolher outros dados dentro do modal
-        var op = $('#opModal').val();
-        var qtChapas = $('#chapaModal').val();
-        var dataPlanejada = $('#dataPlanejamento').val();
-        var maquinaDuplicarOp = $('#maquinaDuplicarOp option:selected').text();
-
-        if (dataPlanejada === '' || qtChapas === '' || maquinaDuplicarOp === '') {
-            alert('Preencha todos os campos.')
-            hideLoading();
-            return;
-        }
-
-        // Construir o objeto JSON com os dados da tabela e os dados coletados
-        var dadosParaEnviar = {
-            op: op,
-            qtChapas: qtChapas,
-            dataPlanejada: dataPlanejada,
-            maquinaDuplicarOp: maquinaDuplicarOp
-        };
-
-        // Envie os dados para o backend via AJAX
-        $.ajax({
-            url: '/duplicar-op/corte',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(dadosParaEnviar),
-            success: function (response) {
-                // Lógica de sucesso aqui
-                console.log('Tabela enviada com sucesso');
-                $('#modalVisualizarPecas').modal('hide');
-                hideLoading();
-                updateTable(1, '', '');
-            },
-            error: function (err) {
-                console.error('Erro:', err);
-                // Lógica de erro aqui
-                hideLoading();
-            }
-        });
-    });
-
-</script>
-
-
-<!-- Adicionar tabela de peças dentro do modal de duplicar -->
+<!-- Histórico de levantamento -->
 <script>
 
     var rowsPerPage = 10;
@@ -1312,30 +882,6 @@
                 dataLevantamentoInicial = formatarDataSemHora(dataLevantamentoInicial);
             };
 
-            // if (dataLevantamentoInicialStr === '' || dataLevantamentoFinalStr === '') {
-            //     alert('Preencha as datas de início e fim.');
-            //     return;
-            // }
-
-            // Converter as strings de data em objetos de data
-            
-            // var dataLevantamentoFinal = new Date(dataLevantamentoFinalStr);
-
-            // Verificar se as datas de início e fim são válidas
-            // if (isNaN(dataLevantamentoInicial.getTime())) {
-            //     alert('Datas inválidas.');
-            //     return;
-            // }
-
-
-            // Verificar se a data de início é menor que a data final
-            // if (dataLevantamentoInicial > dataLevantamentoFinal) {
-            //     alert('A data de início deve ser anterior à data de fim.');
-            //     return;
-            // }
-
-            // Se chegou aqui, as datas são válidas e a dataLevantamento pode ser formada
-
             updateTableDuplicarOpHistorico(1, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
         });
     });
@@ -1349,22 +895,23 @@
             data: { page: currentPage, data: dataLevantamentoInicial, conjunto: conjuntoLevantamento, celula: celulaLevantamento, peca: pecaLevantamento, mp: mp }, // Envie o filtro OP para o servidor
             success: function (response) {
 
-                console.log(response)
+                listaMp('matPrimaSolicitacaoLevantamento', 'lista-mpHistorico', response.mp_historico);
+                listaMp('pecaSolicitacaoLevantamento', 'lista-pecaHistorico', response.peca_historico);
+                listaMp('celulaSolicitacaoLevantamento', 'lista-celulaHistorico', response.celulas_historico);
+                listaMp('conjuntoSolicitacaoLevantamento', 'lista-conjuntoHistorico', response.conjunto_historico);
 
                 var data = response.data;
                 var totalPages = response.total_pages;
-                // listaMp('mpLevantamento', 'lista-mat-prima', response.matprima);
-                // listaMp('pecaLevantamento', 'lista-peca', response.pecas);
-                // listaMp('celulaLevantamento', 'lista-celula', response.celula);
-                // listaMp('conjuntoSolicitacaoLevantamento', 'lista-conjunto', response.conjunto);
 
-                $('#bodyTableHistorico').empty(); // Limpa o corpo da tabela
+                // Limpa o corpo da tabela
+                $('#bodyTableHistorico').empty();
 
                 dados = [];
 
                 // Preenche a tabela com os dados da página atual
                 data.forEach(function (item) {
-                    var row = '<tr>' +
+                    var row =
+                        '<tr>' +
                         '<td>' + item[10] + '</td>' + // celula
                         '<td>' + item[7] + '</td>' + // conjunto
                         '<td>' + item[3] + '</td>' + // peça
@@ -1372,50 +919,8 @@
                         '<td>' + item[4] + '</td>' + // quantidade
                         '<td>' + item[12] + '</td>' + // mat prima
                         '<td>' + item[8] + '</td>' + // mat prima
-                        // '<td><button type="button" class="btn btn-dark btn-sm btn-pecas">Solicitar</button></td>' +
                         '</tr>';
-
-                    var newRow = $(row).appendTo('#bodyTableHistorico');
-                    // (function (item) {
-                    //     newRow.find('.btn-pecas').click(function () {
-                    //         var quantidadeEmEstoque = parseFloat(item[5]);
-                    //         var quantidadeInseridaStr = parseFloat(newRow.find('input[type="number"]').val());
-
-                    //         var dataInicio = $('#dataLevantamentoInicial').val()
-                    //         var dataFinal = $('#dataLevantamentoFinal').val()
-
-                    //         if (dataFinal === '') {
-                    //             dataFinal = dataInicio;
-                    //         };
-
-                    //         if (isNaN(quantidadeInseridaStr)) {
-                    //             alert('Por favor, insira uma quantidade válida.');
-                    //             return;
-                    //         }
-
-                    //         var quantidadeInserida = parseFloat(quantidadeInseridaStr);
-
-                    //         if (quantidadeInserida > quantidadeEmEstoque) {
-                    //             alert('Quantidade em estoque menor do que a necessária.');
-                    //             return;
-                    //         } else {
-                    //             var dados = [
-                    //                 item[0], // celula
-                    //                 item[1], // conjunto
-                    //                 item[2], // peça
-                    //                 item[3], // descricao
-                    //                 item[5], // quantidade
-                    //                 item[4], // mat prima
-                    //                 quantidadeInserida, // quantidade inserida
-                    //                 newRow.find('input[type="text"]').val(),
-                    //                 dataInicio,// descrição adicional inserida
-                    //                 dataFinal// descrição adicional inserida
-
-                    //             ];
-                    //             solicitarPeca(dados);
-                    //         }
-                    //     });
-                    // })(item);
+                    $(row).appendTo('#bodyTableHistorico');
                 });
 
                 // Atualiza a paginação

@@ -2436,7 +2436,8 @@ def consultar_carretas_levantamento():
     
     dados_carga_data_filtrada = dados_carga[(dados_carga['PED_PREVISAOEMISSAODOC'] >= data_inicial) & (dados_carga['PED_PREVISAOEMISSAODOC'] <= data_final)]
 
-    dados_carga_data_filtrada['PED_QUANTIDADE'] = dados_carga_data_filtrada['PED_QUANTIDADE'].astype(int)
+    dados_carga_data_filtrada['PED_QUANTIDADE'] = dados_carga_data_filtrada['PED_QUANTIDADE'].apply(lambda x: x.replace(',','.'))
+    dados_carga_data_filtrada['PED_QUANTIDADE'] = dados_carga_data_filtrada['PED_QUANTIDADE'].astype(float)
     carretas_unica = dados_carga_data_filtrada[['Carreta Trat','PED_QUANTIDADE']]
     agrupado = carretas_unica.groupby('Carreta Trat')['PED_QUANTIDADE'].sum()
     agrupado = agrupado.reset_index()
@@ -2453,9 +2454,11 @@ def consultar_carretas_levantamento():
     df_explodido = pd.read_sql_query(sql_consulta,conn)
 
     df_final = df_explodido.merge(agrupado,how='left',right_on='Carreta Trat',left_on='carreta')
-    df_final['quantidade'] = df_final['quantidade'] * df_final['PED_QUANTIDADE']
-    
 
+    carretas_dentro_da_base=df_explodido.merge(dados_carga_data_filtrada,how='right',left_on='carreta',right_on='Carreta Trat')
+    carretas_dentro_da_base = carretas_dentro_da_base[['Carreta Trat','carreta']].drop_duplicates().fillna('').values.tolist()
+
+    df_final['quantidade'] = df_final['quantidade'] * df_final['PED_QUANTIDADE']
     if conjunto:
         df_final = df_final[df_final['conjunto'] == conjunto]
 
@@ -2497,6 +2500,7 @@ def consultar_carretas_levantamento():
         'celula':celulas_disponiveis,
         'conjunto':conjuntos_disponiveis,
         'matprima':matprima_disponiveis,
+        'carretas_na_base':carretas_dentro_da_base
     })
 
 @app.route("/solicitar-peca/levantamento", methods=['POST'])
@@ -2548,12 +2552,6 @@ def consultar_historico_levantamento():
     peca = request.args.get('peca', None)
     mp = request.args.get('mp', None)
     
-    # Verifica se há mais de um item na string
-    # if ',' in peca:
-    #     peca = tuple(peca.split(','))  # Se sim, divide os itens por vírgula e converte para tupla
-    # else:
-    #     peca = "('" + peca + "')"  # Se não, adiciona parênteses ao redor do único item
-
     # Definir o número de itens por página
     per_page = 10
 
@@ -2567,25 +2565,6 @@ def consultar_historico_levantamento():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    # sql_count = """
-    #             select * from (
-    #                 SELECT *,SUBSTRING(cod_descricao, 1, 6) AS peca
-    #                 FROM pcp.ordens_corte) as t1
-    #             where 1=1
-    #         """
-
-    # if op:
-    #     sql_count += f' and op = {op}'
-
-    # if peca:
-    #     sql_count+=f' and peca in {peca}'
-
-    # sql_count += " and quantidade > 0 and opp = 'opp'"
-
-    # cur.execute(sql_count)
-    # data_count = cur.fetchall()
-    # total_rows = len(data_count)
 
     sql = """select * from software_producao.tb_solicitacao_pecas
             where 1=1
@@ -2624,15 +2603,32 @@ def consultar_historico_levantamento():
 
     cur.execute(sql_count)
     data_count = cur.fetchall()
-    
+
     total_rows = len(data_count)
 
     # Calcular o número total de páginas
     total_pages = (total_rows + per_page - 1) // per_page
 
+    celula_unica = set()
+    mp_unica = set()
+    conjunto_unico = set()
+    peca_unica = set()
+
+    # Iterar sobre a lista e adicionar os valores da coluna específica ao conjunto
+    for sublist in data:
+
+        celula_unica.update([sublist[10]])
+        mp_unica.update([sublist[12]])
+        conjunto_unico.update([sublist[7]])
+        peca_unica.update([sublist[3]])
+
     return jsonify({
         'data': data,
-        'total_pages': total_pages
+        'total_pages': total_pages,
+        'celulas_historico':list(celula_unica),
+        'mp_historico':list(mp_unica),
+        'conjunto_historico':list(conjunto_unico),
+        'peca_historico':list(peca_unica)
     })
 
 
