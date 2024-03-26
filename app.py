@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, Blueprint, send_file
-from flask_socketio import SocketIO, emit
 import pandas as pd
 import time
 import datetime
