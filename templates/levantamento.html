@@ -384,7 +384,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="max-height: 700px; overflow-y: auto;">
                         <div class="row mb-3">
                             <div class="col-sm-2">
                                 <label for="dataSolicitacaoLevantamento">Data da carga</label>
@@ -426,7 +426,7 @@
                                         <th scope="col">Obs</th>
                                     </tr>
                                 </thead>
-                                <tbody id="bodyTableHistorico">
+                                <tbody id="bodyTableHistorico" >
 
                                 </tbody>
                                 <tfoot>
@@ -1130,7 +1130,7 @@
                             var quantidadeInserida = parseFloat(quantidadeInseridaStr);
 
                             if (quantidadeInserida > quantidadeEmEstoque) {
-                                alert('Quantidade em estoque menor do que a necessária.');
+                                alert('Quantidade no estoque físico maior do que a necessária.');
                                 return;
                             } else {
                                 var dados = [
