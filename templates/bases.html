@@ -1,0 +1,794 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Montagem</title>
+{% endblock %}
+
+{% block links %}
+
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<style>
+    .lista-celulaHistorico,
+    .lista-mpHistorico,
+    .lista-conjuntoHistorico,
+    .lista-pecaHistorico,
+    .lista-mat-prima,
+    .lista-celula,
+    .lista-conjunto,
+    .lista-peca {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        border: 1px solid #ccc;
+        border-top: none;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        z-index: 1;
+        background-color: #fff;
+        width: calc(100% - 2px);
+        /* Ajuste para compensar a borda */
+    }
+
+    .lista-celulaHistorico li,
+    .lista-mpHistorico li,
+    .lista-conjuntoHistorico li,
+    .lista-pecaHistorico li,
+    .lista-mat-prima li,
+    .lista-celula li,
+    .lista-conjunto li,
+    .lista-peca li {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+    .lista-celulaHistorico li:hover,
+    .lista-mpHistorico li:hover,
+    .lista-conjuntoHistorico li:hover,
+    .lista-pecaHistorico li:hover,
+    .lista-mat-prima li:hover,
+    .lista-celula li:hover,
+    .lista-conjunto li:hover,
+    .lista-peca li:hover {
+        background-color: #f0f0f0;
+    }
+</style>
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Bases</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" id="btnPecas" href="#">Peças</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="btnOperadores" href="#">Operadores</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Base de peças -->
+        <div class="col-xl-12 mb-2" id="cardBasePecas">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Base de peças</h6>
+                    <div class="btn-group" role="group" aria-label="Criar OP">
+                        <button id="btnModalHistoricoLevantamento" type="button" class="btn btn-sm btn-info mr-2"
+                            data-toggle="modal" data-target="#modalHistoricoLevantamento">Editar</button>
+                        <button id="btnModalCarretasCadastradas" type="button" class="btn btn-sm btn-secondary"
+                            data-toggle="modal" data-target="#modalCarretasCadastradas">Excluir</button>
+                    </div>
+                </div>
+                <br>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="pecaBase">Peça</label>
+                            <input class="form-control" type="text" id="pecaBase">
+                            <ul class="lista-pecaBase" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="celulaBase">Célula</label>
+                            <input class="form-control" type="text" id="celulaBase">
+                            <ul class="lista-celulaBase" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="setorBase">Setor</label>
+                            <input class="form-control" type="text" id="setorBase">
+                            <ul class="lista-setorBase" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="statusBase">Status</label>
+                            <input class="form-control" type="text" id="statusBase">
+                            <ul class="lista-statusBase" style="display: none;"></ul>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 align-self-end">
+                            <button id="btnFilterBasePeca" class="btn btn-primary"><i
+                                    class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Id</th>
+                                            <th scope="col">Código</th>
+                                            <th scope="col">Descrição</th>
+                                            <th scope="col">Setor</th>
+                                            <th scope="col">Célula</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyBasePecas">
+                                        <!-- Seus dados da tabela serão inseridos aqui -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9">
+                                                <nav aria-label="Page navigation example">
+                                                    <ul class="pagination justify-content-end" id="paginationBasePecas">
+                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                    </ul>
+                                                </nav>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Base de operadores -->
+        <div class="col-xl-12 mb-2" id="cardBaseOperadores" style="display: none;">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Base de operadores</h6>
+                    <div class="btn-group" role="group" aria-label="Criar OP">
+                        <button id="btnModalHistoricoLevantamento" type="button" class="btn btn-sm btn-info mr-2"
+                            data-toggle="modal" data-target="#modalHistoricoLevantamento">Editar</button>
+                        <button id="btnModalCarretasCadastradas" type="button" class="btn btn-sm btn-secondary"
+                            data-toggle="modal" data-target="#modalCarretasCadastradas">Excluir</button>
+                    </div>
+                </div>
+                <br>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="matriculaBaseOperador">Matrícula</label>
+                            <input class="form-control" type="text" id="matriculaBaseOperador">
+                            <ul class="lista-matriculaBaseOperador" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="nomeBaseOperador">Nome</label>
+                            <input class="form-control" type="text" id="nomeBaseOperador">
+                            <ul class="lista-nomeBaseOperador" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="setorBaseOperador">Setor</label>
+                            <input class="form-control" type="text" id="setorBaseOperador">
+                            <ul class="lista-setorBaseOperador" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="statusBaseOperador">Status</label>
+                            <input class="form-control" type="text" id="statusBaseOperador">
+                            <ul class="lista-statusBaseOperador" style="display: none;"></ul>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 align-self-end">
+                            <button id="btnFilterBaseOperadores" class="btn btn-primary"><i
+                                    class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Id</th>
+                                            <th scope="col">Matrícula</th>
+                                            <th scope="col">Nome</th>
+                                            <th scope="col">Setor</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyBaseOperadores">
+                                        <!-- Seus dados da tabela serão inseridos aqui -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9">
+                                                <nav aria-label="Page navigation example">
+                                                    <ul class="pagination justify-content-end" id="paginationBaseOperadores">
+                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                    </ul>
+                                                </nav>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Painel de cards "em processo" e "interrompidas" -->
+    <!-- <div class="row">
+
+        <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças em processo</h6>
+                </div>
+                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
+                    <div class="row" id="cardsContainer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças interrompidas</h6>
+                </div>
+                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
+                    <div class="row" id="cardsContainerInterrompida">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> -->
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- Modal criar op laser -->
+        <div class="modal fade" id="modalCarretasCadastradas" tabindex="-1" role="dialog"
+            aria-labelledby="modalCarretasCadastradasLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalCarretasCadastradas">Carretas cadastradas na base</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: 500px; overflow-y:auto;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Carreta</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bodyCarretasCadastradas">
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal histórico de levantamento -->
+        <div class="modal fade" id="modalHistoricoLevantamento" tabindex="-1" role="dialog"
+            aria-labelledby="modalHistoricoLevantamentoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalDuplicarOP">Histórico de levantamento</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: 700px; overflow-y: auto;">
+                        <div class="row mb-3">
+                            <div class="col-sm-2 col-sm-6 mb-3">
+                                <label for="dataSolicitacaoLevantamento">Data da carga</label>
+                                <input class="form-control" type="date" id="dataSolicitacaoLevantamento">
+                            </div>
+                            <div class="col-sm-2 col-sm-6 mb-3">
+                                <label for="celulaSolicitacaoLevantamento">Célula</label>
+                                <input class="form-control" type="text" id="celulaSolicitacaoLevantamento">
+                                <ul class="lista-celulaHistorico" style="display: none;">
+                            </div>
+                            <div class="col-sm-2 col-sm-6 mb-3">
+                                <label for="matPrimaSolicitacaoLevantamento">Mat. Prima</label>
+                                <input class="form-control" type="text" id="matPrimaSolicitacaoLevantamento">
+                                <ul class="lista-mpHistorico" style="display: none;">
+                            </div>
+                            <div class="col-sm-2 col-sm-6 mb-3">
+                                <label for="conjuntoSolicitacaoLevantamento">Conjunto</label>
+                                <input class="form-control" type="text" id="conjuntoSolicitacaoLevantamento">
+                                <ul class="lista-conjuntoHistorico" style="display: none;">
+                            </div>
+                            <div class="col-sm-2 col-sm-6 mb-3">
+                                <label for="pecaSolicitacaoLevantamento">Peça</label>
+                                <input class="form-control" type="text" id="pecaSolicitacaoLevantamento">
+                                <ul class="lista-pecaHistorico" style="display: none;">
+                            </div>
+
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-sm-2 align-self-end">
+                                <button class="btn btn-primary" id="btnFiltraHistorico">Filtrar</button>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Célula</th>
+                                        <th scope="col">Conjunto</th>
+                                        <th scope="col">Peça</th>
+                                        <th scope="col">Descrição</th>
+                                        <th scope="col">Quantidade</th>
+                                        <th scope="col">Mat.prima</th>
+                                        <th scope="col">Obs</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyTableHistorico">
+
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="9">
+                                            <nav aria-label="Page navigation example">
+                                                <ul class="pagination justify-content-end" id="paginationHistorico">
+                                                    <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                </ul>
+                                            </nav>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</div>
+
+<div id="alertBox" class="alert alert-danger">
+    <strong>Erro!</strong> Preencha todos os campos.
+</div>
+
+<div id="successAlert" class="alert alert-success" role="alert">
+    Salvo!
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Script tabela JQuery -->
+
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="static/js/demo/datatables-demo.js"></script>
+
+<!-- Script de loading -->
+<script>
+    function showLoading() {
+        $('#loading').show();
+    }
+
+    function hideLoading() {
+        $('#loading').hide();
+    }
+</script>
+
+<!-- Scripts alerta -->
+<script>
+    function showAndHideSuccessAlert(message, duration) {
+        const successAlert = $('#successAlert');
+        successAlert.html(message);
+        successAlert.slideDown();
+
+        setTimeout(function () {
+            successAlert.slideUp();
+        }, duration);
+    }
+</script>
+
+<script>
+    function showAndHideAlert(message, duration) {
+        const alertBox = $('#alertBox');
+        alertBox.html(`<strong>Danger!</strong> ${message}`);
+        alertBox.slideDown();
+
+        setTimeout(function () {
+            alertBox.slideUp();
+        }, duration);
+    }
+
+</script>
+
+<!-- Script para gerar listas dentro do input -->
+<script>
+
+    function listaMp(id, classe, matPrimaDisponivel) {
+
+        // Manipulador de evento para exibir a lista ao clicar dentro do input
+        $('#' + id).on('click', function () {
+            var valorInput = $(this).val().toLowerCase();
+            var listaFiltrada = matPrimaDisponivel.filter(function (material) {
+                return material.toLowerCase().includes(valorInput);
+            });
+            exibirLista(listaFiltrada);
+        });
+
+        // Manipulador de evento para os itens da lista
+        $(document).on('click', '.' + classe + ' li', function () {
+            var valorSelecionado = $(this).text();
+            $('#' + id).val(valorSelecionado);
+            $('.' + classe).hide();
+        });
+
+        // Manipulador de evento para fechar a lista ao clicar fora do campo de entrada
+        $(document).on('click', function (event) {
+            if (!$(event.target).closest('.' + classe).length && !$(event.target).closest('#' + id).length) {
+                $('.' + classe).hide();
+            }
+        });
+
+        // Função para exibir a lista filtrada
+        function exibirLista(lista) {
+            var listaHtml = lista.map(function (item) {
+                return '<li>' + item + '</li>';
+            }).join('');
+            $('.' + classe).html(listaHtml).show();
+        }
+    }
+
+</script>
+
+<!-- Tabela para base de peças -->
+<script>
+
+    $(document).ready(function () {
+        // Quando o botão de filtro é clicado
+        $('#btnFilterBasePeca').click(function () {
+
+            var pecaBase = $('#pecaBase').val(); // peça
+            var celulaBase = $('#celulaBase').val(); // celula
+            var setorBase = $('#setorBase').val(); // setor
+            var statusBase = $('#statusBase').val(); // status
+
+            updateTableBasePecas(1, pecaBase, celulaBase, setorBase, statusBase);
+        });
+    });
+
+    // Função para preencher a tabela com os dados da página atual
+    function updateTableBasePecas(currentPage, pecaBase, celulaBase, setorBase, statusBase) {
+        showLoading();
+        $.ajax({
+            url: '/consultar-base-pecas/bases',
+            type: 'GET',
+            data: { page: currentPage, pecaBase: pecaBase, celulaBase: celulaBase, setorBase: setorBase, statusBase: statusBase }, // Envie o filtro OP para o servidor
+            success: function (response) {
+
+                var data = response.data;
+                var totalPages = response.total_pages;
+                console.log(totalPages)
+                // var carretasCadastradas = response.carretas_na_base;
+
+                // listaMp('mpLevantamento', 'lista-mat-prima', response.matprima);
+                // listaMp('pecaLevantamento', 'lista-peca', response.pecas);
+                // listaMp('celulaLevantamento', 'lista-celula', response.celula);
+                // listaMp('conjuntoLevantamento', 'lista-conjunto', response.conjunto);
+
+                $('#bodyBasePecas').empty(); // Limpa o corpo da tabela
+
+                // Preenche a tabela com os dados da página atual
+                data.forEach(function (item) {
+                    var row = '<tr>' +
+                        '<td>' + item[0] + '</td>' + // id
+                        '<td>' + item[1] + '</td>' + // codigo
+                        '<td>' + item[2] + '</td>' + // descricao
+                        '<td>' + item[3] + '</td>' + // setor
+                        '<td>' + item[5] + '</td>' + // celula
+                        '<td>' + item[4] + '</td>' + // status
+                        '</tr>';
+
+                    var newRow = $(row).appendTo('#bodyBasePecas');
+                });
+
+            
+                // Atualiza a paginação
+                updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                console.error('Erro ao obter os dados:', errorMessage);
+                hideLoading();
+            }
+        });
+    }
+
+    function updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase) {
+        var pagination = $('#paginationBasePecas');
+        pagination.empty();
+
+        // Botão "Anterior"
+        var prevButton = '<li class="page-item"><a class="page-link" id="prevButtonBasePecas">Previous</a></li>';
+        pagination.append(prevButton);
+        $('#prevButton').click(function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableBasePecas(currentPage, pecaBase, celulaBase, setorBase, statusBase);
+                updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase); // Atualiza a paginação após a mudança de página
+            }
+        });
+
+        // Números das páginas
+        var startPage, endPage;
+        if (totalPages <= 5) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (currentPage <= 3) {
+                startPage = 1;
+                endPage = 5;
+            } else if (currentPage + 2 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
+            }
+        }
+
+        for (var i = startPage; i <= endPage; i++) {
+            var listItem;
+            if (i === currentPage) {
+                listItem = $('<li class="page-item active"><a class="page-link">' + i + '</a></li>');
+            } else {
+                listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+            }
+            pagination.append(listItem);
+            listItem.click(function () {
+                currentPage = parseInt($(this).text());
+                updateTableBasePecas(currentPage, pecaBase, celulaBase, setorBase, statusBase);
+                updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase); // Atualiza a paginação após a mudança de página
+            });
+        }
+
+        // Adiciona reticências antes e depois dos números de página, se necessário
+        if (startPage > 1) {
+            pagination.prepend('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+        if (endPage < totalPages) {
+            pagination.append('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+
+        // Botão "Próximo"
+        var nextButton = '<li class="page-item"><a class="page-link" id="nextButtonBasePecas">Next</a></li>';
+        pagination.append(nextButton);
+        $('#nextButton').click(function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableBasePecas(currentPage, pecaBase, celulaBase, setorBase, statusBase);
+                updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase); // Atualiza a paginação após a mudança de página
+            }
+        });
+    }
+
+    // Inicia a tabela e a paginação na página 1
+    updateTableBasePecas(1, '', '', '', '');
+
+</script>
+
+<!-- Tabela para base de operadores -->
+<script>
+
+    $(document).ready(function () {
+        // Quando o botão de filtro é clicado
+        $('#btnFilterBaseOperadores').click(function () {
+
+            var matriculaBaseOperador = $('#matriculaBaseOperador').val(); // peça
+            var nomeBaseOperador = $('#nomeBaseOperador').val(); // celula
+            var setorBaseOperador = $('#setorBaseOperador').val(); // setor
+            var statusBaseOperador = $('#statusBaseOperador').val(); // status
+
+            updateTableBaseOperadores(1, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+        });
+    });
+
+    // Função para preencher a tabela com os dados da página atual
+    function updateTableBaseOperadores(currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador) {
+        showLoading();
+        $.ajax({
+            url: '/consultar-base-operador/bases',
+            type: 'GET',
+            data: { page: currentPage, matriculaBaseOperador: matriculaBaseOperador, nomeBaseOperador: nomeBaseOperador, setorBaseOperador: setorBaseOperador, statusBaseOperador: statusBaseOperador }, // Envie o filtro OP para o servidor
+            success: function (response) {
+
+                var data = response.data;
+                var totalPages = response.total_pages;
+                console.log(totalPages)
+                // var carretasCadastradas = response.carretas_na_base;
+
+                // listaMp('mpLevantamento', 'lista-mat-prima', response.matprima);
+                // listaMp('pecaLevantamento', 'lista-peca', response.pecas);
+                // listaMp('celulaLevantamento', 'lista-celula', response.celula);
+                // listaMp('conjuntoLevantamento', 'lista-conjunto', response.conjunto);
+
+                $('#bodyBaseOperadores').empty(); // Limpa o corpo da tabela
+
+                // Preenche a tabela com os dados da página atual
+                data.forEach(function (item) {
+                    var row = '<tr>' +
+                        '<td>' + item[0] + '</td>' + // id
+                        '<td>' + item[1] + '</td>' + // matricula
+                        '<td>' + item[2] + '</td>' + // nome
+                        '<td>' + item[4] + '</td>' + // status
+                        '<td>' + item[3] + '</td>' + // setor
+                        '</tr>';
+
+                    var newRow = $(row).appendTo('#bodyBaseOperadores');
+                });
+
+            
+                // Atualiza a paginação
+                updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                console.error('Erro ao obter os dados:', errorMessage);
+                hideLoading();
+            }
+        });
+    }
+
+    function updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador) {
+        var pagination = $('#paginationBaseOperadores');
+        pagination.empty();
+
+        // Botão "Anterior"
+        var prevButton = '<li class="page-item"><a class="page-link" id="prevButtonBaseOperadores">Previous</a></li>';
+        pagination.append(prevButton);
+        $('#prevButton').click(function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableBaseOperadores(currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+                updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador); // Atualiza a paginação após a mudança de página
+            }
+        });
+
+        // Números das páginas
+        var startPage, endPage;
+        if (totalPages <= 5) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (currentPage <= 3) {
+                startPage = 1;
+                endPage = 5;
+            } else if (currentPage + 2 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
+            }
+        }
+
+        for (var i = startPage; i <= endPage; i++) {
+            var listItem;
+            if (i === currentPage) {
+                listItem = $('<li class="page-item active"><a class="page-link">' + i + '</a></li>');
+            } else {
+                listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+            }
+            pagination.append(listItem);
+            listItem.click(function () {
+                currentPage = parseInt($(this).text());
+                updateTableBaseOperadores(currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+                updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador); // Atualiza a paginação após a mudança de página
+            });
+        }
+
+        // Adiciona reticências antes e depois dos números de página, se necessário
+        if (startPage > 1) {
+            pagination.prepend('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+        if (endPage < totalPages) {
+            pagination.append('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+
+        // Botão "Próximo"
+        var nextButton = '<li class="page-item"><a class="page-link" id="nextButtonBaseOperadores">Next</a></li>';
+        pagination.append(nextButton);
+        $('#nextButton').click(function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableBaseOperadores(currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+                updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador); // Atualiza a paginação após a mudança de página
+            }
+        });
+    }
+
+    // Inicia a tabela e a paginação na página 1
+    updateTableBaseOperadores(1, '', '', '', '');
+
+</script>
+
+<!-- Script para navegar sobre navbars -->
+<script>
+    // Função para alternar a ativação entre os botões
+    function alternarAtivacaoBotao(botaoAtivado, botaoDesativado) {
+        document.getElementById(botaoAtivado).classList.add("active");
+        document.getElementById(botaoDesativado).classList.remove("active");
+    }
+
+    // Adicionar manipuladores de eventos aos botões
+    document.getElementById("btnPecas").addEventListener("click", function () {
+        alternarAtivacaoBotao("btnPecas", "btnOperadores");
+        $('#cardBasePecas').show()
+        $('#cardBaseOperadores').hide()
+
+    });
+
+    document.getElementById("btnOperadores").addEventListener("click", function () {
+        alternarAtivacaoBotao("btnOperadores", "btnPecas");
+        $('#cardBasePecas').hide()
+        $('#cardBaseOperadores').show()
+    });
+</script>
+
+
+{% endblock %}

@@ -2627,7 +2627,7 @@ def consultar_historico_levantamento():
     peca_unica = set()
 
     # Iterar sobre a lista e adicionar os valores da coluna específica ao conjunto
-    for sublist in data:
+    for sublist in data_count:
 
         celula_unica.update([sublist[10]])
         mp_unica.update([sublist[12]])
