@@ -24,10 +24,11 @@
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/loading.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/dropdown.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/alert.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/loading.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/dropdown.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/alert.css') }}">
+    <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
 
     {% block links %}
 
@@ -44,7 +45,7 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <img src="/static/img/SELO 50 ANOS ISOLADO_Prancheta 1.png" alt="Selo de 50 anos da CEMAG"
                         style="width: 50px; height: auto; filter: brightness(255);">
@@ -156,8 +157,29 @@
                 </div>
             </li>
 
-            <!-- Divider -->
             <hr class="sidebar-divider">
+
+            <div class="sidebar-heading">
+                Inspeção
+            </div>
+
+            <!-- Divider -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseQuality"
+                    aria-expanded="true" aria-controls="collapseQuality">
+                    <i class="fas fa-fw fa-star"></i>
+                    <span>Qualidade</span>
+                </a>
+                <div id="collapseQuality" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Funções:</h6>
+                        <a class="collapse-item" href="inspecao">Inspeção - Pintura</a>
+                        <a class="collapse-item" href="inspecao-solda">Inspeção - Solda</a>
+                        <a class="collapse-item">Inspeção - Montagem</a>
+                    </div>
+                </div>
+            </li>
 
             <!-- Heading -->
             <!-- <div class="sidebar-heading">
@@ -312,8 +334,8 @@
     <script src="static/vendor/chart.js/Chart.min.js"></script>
 
     <!-- Page level custom scripts -->
-    <script src="static/js/demo/chart-area-demo.js"></script>
-    <script src="static/js/demo/chart-pie-demo.js"></script>
+    <!-- <script src="static/js/demo/chart-area-demo.js"></script>
+    <script src="static/js/demo/chart-pie-demo.js"></script> -->
     {% block scripts %}
 
     {% endblock %}
