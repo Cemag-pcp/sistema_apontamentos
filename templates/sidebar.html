@@ -15,21 +15,22 @@
     <title>SB Admin 2 - Dashboard</title>
     {% endblock %}
 
-    <!-- Custom fonts for this template-->    
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/fontawesome-free/css/all.min.css') }}">
-    
+    <!-- Custom fonts for this template-->
+    <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static',filename='vendor/fontawesome-free/css/all.min.css') }}">
+
     <link
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/loading.css') }}">
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/dropdown.css') }}">
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/alert.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/loading.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/dropdown.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/alert.css') }}">
 
     {% block links %}
-    
+
     {% endblock %}
 
 </head>
@@ -45,9 +46,10 @@
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
                 <div class="sidebar-brand-icon rotate-n-15">
-                    <img src="/static/img/SELO 50 ANOS ISOLADO_Prancheta 1.png" alt="Selo de 50 anos da CEMAG" style="width: 50px; height: auto; filter: brightness(255);" >
+                    <img src="/static/img/SELO 50 ANOS ISOLADO_Prancheta 1.png" alt="Selo de 50 anos da CEMAG"
+                        style="width: 50px; height: auto; filter: brightness(255);">
                 </div>
-                <div class="sidebar-brand-text mx-3">CEMAG</div>
+                <div class="sidebar-brand-text mx-3">CEMAGProd</div>
             </a>
 
             <!-- Divider -->
@@ -64,16 +66,17 @@
             <hr class="sidebar-divider">
 
             <!-- Heading -->
-            <div class="sidebar-heading">
+            <!-- <div class="sidebar-heading">
                 Apontamentos
-            </div>
+            </div> -->
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                     aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Pintura</span>
+                    <img src="/static/img/pintura-de-carro.png" alt="icone pintura"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Pintura</span>
                 </a>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
@@ -90,16 +93,17 @@
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
                     aria-expanded="true" aria-controls="collapseUtilities">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>Montagem</span>
+                    <img src="/static/img/mascara-de-solda.png" alt="icone solda"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Montagem</span>
                 </a>
                 <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Funções:</h6>
                         <a class="collapse-item" href="apontar-montagem">Apontamento</a>
-                        <a class="collapse-item" href="planejar-montagem">Planejar produção</a>
-                        <a class="collapse-item" href="painel-montagem">Painel</a>
+                        <!-- <a class="collapse-item" href="planejar-montagem">Planejar produção</a> -->
+                        <!-- <a class="collapse-item" href="painel-montagem">Painel</a> -->
                     </div>
                 </div>
             </li>
@@ -107,10 +111,12 @@
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseEstamparia"
                     aria-expanded="true" aria-controls="collapseEstamparia">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Estamparia</span>
+                    <img src="/static/img/estampagem.png" alt="icone estamparia"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Estamparia</span>
                 </a>
-                <div id="collapseEstamparia" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div id="collapseEstamparia" class="collapse" aria-labelledby="headingTwo"
+                    data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Funções:</h6>
                         <a class="collapse-item" href="tela-apontamento-estamparia">Apontamento</a>
@@ -121,8 +127,9 @@
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCorte"
                     aria-expanded="true" aria-controls="collapseCorte">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Corte</span>
+                    <img src="/static/img/maquina-de-corte-a-laser.png" alt="icone corte"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Corte</span>
                 </a>
                 <div id="collapseCorte" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
@@ -136,10 +143,12 @@
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLevantamento"
                     aria-expanded="true" aria-controls="collapseLevantamento">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Levantamento</span>
+                    <img src="/static/img/inventario.png" alt="icone levantamento"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Levantamento</span>
                 </a>
-                <div id="collapseLevantamento" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div id="collapseLevantamento" class="collapse" aria-labelledby="headingTwo"
+                    data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Funções:</h6>
                         <a class="collapse-item" href="levantamento">Levantamento</a>
@@ -207,7 +216,7 @@
 
         </ul>
         <!-- End of Sidebar -->
-        
+
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
@@ -327,8 +336,7 @@
                                 </h6>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_1.svg"
-                                            alt="...">
+                                        <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="...">
                                         <div class="status-indicator bg-success"></div>
                                     </div>
                                     <div class="font-weight-bold">
@@ -339,8 +347,7 @@
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_2.svg"
-                                            alt="...">
+                                        <img class="rounded-circle" src="img/undraw_profile_2.svg" alt="...">
                                         <div class="status-indicator"></div>
                                     </div>
                                     <div>
@@ -351,8 +358,7 @@
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_3.svg"
-                                            alt="...">
+                                        <img class="rounded-circle" src="img/undraw_profile_3.svg" alt="...">
                                         <div class="status-indicator bg-warning"></div>
                                     </div>
                                     <div>
@@ -384,8 +390,7 @@
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small"></span>
-                                <img class="img-profile rounded-circle"
-                                    src="img/undraw_profile.svg">
+                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -419,9 +424,9 @@
             </div>
         </div>
         <!-- End of Page Wrapper -->
-    
+
     </div>
-    
+
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>

@@ -34,8 +34,8 @@
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Iniciar Processo</h6>
                     <div class="btn-group" role="group" aria-label="Criar OP">
-                        <button id="btnModalDuplicarOP" type="button" class="btn btn-sm btn-sucess" data-toggle="modal"
-                            data-target="#modalDuplicarOP">Duplicar OP</button>
+                        <button id="btnModalDuplicarOP" type="button" class="btn btn-sm btn-primary mr-2"
+                            data-toggle="modal" data-target="#modalDuplicarOP">Duplicar OP</button>
                         <button id="btnModalOpLaser" type="button" class="btn btn-sm btn-info" data-toggle="modal"
                             data-target="#modalOpLaser">Criar OP Laser</button>
                         <button id="btnModalOpPlasma" type="button" class="btn btn-sm btn-warning" data-toggle="modal"
@@ -98,35 +98,6 @@
 
     </div>
 
-    <!-- Painel de cards "em processo" e "interrompidas" -->
-    <!-- <div class="row">
-
-        <div class="col-xl-6 mb-2">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Peças em processo</h6>
-                </div>
-                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
-                    <div class="row" id="cardsContainer">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-6 mb-2">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Peças interrompidas</h6>
-                </div>
-                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
-                    <div class="row" id="cardsContainerInterrompida">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div> -->
-
     <!-- Content Row -->
     <div class="row">
 
@@ -136,8 +107,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="TittleModalOpLaser">Gerar apontamento para peça fora do
-                            planejamento</h5>
+                        <h5 class="modal-title" id="TittleModalOpLaser">Criar OP laser</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -323,59 +293,60 @@
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="TittleModalDuplicarOP">Gerar apontamento para peça fora do
-                            planejamento</h5>
+                        <h5 class="modal-title" id="TittleModalDuplicarOP">Duplicar OP</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="max-height: 700px; overflow-y: auto;">
                         <div class="row mb-3">
-                            <div class="col-sm-2">
+                            <div class="col-sm-6 col-md-3 mb-2">
                                 <label for="opDuplicar">Op</label>
                                 <input class="form-control" type="text" id="odDuplicar">
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-sm-6 col-md-3 mb-2">
                                 <label for="pecaDuplicar">Peça</label>
                                 <input class="form-control" type="text" id="pecaDuplicar">
                             </div>
-                            <div class="col-sm-2">
+                            <div class="col-sm-6 col-md-3 mb-2">
                                 <label for="maquinaDuplicar">Máquina</label>
                                 <input class="form-control" type="text" id="maquinaDuplicar">
                             </div>
-                            <div class="col-sm-2 align-self-end">
-                                <button class="btn btn-sucess" id="btnFiltraDuplicarOp">Filtrar</button>
+                            <div class="col-md-3 align-self-end mb-2">
+                                <button class="btn btn-dark btn-sm btn-block" id="btnFiltraDuplicarOp">Filtrar</button>
                             </div>
                         </div>
                         <div class="row">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Op</th>
-                                        <th scope="col">Peças</th>
-                                        <th scope="col">Qt. peças</th>
-                                        <th scope="col">Chapa</th>
-                                        <th scope="col">Espessura</th>
-                                        <th scope="col">Qt. chapas</th>
-                                        <th scope="col">Máquina</th>
-                                        <th scope="col">Duplicar</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="bodyDuplicarOp">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Op</th>
+                                            <th scope="col">Peças</th>
+                                            <th scope="col">Qt. peças</th>
+                                            <th scope="col">Chapa</th>
+                                            <th scope="col">Espessura</th>
+                                            <th scope="col">Qt. chapas</th>
+                                            <th scope="col">Máquina</th>
+                                            <th scope="col">Duplicar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyDuplicarOp">
 
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="9">
-                                            <nav aria-label="Page navigation example">
-                                                <ul class="pagination justify-content-end" id="paginationDuplicada">
-                                                    <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
-                                                </ul>
-                                            </nav>
-                                        </td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9">
+                                                <nav aria-label="Page navigation example">
+                                                    <ul class="pagination justify-content-end" id="paginationDuplicada">
+                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                    </ul>
+                                                </nav>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -523,7 +494,7 @@
 
 <script>
 
-    function buscarPecas(op,funcao) {
+    function buscarPecas(op, funcao) {
 
         showLoading();
 

@@ -89,23 +89,24 @@
                 <!-- Card Header - Dropdown -->
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Iniciar Processo</h6>
-                    <button id="btnModalPecaFora" type="button" class="btn btn-info" data-toggle="modal"
-                        data-target="#modalPecaFora">Iniciar peça fora do planejamento</button>
-                    <button id="btnModalPecaFora" type="button" class="btn btn-warning" data-toggle="modal"
-                        data-target="#modalPlanejarPeca">Planejar peça</button>
+                    <div class="btn-group" role="group" aria-label="Criar OP">
+                        <button id="btnModalPecaFora" type="button" class="btn btn-sm btn-info mr-2" data-toggle="modal"
+                            data-target="#modalPlanejarPeca">Planejar peça</button>
+                        <button id="btnModalPecaFora" type="button" class="btn btn-sm btn-secondary" data-toggle="modal"
+                            data-target="#modalPecaFora">Iniciar peça fora do planejamento</button>
+                    </div>
                 </div>
                 <br>
                 <!-- Card Body -->
                 <div class="card-body">
                     <div class="row mb-2">
-                        <div class="col-sm-2">
+                        <div class="col-sm-2 col-sm-6">
                             <!-- <label for="codigoPecaEstamparia">Código</label>
                             <input class="form-control" type="text" id="codigoPecaEstamparia"> -->
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Código"
-                                    aria-label="Código" aria-describedby="clear-codigo" id="codigoPecaEstamparia">
-                                <button class="btn btn-outline-secondary" type="button"
-                                    id="clear-codigo">X</button>
+                                <input type="text" class="form-control" placeholder="Código" aria-label="Código"
+                                    aria-describedby="clear-codigo" id="codigoPecaEstamparia">
+                                <button class="btn btn-outline-secondary" type="button" id="clear-codigo">X</button>
                             </div>
                         </div>
                     </div>
@@ -199,7 +200,8 @@
                                     <div class="position-relative">
                                         <input class="form-control" type="text" id="userInput"
                                             oninput="showSuggestionsPecas_()">
-                                        <span id="peca-modal" class="clear-icon-operador">x</span>
+                                        <span id="peca-modal" class="clear-icon-operador"
+                                            onclick="clearInput_()">x</span>
                                         <ul id="suggestionsPecas" class="custom-dropdown-menu"></ul>
                                     </div>
                                 </div>
@@ -267,7 +269,7 @@
                                     <div class="position-relative">
                                         <input class="form-control" type="text" id="userInput_"
                                             oninput="showSuggestionsPecas()">
-                                        <span id="peca-modal" class="clear-icon-operador"
+                                        <span id="peca-modal_" class="clear-icon-operador"
                                             onclick="clearInput()">x</span>
                                         <ul id="suggestionsPecas_" class="custom-dropdown-menu" style="display: none;">
                                         </ul>
@@ -813,6 +815,8 @@
 <script>
     $(document).ready(function () {
         $('#btnSalvarPlanejamento').on('click', function () {
+            showLoading();
+            
             var peca_ = $('#userInput_').val();
             var dataPlanejamento_ = $('#inputData_').val();
             var quantidade_ = $('#inputQuantidade_').val();
@@ -924,7 +928,7 @@
         // Evento de clique no ícone de limpar para limpar o campo de entrada e esconder a lista de sugestões
         $('#peca-modal').click(function (event) {
             event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
-            clearInput();
+            clearInput_();
         });
 
         // Evento de clique fora da lista de sugestões para escondê-la
@@ -965,7 +969,7 @@
         }
 
         // Função para limpar o campo de entrada e ocultar a lista de sugestões
-        function clearInput() {
+        function clearInput_() {
             $('#userInput').val('');
             $('#suggestionsPecas').hide();
         }
@@ -1007,7 +1011,7 @@
         });
 
         // Evento de clique no ícone de limpar para limpar o campo de entrada e esconder a lista de sugestões
-        $('#peca-modal').click(function (event) {
+        $('#peca-modal_').click(function (event) {
             event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
             clearInput();
         });
@@ -1112,7 +1116,7 @@
 
     function fetchSuggestionsData() {
         $.ajax({
-            url: '/sugestao-operadores-montagem',
+            url: '/sugestao-operadores-estamparia',
             method: 'GET',
             success: function (data) {
                 suggestionsData1 = data.map(row => row[Object.keys(row)[0]]);
@@ -1202,7 +1206,7 @@
     // Função para obter dados brutos do backend
     function fetchSuggestionsOperadorModal() {
         $.ajax({
-            url: '/sugestao-operadores-montagem',
+            url: '/sugestao-operadores-estamparia',
             method: 'GET',
             success: function (data) {
                 suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);
@@ -1270,7 +1274,7 @@
     // Função para obter dados brutos do backend
     function fetchSuggestionsOperadorModal() {
         $.ajax({
-            url: '/sugestao-operadores-montagem',
+            url: '/sugestao-operadores-estamparia',
             method: 'GET',
             success: function (data) {
                 suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);
@@ -1735,7 +1739,7 @@
 </script>
 
 <script>
-    document.getElementById('clear-codigo').addEventListener('click', function(){
+    document.getElementById('clear-codigo').addEventListener('click', function () {
 
         $('#codigoPecaEstamparia').val('');
 

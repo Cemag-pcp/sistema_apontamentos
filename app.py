@@ -10,7 +10,6 @@ import cachetools
 import uuid
 import gspread
 
-
 app = Flask(__name__)
 app.secret_key = "apontamentopintura"
 
@@ -222,7 +221,7 @@ def gerar_cambao():
         table['data_carga']).dt.strftime("%d/%m/%Y")
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
     table['data_planejada'] = pd.to_datetime(
-        table['data_carga']) - timedelta(1)
+        table['data_carga'], format="%d/%m/%Y") - timedelta(1)
 
     # Aplica a função de ajuste para cada valor na coluna 'data_planejada'
     table['data_planejada'] = table['data_planejada'].apply(ajustar_para_sexta)
@@ -468,7 +467,7 @@ def apontar_montagem():
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
     # Supondo que 'table' seja um DataFrame do pandas e 'data_carga' seja uma coluna contendo as datas
     table['data_planejada'] = pd.to_datetime(
-        table['data_carga']) - timedelta(3)
+        table['data_carga'], format="%d/%m/%Y") - timedelta(3)
 
     # Aplica a função de ajuste para cada valor na coluna 'data_planejada'
     table['data_planejada'] = table['data_planejada'].apply(ajustar_para_sexta)
@@ -606,7 +605,7 @@ def mostrar_sugestao_peca_montagem():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select distinct(concat(codigo,' - ', peca)) from pcp.gerador_ordens_montagem"
+    sql = "select distinct(concat(codigo,' - ', descricao)) from pcp.base_pecas where setor = 'Montagem' and status = 'ativo'"
 
     cur.execute(sql)
     data = cur.fetchall()
@@ -621,7 +620,7 @@ def mostrar_sugestao_peca_estamparia():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select distinct(concat(codigo,' - ', peca)) from pcp.gerador_ordens_montagem"
+    sql = "select distinct(concat(codigo,' - ', descricao)) from pcp.base_pecas where setor = 'Estamparia' and status = 'ativo'"
 
     cur.execute(sql)
     data = cur.fetchall()
@@ -636,7 +635,21 @@ def mostrar_sugestao_operadores_montagem():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select distinct(concat(matricula,' - ', nome)) from pcp.operadores_montagem"
+    sql = "select distinct(concat(matricula,' - ', nome)) from pcp.operadores where setor = 'Montagem' and status = 'ativo'"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    return jsonify(data)
+
+@app.route("/sugestao-operadores-estamparia")
+def mostrar_sugestao_operadores_estamparia():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select distinct(concat(matricula,' - ', nome)) from pcp.operadores where setor = 'Estamparia' and status = 'ativo'"
 
     cur.execute(sql)
     data = cur.fetchall()
@@ -2630,6 +2643,160 @@ def consultar_historico_levantamento():
         'peca_historico':list(peca_unica)
     })
 
+# Bases editáveis
+
+@app.route('/bases', methods=['GET'])
+def tela_bases():
+
+
+    return render_template('bases.html')
+
+@app.route('/consultar-base-pecas/bases', methods=['GET'])
+def consultar_pecas_bases():
+    """
+    Rota para enviar itens de peças cadastradas
+    """
+
+    # Obter o número da página atual do parâmetro da solicitação
+    page = request.args.get('page', 1, type=int)
+
+    # Obter o filtro OP do parâmetro da solicitação
+    peca = request.args.get('pecaBase', None)
+    celula = request.args.get('celulaBase',None)
+    setor = request.args.get('setorBase',None)
+    status = request.args.get('statusBase',None)
+
+    # Definir o número de itens por página
+    per_page = 10
+
+    # Calcular o deslocamento com base na página atual e no número de itens por página
+    offset = (page - 1) * per_page
+
+    """
+    Função para buscar os dados da base de peças
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql_count = """
+                select * from pcp.base_pecas
+                where 1=1
+            """
+
+    if peca:
+        sql_count += f" and codigo = '{peca}'"
+    if celula:
+        sql_count += f" and celula = '{celula}'"
+    if setor:
+        sql_count += f" and setor = '{setor}'"
+    if status:
+        sql_count += f" and status = '{status}'"
+
+    cur.execute(sql_count)
+    data_count = cur.fetchall()
+    total_rows = len(data_count)
+
+    sql = """select * from pcp.base_pecas
+            where 1=1
+        """
+
+    if peca:
+        sql += f" and codigo = '{peca}'"
+    if celula:
+        sql += f" and celula = '{celula}'"
+    if setor:
+        sql += f" and setor = '{setor}'"
+    if status:
+        sql += f" and status = '{status}'"
+
+    sql += " LIMIT %s OFFSET %s;"
+
+    cur.execute(sql,(per_page,offset))
+    data = cur.fetchall()
+
+    # Calcular o número total de páginas
+    total_pages = (total_rows + per_page - 1) // per_page
+
+    return jsonify({
+        'data': data,
+        'total_pages': total_pages
+    })
+
+
+@app.route('/consultar-base-operador/bases', methods=['GET'])
+def consultar_operador_bases():
+    """
+    Rota para enviar itens de operadores cadastrados
+    """
+
+    # Obter o número da página atual do parâmetro da solicitação
+    page = request.args.get('page', 1, type=int)
+
+    # Obter o filtro OP do parâmetro da solicitação
+    matricula = request.args.get('matriculaBaseOperador', None)
+    nome = request.args.get('nomeBaseOperador',None)
+    setor = request.args.get('setorBaseOperador',None)
+    status = request.args.get('statusBaseOperador',None)
+
+    # Definir o número de itens por página
+    per_page = 10
+
+    # Calcular o deslocamento com base na página atual e no número de itens por página
+    offset = (page - 1) * per_page
+
+    """
+    Função para buscar os dados da base de operadores
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql_count = """
+                select * from pcp.operadores
+                where 1=1
+            """
+
+    if matricula:
+        sql_count += f" and matricula = '{matricula}'"
+    if nome:
+        sql_count += f" and nome = '{nome}'"
+    if setor:
+        sql_count += f" and setor = '{setor}'"
+    if status:
+        sql_count += f" and status = '{status}'"
+
+    cur.execute(sql_count)
+    data_count = cur.fetchall()
+    total_rows = len(data_count)
+
+    sql = """select * from pcp.operadores
+            where 1=1
+        """
+
+    if matricula:
+        sql += f" and matricula = '{matricula}'"
+    if nome:
+        sql += f" and nome = '{nome}'"
+    if setor:
+        sql += f" and setor = '{setor}'"
+    if status:
+        sql += f" and status = '{status}'"
+
+    sql += " LIMIT %s OFFSET %s;"
+
+    cur.execute(sql,(per_page,offset))
+    data = cur.fetchall()
+
+    # Calcular o número total de páginas
+    total_pages = (total_rows + per_page - 1) // per_page
+
+    return jsonify({
+        'data': data,
+        'total_pages': total_pages
+    })
 
 
 if __name__ == '__main__':

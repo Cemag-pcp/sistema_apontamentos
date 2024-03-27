@@ -595,21 +595,25 @@
             data: { 'op': op },
             success: function (data) {
 
-                var content = '<div class="row mb-3"><div class="col-sm-3"><label for="opModal">Op</label><input class="form-control" id="opModal" value="' + data.data[0][0] + '" readonly=True></div>'
-                content += '<div class="col-sm-6"><label for="espessuraModal">Espessura</label><input class="form-control" id="espessuraModal" value="' + data.data[0][3] + '" readonly="readonly"></div>'
-                content += '<div class="col-sm-3"><label for="chapaModal">Chapas</label><input class="form-control" id="chapaModal" value="' + data.data[0][5] + '" readonly=True></div></div>'
+                var content = '<div class="row mb-3"><div class="col-sm-3"><label for="opModal">Op</label><input class="form-control" id="opModal" value="' + data.data[0][0] + '" readonly></div>'
+                content += '<div class="col-sm-6"><label for="espessuraModal">Espessura</label><input class="form-control" id="espessuraModal" value="' + data.data[0][3] + '" readonly></div>'
+                content += '<div class="col-sm-3"><label for="chapaModal">Chapas</label><input class="form-control" id="chapaModal" value="' + data.data[0][5] + '"></div></div>'
                 content += '<div class="row mb-3"><div class="col-sm-8"><label for="qtChapasModal">Descrição da chapa</label><input class="form-control" id="qtChapasModal" value="' + data.data[0][4] + '" readonly=True></div>'
-                content += '<div class="col-sm-4"><label for="aproveitamentoModal">Aprov.</label><input class="form-control" id="aproveitamentoModal" value="' + data.data[0][6] + '" readonly=True></div></div>'
+                content += '<div class="col-sm-4"><label for="aproveitamentoModal">Aprov.</label><input class="form-control" id="aproveitamentoModal" value="' + data.data[0][6] + '" readonly></div></div>'
                 content += '<div class="row mb-3"><div class="col-sm-6"><label for="selectOperadorFinalizar">Operador</label><select class="form-control" id="selectOperadorFinalizar"><option></option><option>Assis</option><option>Jefferson</option><option>Leano</option><option>Marcio</option></select></div></div>'
 
                 content += '<table class="table table-bordered"><thead><tr><th>Peça</th><th>Qt.Peças</th><th>Mortas</th></tr></thead><tbody>';
 
+                valoresAntigos = [];
+
                 data.data.forEach(peca => {
                     content += '<tr>';
                     content += '<td>' + peca[1] + '</td>';
-                    content += '<td>' + peca[2] + '</td>';
+                    content += '<td class="qtPecas">' + peca[2] + '</td>';
                     content += '<td><input class="form-control" value="0"></td>';
                     content += '</tr>';
+
+                    valoresAntigos.push(peca[2]);
                 });
 
                 content += '</tbody></table>';
@@ -617,6 +621,20 @@
                 $('#bodyModalFinalizar').empty();
 
                 $('#bodyModalFinalizar').html(content);
+
+                var antigoValorChapa = $('#chapaModal').val()
+
+                // Evento de alteração para o campo chapaModal
+                $('#chapaModal').change(function () {
+                    var novoValorChapa = $(this).val();
+                    $('.qtPecas').each(function (index) {
+                        var valorAntigo = valoresAntigos[index];
+                        console.log(valorAntigo);
+                        var qtPecas = $(this).text();
+                        var valorRecalculado = (valorAntigo * novoValorChapa) / antigoValorChapa;
+                        $(this).text(valorRecalculado);
+                    });
+                });
 
                 hideLoading();
                 $('#modalExecucaoApontamento').modal('show');
