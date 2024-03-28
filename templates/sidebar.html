@@ -24,10 +24,10 @@
         rel="stylesheet">
 
     <!-- Custom styles for this template-->
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/loading.css') }}">
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/dropdown.css') }}">
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/alert.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/loading.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/dropdown.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/alert.css') }}">
     <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
 
     {% block links %}
@@ -70,7 +70,9 @@
             <!-- <div class="sidebar-heading">
                 Apontamentos
             </div> -->
-
+            <div class="sidebar-heading">
+                Produção
+            </div>
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
@@ -160,23 +162,45 @@
             <hr class="sidebar-divider">
 
             <div class="sidebar-heading">
-                Inspeção
+                Qualidade
             </div>
 
             <!-- Divider -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseQuality"
                     aria-expanded="true" aria-controls="collapseQuality">
-                    <i class="fas fa-fw fa-star"></i>
-                    <span>Qualidade</span>
+                    <img src="/static/img/auditoria.png" alt="icone qualidade"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Inspeção</span>
                 </a>
                 <div id="collapseQuality" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Funções:</h6>
-                        <a class="collapse-item" href="inspecao">Inspeção - Pintura</a>
-                        <a class="collapse-item" href="inspecao-solda">Inspeção - Solda</a>
-                        <a class="collapse-item">Inspeção - Montagem</a>
+                        <a class="collapse-item" href="inspecao">Pintura</a>
+                        <a class="collapse-item" href="inspecao-solda">Solda</a>
+                    </div>
+                </div>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <div class="sidebar-heading">
+                Bases
+            </div>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCadastros"
+                    aria-expanded="true" aria-controls="collapseCadastros">
+                    <img src="/static/img/novo-banco-de-dados.png" alt="icone registros"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Bases</span>
+                </a>
+                <div id="collapseCadastros" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Funções:</h6>
+                        <a class="collapse-item" href="bases">Cadastros</a>
                     </div>
                 </div>
             </li>
@@ -276,11 +300,8 @@
                                 </form>
                             </div>
                         </li>
-
                         <div class="topbar-divider d-none d-sm-block"></div>
-
                     </ul>
-
                 </nav>
                 <!-- End of Topbar -->
                 {% block containerFluid %}

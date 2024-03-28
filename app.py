@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, Blueprint, send_file
+from flask import Flask,session,render_template, request, jsonify, redirect, url_for, flash, Blueprint, send_file
 import pandas as pd
 import time
 import uuid
@@ -6,13 +6,21 @@ import datetime
 import psycopg2  # pip install psycopg2
 import psycopg2.extras
 from psycopg2.extras import execute_values
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import cachetools
 import uuid
 import gspread
+from flask_socketio import SocketIO, emit
+from threading import Lock
+import json
+
+async_mode = None
 
 app = Flask(__name__)
 app.secret_key = "apontamentopintura"
+socketio = SocketIO(app, async_mode=async_mode)
+thread = None
+thread_lock = Lock()
 
 DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
@@ -968,7 +976,7 @@ def tela_estamparia():
     Rota para tela de estamparia
     """
 
-    return render_template('apontamento-estamparia.html')
+    return render_template('apontamento-estamparia.html', async_mode=socketio.async_mode)
 
 
 @app.route('/salvar-apontamento-montagem', methods=['GET', 'POST'])
@@ -1987,9 +1995,34 @@ def planejar_pecas_estamparia():
 
     return 'sucess'
 
+# def background_thread():
+#     """Example of how to send server generated events to clients."""
+#     count = 0
+#     while True:
+#         socketio.sleep(3)
+#         count += 1
+#         data = api_consulta_pecas_em_processo_estamparia()
+#         print(data)
+#         socketio.emit('my_response',
+#                       {'data': data})
+
+# @socketio.event
+# def my_event(message):
+#     session['receive_count'] = session.get('receive_count', 0) + 1
+#     emit('my_response',
+#          {'data': message['data'], 'count': session['receive_count']})
+
+# @socketio.event
+# def connect():
+#     global thread
+#     with thread_lock:
+#         if thread is None:
+#             thread = socketio.start_background_task(background_thread)
+#     emit('my_response', {'data': 'Connected', 'count': 0})
 
 @app.route("/api/consulta-pecas-em-processo/estamparia", methods=['GET'])
 def api_consulta_pecas_em_processo_estamparia():
+    
     """
     Api para consultar peças com status "em processo"
     """
@@ -2004,6 +2037,25 @@ def api_consulta_pecas_em_processo_estamparia():
 
     cur.execute(query)
     consulta = cur.fetchall()
+
+    # # Verificar tipos de dados não serializáveis
+    # def serialize_value(value):
+    #     if isinstance(value, (datetime, date)):
+    #         return value.strftime("%Y-%m-%d %H:%M:%S") if isinstance(value, datetime) else value.isoformat()
+    #     else:
+    #         return value
+
+    # # Converter objetos datetime para strings
+    # for item in consulta:
+    #     for i, value in enumerate(item):
+    #         item[i] = serialize_value(value)
+
+    # # Tentar serializar os dados em JSON
+    # try:
+    #     consulta_json = json.dumps(consulta)
+    #     print(consulta_json)
+    # except Exception as e:
+    #     print("Erro ao serializar:", e)
 
     return jsonify(consulta)
 
@@ -2197,7 +2249,7 @@ def api_pecas_retornou_estamparia():
 
     return 'sucess'
 
-# Apontamento corte
+# Apontamento corte #
 
 @app.route('/tela-apontamento-corte', methods=['GET', 'POST'])
 def tela_corte():
@@ -2993,7 +3045,7 @@ def duplicar_op():
 
     return 'sucess'
 
-#levantamento
+# Levantamento #
 
 @app.route('/levantamento', methods=['GET'])
 def tela_levantamento():
@@ -3259,7 +3311,7 @@ def consultar_historico_levantamento():
         'peca_historico':list(peca_unica)
     })
 
-# Bases editáveis
+# Bases editáveis #
 
 @app.route('/bases', methods=['GET'])
 def tela_bases():
@@ -3340,7 +3392,6 @@ def consultar_pecas_bases():
         'total_pages': total_pages
     })
 
-
 @app.route('/consultar-base-operador/bases', methods=['GET'])
 def consultar_operador_bases():
     """
@@ -3414,6 +3465,183 @@ def consultar_operador_bases():
         'total_pages': total_pages
     })
 
+@app.route("/editar-peca/bases", methods=['POST'])
+def editar_peca_bases():
+    
+    """
+    Rota para editar peças dentro da base
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+
+    codigo = data['codigo']
+    descricao = data['descricao']
+    setor = data['setor']
+    celula = data['celula']
+    status = data['status']
+    id = data['id']
+
+    sql = """update pcp.base_pecas set codigo = %s, descricao = %s, setor = %s, celula = %s, status = %s where id=%s"""
+
+    cur.execute(sql,(codigo,descricao,setor,celula,status,id))
+    
+    conn.commit()
+
+    return 'SUCESS'
+
+@app.route("/excluir-peca/bases", methods=['POST'])
+def excluir_peca_bases():
+    
+    """
+    Rota para excluir peças dentro da base
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+
+    id = data['id']
+
+    sql = """delete from pcp.base_pecas where id=%s"""
+
+    cur.execute(sql,(id,))
+    
+    conn.commit()
+
+    return 'SUCESS'
+
+@app.route("/editar-operador/bases", methods=['POST'])
+def editar_operador_bases():
+    
+    """
+    Rota para editar operador dentro da base
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+
+    matricula = data['matricula']
+    nome = data['nome']
+    setor = data['setor']
+    status = data['status']
+    id = data['id']
+
+    print(data)
+
+    sql = """update pcp.operadores set matricula = %s, nome = %s, setor = %s, status = %s where id=%s"""
+
+    cur.execute(sql,(matricula,nome,setor,status,id))
+    
+    conn.commit()
+
+    return 'SUCESS'
+
+@app.route("/excluir-operador/bases", methods=['POST'])
+def excluir_operador_bases():
+    
+    """
+    Rota para excluir opeardores dentro da base
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+
+    id = data['id']
+
+    sql = """delete from pcp.operadores where id=%s"""
+
+    cur.execute(sql,(id,))
+    
+    conn.commit()
+
+    return 'SUCESS'
+
+@app.route("/adicionar-peca/bases", methods=['POST'])
+def adicionar_peca_bases():
+    
+    """
+    Rota para adicionar peças dentro da base
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+
+    codigo = data['codigo']
+    descricao = data['descricao']
+    setor = data['setor']
+    celula = data['celula']
+
+    # verificar se ja existe
+
+    sql_verificar = """select * from pcp.base_pecas where codigo = %s"""
+
+    cur.execute(sql_verificar,(codigo,))
+    data_verificacao = cur.fetchall()
+
+    if len(data_verificacao) > 0:
+        return jsonify({'verificacao_consulta':"Código ja existe!"})
+    
+    else:
+        sql = """insert into pcp.base_pecas (codigo,descricao,setor,celula) values(%s,%s,%s,%s)"""
+
+        cur.execute(sql,(codigo,descricao,setor,celula))
+        
+        conn.commit()
+
+        return jsonify({'verificacao_insert':"Cadastrado com sucesso!"})
+
+@app.route("/adicionar-operador/bases", methods=['POST'])
+def adicionar_operador_bases():
+    
+    """
+    Rota para adicionar peças dentro da base
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+
+    matricula = data['matricula']
+    nome = data['nome']
+    setor = data['setor']
+
+    # verificar se ja existe
+
+    sql_verificar = """select * from pcp.operadores where matricula = %s"""
+
+    cur.execute(sql_verificar,(matricula,))
+    data_verificacao = cur.fetchall()
+
+    if len(data_verificacao) > 0:
+        return jsonify({'verificacao_consulta':"Matrícula ja existe!"})
+    
+    else:
+        sql = """insert into pcp.operadores (matricula,nome,setor) values(%s,%s,%s)"""
+
+        cur.execute(sql,(matricula,nome,setor))
+        
+        conn.commit()
+
+        return jsonify({'verificacao_insert':"Cadastrado com sucesso!"})
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    socketio.run(app)
