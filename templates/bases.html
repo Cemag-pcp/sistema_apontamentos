@@ -107,24 +107,45 @@
                         </div>
                         <div class="col-md-3 col-sm-6 mb-3">
                             <label for="celulaBase">Célula</label>
-                            <input class="form-control" type="text" id="celulaBase">
-                            <ul class="lista-celulaBase" style="display: none;"></ul>
+                            <select class="form-control" name="celulaBase" id="celulaBase">
+                                <option value=""></option>
+                                <option value="CILINDRO">CILINDRO</option>
+                                <option value="CHASSI">CHASSI</option>
+                                <option value="LATERAL">LATERAL</option>
+                                <option value="CILINDRO 2">CILINDRO 2</option>
+                                <option value="PLAT. TANQUE. CAÇAM.">PLAT. TANQUE. CAÇAM.</option>
+                                <option value="SERRALHERIA">SERRALHERIA</option>
+                                <option value="IÇAMENTO">IÇAMENTO</option>
+                                <option value="FUEIRO">FUEIRO</option>
+                                <option value="EIXO SIMPLES">EIXO SIMPLES</option>
+                                <option value="CONJ INTERMED">CONJ INTERMED</option>
+                                <option value="EIXO COMPLETO">EIXO COMPLETO</option>
+                            </select>
                         </div>
                         <div class="col-md-3 col-sm-6 mb-3">
                             <label for="setorBase">Setor</label>
-                            <input class="form-control" type="text" id="setorBase">
-                            <ul class="lista-setorBase" style="display: none;"></ul>
+                            <select class="form-control" name="setorBase" id="setorBase">
+                                <option value=""></option>
+                                <option value="Montagem">Montagem</option>
+                                <option value="Estamparia">Estamparia</option>
+                            </select>
                         </div>
-                        <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="col-md-2 col-sm-6 mb-3">
                             <label for="statusBase">Status</label>
-                            <input class="form-control" type="text" id="statusBase">
-                            <ul class="lista-statusBase" style="display: none;"></ul>
+                            <select class="form-control" name="statusBase" id="statusBase">
+                                <option value=""></option>
+                                <option value="ativo">ativo</option>
+                                <option value="inativo">inativo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 col-sm-6 mb-3 d-flex align-items-end">
+                            <button id="btnFilterBasePeca" class="btn btn-primary"><i
+                                    class="fas fa-search"></i></button>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-sm-4 align-self-end">
-                            <button id="btnFilterBasePeca" class="btn btn-primary"><i
-                                    class="fas fa-search"></i></button>
+
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -190,13 +211,28 @@
                         </div>
                         <div class="col-md-3 col-sm-6 mb-3">
                             <label for="setorBaseOperador">Setor</label>
-                            <input class="form-control" type="text" id="setorBaseOperador">
-                            <ul class="lista-setorBaseOperador" style="display: none;"></ul>
+                            <select class="form-control" name="setorBaseOperador" id="setorBaseOperador">
+                                <option value=""></option>
+                                <option value="CILINDRO">CILINDRO</option>
+                                <option value="CHASSI">CHASSI</option>
+                                <option value="LATERAL">LATERAL</option>
+                                <option value="CILINDRO 2">CILINDRO 2</option>
+                                <option value="PLAT. TANQUE. CAÇAM.">PLAT. TANQUE. CAÇAM.</option>
+                                <option value="SERRALHERIA">SERRALHERIA</option>
+                                <option value="IÇAMENTO">IÇAMENTO</option>
+                                <option value="FUEIRO">FUEIRO</option>
+                                <option value="EIXO SIMPLES">EIXO SIMPLES</option>
+                                <option value="CONJ INTERMED">CONJ INTERMED</option>
+                                <option value="EIXO COMPLETO">EIXO COMPLETO</option>
+                            </select>
                         </div>
                         <div class="col-md-3 col-sm-6 mb-3">
                             <label for="statusBaseOperador">Status</label>
-                            <input class="form-control" type="text" id="statusBaseOperador">
-                            <ul class="lista-statusBaseOperador" style="display: none;"></ul>
+                            <select class="form-control" name="statusBaseOperador" id="statusBaseOperador">
+                                <option value=""></option>
+                                <option value="ativo">ativo</option>
+                                <option value="inativo">inativo</option>
+                            </select>
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -429,6 +465,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="inputModalAdicionarCelulaBase">Célula</label>
                                 <select class="form-control" id="inputModalAdicionarCelulaBase">
+                                    <option value=""></option>
                                     <option value="CILINDRO">CILINDRO</option>
                                     <option value="CHASSI">CHASSI</option>
                                     <option value="LATERAL">LATERAL</option>
@@ -602,9 +639,9 @@
         $('#btnFilterBasePeca').click(function () {
 
             var pecaBase = $('#pecaBase').val(); // peça
-            var celulaBase = $('#celulaBase').val(); // celula
-            var setorBase = $('#setorBase').val(); // setor
-            var statusBase = $('#statusBase').val(); // status
+            var celulaBase = $('#celulaBase option:selected').text(); // celula
+            var setorBase = $('#setorBase option:selected').text(); // setor
+            var statusBase = $('#statusBase option:selected').text(); // status
 
             updateTableBasePecas(1, pecaBase, celulaBase, setorBase, statusBase);
         });
@@ -758,8 +795,8 @@
 
             var matriculaBaseOperador = $('#matriculaBaseOperador').val(); // peça
             var nomeBaseOperador = $('#nomeBaseOperador').val(); // celula
-            var setorBaseOperador = $('#setorBaseOperador').val(); // setor
-            var statusBaseOperador = $('#statusBaseOperador').val(); // status
+            var setorBaseOperador = $('#setorBaseOperador option:selected').text(); // setor
+            var statusBaseOperador = $('#statusBaseOperador option:selected').text(); // status
 
             updateTableBaseOperadores(1, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
         });
@@ -1215,7 +1252,7 @@
             celula = $('#inputModalAdicionarCelulaBase').val();
 
             if (codigo === '' || descricao === '' || setor === '') {
-                showAndHideAlert("Campos de codigo, descricao e setor são obrigatórios",3000);
+                showAndHideAlert("Campos de codigo, descricao e setor são obrigatórios", 3000);
                 hideLoading();
                 return;
 
@@ -1272,7 +1309,7 @@
             setor = $('#inputModalAdicionarSetorOperadorBase').val();
 
             if (matricula === '' || nome === '' || setor === '') {
-                showAndHideAlert("Campos de codigo, descricao e setor são obrigatórios",3000);
+                showAndHideAlert("Campos de codigo, descricao e setor são obrigatórios", 3000);
                 hideLoading();
                 return;
 

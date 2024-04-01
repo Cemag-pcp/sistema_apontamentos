@@ -302,7 +302,7 @@
                         <div class="row mb-3">
                             <div class="col-sm-6 col-md-3 mb-2">
                                 <label for="opDuplicar">Op</label>
-                                <input class="form-control" type="text" id="odDuplicar">
+                                <input class="form-control" type="text" id="opDuplicar">
                             </div>
                             <div class="col-sm-6 col-md-3 mb-2">
                                 <label for="pecaDuplicar">Peça</label>
@@ -310,7 +310,12 @@
                             </div>
                             <div class="col-sm-6 col-md-3 mb-2">
                                 <label for="maquinaDuplicar">Máquina</label>
-                                <input class="form-control" type="text" id="maquinaDuplicar">
+                                <select class="form-control" id="maquinaDuplicar">
+                                    <option value=""></option>
+                                    <option value="Laser">Laser</option>
+                                    <option value="Plasma">Plasma</option>
+                                </select>
+                                <!-- <input class="form-control" type="text" id="maquinaDuplicar"> -->
                             </div>
                             <div class="col-md-3 align-self-end mb-2">
                                 <button class="btn btn-dark btn-sm btn-block" id="btnFiltraDuplicarOp">Filtrar</button>
@@ -962,18 +967,20 @@
 
         $('#btnFiltraDuplicarOp').click(function () {
             var opDuplicar = $('#opDuplicar').val(); // Obter o valor do filtro OP
+            console.log(opDuplicar);
             var pecaDuplicar = $('#pecaDuplicar').val();
-            updateTableDuplicarOp(1, opDuplicar, pecaDuplicar); // Atualizar a tabela com o filtro OP
+            var maquinaDuplicar = $('#maquinaDuplicar option:selected').text();
+            updateTableDuplicarOp(1, opDuplicar, pecaDuplicar, maquinaDuplicar); // Atualizar a tabela com o filtro OP
         });
     });
 
     // Função para preencher a tabela com os dados da página atual
-    function updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar) {
+    function updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar) {
         showLoading();
         $.ajax({
             url: '/consultar-op-criada/corte',
             type: 'GET',
-            data: { page: currentPage, op: opDuplicar, peca: pecaDuplicar }, // Envie o filtro OP para o servidor
+            data: { page: currentPage, op: opDuplicar, peca: pecaDuplicar, maquina: maquinaDuplicar },
             success: function (response) {
                 var data = response.data;
                 var totalPages = response.total_pages;
@@ -1032,7 +1039,7 @@
         $('#prevButton').click(function () {
             if (currentPage > 1) {
                 currentPage--;
-                updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar);
+                updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar);
                 updatePaginationDuplicaOp(totalPages, currentPage,); // Atualiza a paginação após a mudança de página
             }
         });
@@ -1065,7 +1072,7 @@
             pagination.append(listItem);
             listItem.click(function () {
                 currentPage = parseInt($(this).text());
-                updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar);
+                updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar);
                 updatePaginationDuplicaOp(totalPages, currentPage); // Atualiza a paginação após a mudança de página
             });
         }
@@ -1084,7 +1091,7 @@
         $('#nextButton').click(function () {
             if (currentPage < totalPages) {
                 currentPage++;
-                updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar);
+                updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar);
                 updatePaginationDuplicaOp(totalPages, currentPage); // Atualiza a paginação após a mudança de página
             }
         });
@@ -1096,7 +1103,7 @@
 
 </script>
 
-<!-- Script ara confirmar duplicação de op -->
+<!-- Script para confirmar duplicação de op -->
 
 <script>
 

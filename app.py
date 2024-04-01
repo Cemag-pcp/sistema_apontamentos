@@ -10,17 +10,17 @@ from datetime import datetime, timedelta, date
 import cachetools
 import uuid
 import gspread
-from flask_socketio import SocketIO, emit
-from threading import Lock
-import json
+# from flask_socketio import SocketIO, emit
+# from threading import Lock
+# import json
 
 async_mode = None
 
 app = Flask(__name__)
 app.secret_key = "apontamentopintura"
-socketio = SocketIO(app, async_mode=async_mode)
-thread = None
-thread_lock = Lock()
+# socketio = SocketIO(app, async_mode=async_mode)
+# thread = None
+# thread_lock = Lock()
 
 DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
@@ -976,7 +976,7 @@ def tela_estamparia():
     Rota para tela de estamparia
     """
 
-    return render_template('apontamento-estamparia.html', async_mode=socketio.async_mode)
+    return render_template('apontamento-estamparia.html') #async_mode=socketio.async_mode)
 
 
 @app.route('/salvar-apontamento-montagem', methods=['GET', 'POST'])
@@ -1455,6 +1455,41 @@ def api_apontamento_montagem():
     for linha in data:
         linha[5] = linha[5].strftime("%d/%m/%Y")
         linha[6] = linha[6].strftime("%d/%m/%Y")
+
+    return jsonify(data)
+
+@app.route("/api/publica/apontamento/estamparia")
+def api_apontamento_estamparia():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select * from pcp.ordens_estamparia order by id asc"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    for linha in data:
+        linha[5] = linha[5].strftime("%d/%m/%Y")
+        linha[6] = linha[6].strftime("%d/%m/%Y")
+
+    return jsonify(data)
+
+@app.route("/api/publica/apontamento/corte")
+def api_apontamento_corte():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select * from pcp.ordens_corte_finalizada order by id asc"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    for linha in data:
+        linha[10] = linha[10].strftime("%d/%m/%Y")
 
     return jsonify(data)
 
@@ -2926,14 +2961,18 @@ def consultar_op_criadas():
     page = request.args.get('page', 1, type=int)
 
     # Obter o filtro OP do parâmetro da solicitação
-    op = request.args.get('opDuplicar', None)
+    op = request.args.get('op', None)
     peca = request.args.get('peca', None)
+    maquina = request.args.get('maquina', None)
 
-    # Verifica se há mais de um item na string
-    if ',' in peca:
-        peca = tuple(peca.split(','))  # Se sim, divide os itens por vírgula e converte para tupla
+    if len(peca) == 0:
+        peca = None
     else:
-        peca = "('" + peca + "')"  # Se não, adiciona parênteses ao redor do único item
+        # Verifica se há mais de um item na string
+        if ',' in peca:
+            peca = tuple(peca.split(','))  # Se sim, divide os itens por vírgula e converte para tupla
+        else:
+            peca = "('" + peca + "')"  # Se não, adiciona parênteses ao redor do único item
 
     # Definir o número de itens por página
     per_page = 10
@@ -2957,10 +2996,13 @@ def consultar_op_criadas():
             """
 
     if op:
-        sql_count += f' and op = {op}'
+        sql_count += f" and op = '{op}'"
 
     if peca:
         sql_count+=f' and peca in {peca}'
+
+    if maquina:
+        sql_count+=f" and maquina = '{maquina}'"
 
     sql_count += " and quantidade > 0 and opp = 'opp'"
 
@@ -2975,10 +3017,13 @@ def consultar_op_criadas():
         """
 
     if op:
-        sql += f' and op = {op}'
+        sql +=f" and op = '{op}'"
 
     if peca:
         sql+=f' and peca in {peca}'
+
+    if maquina:
+        sql+=f" and maquina = '{maquina}'"
 
     sql += " and quantidade > 0 and opp = 'opp' LIMIT %s OFFSET %s;"
 
@@ -3643,5 +3688,5 @@ def adicionar_operador_bases():
 
 
 if __name__ == '__main__':
-    # app.run(debug=True)
-    socketio.run(app)
+    app.run(debug=True)
+    # socketio.run(app)
