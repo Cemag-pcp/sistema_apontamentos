@@ -12,6 +12,9 @@
 <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
 
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
 {% endblock %}
 
 {% block containerFluid %}
@@ -26,7 +29,6 @@
     </div>
 
     <div class="row">
-
         <!-- tabela iniciar apontamento -->
         <div class="col-xl-12 mb-2">
             <div class="card shadow mb-4">
@@ -46,11 +48,11 @@
                 <!-- Card Body -->
                 <div class="card-body">
                     <div class="row mb-2">
-                        <div class="col-sm-4">
+                        <div class="col-sm-4 mb-3">
                             <label for="opFilter">OP:</label>
                             <input class="form-control" type="text" id="opFilter">
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-4 mb-3">
                             <label for="maquinaFilter">Máquina</label>
                             <select class="form-control" name="maquinaFilter" id="maquinaFilter">
                                 <option value=""></option>
@@ -58,44 +60,45 @@
                                 <option value="Laser">Laser</option>
                             </select>
                         </div>
-                        <div class="col-sm-4 align-self-end">
+                        <div class="col-sm-4 align-self-end mb-3">
                             <button id="btnFilter" class="btn btn-primary">Filtrar</button>
                         </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Data criada</th>
-                                    <th scope="col">OP</th>
-                                    <th scope="col">Espessura</th>
-                                    <th scope="col">Chapa</th>
-                                    <th scope="col">Quantidade chapas</th>
-                                    <th scope="col">Máquina</th>
-                                    <th scope="col">Último status</th>
-                                    <th scope="col">Iniciar</th>
-                                </tr>
-                            </thead>
-                            <tbody id="bodyTablePlanejadas">
+                    <div id="no-more-tables">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="cf">
+                                    <tr>
+                                        <th scope="col">Data criada</th>
+                                        <th scope="col">OP</th>
+                                        <th scope="col">Espessura</th>
+                                        <th scope="col">Chapa</th>
+                                        <th scope="col">Quantidade chapas</th>
+                                        <th scope="col">Máquina</th>
+                                        <th scope="col">Último status</th>
+                                        <th scope="col">Iniciar</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyTablePlanejadas">
 
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="9">
-                                        <nav aria-label="Page navigation example">
-                                            <ul class="pagination justify-content-end" id="pagination">
-                                                <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
-                                            </ul>
-                                        </nav>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                </div>
+                <div class="card-footer">
+                    <tr>
+                        <td colspan="9">
+                            <nav aria-label="Page navigation example">
+                                <ul class="pagination justify-content-end" id="pagination">
+                                    <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                </ul>
+                            </nav>
+                        </td>
+                    </tr>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Content Row -->
@@ -339,22 +342,20 @@
                                     <tbody id="bodyDuplicarOp">
 
                                     </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="9">
-                                                <nav aria-label="Page navigation example">
-                                                    <ul class="pagination justify-content-end" id="paginationDuplicada">
-                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
-                                                    </ul>
-                                                </nav>
-                                            </td>
-                                        </tr>
-                                    </tfoot>
                                 </table>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <tr>
+                            <td colspan="9">
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-end" id="paginationDuplicada">
+                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                    </ul>
+                                </nav>
+                            </td>
+                        </tr>
                     </div>
                 </div>
             </div>
@@ -655,14 +656,14 @@
                 // Preenche a tabela com os dados da página atual
                 data.forEach(function (item) {
                     var row = '<tr>' +
-                        '<td>' + formatarDataSemHora(item[4]) + '</td>' + // data
-                        '<td>' + item[0] + '</td>' + // op
-                        '<td>' + item[3] + '</td>' + // espessura
-                        '<td>' + item[2] + '</td>' + // tamanho da chapa
-                        '<td>' + item[1] + '</td>' + // qt chapa
-                        '<td>' + item[5] + '</td>' + // máquina
-                        '<td>' + item[6] + '</td>' + // status
-                        '<td><button type="button" class="btn btn-dark btn-sm btn-pecas">Peças</button></td>' +
+                        '<td data-title="Data criada">' + formatarDataSemHora(item[4]) + '</td>' + // data
+                        '<td data-title="OP">' + item[0] + '</td>' + // op
+                        '<td data-title="Espessura">' + item[3] + '</td>' + // espessura
+                        '<td data-title="Chapa">' + item[2] + '</td>' + // tamanho da chapa
+                        '<td data-title="Quantidade chapas">' + item[1] + '</td>' + // qt chapa
+                        '<td data-title="Máquina">' + item[5] + '</td>' + // máquina
+                        '<td data-title="Último status">' + item[6] + '</td>' + // status
+                        '<td data-title="Iniciar"><button type="button" class="btn btn-dark btn-sm btn-pecas">Peças</button></td>' +
                         '</tr>';
 
                     var newRow = $(row).appendTo('#bodyTablePlanejadas');
@@ -1029,7 +1030,7 @@
         });
     }
 
-    function updatePaginationDuplicaOp(totalPages, currentPage, opDuplicar, pecaDuplicar) {
+    function updatePaginationDuplicaOp(totalPages, currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar) {
         var pagination = $('#paginationDuplicada');
         pagination.empty();
 
@@ -1040,7 +1041,7 @@
             if (currentPage > 1) {
                 currentPage--;
                 updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar);
-                updatePaginationDuplicaOp(totalPages, currentPage,); // Atualiza a paginação após a mudança de página
+                updatePaginationDuplicaOp(totalPages, currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar); // Atualiza a paginação após a mudança de página
             }
         });
 
@@ -1073,7 +1074,7 @@
             listItem.click(function () {
                 currentPage = parseInt($(this).text());
                 updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar);
-                updatePaginationDuplicaOp(totalPages, currentPage); // Atualiza a paginação após a mudança de página
+                updatePaginationDuplicaOp(totalPages, currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar); // Atualiza a paginação após a mudança de página
             });
         }
 
@@ -1092,7 +1093,7 @@
             if (currentPage < totalPages) {
                 currentPage++;
                 updateTableDuplicarOp(currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar);
-                updatePaginationDuplicaOp(totalPages, currentPage); // Atualiza a paginação após a mudança de página
+                updatePaginationDuplicaOp(totalPages, currentPage, opDuplicar, pecaDuplicar, maquinaDuplicar); // Atualiza a paginação após a mudança de página
             }
         });
     }
@@ -1140,9 +1141,10 @@
             data: JSON.stringify(dadosParaEnviar),
             success: function (response) {
                 // Lógica de sucesso aqui
-                console.log('Tabela enviada com sucesso');
-                $('#modalVisualizarPecas').modal('hide');
                 hideLoading();
+                alert('Nova op: ' + response.nova_op);
+                showAndHideSuccessAlert('Nova OP: ' + response.nova_op, 5000);
+                $('#modalVisualizarPecas').modal('hide');
                 updateTable(1, '', '');
             },
             error: function (err) {

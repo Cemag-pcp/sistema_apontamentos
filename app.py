@@ -232,12 +232,12 @@ def dados_inspecionar_reinspecionar():
 
     data_inspecao = cur.fetchall()
 
-    inspecaionados= """SELECT i.*, op.peca,op.cor,op.tipo
+    inspecionados= """SELECT i.*, op.peca,op.cor,op.tipo
                 FROM pcp.pecas_inspecionadas as i
                 LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id::varchar
                 WHERE i.setor = 'Pintura' """
 
-    cur.execute(inspecaionados)
+    cur.execute(inspecionados)
 
     data_inspecionadas = cur.fetchall()
 
@@ -710,43 +710,41 @@ def gerar_planilha():
 
     dados_recebidos = request.json['linhas']
 
-    print(dados_recebidos)
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    # conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-    #                 password=DB_PASS, host=DB_HOST)
-    # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    # Lista de tuplas contendo os dados a serem inseridos
+    values = [(linha['codigo'], linha['descricao'], linha['qt_itens'], linha['cor'], linha['prod'], linha['cambao'],
+                linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(),
+                linha['celula'], linha['chave'], linha['operador']) for linha in dados_recebidos]
 
-    # # Lista de tuplas contendo os dados a serem inseridos
-    # values = [(linha['codigo'], linha['descricao'], linha['qt_itens'], linha['cor'], linha['prod'], linha['cambao'], linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(), linha['celula'], linha['chave']) for linha in dados_recebidos]
+    print(values)
 
-    # print(values)
+    # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
+    query = """INSERT INTO pcp.ordens_pintura (codigo, peca, qt_planejada, cor, qt_apontada, cambao, tipo, data_carga, data_finalizada, celula, chave, operador) VALUES %s"""
 
-    # # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
-    # query = """INSERT INTO pcp.ordens_pintura (codigo, peca, qt_planejada, cor, qt_apontada, cambao, tipo, data_carga, data_finalizada, celula, chave) VALUES %s"""
+    # Use execute_values para inserir várias linhas de uma vez
+    execute_values(cur, query, values)
 
-    # # Use execute_values para inserir várias linhas de uma vez
-    # execute_values(cur, query, values)
+    # Comitar as alterações
+    conn.commit()
 
-    # # Comitar as alterações
-    # conn.commit()
+    # Fechar a conexão
+    cur.close()
+    conn.close()
 
-    # # Fechar a conexão
-    # cur.close()
-    # conn.close()
+    table = dados_sequenciamento()
+    table['qt_produzida'] = ''
+    table['cambao'] = ''
+    table['tipo'] = ''
+    table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
+    table['codificacao'] = table.apply(criar_codificacao, axis=1)
 
-    # table = dados_sequenciamento()
-    # table['qt_produzida'] = ''
-    # table['cambao'] = ''
-    # table['tipo'] = ''
-    # table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
-    # table['codificacao'] = table.apply(criar_codificacao, axis=1)
+    table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao']]
+    sheet_data = table.values.tolist()
 
-    # table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao']]
-    # sheet_data = table.values.tolist()
-
-    # return jsonify({"linhas": sheet_data})
-
-    return ''
+    return jsonify({"linhas": sheet_data})
 
 
 @app.route('/finalizar-cambao', methods=['GET', 'POST'])
@@ -783,8 +781,8 @@ def receber_dados_finalizar_cambao():
 
             #  Construir e executar a consulta UPDATE
 
-            query = ("UPDATE pcp.ordens_pintura SET status = 'OK' WHERE id = %s")
-            cursor.execute(query, (str(dado['chave']),))
+            query = ("UPDATE pcp.ordens_pintura SET status = 'OK', operador_final = %s WHERE id = %s")
+            cursor.execute(query, (dado['operador'],str(dado['chave'])))
     
             sql = """INSERT INTO pcp.pecas_inspecao 
                      (id, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
@@ -1186,6 +1184,7 @@ def inspecao():
     """
     Rota para página de inspecao
     """
+    
     if request.method == 'POST':
 
         data = request.get_json()
@@ -3088,7 +3087,7 @@ def duplicar_op():
 
     conn.commit()
 
-    return 'sucess'
+    return jsonify({'nova_op':ultima_op_criada})
 
 # Levantamento #
 
