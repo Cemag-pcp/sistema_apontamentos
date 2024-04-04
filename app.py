@@ -3119,7 +3119,8 @@ def buscar_dados(filename):
     base = pd.DataFrame(base)
     # base = base.iloc[:,:23]
     base_carretas = base.set_axis(headers, axis=1)[1:]
-    base_carretas.iloc[:,5:]
+    base_carretas = base_carretas[base_carretas['PED_PREVISAOEMISSAODOC'] != ''].reset_index(drop=True)
+    
     base_carretas['PED_PREVISAOEMISSAODOC'] = pd.to_datetime(base_carretas['PED_PREVISAOEMISSAODOC'], format="%d/%m/%Y")
     # base_carretas['PED_PREVISAOEMISSAODOC'] = base_carretas['PED_PREVISAOEMISSAODOC'].dt.date
     # base_carretas[base_carretas['4o. Agrupamento'] == 'Santa Maria de Jetiba'].iloc[:,4:]
@@ -3183,6 +3184,7 @@ def consultar_carretas_levantamento():
     carretas_dentro_da_base = carretas_dentro_da_base[['Carreta Trat','carreta']].drop_duplicates().fillna('').values.tolist()
 
     df_final['quantidade'] = df_final['quantidade'] * df_final['PED_QUANTIDADE']
+    
     if conjunto:
         df_final = df_final[df_final['conjunto'] == conjunto]
 
