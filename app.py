@@ -3210,6 +3210,11 @@ def consultar_carretas_levantamento():
     # Calculando o índice final
     end_index = offset + per_page
 
+    #agrupando dados
+    df_final = df_final.groupby(['processo', 'conjunto', 'codigo', 'descricao', 'materia_prima',
+       'comprimento', 'largura', 'quantidade', 'etapa_seguinte', 'carreta',
+       'Carreta Trat']).sum().reset_index()
+
     # Selecionando as linhas do DataFrame com base nos índices calculados
     df_paginated = df_final.drop(columns={'comprimento','largura'})
     df_paginated = df_paginated.iloc[offset:end_index].values.tolist()
