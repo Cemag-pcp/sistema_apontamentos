@@ -1,0 +1,19 @@
+.custom-file-input {
+    display: none;
+}
+
+.custom-file-label::after {
+    content: 'Escolher arquivo';
+}
+
+.custom-file-input::-webkit-file-upload-button {
+    visibility: hidden;
+}
+
+.custom-file-label {
+    cursor: pointer;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 6px 12px;
+    display: inline-block;
+}

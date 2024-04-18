@@ -226,6 +226,7 @@ def dados_inspecionar_reinspecionar():
 
     inspecao = """SELECT *
                 FROM pcp.pecas_inspecao
+                WHERE excluidas = 'false'
                 ORDER BY id desc"""
     
     cur.execute(inspecao)
@@ -493,10 +494,10 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
 
             cur.execute(sql_insert, values)
 
-            delete_table_inspecao = f"""DELETE 
-                                FROM pcp.pecas_reinspecao 
-                                WHERE id = '{id_inspecao}'"""
-        
+            delete_table_inspecao = f"""UPDATE pcp.pecas_reinspecao 
+                                        SET excluidas = 'true'
+                                        WHERE ='{id_inspecao}''"""
+
             cur.execute(delete_table_inspecao)
 
     elif setor == 'Solda':

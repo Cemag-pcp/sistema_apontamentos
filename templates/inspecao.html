@@ -11,6 +11,7 @@
 
 <!-- CSS tables responsive -->
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/file.css') }}">
 
 {% endblock %}
 
@@ -91,7 +92,7 @@
                                                     '{{inpecao[4]}}',
                                                     '{{inpecao[5]}}',
                                                 )">
-                                                        Status
+                                                        Executar Inspeção
                                                     </a>
                                                 </div>
                                             </div>
@@ -256,29 +257,28 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div id="coluna_causa" class="col-sm-6 mb-4">
-                                    <label>Causa das <strong>não conformidades:</strong></label>
-                                    <select name="causa_reinspecao" id="causa_reinspecao" class="form-control" disabled>
-                                        <option value="" selected hidden disabled></option>
-                                        <option value="Causa A">Causa A</option>
-                                        <option value="Causa B">Causa B</option>
-                                        <option value="Causa C">Causa C</option>
-                                        <option value="Causa D">Causa D</option>
-                                        <option value="Causa E">Causa E</option>
-                                    </select>
+                                <div id="coluna_causa" class="col-sm-12">
+
                                 </div>
+                            </div>
+                            <hr>
+                            <div class="row">
                                 <div class="col-sm-6 mb-4">
                                     <label>Inspetor:</label>
                                     <select name="inspetor" id="inspetor" class="form-control">
                                         <option value="" selected hidden disabled></option>
-                                        <option value="inspetor A">inspetor A</option>
-                                        <option value="inspetor B">inspetor B</option>
-                                        <option value="inspetor C">inspetor C</option>
-                                        <option value="inspetor D">inspetor D</option>
-                                        <option value="inspetor E">inspetor E</option>
+                                        <option value="Elenilson">Elenilson</option>
+                                        <option value="Marcelo">Marcelo</option>
                                     </select>
                                 </div>
-                            </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Escolha os arquivos:</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="foto_inspecao" name="foto_inspecao" accept="image/*" multiple>
+                                        <label class="custom-file-label" for="foto_inspecao">Escolha os arquivos</label>
+                                    </div>  
+                                </div>
+                            </div>                         
                         </div>
                         <div class="modal-footer">
                             <button id="envio_inspecao" class="btn btn-primary">Enviar</button>
@@ -342,28 +342,25 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div id="coluna_causa_nova" class="col-sm-6 mb-4">
-                                    <label>Causa das <strong>não conformidades:</strong></label>
-                                    <select name="causa_nova_reinspecao" id="causa_nova_reinspecao" class="form-control"
-                                        disabled>
-                                        <option value="" selected hidden disabled></option>
-                                        <option value="Causa A">Causa A</option>
-                                        <option value="Causa B">Causa B</option>
-                                        <option value="Causa C">Causa C</option>
-                                        <option value="Causa D">Causa D</option>
-                                        <option value="Causa E">Causa E</option>
-                                    </select>
+                                <div id="coluna_causa_reinspecao" class="col-sm-12">
+
                                 </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-sm-6 mb-4">
                                     <label>Inspetor:</label>
                                     <select name="inspetor_reinspecao" id="inspetor_reinspecao" class="form-control">
                                         <option value="" selected hidden disabled></option>
-                                        <option value="inspetor A">inspetor A</option>
-                                        <option value="inspetor B">inspetor B</option>
-                                        <option value="inspetor C">inspetor C</option>
-                                        <option value="inspetor D">inspetor D</option>
-                                        <option value="inspetor E">inspetor E</option>
+                                        <option value="Elenilson">Elenilson</option>
+                                        <option value="Marcelo">Marcelo</option>
                                     </select>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Escolha os arquivos:</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="foto_reinspecao" name="foto_reinspecao" accept="image/*" multiple>
+                                        <label class="custom-file-label label-reinspecao" for="foto_reinspecao">Escolha os arquivos</label>
+                                    </div>  
                                 </div>
                             </div>
                         </div>
@@ -393,4 +390,5 @@
         <script src="static/js/demo/datatables-demo.js"></script>
         <script src="/static/js/qualidade/inspecao-pintura.js"></script>
         <script src="/static/js/qualidade/inspecao-solda.js"></script>
+        <script src="/static/js/qualidade/selects_causa_pintura.js"></script>
         {% endblock %}

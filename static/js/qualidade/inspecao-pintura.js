@@ -18,7 +18,6 @@ function modalInspecao(id, data, peca, cor,qtd_produzida) {
     
     // Exibir o modal
     $('#inspecaoModal').modal('show');
-
 }
 
 $('#n_conformidades').on('input',function() {
