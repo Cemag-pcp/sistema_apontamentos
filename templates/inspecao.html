@@ -154,7 +154,6 @@
                                         <th>Peça</th>
                                         <th class="text-truncate" data-toggle="tooltip" data-placement="top"
                                             title="N° de Conformidades" style="max-width: 60px;">Não Conformidade</th>
-                                        <th>Causa Reinspecao</th>
                                         <th>Inspetor</th>
                                         <th>Cor</th>
                                         <th>Exec</th>
@@ -165,11 +164,10 @@
                                     <tr>
                                         <td data-title="#">{{reinspecao[0]}}</td>
                                         <td data-title="Data Inspeção">{{reinspecao[1]}}</td>
-                                        <td data-title="Peça">{{reinspecao[11]}}</td>
+                                        <td data-title="Peça">{{reinspecao[12]}}</td>
                                         <td data-title="Ñ conformidade">{{reinspecao[2]}}</td>
-                                        <td data-title="Causa Reinspecao">{{reinspecao[3]}}</td>
                                         <td data-title="Inspetor">{{reinspecao[4]}}</td>
-                                        <td data-title="Cor">{{reinspecao[12]}}</td>
+                                        <td data-title="Cor">{{reinspecao[13]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -179,11 +177,15 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a id="btn_exec" class="dropdown-item dropdown_os"
+                                                        style="cursor: pointer;" onclick="modalVisualizarCausas('{{reinspecao[3]}}','{{reinspecao[11]}}')">
+                                                        Visualize as causas
+                                                    </a>
+                                                    <a id="btn_exec" class="dropdown-item dropdown_os"
                                                         style="cursor: pointer;" onclick="modalReinspecao(
                                                 '{{reinspecao[0]}}',
                                                 '{{reinspecao[1]}}',
-                                                '{{reinspecao[11]}}',
                                                 '{{reinspecao[12]}}',
+                                                '{{reinspecao[13]}}',
                                                 '{{reinspecao[2]}}',
                                                 '{{reinspecao[4]}}'
                                             )">
@@ -371,6 +373,29 @@
                 </div>
             </div>
 
+            <div class="modal fade" data-backdrop="static" id="visualizacaoCausasModal" tabindex="-1" role="dialog"
+                aria-labelledby="visualizacaoCausasModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="visualizacaoCausasModalLabel"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px;">
+                            <h6 id="descricao_causas">Descrição das causas</h6>
+                            <ul id="lista_nao_ordenada" style="padding: 0;">
+                            </ul>
+                            
+                            <div id="img_visualizacaoCausas">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="loading" id="loading" style="display: none;">
                 <div class="spinner-border text-primary" role="status">
                     <span class="sr-only">Loading...</span>
@@ -391,4 +416,6 @@
         <script src="/static/js/qualidade/inspecao-pintura.js"></script>
         <script src="/static/js/qualidade/inspecao-solda.js"></script>
         <script src="/static/js/qualidade/selects_causa_pintura.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+
         {% endblock %}

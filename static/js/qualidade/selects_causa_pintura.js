@@ -3,17 +3,10 @@ var causas = ["Faltando Solda", "Olho de Peixe", "Arranhão", "Escorrimento", "E
 "Contato","Amassando","Camada Baixa","Corrosão","Marcação por Água","Marcação por Óleo","Tonalidade","Marca texto industrial","Respingo de Solda",
 "Marcação de Peça","Falta de aderência","Decapante","Desplacamento","Água"];
 
-// Função para adicionar os selects dinamicamente
-// n_nao_conformidades
-// coluna_causa
-// n_nao_conformidades_reinspecao
-// coluna_causa_reinspecao
-
 function adicionarSelects(n_nao_conformidades,coluna_causa) {
     var n_nao_conformidades = document.getElementById(n_nao_conformidades).value;
     var coluna_causa = document.getElementById(coluna_causa);
 
-    // Limpa qualquer select existente
     coluna_causa.innerHTML = "";
 
     var div_row = document.createElement('div');
@@ -21,8 +14,6 @@ function adicionarSelects(n_nao_conformidades,coluna_causa) {
 
     if (n_nao_conformidades > 0) {
         coluna_causa.style.display = 'block';
-
-        // Adiciona os selects conforme o número de não conformidades
         for (var i = 1; i <= n_nao_conformidades; i++) {
             var div = document.createElement("div");
             div.className = "col-sm-6 mb-4";
@@ -60,15 +51,6 @@ function adicionarSelects(n_nao_conformidades,coluna_causa) {
     }
 }
 
-// Event listener para chamar a função quando o valor de n_nao_conformidades mudar
-document.getElementById("n_conformidades").addEventListener("input", function() {
-    adicionarSelects("n_nao_conformidades","coluna_causa");
-});
-
-document.getElementById("n_conformidades_reinspecao").addEventListener("input", () => {
-    adicionarSelects("n_nao_conformidades_reinspecao","coluna_causa_reinspecao");
-});
-
 document.getElementById("foto_inspecao").addEventListener("change", function() {
     var files = this.files;
     var label = document.querySelector('.custom-file-label');
@@ -87,6 +69,7 @@ document.getElementById("foto_inspecao").addEventListener("change", function() {
 
 document.getElementById("foto_reinspecao").addEventListener("change", function() {
     var files = this.files;
+    console.log(files)
     var label = document.querySelector('.label-reinspecao');
     var fileNames = [];
     for (var i = 0; i < files.length; i++) {
@@ -99,5 +82,14 @@ document.getElementById("foto_reinspecao").addEventListener("change", function()
     } else {
         label.textContent = "Possui " + files.length + " arquivos";
     }
+});
+
+// Event listener para chamar a função quando o valor de n_nao_conformidades mudar
+document.getElementById("n_conformidades").addEventListener("input", function() {
+    adicionarSelects("n_nao_conformidades","coluna_causa");
+});
+
+document.getElementById("n_conformidades_reinspecao").addEventListener("input", () => {
+    adicionarSelects("n_nao_conformidades_reinspecao","coluna_causa_reinspecao");
 });
 

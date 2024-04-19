@@ -18,6 +18,8 @@ function modalInspecao(id, data, peca, cor,qtd_produzida) {
     
     // Exibir o modal
     $('#inspecaoModal').modal('show');
+
+    $("#coluna_causa").html('')
 }
 
 $('#n_conformidades').on('input',function() {
@@ -37,53 +39,104 @@ $('#n_conformidades').on('input',function() {
 })
 
 // Envio das informações para o Backend da Inspecao
-$('#envio_inspecao').on('click',function(){
+// $('#envio_inspecao').on('click',function(){
 
-    $("#loading").show();
+//     $("#loading").show();
 
-    $('#envio_inspecao').prop('disabled',true);
+//     $('#envio_inspecao').prop('disabled',true);
 
-    let n_conformidades_value = $('#n_conformidades').val();
-    let inspetor = $('#inspetor').val();
+//     let n_conformidades_value = $('#n_conformidades').val();
+//     let inspetor = $('#inspetor').val();
+//     let qtd_produzida_value = $('#qtd_produzida').val();
+//     let causa_reinspecao =  $("#causa_reinspecao").val();
+
+//     if(n_conformidades_value === "" || inspetor === null || n_conformidades_value < 0 || n_conformidades_value > qtd_produzida_value){
+//         alert("Preencha todos os campos corretamente")
+//         $('#envio_inspecao').prop('disabled',false);
+//         $("#loading").hide();
+//         return
+//     } else if(n_conformidades_value >= 0 && n_conformidades_value < qtd_produzida_value && causa_reinspecao === null){
+//         alert("Preencha todos os campos corretamente")
+//         $('#envio_inspecao').prop('disabled',false);
+//         $("#loading").hide();
+//         return
+//     }
+
+//     let id_inspecao =  $('#inspecaoModalLabel').text();
+//     let data_inspecao = $('#data_inspecao').val();
+//     let n_nao_conformidades = $('#n_nao_conformidades').val();
+//     let reinspecao = false;
+
+//     $.ajax({
+//         url: '/inspecao',
+//         type: 'POST',  // Alterado para POST
+//         dataType: 'json',
+//         contentType: 'application/json',
+//         data: JSON.stringify({ 'id_inspecao': id_inspecao ,'data_inspecao':data_inspecao,'n_conformidades_value':n_conformidades_value,
+//         'n_nao_conformidades':n_nao_conformidades,'causa_reinspecao':causa_reinspecao,'inspetor':inspetor,'qtd_produzida':qtd_produzida_value,'reinspecao':reinspecao}),  // Enviando um objeto JSON
+//         success: function(response) {
+//             window.location.reload();
+//             console.log(response)
+//             $("#loading").hide();
+//         },
+//         error: function(error) {
+//             console.log(error);
+//             $('#envio_inspecao').prop('disabled',false);
+//             $("#loading").hide();
+//         }
+//     });
+// })
+
+$('#envio_inspecao').on('click', function () {
+
+    var formData = new FormData();
+
+    let id_inspecao = $('#inspecaoModalLabel').text();
+    let data_inspecao = $('#data_inspecao').val();
+    var files = $('#foto_inspecao')[0].files; // Obtenha os arquivos selecionados corretamente
+    let n_conformidades = $('#n_conformidades').val();
+    let n_nao_conformidades = $('#n_nao_conformidades').val();
+    let list_causas = [];
+    let inspetor = $("#inspetor").val();
     let qtd_produzida_value = $('#qtd_produzida').val();
-    let causa_reinspecao =  $("#causa_reinspecao").val();
+    let reinspecao = 'False';
 
-    if(n_conformidades_value === "" || inspetor === null || n_conformidades_value < 0 || n_conformidades_value > qtd_produzida_value){
-        alert("Preencha todos os campos corretamente")
-        $('#envio_inspecao').prop('disabled',false);
-        $("#loading").hide();
-        return
-    } else if(n_conformidades_value >= 0 && n_conformidades_value < qtd_produzida_value && causa_reinspecao === null){
-        alert("Preencha todos os campos corretamente")
-        $('#envio_inspecao').prop('disabled',false);
-        $("#loading").hide();
-        return
+    for (var i = 1; i <= n_nao_conformidades; i++) {
+        let causas = $("#causa_reinspecao_" + i).val();
+        list_causas.push(causas);
     }
 
-    let id_inspecao =  $('#inspecaoModalLabel').text();
-    let data_inspecao = $('#data_inspecao').val();
-    let n_nao_conformidades = $('#n_nao_conformidades').val();
-    let reinspecao = false;
+    for (var i = 0; i < files.length; i++) {
+        formData.append('foto_inspecao[]', files[i]); // Use [] se quiser lidar com vários arquivos
+    }
+
+    formData.append('id_inspecao', id_inspecao);
+    formData.append('data_inspecao', data_inspecao);
+    formData.append('n_conformidades', n_conformidades);
+    formData.append('n_nao_conformidades', n_nao_conformidades);
+    formData.append('list_causas', JSON.stringify(list_causas));
+    formData.append('inspetor', inspetor);
+    formData.append('qtd_produzida', qtd_produzida_value);
+    formData.append('reinspecao', reinspecao);
 
     $.ajax({
         url: '/inspecao',
-        type: 'POST',  // Alterado para POST
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify({ 'id_inspecao': id_inspecao ,'data_inspecao':data_inspecao,'n_conformidades_value':n_conformidades_value,
-        'n_nao_conformidades':n_nao_conformidades,'causa_reinspecao':causa_reinspecao,'inspetor':inspetor,'qtd_produzida':qtd_produzida_value,'reinspecao':reinspecao}),  // Enviando um objeto JSON
-        success: function(response) {
+        type: 'POST',
+        data: formData,
+        processData: false, // Não processe os dados
+        contentType: false, // Não defina o tipo de conteúdo
+        success: function (response) {
             window.location.reload();
-            console.log(response)
+            console.log(response);
             $("#loading").hide();
         },
-        error: function(error) {
+        error: function (error) {
             console.log(error);
-            $('#envio_inspecao').prop('disabled',false);
+            $('#envio_inspecao').prop('disabled', false);
             $("#loading").hide();
         }
     });
-})
+});
 
 // Exibindo modal de Reinspecao
 
@@ -107,6 +160,51 @@ function modalReinspecao(id, data, peca, cor,n_nao_conformidades,inspetor) {
     // Exibir o modal
     $('#reinspecaoModal').modal('show');
 
+    $("#coluna_causa_reinspecao").html('')
+
+}
+
+
+function modalVisualizarCausas(causas, fotos) {
+    var causasLista = JSON.parse(causas);
+    var fotosArray = fotos.split(';').map(function(foto) {
+        return decodeURIComponent(foto);
+    });
+
+    $("#visualizacaoCausasModalLabel").text("Contém " + causasLista.length + " não conformidades");
+
+    // Limpa a lista existente
+    $('#lista_nao_ordenada').empty();
+
+    // Limpa as imagens existentes
+    $('#visualizacaoCausasModal .modal-body div').empty();
+
+    console.log(fotosArray.length)
+
+    console.log(fotosArray)
+    // Verifica se há fotos
+    if (fotosArray[0] != "None") {
+        // Itera sobre as fotos e cria elementos <img>
+        $('#visualizacaoCausasModal .modal-body div').show();
+        fotosArray.forEach(function(foto) {
+            $('<img>').attr('src', foto).addClass('img-fluid').appendTo('#visualizacaoCausasModal .modal-body div').addClass('mb-4');
+        });
+    } else {
+        // Se não houver fotos, oculta a área de imagens
+        $('#visualizacaoCausasModal .modal-body div').hide();
+    }
+
+    // Itera sobre os elementos da lista causas
+    causasLista.forEach(function(causa) {
+        // Cria um novo elemento <li> com o texto da causa e adiciona à lista
+        $('<li>').text(causa).addClass('list-group-item').appendTo('#lista_nao_ordenada');
+    });
+
+    // Torna a lista ordenável e itens movíveis
+    Sortable.create(lista_nao_ordenada);
+    
+    // Mostra o modal
+    $('#visualizacaoCausasModal').modal('show');
 }
 
 // Verificação do Input de Reinspecao

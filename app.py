@@ -10,6 +10,9 @@ from datetime import datetime, timedelta, date
 import cachetools
 import uuid
 import gspread
+import os
+from werkzeug.utils import secure_filename
+
 # from flask_socketio import SocketIO, emit
 # from threading import Lock
 # import json
@@ -18,6 +21,8 @@ async_mode = None
 
 app = Flask(__name__)
 app.secret_key = "apontamentopintura"
+UPLOAD_FOLDER = 'static/fotos_causas'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # socketio = SocketIO(app, async_mode=async_mode)
 # thread = None
 # thread_lock = Lock()
@@ -253,7 +258,7 @@ def dados_inspecionar_reinspecionar():
 
     return data_inspecao,data_reinspecao,data_inspecionadas
 
-def inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor,setor,
+def inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor,setor,arquivo,
                        conjunto_especifico='',tipo_nao_conformidade='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -264,21 +269,24 @@ def inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor
 
     if setor == 'Pintura':
 
-        delete_table_inspecao = f"""DELETE 
-                                FROM pcp.pecas_inspecao 
-                                WHERE id = '{id_inspecao}'"""
-        
+        delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao 
+                                    SET excluidas = 'true' 
+                                    WHERE id = '{id_inspecao}'"""
+
         cur.execute(delete_table_inspecao)
+        
+        # cur.execute(delete_table_inspecao)
 
         sql = """INSERT INTO pcp.pecas_reinspecao 
-                        (id,nao_conformidades, causa_reinspecao, inspetor,setor) 
-                        VALUES (%s, %s, %s, %s, %s)"""
+                        (id,nao_conformidades, causa_reinspecao, inspetor,setor,caminho_foto) 
+                        VALUES (%s, %s, %s, %s, %s, %s)"""
         values = (
             id_inspecao,
             n_nao_conformidades,
             causa_reinspecao,
             inspetor,
-            setor
+            setor,
+            arquivo
         )
 
     elif setor == 'Solda':
@@ -316,9 +324,9 @@ def inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor,
 
     if setor == 'Pintura':
 
-        delete_table_inspecao = f"""DELETE 
-                                FROM pcp.pecas_inspecao 
-                                WHERE id = '{id_inspecao}'"""
+        delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao 
+                                    SET excluidas = 'true' 
+                                    WHERE id = '{id_inspecao}'"""
         
         cur.execute(delete_table_inspecao)
 
@@ -1188,36 +1196,53 @@ def inspecao():
     
     if request.method == 'POST':
 
-        data = request.get_json()
+        if 'foto_inspecao[]' not in request.files:
+            return 'Nenhum arquivo enviado', 400
 
-        id_inspecao = data['id_inspecao']
-        data_inspecao = data['data_inspecao']
+        # Obtenha a lista de arquivos
+        fotos = request.files.getlist('foto_inspecao[]')
+
+        print(fotos)
+
+        arquivo = ''
+        # Faça o que precisar com os arquivos
+        for foto in fotos:
+            if foto:
+                # Garanta que o nome do arquivo é seguro
+                filename = secure_filename(foto.filename)
+                # Salve o arquivo no diretório de upload
+                arquivo += os.path.join(app.config['UPLOAD_FOLDER'], filename) + ";"
+                foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        arquivo = arquivo.replace('\\', '/')
+
+        # Outros dados enviados no formulário podem ser acessados da seguinte maneira:
+        id_inspecao = request.form.get('id_inspecao')
+
+        data_inspecao = request.form.get('data_inspecao')
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
-
-        # Converter de volta para string no formato desejado
         data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
 
-        n_nao_conformidades = data['n_nao_conformidades']
-        n_conformidades = data['n_conformidades_value']
-        causa_reinspecao = data['causa_reinspecao']
-        inspetor = data['inspetor']
-        qtd_produzida = data['qtd_produzida']
+        n_conformidades = request.form.get('n_conformidades')
+        n_nao_conformidades = request.form.get('n_nao_conformidades')
+        list_causas = request.form.get('list_causas')  # É uma string JSON
+        inspetor = request.form.get('inspetor')
+        qtd_produzida = request.form.get('qtd_produzida')
+        modal_reinspecao = request.form.get('reinspecao')
         setor = 'Pintura'
 
-        # Identificar se veio do modal de reinspecoes ou não
-        modal_reinspecao = data['reinspecao']
-        if modal_reinspecao:
-            alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor,setor)
+        if modal_reinspecao != 'False':
+            alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,list_causas,inspetor,setor)
             return jsonify("Success")
         
         else:
             if n_conformidades != qtd_produzida:
-                inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor,setor)
+                inserir_reinspecao(id_inspecao,n_nao_conformidades,list_causas,inspetor,setor,arquivo)
                 inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor)
             else:
                 inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor)
 
-            return jsonify("Success")
+        return jsonify("Success")
 
     inspecoes,reinspecoes,inspecionadas = dados_inspecionar_reinspecionar()
 
