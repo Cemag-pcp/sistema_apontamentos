@@ -113,27 +113,34 @@
                                 <thead class="cf">
                                     <tr>
                                         <th>#</th>
-                                        <th>Data Inspecao</th>
                                         <th>Peca</th>
-                                        <th class="text-truncate" data-toggle="tooltip" data-placement="top"
-                                            title="N° de Conformidades" style="max-width: 60px;">N° de
-                                            Conformidades
-                                        </th>
                                         <th>Cor</th>
                                         <th>Tipo</th>
-                                        <th>Inspetor</th>
+                                        <th>Histórico</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for inspecionada in inspecionadas %}
                                     <tr>
                                         <td data-title="#">{{inspecionada[0]}}</td>
-                                        <td data-title="Data Inspecao" class=data_inspecao>{{inspecionada[1]}}</td>
-                                        <td data-title="Peca">{{inspecionada[9]}}</td>
-                                        <td data-title="N° de Conformidades">{{inspecionada[2]}}</td>
-                                        <td data-title="Cor">{{inspecionada[10]}}</td>
-                                        <td data-title="Tipo">{{inspecionada[11]}}</td>
-                                        <td data-title="Inspetor">{{inspecionada[3]}}</td>
+                                        <td data-title="Peca">{{inspecionada[11]}}</td>
+                                        <td data-title="Cor">{{inspecionada[12]}}</td>
+                                        <td data-title="Tipo">{{inspecionada[13]}}</td>
+                                        <td data-title="Exec">
+                                            <div class="col-sm-4 d-flex justify-content-center align-items-center"
+                                                style="padding-left: 0.35rem;">
+                                                <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                                    style="cursor: pointer;">
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </a>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                    <a id="btn_exec" class="dropdown-item dropdown_os"
+                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecionada[0]}}')">
+                                                        Histórico
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -164,10 +171,10 @@
                                     <tr>
                                         <td data-title="#">{{reinspecao[0]}}</td>
                                         <td data-title="Data Inspeção">{{reinspecao[1]}}</td>
-                                        <td data-title="Peça">{{reinspecao[12]}}</td>
+                                        <td data-title="Peça">{{reinspecao[13]}}</td>
                                         <td data-title="Ñ conformidade">{{reinspecao[2]}}</td>
                                         <td data-title="Inspetor">{{reinspecao[4]}}</td>
-                                        <td data-title="Cor">{{reinspecao[13]}}</td>
+                                        <td data-title="Cor">{{reinspecao[14]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -184,12 +191,12 @@
                                                         style="cursor: pointer;" onclick="modalReinspecao(
                                                 '{{reinspecao[0]}}',
                                                 '{{reinspecao[1]}}',
-                                                '{{reinspecao[12]}}',
                                                 '{{reinspecao[13]}}',
+                                                '{{reinspecao[14]}}',
                                                 '{{reinspecao[2]}}',
                                                 '{{reinspecao[4]}}'
                                             )">
-                                                        Inspeção
+                                                        Reinspecionar
                                                     </a>
                                                 </div>
                                             </div>
@@ -273,7 +280,7 @@
                                         <option value="Marcelo">Marcelo</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-6 mb-4">
+                                <div id="campo_arquivos" class="col-sm-6 mb-4" style="display: none;">
                                     <label>Escolha os arquivos:</label>
                                     <div class="custom-file">
                                         <input type="file" class="custom-file-input" id="foto_inspecao" name="foto_inspecao" accept="image/*" multiple>
@@ -357,7 +364,7 @@
                                         <option value="Marcelo">Marcelo</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-6 mb-4">
+                                <div class="col-sm-6 mb-4" id="campo_arquivos_reinspecao" style="display: none;">
                                     <label>Escolha os arquivos:</label>
                                     <div class="custom-file">
                                         <input type="file" class="custom-file-input" id="foto_reinspecao" name="foto_reinspecao" accept="image/*" multiple>
@@ -374,7 +381,7 @@
             </div>
 
             <div class="modal fade" data-backdrop="static" id="visualizacaoCausasModal" tabindex="-1" role="dialog"
-                aria-labelledby="visualizacaoCausasModalLabel" aria-hidden="true">
+                aria-labelledby="visualizacaoCausasModalLabel" aria-hidden="true" style="overflow-y: auto;">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -391,6 +398,27 @@
                             <div id="img_visualizacaoCausas">
 
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="modalTimeline" tabindex="-1" role="dialog" aria-labelledby="modalTimelineLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="m-0 font-weight-bold text-info">Histórico</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="height: 60vh; overflow-y: auto;">
+                            <div class="list-group" id="listaHistorico">
+                                
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            
                         </div>
                     </div>
                 </div>

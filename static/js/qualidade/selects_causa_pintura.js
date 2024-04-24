@@ -3,9 +3,10 @@ var causas = ["Faltando Solda", "Olho de Peixe", "Arranhão", "Escorrimento", "E
 "Contato","Amassando","Camada Baixa","Corrosão","Marcação por Água","Marcação por Óleo","Tonalidade","Marca texto industrial","Respingo de Solda",
 "Marcação de Peça","Falta de aderência","Decapante","Desplacamento","Água"];
 
-function adicionarSelects(n_nao_conformidades,coluna_causa) {
+function adicionarSelects(n_nao_conformidades,coluna_causa,coluna_arquivos) {
     var n_nao_conformidades = document.getElementById(n_nao_conformidades).value;
     var coluna_causa = document.getElementById(coluna_causa);
+    var coluna_arquivos = document.getElementById(coluna_arquivos);
 
     coluna_causa.innerHTML = "";
 
@@ -14,6 +15,7 @@ function adicionarSelects(n_nao_conformidades,coluna_causa) {
 
     if (n_nao_conformidades > 0) {
         coluna_causa.style.display = 'block';
+        coluna_arquivos.style.display = 'block';
         for (var i = 1; i <= n_nao_conformidades; i++) {
             var div = document.createElement("div");
             div.className = "col-sm-6 mb-4";
@@ -48,6 +50,7 @@ function adicionarSelects(n_nao_conformidades,coluna_causa) {
         }
     } else {
         coluna_causa.style.display = 'none';
+        coluna_arquivos.style.display = 'none';
     }
 }
 
@@ -86,10 +89,10 @@ document.getElementById("foto_reinspecao").addEventListener("change", function()
 
 // Event listener para chamar a função quando o valor de n_nao_conformidades mudar
 document.getElementById("n_conformidades").addEventListener("input", function() {
-    adicionarSelects("n_nao_conformidades","coluna_causa");
+    adicionarSelects("n_nao_conformidades","coluna_causa","campo_arquivos");
 });
 
 document.getElementById("n_conformidades_reinspecao").addEventListener("input", () => {
-    adicionarSelects("n_nao_conformidades_reinspecao","coluna_causa_reinspecao");
+    adicionarSelects("n_nao_conformidades_reinspecao","coluna_causa_reinspecao","campo_arquivos_reinspecao");
 });
 

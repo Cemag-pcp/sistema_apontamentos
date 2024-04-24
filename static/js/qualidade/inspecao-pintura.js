@@ -1,4 +1,3 @@
-
 function modalInspecao(id, data, peca, cor,qtd_produzida) {
 
     const timeElapsed = Date.now();
@@ -145,9 +144,13 @@ function modalReinspecao(id, data, peca, cor,n_nao_conformidades,inspetor) {
     const timeElapsed = Date.now();
     const today = new Date(timeElapsed);
 
+    const dataHoraCompleta = new Date(data);
+
+    let dataFormatada = dataHoraCompleta.toISOString().split('T')[0];
+
     // Configurar o conteúdo do modal com os parâmetros recebidos
     $('#reinspecaoModalLabel').text(id);
-    $('#data_inspecao_anterior').val(data);
+    $('#data_inspecao_anterior').val(dataFormatada);
     $('#peca_reinspecionada').val(peca);
     $('#cor_reinspecionada').val(cor);
     $('#data_nova_inspecao').val(today.toLocaleDateString());
@@ -233,44 +236,50 @@ $('#envio_reinspecao').on('click',function() {
 
     $("#loading").show();
 
-    let n_conformidades_value = $('#n_conformidades_reinspecao').val();
-    let inspetor = $('#inspetor_reinspecao').val();
-    let qtd_produzida_value = $('#qtd_produzida_reinspecao').val();
-    let causa_reinspecao =  $("#causa_nova_reinspecao").val();
+    var formData = new FormData();
 
-    if(n_conformidades_value === "" || inspetor === null || n_conformidades_value < 0 || n_conformidades_value > qtd_produzida_value){
-        alert("Preencha todos os campos corretamente")
-        $('#envio_reinspecao').prop('disabled',false);
-        $("#loading").hide();
-        return
-    } else if(n_conformidades_value >= 0 && n_conformidades_value < qtd_produzida_value && causa_reinspecao === null){
-        alert("Preencha todos os campos corretamente")
-        console.log("else if")
-        $('#envio_reinspecao').prop('disabled',false);
-        $("#loading").hide();
-        return
+    let id_inspecao = $('#reinspecaoModalLabel').text();
+    let data_inspecao = $('#data_nova_inspecao').val();
+    var files = $('#foto_reinspecao')[0].files; // Obtenha os arquivos selecionados corretamente
+    let n_conformidades = $('#n_conformidades_reinspecao').val();
+    let n_nao_conformidades = $('#n_nao_conformidades_reinspecao').val();
+    let list_causas = [];
+    let inspetor = $("#inspetor_reinspecao").val();
+    let qtd_produzida_value = $('#qtd_produzida_reinspecao').val();
+    let reinspecao = true;
+
+    for (var i = 1; i <= n_nao_conformidades; i++) {
+        let causas = $("#causa_reinspecao_" + i).val();
+        list_causas.push(causas);
     }
 
-    let id_inspecao =  $('#reinspecaoModalLabel').text();
-    let data_inspecao = $('#data_nova_inspecao').val();
-    let n_nao_conformidades = $('#n_nao_conformidades_reinspecao').val();
-    let reinspecao = true;
+    for (var i = 0; i < files.length; i++) {
+        formData.append('foto_inspecao[]', files[i]); // Use [] se quiser lidar com vários arquivos
+    }
+
+    formData.append('id_inspecao', id_inspecao);
+    formData.append('data_inspecao', data_inspecao);
+    formData.append('n_conformidades', n_conformidades);
+    formData.append('n_nao_conformidades', n_nao_conformidades);
+    formData.append('list_causas', JSON.stringify(list_causas));
+    formData.append('inspetor', inspetor);
+    formData.append('qtd_produzida', qtd_produzida_value);
+    formData.append('reinspecao', reinspecao);
 
     $.ajax({
         url: '/inspecao',
-        type: 'POST',  // Alterado para POST
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify({ 'id_inspecao': id_inspecao ,'data_inspecao':data_inspecao,'n_conformidades_value':n_conformidades_value,
-        'n_nao_conformidades':n_nao_conformidades,'causa_reinspecao':causa_reinspecao,'inspetor':inspetor,'qtd_produzida':qtd_produzida_value,'reinspecao':reinspecao}),  // Enviando um objeto JSON
-        success: function(response) {
+        type: 'POST',
+        data: formData,
+        processData: false, // Não processe os dados
+        contentType: false, // Não defina o tipo de conteúdo
+        success: function (response) {
             window.location.reload();
-            console.log(response)
+            console.log(response);
             $("#loading").hide();
         },
-        error: function(error) {
+        error: function (error) {
             console.log(error);
-            $('#envio_reinspecao').prop('disabled',false);
+            $('#envio_reinspecao').prop('disabled', false);
             $("#loading").hide();
         }
     });
@@ -300,4 +309,90 @@ function changeTab(tabName) {
     // Adicionar a classe "active" à aba clicada
     var clickedTab = document.querySelector('[onclick="changeTab(\'' + tabName + '\')"]');
     clickedTab.classList.add('active');
+}
+
+function formatarDataBrComHora(dataString) {
+    // Cria um objeto Date a partir da string
+    var data = new Date(dataString);
+    data.setDate(data.getDate() + 1);
+
+    // Obtém os componentes da data
+    var dia = data.getDate().toString().padStart(2, '0');
+    var mes = (data.getMonth() + 1).toString().padStart(2, '0');
+    var ano = data.getFullYear();
+    var hora = data.getHours().toString().padStart(2, '0');
+    var minuto = data.getMinutes().toString().padStart(2, '0');
+    var segundo = data.getSeconds().toString().padStart(2, '0');
+
+    var formatoDesejado = `${dia}/${mes}/${ano} ${hora}:${minuto}:${segundo}`;
+
+    return formatoDesejado;
+}
+
+function modalTimeline(idinspecao) {
+
+    $("#loading").show();
+        
+    $.ajax({
+        url: '/modal-historico',
+        type: 'POST',  // Alterado para POST
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ 'idinspecao': idinspecao }),  // Enviando um objeto JSON
+        success: function(response) {
+            // Limpar conteúdo atual da lista
+            $("#modalTimeline .modal-header h5").text("Possui " + response.length + " inspeções")
+
+            $('#listaHistorico').empty();
+        
+            $('#modalTimeline').modal('show');
+
+            $("#loading").hide();
+        
+            // Loop pelos dados e gerar elementos da lista
+            for (var i = 0; i < response.length; i++) {
+                var item = response[i];
+
+                // Criar elemento da lista e definir atributos de dados
+                var listItem = $('<a>', {
+                    class: 'list-group-item list-group-item-action modal-edit',
+                    'aria-current': 'true',
+                    'data-index': i, // Armazenar o índice do item como um atributo de dados
+                    'data-item': JSON.stringify(item) // Armazenar todo o item como um atributo de dados
+                });
+        
+                var content = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${item[0]}</h6>
+                        <div class="d-flex flex-column align-items-end">
+                            <small>N° Conformidade : ${item[2]}</small>
+                            <small>Inspetor : ${item[3]}</small>
+                            <small>Exec.:  ${item[5]}</small>
+                        </div>
+                    </div>
+                    <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1])}</p>
+                `;
+        
+                listItem.html(content);
+        
+                $('#listaHistorico').append(listItem);
+            }
+            $(".modal-edit").on('click', function() {
+                var dataItemString = $(this).data('item');
+                
+                try {
+                    $("#modalTimeline").modal('hide')
+                    modalVisualizarCausas(dataItemString[10],dataItemString[9])
+                } catch (error) {
+                    alert("Ultima execução não possui imagens nem causas de não conformidades")
+                }
+                
+            }); 
+        },
+        error: function(error) {
+            $("#loading").hide();
+            alert('Ocorreu um erro ');
+            console.log(error);
+        }
+    });
 }

@@ -230,7 +230,7 @@ def dados_inspecionar_reinspecionar():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     inspecao = """SELECT *
-                FROM pcp.pecas_inspecao
+                    FROM pcp.pecas_inspecao
                 WHERE excluidas = 'false'
                 ORDER BY id desc"""
     
@@ -238,19 +238,19 @@ def dados_inspecionar_reinspecionar():
 
     data_inspecao = cur.fetchall()
 
-    inspecionados= """SELECT i.*, op.peca,op.cor,op.tipo
-                FROM pcp.pecas_inspecionadas as i
+    inspecionados= """SELECT i.*, op.peca,op.cor,op.tipo,i.caminho_foto,i.causa_reinspecao
+                    FROM pcp.pecas_inspecionadas as i
                 LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id::varchar
-                WHERE i.setor = 'Pintura' """
+                WHERE i.setor = 'Pintura' and i.num_inspecao = 0"""
 
     cur.execute(inspecionados)
 
     data_inspecionadas = cur.fetchall()
 
     reinspecao = """SELECT r.*, op.peca,op.cor,op.tipo
-                FROM pcp.pecas_reinspecao as r
-                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
-                WHERE r.setor = 'Pintura'"""
+                        FROM pcp.pecas_reinspecao as r
+                    LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
+                    WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true"""
 
     cur.execute(reinspecao)
 
@@ -274,6 +274,12 @@ def inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor
                                     WHERE id = '{id_inspecao}'"""
 
         cur.execute(delete_table_inspecao)
+
+        update_pecas_inspecionadas = f"""UPDATE pcp.pecas_inspecionadas 
+                                    SET causa_reinspecao = '{causa_reinspecao}', caminho_foto = '{arquivo}'
+                                    WHERE id_inspecao = '{id_inspecao}'"""
+
+        cur.execute(update_pecas_inspecionadas)
         
         # cur.execute(delete_table_inspecao)
 
@@ -361,7 +367,7 @@ def inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor,
 
     print("inserir_inspecionados")
 
-def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor,setor,
+def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor,setor,arquivo,
                        conjunto_especifico='',tipo_nao_conformidade='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -375,12 +381,13 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
         if n_conformidades == "0":
 
             sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                    SET causa_reinspecao = %s, inspetor = %s
+                    SET causa_reinspecao = %s, inspetor = %s, caminho_foto = %s
                     WHERE id = %s """
             
             values = (
                 causa_reinspecao,
                 inspetor,
+                arquivo,
                 id_inspecao
             )
 
@@ -390,16 +397,16 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
                             BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
                                     INSERT INTO pcp.pecas_inspecionadas
-                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                        (id_inspecao, total_conformidades, inspetor, setor, caminho_foto,causa_reinspecao, num_inspecao) 
                                     VALUES 
-                                        (%s, %s, %s, %s, 
+                                        (%s, %s, %s, %s, %s, %s,
                                             (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
                                         );
                                 ELSE
                                     INSERT INTO pcp.pecas_inspecionadas
-                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                        (id_inspecao, total_conformidades, inspetor, setor, caminho_foto,causa_reinspecao, num_inspecao) 
                                     VALUES 
-                                        (%s, %s, %s, %s, 0);
+                                        (%s, %s, %s, %s, %s, %s, 0);
                                 END IF;
                             END $$;
                         """
@@ -410,11 +417,15 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
                 n_conformidades,
                 inspetor,
                 setor,
+                arquivo,
+                causa_reinspecao,
                 id_inspecao,
                 id_inspecao,
                 n_conformidades,
                 inspetor,
-                setor
+                setor,
+                arquivo,
+                causa_reinspecao
             )
 
             cur.execute(sql_insert, values)
@@ -422,13 +433,14 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
         elif n_conformidades > "0" and n_conformidades < qtd_produzida:
 
             sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s
+                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, caminho_foto = %s
                     WHERE id = %s """
             
             values = (
                 n_nao_conformidades,
                 causa_reinspecao,
                 inspetor,
+                arquivo,
                 id_inspecao
             )
 
@@ -438,16 +450,16 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
                             BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
                                     INSERT INTO pcp.pecas_inspecionadas
-                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                        (id_inspecao, total_conformidades, inspetor, setor, caminho_foto, causa_reinspecao, num_inspecao) 
                                     VALUES 
-                                        (%s, %s, %s, %s, 
+                                        (%s, %s, %s, %s, %s, %s,
                                             (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
                                         );
                                 ELSE
                                     INSERT INTO pcp.pecas_inspecionadas
-                                        (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
+                                        (id_inspecao, total_conformidades, inspetor, setor, caminho_foto, causa_reinspecao, num_inspecao) 
                                     VALUES 
-                                        (%s, %s, %s, %s, 0);
+                                        (%s, %s, %s, %s, %s, %s, 0);
                                 END IF;
                             END $$;
                         """
@@ -458,11 +470,15 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
                 n_conformidades,
                 inspetor,
                 setor,
+                arquivo,
+                causa_reinspecao,
                 id_inspecao,
                 id_inspecao,
                 n_conformidades,
                 inspetor,
-                setor
+                setor,
+                arquivo,
+                causa_reinspecao
             )
 
             cur.execute(sql_insert, values)
@@ -504,7 +520,7 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
 
             delete_table_inspecao = f"""UPDATE pcp.pecas_reinspecao 
                                         SET excluidas = 'true'
-                                        WHERE ='{id_inspecao}''"""
+                                        WHERE id ='{id_inspecao}'"""
 
             cur.execute(delete_table_inspecao)
 
@@ -663,9 +679,9 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
 
             cur.execute(sql_insert, values)
 
-            delete_table_inspecao = f"""DELETE 
-                                FROM pcp.pecas_reinspecao 
-                                WHERE id = '{id_inspecao}'"""
+            delete_table_inspecao = f"""UPDATE pcp.pecas_reinspecao 
+                                    SET excluidas = 'true'
+                                    WHERE ='{id_inspecao}''"""
         
             cur.execute(delete_table_inspecao)
     
@@ -1197,24 +1213,26 @@ def inspecao():
     if request.method == 'POST':
 
         if 'foto_inspecao[]' not in request.files:
-            return 'Nenhum arquivo enviado', 400
+            arquivo = ''
+        else:
+            # Obtenha a lista de arquivos
+            fotos = request.files.getlist('foto_inspecao[]')
 
-        # Obtenha a lista de arquivos
-        fotos = request.files.getlist('foto_inspecao[]')
+            print(fotos)
 
-        print(fotos)
+            arquivo = ''
+            # Faça o que precisar com os arquivos
+            for foto in fotos:
+                if foto:
+                    # Garanta que o nome do arquivo é seguro
+                    filename = secure_filename(foto.filename)
+                    # Salve o arquivo no diretório de upload
+                    arquivo += os.path.join(app.config['UPLOAD_FOLDER'], filename) + ";"
+                    foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-        arquivo = ''
-        # Faça o que precisar com os arquivos
-        for foto in fotos:
-            if foto:
-                # Garanta que o nome do arquivo é seguro
-                filename = secure_filename(foto.filename)
-                # Salve o arquivo no diretório de upload
-                arquivo += os.path.join(app.config['UPLOAD_FOLDER'], filename) + ";"
-                foto.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            arquivo = arquivo.replace('\\', '/')
 
-        arquivo = arquivo.replace('\\', '/')
+            print(arquivo)
 
         # Outros dados enviados no formulário podem ser acessados da seguinte maneira:
         id_inspecao = request.form.get('id_inspecao')
@@ -1232,13 +1250,13 @@ def inspecao():
         setor = 'Pintura'
 
         if modal_reinspecao != 'False':
-            alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,list_causas,inspetor,setor)
+            alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,list_causas,inspetor,setor,arquivo)
             return jsonify("Success")
         
         else:
             if n_conformidades != qtd_produzida:
-                inserir_reinspecao(id_inspecao,n_nao_conformidades,list_causas,inspetor,setor,arquivo)
                 inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor)
+                inserir_reinspecao(id_inspecao,n_nao_conformidades,list_causas,inspetor,setor,arquivo)
             else:
                 inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor)
 
@@ -1247,6 +1265,27 @@ def inspecao():
     inspecoes,reinspecoes,inspecionadas = dados_inspecionar_reinspecionar()
 
     return render_template('inspecao.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
+
+@app.route('/modal-historico', methods=['POST'])
+def modal_historico():
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    dados = request.get_json()
+
+    idinspecao = dados['idinspecao']
+
+    query_historico = f"""SELECT i.*, op.peca,op.cor,op.tipo
+                FROM pcp.pecas_inspecionadas as i
+                LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id::varchar
+                WHERE i.setor = 'Pintura' and i.id_inspecao = '{idinspecao}'
+                """
+
+    cur.execute(query_historico)
+    historico = cur.fetchall()
+
+    return jsonify(historico)
 
 @app.route('/inspecao-solda',methods=['GET','POST'])
 def solda():
