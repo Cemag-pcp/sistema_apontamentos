@@ -31,6 +31,15 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
+  $('#dataTableAinspecionarSolda').DataTable({
+    "info":false,
+    "aLengthMenu":[5,10,25],
+    "iDisplayLength":10,
+    order: [[0, 'desc']]
+  });
+});
+
+$(document).ready(function() {
   $('#dataTableInspecionadosSolda').DataTable({
     "info":false,
     "aLengthMenu":[5,10,25],

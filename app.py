@@ -1339,6 +1339,20 @@ def solda():
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+    query_a_inspecionar = """SELECT *
+                                FROM pcp.ordens_montagem
+                            ORDER BY id desc
+                            LIMIT 10
+                        """
+    
+    cur.execute(query_a_inspecionar)
+
+    a_inspecionar_solda = cur.fetchall()
+
+    for item in a_inspecionar_solda:
+        if isinstance(item[1], datetime):
+            item[1] = formatar_data(item[1])
+
     query_inspecao = """SELECT *
             FROM pcp.pecas_inspecionadas
             WHERE setor = 'Solda'"""
@@ -1350,8 +1364,6 @@ def solda():
     for item in inspecoes_solda:
         if isinstance(item[1], datetime):
             item[1] = formatar_data(item[1])
-
-    print(inspecoes_solda)
 
     query_reinspecao = """SELECT *
             FROM pcp.pecas_reinspecao
@@ -1365,7 +1377,7 @@ def solda():
         if isinstance(item[1], datetime):
             item[1] = formatar_data(item[1])
     
-    return render_template('inspecao-solda.html',inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda)
+    return render_template('inspecao-solda.html',a_inspecionar_solda=a_inspecionar_solda,inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda)
 
 @app.route('/conjuntos', methods=['POST'])
 def listar_conjuntos():
