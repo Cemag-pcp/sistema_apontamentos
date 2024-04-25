@@ -88,6 +88,10 @@ $('#n_conformidades').on('input',function() {
 
 $('#envio_inspecao').on('click', function () {
 
+    $("#loading").show();
+
+    $('#envio_inspecao').prop('disabled',true);
+
     var formData = new FormData();
 
     let id_inspecao = $('#inspecaoModalLabel').text();
@@ -100,8 +104,23 @@ $('#envio_inspecao').on('click', function () {
     let qtd_produzida_value = $('#qtd_produzida').val();
     let reinspecao = 'False';
 
+    console.log(inspetor)
+
+    if (n_conformidades.trim() === "" || inspetor === null || n_conformidades.trim() > qtd_produzida_value || n_conformidades.trim() < 0) {
+        alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
+        $('#envio_inspecao').prop('disabled',false);
+        $("#loading").hide();
+        return; // Interrompe a execução
+    }
+
     for (var i = 1; i <= n_nao_conformidades; i++) {
         let causas = $("#causa_reinspecao_" + i).val();
+        if (causas.trim() === "") {
+            alert('Por favor, preencha todos os campos de causas de não conformidade.');
+            $('#envio_inspecao').prop('disabled',false);
+            $("#loading").hide();
+            return; // Interrompe a execução
+        }
         list_causas.push(causas);
     }
 
@@ -248,8 +267,21 @@ $('#envio_reinspecao').on('click',function() {
     let qtd_produzida_value = $('#qtd_produzida_reinspecao').val();
     let reinspecao = true;
 
+    if (n_conformidades.trim() === "" || inspetor === null || n_conformidades.trim() > qtd_produzida_value || n_conformidades.trim() < 0) {
+        alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
+        $('#envio_reinspecao').prop('disabled',false);
+        $("#loading").hide();
+        return; // Interrompe a execução
+    }
+
     for (var i = 1; i <= n_nao_conformidades; i++) {
         let causas = $("#causa_reinspecao_" + i).val();
+        if (causas.trim() === "") {
+            alert('Por favor, preencha todos os campos de causas de não conformidade.');
+            $('#envio_reinspecao').prop('disabled',false);
+            $("#loading").hide();
+            return; // Interrompe a execução
+        }
         list_causas.push(causas);
     }
 
@@ -314,13 +346,14 @@ function changeTab(tabName) {
 function formatarDataBrComHora(dataString) {
     // Cria um objeto Date a partir da string
     var data = new Date(dataString);
-    data.setDate(data.getDate() + 1);
+
+    data.setDate(data.getDate());
 
     // Obtém os componentes da data
     var dia = data.getDate().toString().padStart(2, '0');
     var mes = (data.getMonth() + 1).toString().padStart(2, '0');
     var ano = data.getFullYear();
-    var hora = data.getHours().toString().padStart(2, '0');
+    var hora = (data.getHours() + 3).toString().padStart(2, '0');
     var minuto = data.getMinutes().toString().padStart(2, '0');
     var segundo = data.getSeconds().toString().padStart(2, '0');
 
@@ -342,11 +375,11 @@ function modalTimeline(idinspecao) {
         success: function(response) {
             // Limpar conteúdo atual da lista
             $("#modalTimeline .modal-header h5").text("Possui " + response.length + " inspeções")
-
+        
             $('#listaHistorico').empty();
         
             $('#modalTimeline').modal('show');
-
+        
             $("#loading").hide();
         
             // Loop pelos dados e gerar elementos da lista
@@ -360,10 +393,12 @@ function modalTimeline(idinspecao) {
                     'data-index': i, // Armazenar o índice do item como um atributo de dados
                     'data-item': JSON.stringify(item) // Armazenar todo o item como um atributo de dados
                 });
+
+                listItem.css('cursor','pointer');
         
                 var content = `
                     <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">${item[0]}</h6>
+                        <h6 class="mb-1">${item[11]}</h6>
                         <div class="d-flex flex-column align-items-end">
                             <small>N° Conformidade : ${item[2]}</small>
                             <small>Inspetor : ${item[3]}</small>
@@ -379,7 +414,7 @@ function modalTimeline(idinspecao) {
             }
             $(".modal-edit").on('click', function() {
                 var dataItemString = $(this).data('item');
-                
+
                 try {
                     $("#modalTimeline").modal('hide')
                     modalVisualizarCausas(dataItemString[10],dataItemString[9])
