@@ -1,0 +1,1028 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Montagem</title>
+{% endblock %}
+
+{% block links %}
+
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+<style>
+    .lista-celulaHistorico,
+    .lista-mpHistorico,
+    .lista-conjuntoHistorico,
+    .lista-pecaHistorico,
+    .lista-mat-prima,
+    .lista-celula,
+    .lista-conjunto,
+    .lista-peca {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        border: 1px solid #ccc;
+        border-top: none;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        z-index: 1;
+        background-color: #fff;
+        width: calc(100% - 2px);
+        /* Ajuste para compensar a borda */
+    }
+
+    .lista-celulaHistorico li,
+    .lista-mpHistorico li,
+    .lista-conjuntoHistorico li,
+    .lista-pecaHistorico li,
+    .lista-mat-prima li,
+    .lista-celula li,
+    .lista-conjunto li,
+    .lista-peca li {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+    .lista-celulaHistorico li:hover,
+    .lista-mpHistorico li:hover,
+    .lista-conjuntoHistorico li:hover,
+    .lista-pecaHistorico li:hover,
+    .lista-mat-prima li:hover,
+    .lista-celula li:hover,
+    .lista-conjunto li:hover,
+    .lista-peca li:hover {
+        background-color: #f0f0f0;
+    }
+</style>
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Levantamento</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <div class="row">
+        <!-- tabela iniciar apontamento -->
+        <div class="col-xl-12 mb-2">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+                    <div class="btn-group" role="group" aria-label="Criar OP">
+                        <button id="btnModalHistoricoLevantamento" type="button" class="btn btn-sm btn-info mr-2"
+                            data-toggle="modal" data-target="#modalHistoricoLevantamento">Histórico</button>
+                        <button id="btnModalCarretasCadastradas" type="button" class="btn btn-sm btn-secondary mr-2"
+                            data-toggle="modal" data-target="#modalCarretasCadastradas">Carretas</button>
+                        <button id="btnExportarResumo" type="button" class="btn btn-sm btn-primary">Resumo</button>
+                    </div>
+                </div>
+                <br>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3 col-sm-6">
+                            <label for="dataLevantamentoInicial">Data inicial:</label>
+                            <input class="form-control" type="date" id="dataLevantamentoInicial">
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <label for="dataLevantamentoFinal">Data final:</label>
+                            <input class="form-control" type="date" id="dataLevantamentoFinal">
+                        </div>
+                    </div>
+                    <div class="row mb-3" style="display: none;" id="row2-filters">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="conjuntoLevantamento">Conjunto</label>
+                            <input class="form-control" type="text" id="conjuntoLevantamento">
+                            <ul class="lista-conjunto" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="celulaLevantamento">Célula</label>
+                            <input class="form-control" type="text" id="celulaLevantamento">
+                            <ul class="lista-celula" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="pecaLevantamento">Peça</label>
+                            <input class="form-control" type="text" id="pecaLevantamento">
+                            <ul class="lista-peca" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="mpLevantamento">Mat.Prima</label>
+                            <input class="form-control" type="text" id="mpLevantamento">
+                            <ul class="lista-mat-prima" style="display: none;"></ul>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 align-self-end">
+                            <button id="btnFilterLevantamento" class="btn btn-primary"><i
+                                    class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-12">
+                            <div id="no-more-tables">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead class="cf">
+                                            <tr>
+                                                <th scope="col" class="col-2 d-none d-md-table-cell">Célula</th>
+                                                <th scope="col" class="d-none d-md-table-cell">Conjunto</th>
+                                                <th scope="col">Código</th>
+                                                <th scope="col" class="col-2">Descrição</th>
+                                                <th scope="col" class="col-1">Qt.Necessária</th>
+                                                <th scope="col" class="col-2 d-none d-md-table-cell">Mat.Prima</th>
+                                                <th scope="col" class="col-1">Qt.Físico</th>
+                                                <th scope="col" class="col-md-2">Observação</th>
+                                                <th scope="col" class="col-md-2">Solicitar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="bodyTableLevantamento">
+                                            <!-- Seus dados da tabela serão inseridos aqui -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <tr>
+                            <td colspan="9">
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-end" id="paginationDuplicada">
+                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                    </ul>
+                                </nav>
+                            </td>
+                        </tr>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Row -->
+        <div class="row">
+
+            <!-- Modal criar op laser -->
+            <div class="modal fade" id="modalCarretasCadastradas" tabindex="-1" role="dialog"
+                aria-labelledby="modalCarretasCadastradasLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="TittleModalCarretasCadastradas">Carretas cadastradas na base
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="max-height: 500px; overflow-y:auto;">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Carreta</th>
+                                        <th scope="col">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyCarretasCadastradas">
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal histórico de levantamento -->
+            <div class="modal fade" id="modalHistoricoLevantamento" tabindex="-1" role="dialog"
+                aria-labelledby="modalHistoricoLevantamentoLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="TittleModalDuplicarOP">Histórico de levantamento</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="max-height: 700px; overflow-y: auto;">
+                            <div class="row mb-3">
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="dataSolicitacaoLevantamento">Data da carga</label>
+                                    <input class="form-control" type="date" id="dataSolicitacaoLevantamento">
+                                </div>
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="celulaSolicitacaoLevantamento">Célula</label>
+                                    <input class="form-control" type="text" id="celulaSolicitacaoLevantamento">
+                                    <ul class="lista-celulaHistorico" style="display: none;">
+                                </div>
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="matPrimaSolicitacaoLevantamento">Mat. Prima</label>
+                                    <input class="form-control" type="text" id="matPrimaSolicitacaoLevantamento">
+                                    <ul class="lista-mpHistorico" style="display: none;">
+                                </div>
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="conjuntoSolicitacaoLevantamento">Conjunto</label>
+                                    <input class="form-control" type="text" id="conjuntoSolicitacaoLevantamento">
+                                    <ul class="lista-conjuntoHistorico" style="display: none;">
+                                </div>
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="pecaSolicitacaoLevantamento">Peça</label>
+                                    <input class="form-control" type="text" id="pecaSolicitacaoLevantamento">
+                                    <ul class="lista-pecaHistorico" style="display: none;">
+                                </div>
+
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-2 align-self-end">
+                                    <button class="btn btn-primary" id="btnFiltraHistorico">Filtrar</button>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Célula</th>
+                                            <th scope="col">Conjunto</th>
+                                            <th scope="col">Peça</th>
+                                            <th scope="col">Descrição</th>
+                                            <th scope="col">Quantidade</th>
+                                            <th scope="col">Mat.prima</th>
+                                            <th scope="col">Obs</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyTableHistorico">
+
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9">
+                                                <nav aria-label="Page navigation example">
+                                                    <ul class="pagination justify-content-end" id="paginationHistorico">
+                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                    </ul>
+                                                </nav>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="alertBox" class="alert alert-danger">
+        <strong>Erro!</strong> Preencha todos os campos.
+    </div>
+
+    <div id="successAlert" class="alert alert-success" role="alert">
+        Salvo!
+    </div>
+
+    {% endblock %}
+
+    {% block scripts %}
+
+    <!-- Script tabela JQuery -->
+
+    <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="static/js/demo/datatables-demo.js"></script>
+
+    <!-- Script de loading -->
+    <script>
+        function showLoading() {
+            $('#loading').show();
+        }
+
+        function hideLoading() {
+            $('#loading').hide();
+        }
+    </script>
+
+    <!-- Script solicitar peça para levantamento -->
+    <script>
+
+        function solicitarPeca(dados) {
+
+            console.log(dados);
+            showLoading();
+            $.ajax({
+                type: 'POST',
+                url: '/solicitar-peca/levantamento',
+                contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                data: JSON.stringify(dados),
+                success: function (data) {
+                    console.log('Solicitação POST bem-sucedida:', data);
+                    showAndHideSuccessAlert('Salvo.', 2000);
+                    hideLoading();
+                },
+                error: function (error) {
+                    console.error('Erro na solicitação POST:', error);
+                    // Adiciona um pequeno atraso antes de chamar hideLoading()
+                    hideLoading();
+                    // location.reload();
+                }
+            });
+
+        }
+
+        function formatarDataSemHora(dataString) {
+            var data = new Date(dataString);
+            var dia = ("0" + data.getDate()).slice(-2);
+            var mes = ("0" + (data.getMonth() + 1)).slice(-2);
+            var ano = data.getFullYear();
+            return dia + '/' + mes + '/' + ano;
+        }
+
+        // $(document).ready(function () {
+        //     setInterval(preencherTabela, 1000);
+
+        // Função para iniciar um item
+        function iniciar(op) {
+            $('#modalConfirmarInicioProducao').modal('show');
+            $('#pecaTextoModalIniciar').text(op);
+
+            var botaoRetornar = $('#confimarRetornoProducao');
+            botaoRetornar.hide();
+
+            var botaoIniciar = $('#confimarInicioProducao');
+            botaoIniciar.show();
+
+            botaoIniciar.off('click').on('click', function () {
+                showLoading();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/pecas-em-processo-planejamento/corte',
+                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                    data: JSON.stringify({ op: op }),
+                    success: function (data) {
+                        console.log('Solicitação POST bem-sucedida:', data);
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        $('#modalConfirmarInicioProducao').modal('hide');
+                        hideLoading();
+                    },
+                    error: function (error) {
+                        console.error('Erro na solicitação POST:', error);
+                        // Adiciona um pequeno atraso antes de chamar hideLoading()
+                        hideLoading();
+                        // location.reload();
+                    }
+                });
+
+            });
+        }
+
+        // Função para preencher a tabela com os dados da página atual
+        // Variáveis de paginação
+        var rowsPerPage = 10;
+
+        $(document).ready(function () {
+            // Quando o botão de filtro é clicado
+
+
+            $('#btnFilter').click(function () {
+                var opFilterValue = $('#opFilter').val(); // Obter o valor do filtro OP
+                var maquinaFilter = $('#maquinaFilter option:selected').text();
+                updateTable(1, opFilterValue, maquinaFilter); // Atualizar a tabela com o filtro OP
+            });
+        });
+
+        // Função para preencher a tabela com os dados da página atual
+        function updateTable(currentPage, opFilter, maquinaFilter) {
+            showLoading();
+            $.ajax({
+                url: '/planejamento-corte-programacao',
+                type: 'GET',
+                data: { page: currentPage, op: opFilter, maquina: maquinaFilter }, // Envie o filtro OP para o servidor
+                success: function (response) {
+                    var data = response.data;
+                    var totalPages = response.total_pages;
+
+                    $('#bodyTablePlanejadas').empty(); // Limpa o corpo da tabela
+
+                    // Preenche a tabela com os dados da página atual
+                    data.forEach(function (item) {
+                        var row = '<tr>' +
+                            '<td>' + formatarDataSemHora(item[4]) + '</td>' + // data
+                            '<td>' + item[0] + '</td>' + // op
+                            '<td>' + item[3] + '</td>' + // espessura
+                            '<td>' + item[2] + '</td>' + // tamanho da chapa
+                            '<td>' + item[1] + '</td>' + // qt chapa
+                            '<td>' + item[5] + '</td>' + // máquina
+                            '<td>' + item[6] + '</td>' + // status
+                            '<td><button type="button" class="btn btn-dark btn-sm btn-pecas">Peças</button></td>' +
+                            '</tr>';
+
+                        var newRow = $(row).appendTo('#bodyTablePlanejadas');
+                        (function (item) {
+                            newRow.find('.btn-pecas').click(function () {
+
+                                var botaoRetornar = $('#btnPlanejar');
+                                botaoRetornar.show();
+
+                                var botaoIniciar = $('#btnConfirmarDuplicacao');
+                                botaoIniciar.hide();
+
+                                var funcao = 'Planejar';
+
+                                buscarPecas(item[0], funcao);
+                            });
+                        })(item);
+                    });
+
+                    // Atualiza a paginação
+                    updatePagination(totalPages, currentPage, opFilter, maquinaFilter);
+                    hideLoading();
+                },
+                error: function (error) {
+                    console.error('Erro ao obter os dados:', error);
+                }
+            });
+        }
+
+        function updatePagination(totalPages, currentPage, opFilter, maquinaFilter) {
+            var pagination = $('#pagination');
+            pagination.empty();
+
+            // Botão "Anterior"
+            var prevButton = '<li class="page-item"><a class="page-link" id="prevButton">Previous</a></li>';
+            pagination.append(prevButton);
+            $('#prevButton').click(function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTable(currentPage, opFilter, maquinaFilter);
+                    updatePagination(totalPages, currentPage,); // Atualiza a paginação após a mudança de página
+                }
+            });
+
+            // Números das páginas
+            var startPage, endPage;
+            if (totalPages <= 5) {
+                startPage = 1;
+                endPage = totalPages;
+            } else {
+                if (currentPage <= 3) {
+                    startPage = 1;
+                    endPage = 5;
+                } else if (currentPage + 2 >= totalPages) {
+                    startPage = totalPages - 4;
+                    endPage = totalPages;
+                } else {
+                    startPage = currentPage - 2;
+                    endPage = currentPage + 2;
+                }
+            }
+
+            for (var i = startPage; i <= endPage; i++) {
+                var listItem;
+                if (i === currentPage) {
+                    listItem = $('<li class="page-item active"><a class="page-link">' + i + '</a></li>');
+                } else {
+                    listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+                }
+                pagination.append(listItem);
+                listItem.click(function () {
+                    currentPage = parseInt($(this).text());
+                    updateTable(currentPage, opFilter, maquinaFilter);
+                    updatePagination(totalPages, currentPage); // Atualiza a paginação após a mudança de página
+                });
+            }
+
+            // Adiciona reticências antes e depois dos números de página, se necessário
+            if (startPage > 1) {
+                pagination.prepend('<li class="page-item"><a class="page-link">...</a></li>');
+            }
+            if (endPage < totalPages) {
+                pagination.append('<li class="page-item"><a class="page-link">...</a></li>');
+            }
+
+            // Botão "Próximo"
+            var nextButton = '<li class="page-item"><a class="page-link" id="nextButton">Next</a></li>';
+            pagination.append(nextButton);
+            $('#nextButton').click(function () {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateTable(currentPage, opFilter, maquinaFilter);
+                    updatePagination(totalPages, currentPage); // Atualiza a paginação após a mudança de página
+                }
+            });
+        }
+
+        // Inicia a tabela e a paginação na página 1
+        updateTable(1, '', '');
+
+    </script>
+
+    <!-- Scripts alerta -->
+    <script>
+        function showAndHideSuccessAlert(message, duration) {
+            const successAlert = $('#successAlert');
+            successAlert.html(message);
+            successAlert.slideDown();
+
+            setTimeout(function () {
+                successAlert.slideUp();
+            }, duration);
+        }
+    </script>
+
+    <script>
+        function showAndHideAlert(message, duration) {
+            const alertBox = $('#alertBox');
+            alertBox.html(`<strong>Danger!</strong> ${message}`);
+            alertBox.slideDown();
+
+            setTimeout(function () {
+                alertBox.slideUp();
+            }, duration);
+        }
+
+    </script>
+
+    <!-- Script para gerar listas dentro do input -->
+    <script>
+
+        function listaMp(id, classe, matPrimaDisponivel) {
+
+            // Manipulador de evento para exibir a lista ao clicar dentro do input
+            $('#' + id).on('click', function () {
+                var valorInput = $(this).val().toLowerCase();
+                var listaFiltrada = matPrimaDisponivel.filter(function (material) {
+                    return material.toLowerCase().includes(valorInput);
+                });
+                exibirLista(listaFiltrada);
+            });
+
+            // Manipulador de evento para os itens da lista
+            $(document).on('click', '.' + classe + ' li', function () {
+                var valorSelecionado = $(this).text();
+                $('#' + id).val(valorSelecionado);
+                $('.' + classe).hide();
+            });
+
+            // Manipulador de evento para fechar a lista ao clicar fora do campo de entrada
+            $(document).on('click', function (event) {
+                if (!$(event.target).closest('.' + classe).length && !$(event.target).closest('#' + id).length) {
+                    $('.' + classe).hide();
+                }
+            });
+
+            // Função para exibir a lista filtrada
+            function exibirLista(lista) {
+                var listaHtml = lista.map(function (item) {
+                    return '<li>' + item + '</li>';
+                }).join('');
+                $('.' + classe).html(listaHtml).show();
+            }
+        }
+
+    </script>
+
+    <!-- Tabela inicial de levantamento -->
+    <script>
+
+        var rowsPerPage = 10;
+
+        $(document).ready(function () {
+            // Quando o botão de filtro é clicado
+            $('#btnFilterLevantamento').click(function () {
+
+                var dataLevantamentoInicialStr = $('#dataLevantamentoInicial').val(); // Obter o valor do filtro OP
+                var dataLevantamentoFinalStr = $('#dataLevantamentoFinal').val(); // Obter o valor do filtro OP
+                var conjuntoLevantamento = $('#conjuntoLevantamento').val();
+                var celulaLevantamento = $('#celulaLevantamento').val();
+                var pecaLevantamento = $('#pecaLevantamento').val();
+                var mp = $('#mpLevantamento').val();
+
+                if (dataLevantamentoInicialStr === '' || dataLevantamentoFinalStr === '') {
+                    alert('Preencha as datas de início e fim.');
+                    return;
+                }
+
+                // $('#col-conjunto').show();
+                $('#row2-filters').show();
+
+                // Converter as strings de data em objetos de data
+                var dataLevantamentoInicial = new Date(dataLevantamentoInicialStr);
+                var dataLevantamentoFinal = new Date(dataLevantamentoFinalStr);
+
+                // Verificar se as datas de início e fim são válidas
+                if (isNaN(dataLevantamentoInicial.getTime()) || isNaN(dataLevantamentoFinal.getTime())) {
+                    alert('Datas inválidas.');
+                    return;
+                }
+
+                // Verificar se a data de início é menor que a data final
+                if (dataLevantamentoInicial > dataLevantamentoFinal) {
+                    alert('A data de início deve ser anterior à data de fim.');
+                    return;
+                }
+
+                // Se chegou aqui, as datas são válidas e a dataLevantamento pode ser formada
+                var dataLevantamento = dataLevantamentoInicialStr + ' - ' + dataLevantamentoFinalStr;
+
+                updateTableDuplicarOp(1, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+            });
+        });
+
+        // Função para preencher a tabela com os dados da página atual
+        function updateTableDuplicarOp(currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp) {
+            showLoading();
+            $.ajax({
+                url: '/consultar-carreta/levantamento',
+                type: 'GET',
+                data: { page: currentPage, data: dataLevantamento, conjunto: conjuntoLevantamento, celula: celulaLevantamento, peca: pecaLevantamento, mp: mp }, // Envie o filtro OP para o servidor
+                success: function (response) {
+
+                    var data = response.data;
+                    var totalPages = response.total_pages;
+                    var carretasCadastradas = response.carretas_na_base;
+
+                    listaMp('mpLevantamento', 'lista-mat-prima', response.matprima);
+                    listaMp('pecaLevantamento', 'lista-peca', response.pecas);
+                    listaMp('celulaLevantamento', 'lista-celula', response.celula);
+                    listaMp('conjuntoLevantamento', 'lista-conjunto', response.conjunto);
+
+                    $('#bodyTableLevantamento').empty(); // Limpa o corpo da tabela
+                    $('#bodyCarretasCadastradas').empty();
+
+                    dados = [];
+
+                    // Preenche a tabela com os dados da página atual
+                    data.forEach(function (item) {
+                        var row = '<tr>' +
+                            '<td data-title="Célula" class="d-none d-md-table-cell">' + item[0] + '</td>' + // celula
+                            '<td data-title="Conjunto" class="d-none d-md-table-cell">' + item[1] + '</td>' + // conjunto
+                            '<td data-title="Código">' + item[2] + '</td>' + // peça
+                            '<td data-title="Descrição">' + item[3] + '</td>' + // descricao
+                            '<td data-title="Qt.Necessária" class="text-truncate">' + item[5] + '</td>' + // quantidade
+                            '<td data-title="Mat.Prima" class="d-none d-md-table-cell">' + item[4] + '</td>' + // mat prima
+                            '<td data-title="Qt.Físico"><input type="number" class="form-control"></td>' + // quantidade fisica
+                            '<td data-title="Observação"><textarea row="3" cols="20" type="text" class="form-control"></textarea></td>' + // obs
+                            '<td data-title="Solicitar"><button type="button" class="btn btn-dark btn-sm btn-pecas"><i class="fa fa-paper-plane" aria-hidden="true"></i></button></td>' +
+                            '</tr>';
+
+                        var newRow = $(row).appendTo('#bodyTableLevantamento');
+                        (function (item) {
+                            newRow.find('.btn-pecas').click(function () {
+                                var quantidadeEmEstoque = parseFloat(item[5]);
+                                var quantidadeInseridaStr = parseFloat(newRow.find('input[type="number"]').val());
+
+                                var dataInicio = $('#dataLevantamentoInicial').val()
+                                var dataFinal = $('#dataLevantamentoFinal').val()
+
+                                if (dataFinal === '') {
+                                    dataFinal = dataInicio;
+                                };
+
+                                if (isNaN(quantidadeInseridaStr)) {
+                                    alert('Por favor, insira uma quantidade válida.');
+                                    return;
+                                }
+
+                                var quantidadeInserida = parseFloat(quantidadeInseridaStr);
+
+                                if (quantidadeInserida > quantidadeEmEstoque) {
+                                    alert('Quantidade no estoque físico maior do que a necessária.');
+                                    return;
+                                } else {
+                                    var dados = [
+                                        item[0], // celula
+                                        item[1], // conjunto
+                                        item[2], // peça
+                                        item[3], // descricao
+                                        item[5], // quantidade
+                                        item[4], // mat prima
+                                        quantidadeInserida, // quantidade inserida
+                                        newRow.find('textarea').val(), // observação
+                                        dataInicio,// descrição adicional inserida
+                                        dataFinal// descrição adicional inserida
+
+                                    ];
+                                    solicitarPeca(dados);
+                                }
+                            });
+                        })(item);
+                    });
+
+                    carretasCadastradas.forEach(function (item) {
+                        var statusIcon = (item[1] === '') ? 'checked' : 'x';
+                        var rowBodyCarretasCadastradas = '<tr>' +
+                            '<td>' + item[0] + '</td>' + // carreta
+                            '<td>' + getStatusIcon(statusIcon) + '</td>' + // status
+                            '</tr>';
+                        var newRowBodyCarretasCadastradas = $(rowBodyCarretasCadastradas).appendTo('#bodyCarretasCadastradas');
+                    });
+
+                    function getStatusIcon(icon) {
+                        if (icon === 'checked') {
+                            return '<i style="color:red;" class="fas fa-times"></i>'; // Exemplo de ícone de x (você pode substituir pelo ícone desejado)
+                        } else {
+                            return '<i style="color:green;" class="fas fa-check"></i>'; // Exemplo de ícone de check (você pode substituir pelo ícone desejado)
+                        }
+                    }
+
+                    // Atualiza a paginação
+                    updatePaginationDuplicaOp(totalPages, currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+                    hideLoading();
+                },
+                error: function (xhr, status, error) {
+                    var errorMessage = xhr.status + ': ' + xhr.statusText;
+                    console.error('Erro ao obter os dados:', errorMessage);
+                    hideLoading();
+                }
+            });
+        }
+
+        function updatePaginationDuplicaOp(totalPages, currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp) {
+            var pagination = $('#paginationDuplicada');
+            pagination.empty();
+
+            // Botão "Anterior"
+            var prevButton = '<li class="page-item"><a class="page-link" id="prevButtonDuplicar">Previous</a></li>';
+            pagination.append(prevButton);
+            $('#prevButton').click(function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTableDuplicarOp(currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+                    updatePaginationDuplicaOp(totalPages, currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp); // Atualiza a paginação após a mudança de página
+                }
+            });
+
+            // Números das páginas
+            var startPage, endPage;
+            if (totalPages <= 5) {
+                startPage = 1;
+                endPage = totalPages;
+            } else {
+                if (currentPage <= 3) {
+                    startPage = 1;
+                    endPage = 5;
+                } else if (currentPage + 2 >= totalPages) {
+                    startPage = totalPages - 4;
+                    endPage = totalPages;
+                } else {
+                    startPage = currentPage - 2;
+                    endPage = currentPage + 2;
+                }
+            }
+
+            for (var i = startPage; i <= endPage; i++) {
+                var listItem;
+                if (i === currentPage) {
+                    listItem = $('<li class="page-item active"><a class="page-link">' + i + '</a></li>');
+                } else {
+                    listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+                }
+                pagination.append(listItem);
+                listItem.click(function () {
+                    currentPage = parseInt($(this).text());
+                    updateTableDuplicarOp(currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+                    updatePaginationDuplicaOp(totalPages, currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp); // Atualiza a paginação após a mudança de página
+                });
+            }
+
+            // Adiciona reticências antes e depois dos números de página, se necessário
+            if (startPage > 1) {
+                pagination.prepend('<li class="page-item"><a class="page-link">...</a></li>');
+            }
+            if (endPage < totalPages) {
+                pagination.append('<li class="page-item"><a class="page-link">...</a></li>');
+            }
+
+            // Botão "Próximo"
+            var nextButton = '<li class="page-item"><a class="page-link" id="nextButtonDuplicar">Next</a></li>';
+            pagination.append(nextButton);
+            $('#nextButton').click(function () {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateTableDuplicarOp(currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+                    updatePaginationDuplicaOp(totalPages, currentPage, dataLevantamento, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp); // Atualiza a paginação após a mudança de página
+                }
+            });
+        }
+
+        // Inicia a tabela e a paginação na página 1
+        // updateTableDuplicarOp(1, '', '');
+
+    </script>
+
+    <!-- Histórico de levantamento -->
+    <script>
+
+        var rowsPerPage = 10;
+
+        $(document).ready(function () {
+            // Quando o botão de filtro é clicado
+            $('#btnFiltraHistorico').click(function () {
+                var dataLevantamentoInicialStr = $('#dataSolicitacaoLevantamento').val(); // Obter o valor do filtro OP
+                var conjuntoLevantamento = $('#conjuntoSolicitacaoLevantamento').val();
+                var celulaLevantamento = $('#celulaSolicitacaoLevantamento').val();
+                var pecaLevantamento = $('#pecaSolicitacaoLevantamento').val();
+                var mp = $('#matPrimaSolicitacaoLevantamento').val();
+
+                if (dataLevantamentoInicialStr === '') {
+                    var dataLevantamentoInicial;
+                } else {
+                    var dataLevantamentoInicial = new Date(dataLevantamentoInicialStr);
+                    dataLevantamentoInicial.setDate(dataLevantamentoInicial.getDate() + 1);
+                    dataLevantamentoInicial = formatarDataSemHora(dataLevantamentoInicial);
+                };
+
+                updateTableDuplicarOpHistorico(1, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+            });
+        });
+
+        // Função para preencher a tabela com os dados da página atual
+        function updateTableDuplicarOpHistorico(currentPage, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp) {
+            showLoading();
+            $.ajax({
+                url: '/historico-levantamento/levantamento',
+                type: 'GET',
+                data: { page: currentPage, data: dataLevantamentoInicial, conjunto: conjuntoLevantamento, celula: celulaLevantamento, peca: pecaLevantamento, mp: mp }, // Envie o filtro OP para o servidor
+                success: function (response) {
+
+                    listaMp('matPrimaSolicitacaoLevantamento', 'lista-mpHistorico', response.mp_historico);
+                    listaMp('pecaSolicitacaoLevantamento', 'lista-pecaHistorico', response.peca_historico);
+                    listaMp('celulaSolicitacaoLevantamento', 'lista-celulaHistorico', response.celulas_historico);
+                    listaMp('conjuntoSolicitacaoLevantamento', 'lista-conjuntoHistorico', response.conjunto_historico);
+
+                    var data = response.data;
+                    var totalPages = response.total_pages;
+
+                    // Limpa o corpo da tabela
+                    $('#bodyTableHistorico').empty();
+
+                    dados = [];
+
+                    // Preenche a tabela com os dados da página atual
+                    data.forEach(function (item) {
+                        var row =
+                            '<tr>' +
+                            '<td>' + item[10] + '</td>' + // celula
+                            '<td>' + item[7] + '</td>' + // conjunto
+                            '<td>' + item[3] + '</td>' + // peça
+                            '<td>' + item[6] + '</td>' + // descricao
+                            '<td>' + item[4] + '</td>' + // quantidade
+                            '<td>' + item[12] + '</td>' + // mat prima
+                            '<td>' + item[8] + '</td>' + // mat prima
+                            '</tr>';
+                        $(row).appendTo('#bodyTableHistorico');
+                    });
+
+                    // Atualiza a paginação
+                    updatePaginationDuplicaOpHistorico(totalPages, currentPage, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+                    hideLoading();
+                },
+                error: function (xhr, status, error) {
+                    var errorMessage = xhr.status + ': ' + xhr.statusText;
+                    console.error('Erro ao obter os dados:', errorMessage);
+                    hideLoading();
+                }
+            });
+        }
+
+        function updatePaginationDuplicaOpHistorico(totalPages, currentPage, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp) {
+            var pagination = $('#paginationHistorico');
+            pagination.empty();
+
+            // Botão "Anterior"
+            var prevButton = '<li class="page-item"><a class="page-link" id="prevButtonHistorico">Previous</a></li>';
+            pagination.append(prevButton);
+            $('#prevButton').click(function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTableDuplicarOpHistorico(currentPage, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+                    updatePaginationDuplicaOpHistorico(totalPages, currentPage, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp); // Atualiza a paginação após a mudança de página
+                }
+            });
+
+            // Números das páginas
+            var startPage, endPage;
+            if (totalPages <= 5) {
+                startPage = 1;
+                endPage = totalPages;
+            } else {
+                if (currentPage <= 3) {
+                    startPage = 1;
+                    endPage = 5;
+                } else if (currentPage + 2 >= totalPages) {
+                    startPage = totalPages - 4;
+                    endPage = totalPages;
+                } else {
+                    startPage = currentPage - 2;
+                    endPage = currentPage + 2;
+                }
+            }
+
+            for (var i = startPage; i <= endPage; i++) {
+                var listItem;
+                if (i === currentPage) {
+                    listItem = $('<li class="page-item active"><a class="page-link">' + i + '</a></li>');
+                } else {
+                    listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+                }
+                pagination.append(listItem);
+                listItem.click(function () {
+                    currentPage = parseInt($(this).text());
+                    updateTableDuplicarOpHistorico(currentPage, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+                    updatePaginationDuplicaOpHistorico(totalPages, currentPage, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp); // Atualiza a paginação após a mudança de página
+                });
+            }
+
+            // Adiciona reticências antes e depois dos números de página, se necessário
+            if (startPage > 1) {
+                pagination.prepend('<li class="page-item"><a class="page-link">...</a></li>');
+            }
+            if (endPage < totalPages) {
+                pagination.append('<li class="page-item"><a class="page-link">...</a></li>');
+            }
+
+            // Botão "Próximo"
+            var nextButton = '<li class="page-item"><a class="page-link" id="nextButtonHistorico">Next</a></li>';
+            pagination.append(nextButton);
+            $('#nextButton').click(function () {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateTableDuplicarOpHistorico(currentPage, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp);
+                    updatePaginationDuplicaOpHistorico(totalPages, currentPage, dataLevantamentoInicial, conjuntoLevantamento, celulaLevantamento, pecaLevantamento, mp); // Atualiza a paginação após a mudança de página
+                }
+            });
+        }
+
+        // Inicia a tabela e a paginação na página 1
+        // updateTableDuplicarOp(1, '', '');
+
+    </script>
+
+    <!-- Baixar resumo de necessidades -->
+    <script>
+
+        $('#btnExportarResumo').click(function () {
+
+            var dataLevantamentoInicialStr = $('#dataLevantamentoInicial').val(); // Obter o valor do filtro OP
+            var dataLevantamentoFinalStr = $('#dataLevantamentoFinal').val(); // Obter o valor do filtro OP
+
+            showLoading();
+
+            if (dataLevantamentoInicialStr === '' || dataLevantamentoFinalStr === '') {
+                showAndHideAlert('Preencha as datas de inicio e fim.', 2000);
+                hideLoading();
+                return;
+            }
+
+            $.ajax({
+                url: '/baixar-resumo/levantamento',
+                type: 'GET',
+                data: { dataInicio: dataLevantamentoInicialStr, dataFinal: dataLevantamentoFinalStr },
+                xhrFields: {
+                    responseType: 'blob' // Define o tipo de resposta para 'blob' (binário)
+                },
+                success: function (response) {
+                    hideLoading();
+                    var blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }); // Cria um Blob a partir da resposta
+                    var link = document.createElement('a'); // Cria um elemento <a> para o download
+                    link.href = window.URL.createObjectURL(blob); // Define o URL do link como o URL do Blob
+                    link.download = 'resumos.xlsx'; // Define o nome do arquivo a ser baixado
+                    document.body.appendChild(link); // Adiciona o link ao corpo do documento
+                    link.click(); // Simula um clique no link para iniciar o download
+                    document.body.removeChild(link); // Remove o link do corpo do documento após o download
+                },
+                error: function (xhr, status, error) {
+                    hideLoading();
+                    console.error('Erro ao baixar o arquivo:', error);
+                }
+            });
+        });
+    </script>
+
+    {% endblock %}

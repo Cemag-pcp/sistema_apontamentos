@@ -1,0 +1,222 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Pintura</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Apontamento pintura - Histórico</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- tabela gerar cambão -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Histórico</h6>
+                    <button type="button" class="btn btn-info" id="limparCacheHistorico">Atualizar dados</button>
+                </div>
+                <br>
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <div class="form-row">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="dataApontamento">Data de apontamento</label>
+                                <input type="date" id="dataApontamento" class="form-control" data-column="0">
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="dataCarga">Data da carga</label>
+                                <input type="date" id="dataCarga" class="form-control" data-column="1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div id="no-more-tables">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead class="cf">
+                                    <tr>
+                                        <th>Data de apontamento</th>
+                                        <th>Data da carga</th>
+                                        <th>Código</th>
+                                        <th>Descrição</th>
+                                        <th>Qt. planejada</th>
+                                        <th>Cor</th>
+                                        <th>Qt. produzida</th>
+                                        <th>Tipo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if sheet_data %}
+                                    {% for data in sheet_data %}
+                                    <tr>
+                                        <td data-title="Data de apontamento">{{ data[9] }}</td>
+                                        <td data-title="Data da carga">{{ data[8] }}</td>
+                                        <td data-title="Código">{{ data[1] }}</td>
+                                        <td data-title="Descrição">{{ data[2] }}</td>
+                                        <td data-title="Qt. planejada">{{ data[3] }}</td>
+                                        <td data-title="Cor">{{ data[4] }}</td>
+                                        <td data-title="Qt. produzida">{{ data[5] }}</td>
+                                        <td data-title="Tipo">{{ data[7] }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="7">Nenhum dado disponível</td>
+                                    </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}
+
+    {% block scripts %}
+
+    <!-- Script tabela JQuery -->
+
+    <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="static/js/demo/datatables-demo.js"></script>
+
+    <!-- Scripts campos de filtro -->
+
+    <!-- <script>
+    $(document).ready(function () {
+        // Obtém a data de hoje no formato 'YYYY-MM-DD'
+        var today = moment().format('YYYY-MM-DD');
+
+        // Define o valor padrão para o campo de data
+        $('#dataApontamento').val(today);
+        // Restante do seu código...
+    });
+</script> -->
+
+    <script>
+        $(document).ready(function () {
+            var table = $('#dataTable').DataTable();
+
+            // Função para aplicar o filtro com base na data
+            function applyDateFilter_dataApontamento() {
+                var columnIndex = $('#dataApontamento').data('column');
+                var filterValue = $('#dataApontamento').val();
+
+                console.log('Column Index:', columnIndex);
+                console.log('Filter Value:', filterValue);
+
+                // Verifica se o campo de entrada está vazio
+                if (filterValue.trim() === '') {
+                    // Remove o filtro na coluna específica
+                    table.column(columnIndex).search('').draw();
+                } else {
+                    // Formata a data usando Moment.js
+                    filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
+
+                    // Define o filtro na coluna específica
+                    table.column(columnIndex).search(filterValue).draw();
+                }
+            }
+
+            // Aplica o filtro ao carregar a página
+            applyDateFilter_dataApontamento();
+
+            // Adiciona campos de entrada para filtrar por coluna
+            $('#dataApontamento').on('input', function () {
+                applyDateFilter_dataApontamento();
+            });
+
+            // Função para aplicar o filtro com base na data
+            function applyDateFilter_dataCarga() {
+                var columnIndex = $('#dataCarga').data('column');
+                var filterValue = $('#dataCarga').val();
+
+                console.log('Column Index:', columnIndex);
+                console.log('Filter Value:', filterValue);
+
+                // Verifica se o campo de entrada está vazio
+                if (filterValue.trim() === '') {
+                    // Remove o filtro na coluna específica
+                    table.column(columnIndex).search('').draw();
+                } else {
+                    // Formata a data usando Moment.js
+                    filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
+
+                    // Define o filtro na coluna específica
+                    table.column(columnIndex).search(filterValue).draw();
+                }
+            }
+
+            // Aplica o filtro ao carregar a página
+            applyDateFilter_dataCarga();
+
+            // Adiciona campos de entrada para filtrar por coluna
+            $('#dataCarga').on('input', function () {
+                applyDateFilter_dataCarga();
+            });
+
+        });
+
+    </script>
+
+    <!-- Script tratar data -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- Script para limpar cache -->
+
+    <script>
+
+        function limparCacheHistorico() {
+            $.ajax({
+                url: '/limpar-cache-historico',
+                method: 'POST',
+                contentType: 'application/json',
+                success: function (response) {
+                    // Tratar a resposta do backend, se necessário
+                    location.reload();
+                },
+                error: function (err) {
+                    console.error('Erro ao enviar dados para o backend', err);
+                }
+            });
+        }
+
+        // Adiciona campos de entrada para filtrar por coluna
+        $('#limparCacheHistorico').on('click', function () {
+            limparCacheHistorico();
+        });
+
+    </script>
+
+    {% endblock %}

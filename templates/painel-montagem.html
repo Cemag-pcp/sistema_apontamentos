@@ -1,0 +1,217 @@
+{% extends 'sidebar.html' %}
+
+{% block meta %}
+<!-- <meta http-equiv="refresh" content="5"> -->
+{% endblock %}
+
+{% block title %}
+<title>Apontamneto Montagem</title>
+{% endblock %}
+
+{% block links %}
+{% endblock %}
+
+{% block containerFluid %}
+<div class="container-fluid">
+    <!-- Page Heading -->
+    <!-- <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Painel</h1>
+        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+    </div> -->
+    <!-- Content Row -->
+    <div class="row">
+        <!-- Area Chart -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Planejamento de produção para o dia {{ today }}</h6>
+                </div>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col"> 
+                            <div class="card shadow mb-4" id="cardChassi">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: yellow;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Chassi</h6>
+                                </div>
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                                   
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" id="cardPlataforma">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:gray;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Plat. Tanq. e Caç.</h6>
+                                </div>
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" id="cardEixoS">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:gray;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Eixo simples</h6>
+                                </div>
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                                   
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" id="cardEixoC">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:orange;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Eixo completo</h6>
+                                </div>
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                                     
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col"> 
+                            <div class="card shadow mb-4" id="cardFueiro">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: green;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Fueiro</h6>
+                                </div>
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                                   
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" id="cardIcamento">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Içamento</h6>
+                                </div>
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" id="cardLateral">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Lateral</h6>
+                                </div>
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                                     
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="card shadow mb-4" id="cardCubo">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Cubo de roda</h6>
+                                </div>
+                                <div class="card-body" style="height: 400px; overflow-y: auto;">
+                                    <div class="list-group">
+                                                  
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+    // Função para atualizar os dados
+    function atualizarDados() {
+        // Realiza uma solicitação AJAX para o endpoint '/dados_planejamento' (ajuste o nome do endpoint conforme necessário)
+        $.ajax({
+            type: 'GET',
+            url: '/atualizar-painel-montagem',
+            success: function (data) {
+                // Atualiza os dados em cada card
+                
+                // Peças planejadas
+                atualizarCardPecasPlanejada('#cardChassi', data.data_pecas_planejada, 'CHASSI');
+                atualizarCardPecasPlanejada('#cardPlataforma', data.data_pecas_planejada, 'PLAT. TANQUE. CAÇAM.');
+                atualizarCardPecasPlanejada('#cardEixoS', data.data_pecas_planejada, 'EIXO SIMPLES');
+                atualizarCardPecasPlanejada('#cardEixoC', data.data_pecas_planejada, 'EIXO COMPLETO');
+                atualizarCardPecasPlanejada('#cardFueiro', data.data_pecas_planejada, 'FUEIRO');
+                atualizarCardPecasPlanejada('#cardIcamento', data.data_pecas_planejada, 'IÇAMENTO');
+                atualizarCardPecasPlanejada('#cardLateral', data.data_pecas_planejada, 'LATERAL');
+                atualizarCardPecasPlanejada('#cardCubo', data.data_pecas_planejada, 'CUBO DE RODA');
+
+                console.log(data.data_pecas_processo)
+            },
+            error: function (error) {
+                console.error('Erro na solicitação AJAX:', error);
+            }
+        });
+    }
+
+    function atualizarCardPecasPlanejada(cardId, dados, celula) {
+        var card = $(cardId + ' .list-group');
+        card.empty(); // Limpa os dados existentes
+
+        var dadosFiltrados = dados.filter(function (linha) {
+            return linha[8] === celula; // 4 é o índice da coluna 'cor'
+        });
+
+        // Adiciona os novos dados ao card
+        for (var i = 0; i < dadosFiltrados.length; i++) {
+
+            var dataCarga = formatarDataParaString(new Date(dadosFiltrados[i][1]));
+
+            card.append(`
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">${dadosFiltrados[i][3]} - ${dadosFiltrados[i][4]}</h5>
+                </div>
+                <small>Quantidade: <strong>${dadosFiltrados[i][6]}</strong></small>
+                <small>Lote: <strong>${dadosFiltrados[i][7]}</strong></small> <!-- Correção aqui -->
+                <small>Data da carga: <strong>${dataCarga}</strong></small>
+                <hr>
+            `);
+        }
+    }
+
+    function formatarDataParaString(data) {
+        var dia = data.getUTCDate();
+        var mes = data.getUTCMonth() + 1;
+        var ano = data.getUTCFullYear();
+
+        return ("0" + dia).slice(-2) + "/" + ("0" + mes).slice(-2) + "/" + ano;
+    }   
+
+    // Chama a função de atualização a cada 2 segundos
+    setInterval(atualizarDados, 2000);
+
+</script>
+
+{% endblock %}

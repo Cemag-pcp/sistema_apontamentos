@@ -1,0 +1,212 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Montagem</title>
+{% endblock %}
+
+{% block links %}
+
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Reunião</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <div class="row">
+        <!-- tabela iniciar apontamento -->
+        <div class="col-xl-12 mb-2">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+                    <div class="btn-group" role="group" aria-label="Criar OP">
+                        <button id="btnModalHistoricoLevantamento" type="button" class="btn btn-sm btn-info mr-2"
+                            data-toggle="modal" data-target="#modalHistoricoLevantamento">Histórico</button>
+                        <button id="btnModalCarretasCadastradas" type="button" class="btn btn-sm btn-secondary mr-2"
+                            data-toggle="modal" data-target="#modalCarretasCadastradas">Carretas</button>
+                        <button id="btnExportarResumo" type="button" class="btn btn-sm btn-primary">Resumo</button>
+                    </div>
+                </div>
+                <br>
+                <!-- Card Body -->
+                <div class="card-body">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-3 col-sm-6">
+                            <label for="dataLevantamentoInicial">Data inicial:</label>
+                            <input class="form-control" type="date" id="dataLevantamentoInicial">
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <label for="dataLevantamentoFinal">Data final:</label>
+                            <input class="form-control" type="date" id="dataLevantamentoFinal">
+                        </div>
+                    </div>
+                    
+
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Row -->
+        <div class="row">
+
+            <!-- Modal criar op laser -->
+            <div class="modal fade" id="modalCarretasCadastradas" tabindex="-1" role="dialog"
+                aria-labelledby="modalCarretasCadastradasLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="TittleModalCarretasCadastradas">Carretas cadastradas na base
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="max-height: 500px; overflow-y:auto;">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Carreta</th>
+                                        <th scope="col">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyCarretasCadastradas">
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal histórico de levantamento -->
+            <div class="modal fade" id="modalHistoricoLevantamento" tabindex="-1" role="dialog"
+                aria-labelledby="modalHistoricoLevantamentoLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="TittleModalDuplicarOP">Histórico de levantamento</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="max-height: 700px; overflow-y: auto;">
+                            <div class="row mb-3">
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="dataSolicitacaoLevantamento">Data da carga</label>
+                                    <input class="form-control" type="date" id="dataSolicitacaoLevantamento">
+                                </div>
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="celulaSolicitacaoLevantamento">Célula</label>
+                                    <input class="form-control" type="text" id="celulaSolicitacaoLevantamento">
+                                    <ul class="lista-celulaHistorico" style="display: none;">
+                                </div>
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="matPrimaSolicitacaoLevantamento">Mat. Prima</label>
+                                    <input class="form-control" type="text" id="matPrimaSolicitacaoLevantamento">
+                                    <ul class="lista-mpHistorico" style="display: none;">
+                                </div>
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="conjuntoSolicitacaoLevantamento">Conjunto</label>
+                                    <input class="form-control" type="text" id="conjuntoSolicitacaoLevantamento">
+                                    <ul class="lista-conjuntoHistorico" style="display: none;">
+                                </div>
+                                <div class="col-sm-2 col-sm-6 mb-3">
+                                    <label for="pecaSolicitacaoLevantamento">Peça</label>
+                                    <input class="form-control" type="text" id="pecaSolicitacaoLevantamento">
+                                    <ul class="lista-pecaHistorico" style="display: none;">
+                                </div>
+
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-sm-2 align-self-end">
+                                    <button class="btn btn-primary" id="btnFiltraHistorico">Filtrar</button>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Célula</th>
+                                            <th scope="col">Conjunto</th>
+                                            <th scope="col">Peça</th>
+                                            <th scope="col">Descrição</th>
+                                            <th scope="col">Quantidade</th>
+                                            <th scope="col">Mat.prima</th>
+                                            <th scope="col">Obs</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyTableHistorico">
+
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9">
+                                                <nav aria-label="Page navigation example">
+                                                    <ul class="pagination justify-content-end" id="paginationHistorico">
+                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                    </ul>
+                                                </nav>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="loading" id="loading" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="alertBox" class="alert alert-danger">
+        <strong>Erro!</strong> Preencha todos os campos.
+    </div>
+
+    <div id="successAlert" class="alert alert-success" role="alert">
+        Salvo!
+    </div>
+
+    {% endblock %}
+
+    {% block scripts %}
+
+    <!-- Script tabela JQuery -->
+
+    <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="static/js/demo/datatables-demo.js"></script>
+
+    {% endblock %}

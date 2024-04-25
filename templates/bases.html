@@ -1,0 +1,1353 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Montagem</title>
+{% endblock %}
+
+{% block links %}
+
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+<style>
+    .lista-celulaHistorico,
+    .lista-mpHistorico,
+    .lista-conjuntoHistorico,
+    .lista-pecaHistorico,
+    .lista-mat-prima,
+    .lista-celula,
+    .lista-conjunto,
+    .lista-peca {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        border: 1px solid #ccc;
+        border-top: none;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        z-index: 1;
+        background-color: #fff;
+        width: calc(100% - 2px);
+        /* Ajuste para compensar a borda */
+    }
+
+    .lista-celulaHistorico li,
+    .lista-mpHistorico li,
+    .lista-conjuntoHistorico li,
+    .lista-pecaHistorico li,
+    .lista-mat-prima li,
+    .lista-celula li,
+    .lista-conjunto li,
+    .lista-peca li {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+    .lista-celulaHistorico li:hover,
+    .lista-mpHistorico li:hover,
+    .lista-conjuntoHistorico li:hover,
+    .lista-pecaHistorico li:hover,
+    .lista-mat-prima li:hover,
+    .lista-celula li:hover,
+    .lista-conjunto li:hover,
+    .lista-peca li:hover {
+        background-color: #f0f0f0;
+    }
+</style>
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Bases</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" id="btnPecas" href="#">Peças</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="btnOperadores" href="#">Operadores</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Base de peças -->
+        <div class="col-xl-12 mb-2" id="cardBasePecas">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Base de peças</h6>
+                    <div class="btn-group" role="group" aria-label="Criar OP">
+                        <button id="btnModalAdicionarPecaBase" type="button" class="btn btn-sm btn-info mr-2"
+                            data-toggle="modal" data-target="#modalAdicionarPecaBase">Adicionar</button>
+                    </div>
+                </div>
+                <br>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="pecaBase">Peça</label>
+                            <input class="form-control" type="text" id="pecaBase">
+                            <ul class="lista-pecaBase" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="celulaBase">Célula</label>
+                            <select class="form-control" name="celulaBase" id="celulaBase">
+                                <option value=""></option>
+                                <option value="CILINDRO">CILINDRO</option>
+                                <option value="CHASSI">CHASSI</option>
+                                <option value="LATERAL">LATERAL</option>
+                                <option value="CILINDRO 2">CILINDRO 2</option>
+                                <option value="PLAT. TANQUE. CAÇAM.">PLAT. TANQUE. CAÇAM.</option>
+                                <option value="SERRALHERIA">SERRALHERIA</option>
+                                <option value="IÇAMENTO">IÇAMENTO</option>
+                                <option value="FUEIRO">FUEIRO</option>
+                                <option value="EIXO SIMPLES">EIXO SIMPLES</option>
+                                <option value="CONJ INTERMED">CONJ INTERMED</option>
+                                <option value="EIXO COMPLETO">EIXO COMPLETO</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="setorBase">Setor</label>
+                            <select class="form-control" name="setorBase" id="setorBase">
+                                <option value=""></option>
+                                <option value="Montagem">Montagem</option>
+                                <option value="Estamparia">Estamparia</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-sm-6 mb-3">
+                            <label for="statusBase">Status</label>
+                            <select class="form-control" name="statusBase" id="statusBase">
+                                <option value=""></option>
+                                <option value="ativo">ativo</option>
+                                <option value="inativo">inativo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 col-sm-6 mb-3 d-flex align-items-end">
+                            <button id="btnFilterBasePeca" class="btn btn-primary"><i
+                                    class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 align-self-end">
+
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Id</th>
+                                            <th scope="col">Código</th>
+                                            <th scope="col">Descrição</th>
+                                            <th scope="col">Setor</th>
+                                            <th scope="col">Célula</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyBasePecas">
+                                        <!-- Seus dados da tabela serão inseridos aqui -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9">
+                                                <nav aria-label="Page navigation example">
+                                                    <ul class="pagination justify-content-end" id="paginationBasePecas">
+                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                    </ul>
+                                                </nav>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Base de operadores -->
+        <div class="col-xl-12 mb-2" id="cardBaseOperadores" style="display: none;">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Base de operadores</h6>
+                    <div class="btn-group" role="group" aria-label="Criar OP">
+                        <button id="btnModalAdicionarOperadorBase" type="button" class="btn btn-sm btn-info mr-2"
+                            data-toggle="modal" data-target="#modalAdicionarOperadorBase">Adicionar</button>
+                    </div>
+                </div>
+                <br>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="matriculaBaseOperador">Matrícula</label>
+                            <input class="form-control" type="text" id="matriculaBaseOperador">
+                            <ul class="lista-matriculaBaseOperador" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="nomeBaseOperador">Nome</label>
+                            <input class="form-control" type="text" id="nomeBaseOperador">
+                            <ul class="lista-nomeBaseOperador" style="display: none;"></ul>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="setorBaseOperador">Setor</label>
+                            <select class="form-control" name="setorBaseOperador" id="setorBaseOperador">
+                                <option value=""></option>
+                                <option value="CILINDRO">CILINDRO</option>
+                                <option value="CHASSI">CHASSI</option>
+                                <option value="LATERAL">LATERAL</option>
+                                <option value="CILINDRO 2">CILINDRO 2</option>
+                                <option value="PLAT. TANQUE. CAÇAM.">PLAT. TANQUE. CAÇAM.</option>
+                                <option value="SERRALHERIA">SERRALHERIA</option>
+                                <option value="IÇAMENTO">IÇAMENTO</option>
+                                <option value="FUEIRO">FUEIRO</option>
+                                <option value="EIXO SIMPLES">EIXO SIMPLES</option>
+                                <option value="CONJ INTERMED">CONJ INTERMED</option>
+                                <option value="EIXO COMPLETO">EIXO COMPLETO</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <label for="statusBaseOperador">Status</label>
+                            <select class="form-control" name="statusBaseOperador" id="statusBaseOperador">
+                                <option value=""></option>
+                                <option value="ativo">ativo</option>
+                                <option value="inativo">inativo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-4 align-self-end">
+                            <button id="btnFilterBaseOperadores" class="btn btn-primary"><i
+                                    class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-sm-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Id</th>
+                                            <th scope="col">Matrícula</th>
+                                            <th scope="col">Nome</th>
+                                            <th scope="col">Setor</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyBaseOperadores">
+                                        <!-- Seus dados da tabela serão inseridos aqui -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="9">
+                                                <nav aria-label="Page navigation example">
+                                                    <ul class="pagination justify-content-end"
+                                                        id="paginationBaseOperadores">
+                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                                    </ul>
+                                                </nav>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- Modal editar peça base -->
+        <div class="modal fade" id="modalEditarPecaBase" tabindex="-1" role="dialog"
+            aria-labelledby="modalEditarPecaBaseLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalCarretasCadastradas">Editar peça</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: 500px; overflow-y:auto;">
+                        <div class="row mb-3">
+                            <div class="col-md-3 mb-3">
+                                <label for="inputModalEditCodigoBase">Código</label>
+                                <input class="form-control" type="text" id="inputModalEditCodigoBase">
+                            </div>
+                            <div class="col-md-9 mb-3">
+                                <label for="inputModalEditDescricaoBase">Descrição</label>
+                                <input class="form-control" type="text" id="inputModalEditDescricaoBase">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 mb-3">
+                                <label for="inputModalEditSetorBase">Setor</label>
+                                <select class="form-control" id="inputModalEditSetorBase">
+                                    <option value="Montagem">Montagem</option>
+                                    <option value="Estamparia">Estamparia</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="inputModalEditCelulaBase">Célula</label>
+                                <select class="form-control" id="inputModalEditCelulaBase">
+                                    <option value="CILINDRO">CILINDRO</option>
+                                    <option value="CHASSI">CHASSI</option>
+                                    <option value="LATERAL">LATERAL</option>
+                                    <option value="CILINDRO 2">CILINDRO 2</option>
+                                    <option value="PLAT. TANQUE. CAÇAM.">PLAT. TANQUE. CAÇAM.</option>
+                                    <option value="SERRALHERIA">SERRALHERIA</option>
+                                    <option value="IÇAMENTO">IÇAMENTO</option>
+                                    <option value="FUEIRO">FUEIRO</option>
+                                    <option value="EIXO SIMPLES">EIXO SIMPLES</option>
+                                    <option value="CONJ INTERMED">CONJ INTERMED</option>
+                                    <option value="EIXO COMPLETO">EIXO COMPLETO</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="inputModalEditStatusBase">Status</label>
+                                <select class="form-control" id="selectModalEditStatusBase">
+                                    <option value="ativo">Ativo</option>
+                                    <option value="inativo">Inativo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="salvarEditPecaBase">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal excluir peça base -->
+        <div class="modal fade" id="modalExcluirPecaBase" tabindex="-1" role="dialog"
+            aria-labelledby="modalExcluirPecaBaseLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalCarretasCadastradas">Excluir peça</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="bodyExcluirPecaBase">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="confirmarExcluir">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal editar operador base -->
+        <div class="modal fade" id="modalEditarOperadorBase" tabindex="-1" role="dialog"
+            aria-labelledby="modalEditarOperadorBaseLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalCarretasCadastradas">Editar operador</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: 500px; overflow-y:auto;">
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="inputModalEditMatriculaOperadorBase">Matrícula</label>
+                                <input class="form-control" type="text" id="inputModalEditMatriculaOperadorBase">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="inputModalEditNomeOperadorBase">Nome</label>
+                                <input class="form-control" type="text" id="inputModalEditNomeOperadorBase">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="inputModalEditSetorOperadorBase">Setor</label>
+                                <select class="form-control" id="inputModalEditSetorOperadorBase">
+                                    <option value="Montagem">Montagem</option>
+                                    <option value="Estamparia">Estamparia</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="selectModalEditOperadorStatusBase">Status</label>
+                                <select class="form-control" id="selectModalEditOperadorStatusBase">
+                                    <option value="ativo">Ativo</option>
+                                    <option value="inativo">Inativo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="salvarEditOperadorBase">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal excluir operador base -->
+        <div class="modal fade" id="modalExcluirOperadorBase" tabindex="-1" role="dialog"
+            aria-labelledby="modalExcluirOperadorBaseLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalCarretasCadastradas">Excluir operador</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="bodyExcluirOperadorBase">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="confirmarExcluirOperador">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal adicionar peça base -->
+        <div class="modal fade" id="modalAdicionarPecaBase" tabindex="-1" role="dialog"
+            aria-labelledby="modalAdicionarPecaBaseLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalCarretasCadastradas">Adicionar peça</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: 500px; overflow-y:auto;">
+                        <div class="row mb-3">
+                            <div class="col-md-3 mb-3">
+                                <label for="inputModalAdicionarCodigoBase">Código</label>
+                                <input class="form-control" type="text" id="inputModalAdicionarCodigoBase">
+                            </div>
+                            <div class="col-md-9 mb-3">
+                                <label for="inputModalAdicionarDescricaoBase">Descrição</label>
+                                <input class="form-control" type="text" id="inputModalAdicionarDescricaoBase">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="inputModalAdicionarSetorBase">Setor</label>
+                                <select class="form-control" id="inputModalAdicionarSetorBase">
+                                    <option value="Montagem">Montagem</option>
+                                    <option value="Estamparia">Estamparia</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="inputModalAdicionarCelulaBase">Célula</label>
+                                <select class="form-control" id="inputModalAdicionarCelulaBase">
+                                    <option value=""></option>
+                                    <option value="CILINDRO">CILINDRO</option>
+                                    <option value="CHASSI">CHASSI</option>
+                                    <option value="LATERAL">LATERAL</option>
+                                    <option value="CILINDRO 2">CILINDRO 2</option>
+                                    <option value="PLAT. TANQUE. CAÇAM.">PLAT. TANQUE. CAÇAM.</option>
+                                    <option value="SERRALHERIA">SERRALHERIA</option>
+                                    <option value="IÇAMENTO">IÇAMENTO</option>
+                                    <option value="FUEIRO">FUEIRO</option>
+                                    <option value="EIXO SIMPLES">EIXO SIMPLES</option>
+                                    <option value="CONJ INTERMED">CONJ INTERMED</option>
+                                    <option value="EIXO COMPLETO">EIXO COMPLETO</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="salvarAdicionarPecaBase">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal adicionar operador base  -->
+        <div class="modal fade" id="modalAdicionarOperadorBase" tabindex="-1" role="dialog"
+            aria-labelledby="modalAdicionarOperadorBaseLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TittleModalCarretasCadastradas">Adicionar operador</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" style="max-height: 500px; overflow-y:auto;">
+                        <div class="row mb-3">
+                            <div class="col-md-3 mb-3">
+                                <label for="inputModalAdicionarMatriculaOperadorBase">Matrícula</label>
+                                <input class="form-control" type="text" id="inputModalAdicionarMatriculaOperadorBase">
+                            </div>
+                            <div class="col-md-9 mb-3">
+                                <label for="inputModalAdicionarNomeOperadorBase">Nome</label>
+                                <input class="form-control" type="text" id="inputModalAdicionarNomeOperadorBase">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="inputModalAdicionarSetorOperadorBase">Setor</label>
+                                <select class="form-control" id="inputModalAdicionarSetorOperadorBase">
+                                    <option value="Montagem">Montagem</option>
+                                    <option value="Estamparia">Estamparia</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="salvarAdicionarOperadorBase">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</div>
+
+<div id="alertBox" class="alert alert-danger">
+    <strong>Erro!</strong> Preencha todos os campos.
+</div>
+
+<div id="successAlert" class="alert alert-success" role="alert">
+    Salvo!
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Script tabela JQuery -->
+
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="static/js/demo/datatables-demo.js"></script>
+
+<!-- Script de loading -->
+<script>
+    function showLoading() {
+        $('#loading').show();
+    }
+
+    function hideLoading() {
+        $('#loading').hide();
+    }
+</script>
+
+<!-- Scripts alerta -->
+<script>
+    function showAndHideSuccessAlert(message, duration) {
+        const successAlert = $('#successAlert');
+        successAlert.html(message);
+        successAlert.slideDown();
+
+        setTimeout(function () {
+            successAlert.slideUp();
+        }, duration);
+    }
+</script>
+
+<script>
+    function showAndHideAlert(message, duration) {
+        const alertBox = $('#alertBox');
+        alertBox.html(`<strong>Danger!</strong> ${message}`);
+        alertBox.slideDown();
+
+        setTimeout(function () {
+            alertBox.slideUp();
+        }, duration);
+    }
+
+</script>
+
+<!-- Script para gerar listas dentro do input -->
+<script>
+
+    function listaMp(id, classe, matPrimaDisponivel) {
+
+        // Manipulador de evento para exibir a lista ao clicar dentro do input
+        $('#' + id).on('click', function () {
+            var valorInput = $(this).val().toLowerCase();
+            var listaFiltrada = matPrimaDisponivel.filter(function (material) {
+                return material.toLowerCase().includes(valorInput);
+            });
+            exibirLista(listaFiltrada);
+        });
+
+        // Manipulador de evento para os itens da lista
+        $(document).on('click', '.' + classe + ' li', function () {
+            var valorSelecionado = $(this).text();
+            $('#' + id).val(valorSelecionado);
+            $('.' + classe).hide();
+        });
+
+        // Manipulador de evento para fechar a lista ao clicar fora do campo de entrada
+        $(document).on('click', function (event) {
+            if (!$(event.target).closest('.' + classe).length && !$(event.target).closest('#' + id).length) {
+                $('.' + classe).hide();
+            }
+        });
+
+        // Função para exibir a lista filtrada
+        function exibirLista(lista) {
+            var listaHtml = lista.map(function (item) {
+                return '<li>' + item + '</li>';
+            }).join('');
+            $('.' + classe).html(listaHtml).show();
+        }
+    }
+
+</script>
+
+<!-- Tabela para base de peças -->
+<script>
+
+    $(document).ready(function () {
+        // Quando o botão de filtro é clicado
+        $('#btnFilterBasePeca').click(function () {
+
+            var pecaBase = $('#pecaBase').val(); // peça
+            var celulaBase = $('#celulaBase option:selected').text(); // celula
+            var setorBase = $('#setorBase option:selected').text(); // setor
+            var statusBase = $('#statusBase option:selected').text(); // status
+
+            updateTableBasePecas(1, pecaBase, celulaBase, setorBase, statusBase);
+        });
+    });
+
+    // Função para preencher a tabela com os dados da página atual
+    function updateTableBasePecas(currentPage, pecaBase, celulaBase, setorBase, statusBase) {
+        showLoading();
+        $.ajax({
+            url: '/consultar-base-pecas/bases',
+            type: 'GET',
+            data: { page: currentPage, pecaBase: pecaBase, celulaBase: celulaBase, setorBase: setorBase, statusBase: statusBase }, // Envie o filtro OP para o servidor
+            success: function (response) {
+
+                var data = response.data;
+                var totalPages = response.total_pages;
+                console.log(totalPages)
+                // var carretasCadastradas = response.carretas_na_base;
+
+                // listaMp('mpLevantamento', 'lista-mat-prima', response.matprima);
+                // listaMp('pecaLevantamento', 'lista-peca', response.pecas);
+                // listaMp('celulaLevantamento', 'lista-celula', response.celula);
+                // listaMp('conjuntoLevantamento', 'lista-conjunto', response.conjunto);
+
+                $('#bodyBasePecas').empty(); // Limpa o corpo da tabela
+
+                // Preenche a tabela com os dados da página atual
+                data.forEach(function (item) {
+                    var row = '<tr>' +
+                        '<td>' + item[0] + '</td>' + // id
+                        '<td>' + item[1] + '</td>' + // codigo
+                        '<td>' + item[2] + '</td>' + // descricao
+                        '<td>' + item[3] + '</td>' + // setor
+                        '<td>' + item[5] + '</td>' + // celula
+                        '<td>' + item[4] + '</td>' + // status
+                        '<td>' +
+                        '<div class="btn-group" role="group" aria-label="Ações">' +
+                        '<button type="button" class="btn btn-dark btn-sm btn-edit-pecas mr-1">Editar</button>' +
+                        '<button type="button" class="btn btn-warning btn-sm btn-excluir-pecas">Excluir</button>' +
+                        '</div>' +
+                        '</td>' +
+                        '</tr>';
+                    var newRow = $(row).appendTo('#bodyBasePecas');
+                    (function (item) {
+                        newRow.find('.btn-edit-pecas').click(function () {
+
+                            editarPeca(item[0], item[1], item[2], item[3], item[4], item[5]);
+                        });
+                    })(item);
+
+                    (function (item) {
+                        newRow.find('.btn-excluir-pecas').click(function () {
+
+                            excluirPeca(item[0], item[1], item[2]);
+                        });
+                    })(item);
+                });
+
+
+                // Atualiza a paginação
+                updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                console.error('Erro ao obter os dados:', errorMessage);
+                hideLoading();
+            }
+        });
+    }
+
+    function updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase) {
+        var pagination = $('#paginationBasePecas');
+        pagination.empty();
+
+        // Botão "Anterior"
+        var prevButton = '<li class="page-item"><a class="page-link" id="prevButtonBasePecas">Previous</a></li>';
+        pagination.append(prevButton);
+        $('#prevButton').click(function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableBasePecas(currentPage, pecaBase, celulaBase, setorBase, statusBase);
+                updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase); // Atualiza a paginação após a mudança de página
+            }
+        });
+
+        // Números das páginas
+        var startPage, endPage;
+        if (totalPages <= 5) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (currentPage <= 3) {
+                startPage = 1;
+                endPage = 5;
+            } else if (currentPage + 2 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
+            }
+        }
+
+        for (var i = startPage; i <= endPage; i++) {
+            var listItem;
+            if (i === currentPage) {
+                listItem = $('<li class="page-item active"><a class="page-link">' + i + '</a></li>');
+            } else {
+                listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+            }
+            pagination.append(listItem);
+            listItem.click(function () {
+                currentPage = parseInt($(this).text());
+                updateTableBasePecas(currentPage, pecaBase, celulaBase, setorBase, statusBase);
+                updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase); // Atualiza a paginação após a mudança de página
+            });
+        }
+
+        // Adiciona reticências antes e depois dos números de página, se necessário
+        if (startPage > 1) {
+            pagination.prepend('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+        if (endPage < totalPages) {
+            pagination.append('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+
+        // Botão "Próximo"
+        var nextButton = '<li class="page-item"><a class="page-link" id="nextButtonBasePecas">Next</a></li>';
+        pagination.append(nextButton);
+        $('#nextButton').click(function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableBasePecas(currentPage, pecaBase, celulaBase, setorBase, statusBase);
+                updatePaginationBasePecas(totalPages, currentPage, pecaBase, celulaBase, setorBase, statusBase); // Atualiza a paginação após a mudança de página
+            }
+        });
+    }
+
+    // Inicia a tabela e a paginação na página 1
+    updateTableBasePecas(1, '', '', '', '');
+
+</script>
+
+<!-- Tabela para base de operadores -->
+<script>
+
+    $(document).ready(function () {
+        // Quando o botão de filtro é clicado
+        $('#btnFilterBaseOperadores').click(function () {
+
+            var matriculaBaseOperador = $('#matriculaBaseOperador').val(); // peça
+            var nomeBaseOperador = $('#nomeBaseOperador').val(); // celula
+            var setorBaseOperador = $('#setorBaseOperador option:selected').text(); // setor
+            var statusBaseOperador = $('#statusBaseOperador option:selected').text(); // status
+
+            updateTableBaseOperadores(1, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+        });
+    });
+
+    // Função para preencher a tabela com os dados da página atual
+    function updateTableBaseOperadores(currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador) {
+        showLoading();
+        $.ajax({
+            url: '/consultar-base-operador/bases',
+            type: 'GET',
+            data: { page: currentPage, matriculaBaseOperador: matriculaBaseOperador, nomeBaseOperador: nomeBaseOperador, setorBaseOperador: setorBaseOperador, statusBaseOperador: statusBaseOperador }, // Envie o filtro OP para o servidor
+            success: function (response) {
+
+                var data = response.data;
+                var totalPages = response.total_pages;
+                console.log(totalPages)
+                // var carretasCadastradas = response.carretas_na_base;
+
+                // listaMp('mpLevantamento', 'lista-mat-prima', response.matprima);
+                // listaMp('pecaLevantamento', 'lista-peca', response.pecas);
+                // listaMp('celulaLevantamento', 'lista-celula', response.celula);
+                // listaMp('conjuntoLevantamento', 'lista-conjunto', response.conjunto);
+
+                $('#bodyBaseOperadores').empty(); // Limpa o corpo da tabela
+
+                // Preenche a tabela com os dados da página atual
+                data.forEach(function (item) {
+                    var row = '<tr>' +
+                        '<td>' + item[0] + '</td>' + // id
+                        '<td>' + item[1] + '</td>' + // matricula
+                        '<td>' + item[2] + '</td>' + // nome
+                        '<td>' + item[4] + '</td>' + // status
+                        '<td>' + item[3] + '</td>' + // setor
+                        '<td>' +
+                        '<div class="btn-group" role="group" aria-label="Ações">' +
+                        '<button type="button" class="btn btn-dark btn-sm btn-edit-operador mr-1">Editar</button>' +
+                        '<button type="button" class="btn btn-warning btn-sm btn-excluir-operador">Excluir</button>' +
+                        '</div>' +
+                        '</td>' +
+                        '</tr>';
+
+                    var newRow = $(row).appendTo('#bodyBaseOperadores');
+                    (function (item) {
+                        newRow.find('.btn-edit-operador').click(function () {
+
+                            editarOperador(item[0], item[1], item[2], item[4], item[3]);
+                        });
+                    })(item);
+
+                    (function (item) {
+                        newRow.find('.btn-excluir-operador').click(function () {
+
+                            excluirOperador(item[0], item[1], item[2]);
+                        });
+                    })(item);
+                });
+
+
+                // Atualiza a paginação
+                updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+                hideLoading();
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                console.error('Erro ao obter os dados:', errorMessage);
+                hideLoading();
+            }
+        });
+    }
+
+    function updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador) {
+        var pagination = $('#paginationBaseOperadores');
+        pagination.empty();
+
+        // Botão "Anterior"
+        var prevButton = '<li class="page-item"><a class="page-link" id="prevButtonBaseOperadores">Previous</a></li>';
+        pagination.append(prevButton);
+        $('#prevButton').click(function () {
+            if (currentPage > 1) {
+                currentPage--;
+                updateTableBaseOperadores(currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+                updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador); // Atualiza a paginação após a mudança de página
+            }
+        });
+
+        // Números das páginas
+        var startPage, endPage;
+        if (totalPages <= 5) {
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            if (currentPage <= 3) {
+                startPage = 1;
+                endPage = 5;
+            } else if (currentPage + 2 >= totalPages) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
+            }
+        }
+
+        for (var i = startPage; i <= endPage; i++) {
+            var listItem;
+            if (i === currentPage) {
+                listItem = $('<li class="page-item active"><a class="page-link">' + i + '</a></li>');
+            } else {
+                listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+            }
+            pagination.append(listItem);
+            listItem.click(function () {
+                currentPage = parseInt($(this).text());
+                updateTableBaseOperadores(currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+                updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador); // Atualiza a paginação após a mudança de página
+            });
+        }
+
+        // Adiciona reticências antes e depois dos números de página, se necessário
+        if (startPage > 1) {
+            pagination.prepend('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+        if (endPage < totalPages) {
+            pagination.append('<li class="page-item"><a class="page-link">...</a></li>');
+        }
+
+        // Botão "Próximo"
+        var nextButton = '<li class="page-item"><a class="page-link" id="nextButtonBaseOperadores">Next</a></li>';
+        pagination.append(nextButton);
+        $('#nextButton').click(function () {
+            if (currentPage < totalPages) {
+                currentPage++;
+                updateTableBaseOperadores(currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador);
+                updatePaginateBaseOperadores(totalPages, currentPage, matriculaBaseOperador, nomeBaseOperador, setorBaseOperador, statusBaseOperador); // Atualiza a paginação após a mudança de página
+            }
+        });
+    }
+
+    // Inicia a tabela e a paginação na página 1
+    updateTableBaseOperadores(1, '', '', '', '');
+
+</script>
+
+<!-- Script para navegar sobre navbars -->
+<script>
+    // Função para alternar a ativação entre os botões
+    function alternarAtivacaoBotao(botaoAtivado, botaoDesativado) {
+        document.getElementById(botaoAtivado).classList.add("active");
+        document.getElementById(botaoDesativado).classList.remove("active");
+    }
+
+    // Adicionar manipuladores de eventos aos botões
+    document.getElementById("btnPecas").addEventListener("click", function () {
+        alternarAtivacaoBotao("btnPecas", "btnOperadores");
+        $('#cardBasePecas').show()
+        $('#cardBaseOperadores').hide()
+
+    });
+
+    document.getElementById("btnOperadores").addEventListener("click", function () {
+        alternarAtivacaoBotao("btnOperadores", "btnPecas");
+        $('#cardBasePecas').hide()
+        $('#cardBaseOperadores').show()
+    });
+</script>
+
+<!-- Script para editar e excluir peças da base -->
+<script>
+    var changesMade = false; // Variável para rastrear se houve alterações
+
+    $(document).ready(function () {
+        // Manipuladores de eventos de mudança para os campos do formulário
+        $('#inputModalEditCodigoBase, #inputModalEditDescricaoBase, #inputModalEditSetorBase, #inputModalEditCelulaBase, #selectModalEditStatusBase').change(function () {
+            changesMade = true; // Marcar que houve alterações
+            enableSaveButton(); // Habilitar o botão de salvar
+        });
+    });
+
+    // Função para habilitar o botão de salvar
+    function enableSaveButton() {
+        $('#salvarEditPecaBase').prop('disabled', !changesMade);
+    }
+
+    // Função para editar a peça
+    function editarPeca(id, codigo, descricao, setor, status, celula) {
+        $('#modalEditarPecaBase').modal('show');
+
+        $('#inputModalEditCodigoBase').val(codigo);
+        $('#inputModalEditDescricaoBase').val(descricao);
+        $('#inputModalEditSetorBase').val(setor);
+        $('#inputModalEditCelulaBase').val(celula);
+        $('#selectModalEditStatusBase').val(status);
+
+        changesMade = false; // Reiniciar a variável de alterações
+        enableSaveButton(); // Desabilitar o botão de salvar no início
+
+        document.getElementById('salvarEditPecaBase').addEventListener('click', function () {
+
+            showLoading();
+
+            var codigo = $('#inputModalEditCodigoBase').val()
+            var descricao = $('#inputModalEditDescricaoBase').val();
+            var setor = $('#inputModalEditSetorBase').val();
+            var celula = $('#inputModalEditCelulaBase').val();
+            var status = $('#selectModalEditStatusBase').val();
+
+            $.ajax({
+                url: '/editar-peca/bases',
+                type: 'POST',
+                contentType: 'application/json', // Definir o tipo de conteúdo para JSON
+                data: JSON.stringify({  // Serializar os dados para JSON
+                    id: id,
+                    codigo: codigo,
+                    descricao: descricao,
+                    setor: setor,
+                    celula: celula,
+                    status: status
+                }),
+                success: function (response) {
+                    hideLoading();
+                    location.reload();
+                    console.log('Sucesso:', response);
+                },
+                error: function (xhr, status, error) {
+                    hideLoading();
+                    console.error('Erro:', error);
+                }
+            });
+
+        });
+
+    }
+
+    // Função para excluir a peça
+    function excluirPeca(id, codigo, descricao) {
+
+        $('#modalExcluirPecaBase').modal('show');
+
+        $('#bodyExcluirPecaBase').html('<h6>Confirma excluir a peça: <strong>' + codigo + ' - ' + descricao + '?</strong></h6>');
+
+        document.getElementById('confirmarExcluir').addEventListener('click', function () {
+
+            showLoading();
+
+            $.ajax({
+                url: '/excluir-peca/bases',
+                type: 'POST',
+                contentType: 'application/json', // Definir o tipo de conteúdo para JSON
+                data: JSON.stringify({  // Serializar os dados para JSON
+                    id: id,
+                }),
+                success: function (response) {
+                    hideLoading();
+                    location.reload();
+                    console.log('Sucesso:', response);
+                },
+                error: function (xhr, status, error) {
+                    hideLoading();
+                    console.error('Erro:', error);
+                }
+            });
+
+        });
+
+    }
+
+</script>
+
+<!-- Script para editar e excluir operadores da base -->
+<script>
+
+    var changesMade = false; // Variável para rastrear se houve alterações
+
+    $(document).ready(function () {
+        // Manipuladores de eventos de mudança para os campos do formulário
+        $('#inputModalEditMatriculaOperadorBase, #inputModalEditNomeOperadorBase, #inputModalEditSetorOperadorBase, #selectModalEditOperadorStatusBase').change(function () {
+            changesMade = true; // Marcar que houve alterações
+            enableSaveButtonOperador(); // Habilitar o botão de salvar
+        });
+    });
+
+    // Função para habilitar o botão de salvar
+    function enableSaveButtonOperador() {
+        $('#salvarEditOperadorBase').prop('disabled', !changesMade);
+    }
+
+    // Função para editar operador
+    function editarOperador(id, matricula, nome, setor, status) {
+        $('#modalEditarOperadorBase').modal('show');
+
+        $('#inputModalEditMatriculaOperadorBase').val(matricula);
+        $('#inputModalEditNomeOperadorBase').val(nome);
+        $('#inputModalEditSetorOperadorBase').val(setor);
+        $('#selectModalEditOperadorStatusBase').val(status);
+
+        changesMade = false; // Reiniciar a variável de alterações
+        enableSaveButtonOperador(); // Desabilitar o botão de salvar no início
+
+        document.getElementById('salvarEditOperadorBase').addEventListener('click', function () {
+
+            showLoading();
+
+            var matricula = $('#inputModalEditMatriculaOperadorBase').val()
+            var nome = $('#inputModalEditNomeOperadorBase').val();
+            var setor = $('#inputModalEditSetorOperadorBase').val();
+            var status = $('#selectModalEditOperadorStatusBase').val();
+
+            $.ajax({
+                url: '/editar-operador/bases',
+                type: 'POST',
+                contentType: 'application/json', // Definir o tipo de conteúdo para JSON
+                data: JSON.stringify({  // Serializar os dados para JSON
+                    id: id,
+                    matricula: matricula,
+                    nome: nome,
+                    setor: setor,
+                    status: status
+                }),
+                success: function (response) {
+                    hideLoading();
+                    location.reload();
+                    console.log('Sucesso:', response);
+                },
+                error: function (xhr, status, error) {
+                    hideLoading();
+                    console.error('Erro:', error);
+                }
+            });
+
+        });
+
+    }
+
+    // Função para excluir a peça
+    function excluirOperador(id, matricula, nome) {
+
+        $('#modalExcluirOperadorBase').modal('show');
+
+        $('#bodyExcluirOperadorBase').html('<h6>Confirma excluir o operador: <strong>' + matricula + ' - ' + nome + '?</strong></h6>');
+
+        document.getElementById('confirmarExcluirOperador').addEventListener('click', function () {
+
+            showLoading();
+
+            $.ajax({
+                url: '/excluir-operador/bases',
+                type: 'POST',
+                contentType: 'application/json', // Definir o tipo de conteúdo para JSON
+                data: JSON.stringify({  // Serializar os dados para JSON
+                    id: id,
+                }),
+                success: function (response) {
+                    hideLoading();
+                    location.reload();
+                    console.log('Sucesso:', response);
+                },
+                error: function (xhr, status, error) {
+                    hideLoading();
+                    console.error('Erro:', error);
+                }
+            });
+
+        });
+
+    }
+
+
+</script>
+
+<!-- Script para adicionar peças na base -->
+<script>
+    var changesMade = false; // Variável para rastrear se houve alterações
+
+    $(document).ready(function () {
+        // Manipuladores de eventos de mudança para os campos do formulário
+        $('#inputModalEditCodigoBase, #inputModalEditDescricaoBase, #inputModalEditSetorBase, #inputModalEditCelulaBase, #selectModalEditStatusBase').change(function () {
+            changesMade = true; // Marcar que houve alterações
+            enableSaveButton(); // Habilitar o botão de salvar
+        });
+    });
+
+    // Função para habilitar o botão de salvar
+    function enableSaveButton() {
+        $('#salvarEditPecaBase').prop('disabled', !changesMade);
+    }
+
+    // Função para editar a peça
+    function editarPeca(id, codigo, descricao, setor, status, celula) {
+        $('#modalEditarPecaBase').modal('show');
+
+        $('#inputModalEditCodigoBase').val(codigo);
+        $('#inputModalEditDescricaoBase').val(descricao);
+        $('#inputModalEditSetorBase').val(setor);
+        $('#inputModalEditCelulaBase').val(celula);
+        $('#selectModalEditStatusBase').val(status);
+
+        changesMade = false; // Reiniciar a variável de alterações
+        enableSaveButton(); // Desabilitar o botão de salvar no início
+
+        document.getElementById('salvarEditPecaBase').addEventListener('click', function () {
+
+            showLoading();
+
+            var codigo = $('#inputModalEditCodigoBase').val()
+            var descricao = $('#inputModalEditDescricaoBase').val();
+            var setor = $('#inputModalEditSetorBase').val();
+            var celula = $('#inputModalEditCelulaBase').val();
+            var status = $('#selectModalEditStatusBase').val();
+
+            $.ajax({
+                url: '/editar-peca/bases',
+                type: 'POST',
+                contentType: 'application/json', // Definir o tipo de conteúdo para JSON
+                data: JSON.stringify({  // Serializar os dados para JSON
+                    id: id,
+                    codigo: codigo,
+                    descricao: descricao,
+                    setor: setor,
+                    celula: celula,
+                    status: status
+                }),
+                success: function (response) {
+                    hideLoading();
+                    location.reload();
+                    console.log('Sucesso:', response);
+                },
+                error: function (xhr, status, error) {
+                    hideLoading();
+                    console.error('Erro:', error);
+                }
+            });
+
+        });
+
+    }
+
+</script>
+
+<!-- Adicionar peça na base -->
+<script>
+
+    document.getElementById('btnModalAdicionarPecaBase').addEventListener('click', function () {
+        $('#modalAdicionarPecaBase').modal('show')
+
+        document.getElementById('salvarAdicionarPecaBase').addEventListener('click', function () {
+
+            showLoading();
+
+            codigo = $('#inputModalAdicionarCodigoBase').val();
+            descricao = $('#inputModalAdicionarDescricaoBase').val();
+            setor = $('#inputModalAdicionarSetorBase').val();
+            celula = $('#inputModalAdicionarCelulaBase').val();
+
+            if (codigo === '' || descricao === '' || setor === '') {
+                showAndHideAlert("Campos de codigo, descricao e setor são obrigatórios", 3000);
+                hideLoading();
+                return;
+
+            } else {
+                $.ajax({
+                    url: '/adicionar-peca/bases',
+                    type: 'POST',
+                    contentType: 'application/json', // Definir o tipo de conteúdo para JSON
+                    data: JSON.stringify({  // Serializar os dados para JSON
+                        codigo: codigo,
+                        descricao: descricao,
+                        setor: setor,
+                        celula: celula,
+                    }),
+                    success: function (response) {
+                        if (response.verificacao_consulta) {
+                            showAndHideAlert(response.verificacao_consulta, 3000)
+                            hideLoading();
+                            return;
+                        } else {
+                            hideLoading();
+                            showAndHideSuccessAlert(response.verificacao_insert, 3000)
+                            $('#modalAdicionarPecaBase').modal('hide');
+                        };
+
+                    },
+                    error: function (xhr, status, error) {
+                        hideLoading();
+                        console.error('Erro:', error);
+                    }
+                });
+
+
+            }
+
+        })
+
+    });
+
+</script>
+
+<!-- Adicionar operador na base -->
+<script>
+
+    document.getElementById('btnModalAdicionarOperadorBase').addEventListener('click', function () {
+        $('#modalAdicionarOperadorBase').modal('show')
+
+        document.getElementById('salvarAdicionarOperadorBase').addEventListener('click', function () {
+
+            showLoading();
+
+            matricula = $('#inputModalAdicionarMatriculaOperadorBase').val();
+            nome = $('#inputModalAdicionarNomeOperadorBase').val();
+            setor = $('#inputModalAdicionarSetorOperadorBase').val();
+
+            if (matricula === '' || nome === '' || setor === '') {
+                showAndHideAlert("Campos de codigo, descricao e setor são obrigatórios", 3000);
+                hideLoading();
+                return;
+
+            } else {
+                $.ajax({
+                    url: '/adicionar-operador/bases',
+                    type: 'POST',
+                    contentType: 'application/json', // Definir o tipo de conteúdo para JSON
+                    data: JSON.stringify({  // Serializar os dados para JSON
+                        matricula: matricula,
+                        nome: nome,
+                        setor: setor,
+                    }),
+                    success: function (response) {
+                        if (response.verificacao_consulta) {
+                            showAndHideAlert(response.verificacao_consulta, 3000)
+                            hideLoading();
+                            return;
+                        } else {
+                            hideLoading();
+                            showAndHideSuccessAlert(response.verificacao_insert, 3000)
+                            $('#modalAdicionarOperadorBase').modal('hide');
+                        };
+
+                    },
+                    error: function (xhr, status, error) {
+                        hideLoading();
+                        console.error('Erro:', error);
+                    }
+                });
+
+
+            }
+
+        })
+
+    });
+
+</script>
+
+{% endblock %}

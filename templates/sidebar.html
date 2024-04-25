@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    {% block meta %}
+    {% endblock %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    {% block title %}
+    <title>SB Admin 2 - Dashboard</title>
+    {% endblock %}
+
+    <!-- Custom fonts for this template-->
+    <link rel="stylesheet" type="text/css"
+        href="{{ url_for('static',filename='vendor/fontawesome-free/css/all.min.css') }}">
+
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/sb-admin-2.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/loading.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/dropdown.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/alert.css') }}">
+    <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+
+    {% block links %}
+
+    {% endblock %}
+
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <img src="/static/img/SELO 50 ANOS ISOLADO_Prancheta 1.png" alt="Selo de 50 anos da CEMAG"
+                        style="width: 50px; height: auto; filter: brightness(255);">
+                </div>
+                <div class="sidebar-brand-text mx-3">CEMAGProd</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <!-- <li class="nav-item active">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span></a>
+            </li> -->
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <!-- <div class="sidebar-heading">
+                Apontamentos
+            </div> -->
+            <div class="sidebar-heading">
+                Produção
+            </div>
+            <!-- Nav Item - Pages Collapse Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
+                    aria-expanded="true" aria-controls="collapseTwo">
+                    <img src="/static/img/pintura-de-carro.png" alt="icone pintura"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Pintura</span>
+                </a>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Funções:</h6>
+                        <a class="collapse-item" href="gerar-cambao">Gerar cambão</a>
+                        <a class="collapse-item" href="finalizar-cambao">Finalizar cambão</a>
+                        <a class="collapse-item" href="dashboard">Painel</a>
+                        <a class="collapse-item" href="planejar-pintura">Planejar produção</a>
+                        <a class="collapse-item" href="historico-pintura">Histórico</a>
+                    </div>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
+                    aria-expanded="true" aria-controls="collapseUtilities">
+                    <img src="/static/img/mascara-de-solda.png" alt="icone solda"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Montagem</span>
+                </a>
+                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Funções:</h6>
+                        <a class="collapse-item" href="apontar-montagem">Apontamento</a>
+                        <!-- <a class="collapse-item" href="planejar-montagem">Planejar produção</a> -->
+                        <!-- <a class="collapse-item" href="painel-montagem">Painel</a> -->
+                    </div>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseEstamparia"
+                    aria-expanded="true" aria-controls="collapseEstamparia">
+                    <img src="/static/img/estampagem.png" alt="icone estamparia"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Estamparia</span>
+                </a>
+                <div id="collapseEstamparia" class="collapse" aria-labelledby="headingTwo"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Funções:</h6>
+                        <a class="collapse-item" href="tela-apontamento-estamparia">Apontamento</a>
+                    </div>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCorte"
+                    aria-expanded="true" aria-controls="collapseCorte">
+                    <img src="/static/img/maquina-de-corte-a-laser.png" alt="icone corte"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Corte</span>
+                </a>
+                <div id="collapseCorte" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Funções:</h6>
+                        <a class="collapse-item" href="tela-planejamento-corte">Planejamento</a>
+                        <a class="collapse-item" href="tela-apontamento-corte">Apontamento</a>
+                    </div>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLevantamento"
+                    aria-expanded="true" aria-controls="collapseLevantamento">
+                    <img src="/static/img/inventario.png" alt="icone levantamento"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Levantamento</span>
+                </a>
+                <div id="collapseLevantamento" class="collapse" aria-labelledby="headingTwo"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Funções:</h6>
+                        <a class="collapse-item" href="levantamento">Levantamento</a>
+                    </div>
+                </div>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <div class="sidebar-heading">
+                Qualidade
+            </div>
+
+            <!-- Divider -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseQuality"
+                    aria-expanded="true" aria-controls="collapseQuality">
+                    <img src="/static/img/auditoria.png" alt="icone qualidade"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Inspeção</span>
+                </a>
+                <div id="collapseQuality" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Funções:</h6>
+                        <a class="collapse-item" href="inspecao">Pintura</a>
+                        <a class="collapse-item" href="inspecao-solda">Solda</a>
+                    </div>
+                </div>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <div class="sidebar-heading">
+                Bases
+            </div>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCadastros"
+                    aria-expanded="true" aria-controls="collapseCadastros">
+                    <img src="/static/img/novo-banco-de-dados.png" alt="icone registros"
+                        style="width: 47px; height: 47px; filter: brightness(255);" class="mb-2">
+                    <span style="font-size: smaller;">Bases</span>
+                </a>
+                <div id="collapseCadastros" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Funções:</h6>
+                        <a class="collapse-item" href="bases">Cadastros</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Heading -->
+            <!-- <div class="sidebar-heading">
+                Addons
+            </div> -->
+
+            <!-- Nav Item - Pages Collapse Menu -->
+            <!-- <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
+                    aria-expanded="true" aria-controls="collapsePages">
+                    <i class="fas fa-fw fa-folder"></i>
+                    <span>Pages</span>
+                </a>
+                <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Login Screens:</h6>
+                        <a class="collapse-item" href="login.html">Login</a>
+                        <a class="collapse-item" href="register.html">Register</a>
+                        <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
+                        <div class="collapse-divider"></div>
+                        <h6 class="collapse-header">Other Pages:</h6>
+                        <a class="collapse-item" href="404.html">404 Page</a>
+                        <a class="collapse-item" href="blank.html">Blank Page</a>
+                    </div>
+                </div>
+            </li> -->
+
+            <!-- Nav Item - Charts -->
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="charts.html">
+                    <i class="fas fa-fw fa-chart-area"></i>
+                    <span>Charts</span></a>
+            </li> -->
+
+            <!-- Nav Item - Tables -->
+            <!-- <li class="nav-item">
+                <a class="nav-link" href="tables.html">
+                    <i class="fas fa-fw fa-table"></i>
+                    <span>Tables</span></a>
+            </li> -->
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+            <!-- Sidebar Message -->
+            <!-- <div class="sidebar-card d-none d-lg-flex">
+                <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
+                <p class="text-center mb-2"><strong>SB Admin Pro</strong> is packed with premium features, components, and more!</p>
+                <a class="btn btn-success btn-sm" href="https://startbootstrap.com/theme/sb-admin-pro">Upgrade to Pro!</a>
+            </div> -->
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+                        <li class="nav-item dropdown no-arrow d-sm-none">
+                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-search fa-fw"></i>
+                            </a>
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
+                                aria-labelledby="searchDropdown">
+                                <form class="form-inline mr-auto w-100 navbar-search">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-light border-0 small"
+                                            placeholder="Search for..." aria-label="Search"
+                                            aria-describedby="basic-addon2">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="button">
+                                                <i class="fas fa-search fa-sm"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </li>
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                    </ul>
+                </nav>
+                <!-- End of Topbar -->
+                {% block containerFluid %}
+                {% endblock %}
+            </div>
+        </div>
+        <!-- End of Page Wrapper -->
+
+    </div>
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <div class="scroll-to-down rounded" id="scrollToDownBtn">
+        <i class="fas fa-angle-down"></i>
+    </div>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="static/vendor/jquery/jquery.min.js"></script>
+    <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="static/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="static/js/sb-admin-2.min.js"></script>
+
+    <!-- Page level plugins -->
+    <script src="static/vendor/chart.js/Chart.min.js"></script>
+
+    <!-- Page level custom scripts -->
+    <!-- <script src="static/js/demo/chart-area-demo.js"></script>
+    <script src="static/js/demo/chart-pie-demo.js"></script> -->
+    {% block scripts %}
+
+    {% endblock %}
+
+    <script>
+        $(document).ready(function () {
+            // Adiciona um evento de rolagem para mostrar/ocultar o botão
+            $(window).scroll(function () {
+                if ($(this).scrollTop() < 500) {
+                    $('#scrollToDownBtn').fadeIn();
+                } else {
+                    $('#scrollToDownBtn').fadeOut();
+                }
+            });
+
+            // Adiciona o evento de clique ao botão para rolar para baixo
+            $('#scrollToDownBtn').click(function () {
+                $('html, body').animate({ scrollTop: $(document).height() }, 'slow');
+                return false;
+            });
+        });
+    </script>
+
+</body>
+
+</html>

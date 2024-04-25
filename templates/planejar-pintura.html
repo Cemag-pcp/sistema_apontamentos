@@ -1,0 +1,558 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Pintura</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Apontamento pintura - Planejamento da produção</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- tabela gerar cambão -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Planejamento</h6>
+                    <!-- <div class="form-group">
+                        <label for="dataCarga">Data da carga</label>
+                        <input type="date" name="browser" id="dataCarga" class="form-control">
+                    </div> -->
+                </div>
+                <br>
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <div class="form-row">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="dataCarga">Data da carga</label>
+                                <input type="date" id="dataCarga" class="form-control" data-column="0">
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="cor">Cor</label>
+                                <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
+                                <input list="listaCor"  id="cor" class="form-control" data-column="4">
+                                <datalist id="listaCor">
+                                </datalist>                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Codificação</th>
+                                    <th>Planejar</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Codificação</th>
+                                    <th>Planejar</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                {% if sheet_data %}
+                                    {% for data in sheet_data %}
+                                    <tr>
+                                        <td>{{ data[0] }}</td>
+                                        <td>{{ data[1] }}</td>
+                                        <td>{{ data[2] }}</td>
+                                        <td>{{ data[3] }}</td>
+                                        <td>{{ data[4] }}</td>
+                                        <td>
+                                            <input class="form-control" id='prod' type="number">
+                                        </td>
+                                        <td><input class="form-control" id='cambao' type="number" value="{{ data[6] }}"></td>
+                                        <td>
+                                            <select class="form-control" id='tipo' type="text" value="">
+                                                <option value=""></option>
+                                                <option value="PÓ">PÓ</option>
+                                                <option value="PU">PU</option>
+                                            </select>
+                                        </td>
+                                        <td>{{ data[8] }}</td>
+                                        <td>
+                                            <input type="checkbox" class="form-control">
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                            
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7">Nenhum dado disponível</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- Modal confirmar planejamento -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Confirmar planejamento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-floating mb-3">
+                                <label for="userInput">Data do planejamento</label>
+                                <!-- <input class="form-control" type="text" id="inputPeca"> Peça -->
+                                <input class="form-control" type="date" id="dataPlanejamento">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="enviarBtn" type="button" class="btn btn-success">Enviar</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- Content Column -->
+        <div class="col-lg-12 mb-4">
+
+            <!-- Botão para enviar os itens apontados -->
+            <button type="button" class="btn btn-info">Confirmar</button>
+            
+        </div>
+
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</div>
+
+<div id="alertBox" class="alert alert-danger">
+    <strong>Erro!</strong> Preencha todos os campos.
+</div>
+
+<div id="successAlert" class="alert alert-success" role="alert">
+    Salvo!
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<!-- Script tabela JQuery -->
+
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="static/js/demo/datatables-demo.js"></script>
+
+<!-- Scripts campos de filtro -->
+
+<script>
+    $(document).ready(function () {
+        // Obtém a data de hoje no formato 'YYYY-MM-DD'
+        var today = moment().format('YYYY-MM-DD');
+
+        // Define o valor padrão para o campo de data
+        $('#dataCarga').val(today);
+        // Restante do seu código...
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        var table = $('#dataTable').DataTable();
+
+        // Função para obter valores únicos de uma coluna
+        function getUniqueColumnValues(columnIndex) {
+            return table.column(columnIndex, { search: 'applied' }).data().unique().sort().toArray();
+        }
+
+        // Função para popular as opções de um datalist
+        function populateDatalistOptions(datalistId, columnIndex) {
+            var datalist = $('#' + datalistId);
+            datalist.empty(); // Limpa as opções existentes
+
+            var uniqueValues = getUniqueColumnValues(columnIndex);
+
+            // Adiciona as opções ao datalist
+            uniqueValues.forEach(function (value) {
+                datalist.append('<option value="' + value + '">');
+            });
+
+            console.log(uniqueValues);
+        }
+
+        // Função para aplicar o filtro com base na data
+        function applyDateFilter() {
+            var columnIndex = $('#dataCarga').data('column');
+            var filterValue = $('#dataCarga').val();
+
+            console.log('Column Index:', columnIndex);
+            console.log('Filter Value:', filterValue);
+
+            // Formata a data usando Moment.js
+            if (filterValue === '') {
+                filterValue = moment().format('DD/MM/YYYY');
+            } else {
+                filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
+            }
+
+            // Define o filtro na coluna específica
+            table.column(columnIndex).search(filterValue).draw();
+
+            populateDatalistOptions('listaCor', 4);
+        }
+
+        function applyColorFilter() {
+            var columnIndex = $('#cor').data('column');
+            var filterValue = $('#cor').val();
+
+            console.log('Column Index:', columnIndex);
+            console.log('Filter Value:', filterValue);
+
+            // Define o filtro na coluna específica
+            table.column(columnIndex).search(filterValue).draw();
+        }
+
+        // Carrega as opções do datalist quando a página é carregada
+        populateDatalistOptions('listaCor', 4);
+
+        // Aplica o filtro ao carregar a página
+        applyDateFilter();
+
+        // Adiciona campos de entrada para filtrar por coluna
+        $('#dataCarga').on('input', function () {
+            applyDateFilter();
+        });
+
+        $('#cor').on('input', function () {
+            applyColorFilter();
+            populateDatalistOptions('listaCor', 4);
+        });
+    });
+</script>
+
+<!-- Script tratar data -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<!-- Script tela de carregamento -->
+
+<script>
+    function showLoading() {
+        $('#loading').show();
+    }
+
+    function hideLoading() {
+        $('#loading').hide();
+    }
+</script>
+
+<!-- Script para lista input -->
+
+<script>
+
+    // Função para ocultar a lista
+    function hideSuggestions() {
+        $('#suggestions').css('display', 'none');
+    }
+
+    // Adicionar um event listener para cliques no documento
+    $(document).on('click', function (event) {
+        const clickedElement = $(event.target);
+
+        // Verificar se o clique foi fora da lista e do campo de entrada
+        if (!clickedElement.closest('#suggestions, #userInput').length) {
+            hideSuggestions();
+        }
+    });
+
+    // Adicionar um event listener para o input para ocultar a lista quando estiver vazio
+    $('#userInput').on('input', function () {
+        const userInput = $(this).val().trim();
+
+        if (!userInput.length) {
+            hideSuggestions();
+        }
+    });
+    // Variável para armazenar os dados brutos do backend
+    let suggestionsData = [];
+
+    // Função para obter dados brutos do backend
+    function fetchSuggestionsData() {
+        $.ajax({
+            url: '/sugestao-pecas',
+            method: 'GET',
+            success: function (data) {
+                suggestionsData = data.map(row => row[Object.keys(row)[0]]);
+                console.log('Dados brutos do Backend:', suggestionsData);
+            },
+            error: function (err) {
+                console.error('Erro ao obter dados brutos do backend', err);
+            }
+        });
+    }
+
+    // Chamar a função de obter dados brutos assim que a página carregar
+    $(document).ready(function () {
+        fetchSuggestionsData();
+    });
+
+    // Função para exibir sugestões filtradas
+    function showSuggestions() {
+        const userInput = document.getElementById('userInput').value.toLowerCase();
+
+        console.log('User Input:', userInput);
+
+        // Limpar sugestões anteriores
+        $('#suggestions').empty();
+
+        // Filtrar sugestões com base no texto inserido pelo usuário
+        const filteredSuggestions = suggestionsData.filter(suggestion =>
+            suggestion.toLowerCase().includes(userInput)
+        );
+
+        console.log('Sugestões Filtradas:', filteredSuggestions);
+
+        // Exibir sugestões filtradas na lista
+        filteredSuggestions.forEach(suggestion => {
+            const li = $('<li>');
+            const a = $('<a>').attr('href', '#').text(suggestion);
+            a.on('click', function (event) {
+                event.preventDefault();
+                // Ação ao selecionar uma sugestão (pode ser ajustada conforme necessário)
+                $('#userInput').val(suggestion);
+                hideSuggestions();
+            });
+            li.append(a);
+            $('#suggestions').append(li);
+        });
+
+        // Exibir a lista se houver sugestões filtradas, ocultar caso contrário
+        $('#suggestions').css('display', filteredSuggestions.length ? 'block' : 'none');
+    }
+
+</script>
+
+<!-- Script de alertas (Depois jogar em um arquivo.js) -->
+
+<script>
+    function showAndHideAlert(message, duration) {
+        const alertBox = $('#alertBox');
+        alertBox.html(`<strong>Danger!</strong> ${message}`);
+        alertBox.slideDown();
+
+        setTimeout(function () {
+            alertBox.slideUp();
+        }, duration);
+    }
+
+</script>
+
+<script>
+    function showAndHideSuccessAlert(message, duration) {
+        const successAlert = $('#successAlert');
+        successAlert.html(message);
+        successAlert.slideDown();
+
+        setTimeout(function () {
+            successAlert.slideUp();
+        }, duration);
+    }
+</script>
+
+<!-- Script botão de enviar -->
+
+<script>
+    $(document).ready(function () {
+        // Adicione um manipulador de clique ao botão de envio
+        $('.btn-success').on('click', function () {
+            var dataPlanejamento = $('#dataPlanejamento').val();
+            
+            // Obtém as linhas com a coluna 5 diferente de vazio
+            showLoading();
+            var linhas = [];
+            
+            $('#dataTable tbody tr').each(function () {
+                // var qt_produzida = $(this).find('td:eq(9) input').val().trim(); // Obtém o valor da coluna 5
+                // console.log(qt_produzida);
+                
+                if ($(this).find('td:eq(9) input').prop('checked')) {
+                    // Obtém os valores das outras colunas se necessário
+                    var data = $(this).find('td:eq(0)').text().trim();
+                    var codigo = $(this).find('td:eq(1)').text().trim();
+                    var descricao = $(this).find('td:eq(2)').text().trim();
+                    var qt_planejada = $(this).find('td:eq(3)').text().trim();
+                    var cor = $(this).find('td:eq(4)').text().trim();
+                    if (cor === 'Azul') {
+                        cor = 'AN';
+                    } else if (cor === 'Cinza') {
+                        cor = 'CO';
+                    } else if (cor === 'Laranja') {
+                        cor = 'LC';
+                    } else if (cor === 'Verde') {
+                        cor = 'VJ'
+                    } else if (cor === 'Vermelho') {
+                        cor = 'VM'
+                    } else if (cor === 'Amarelo') {
+                        cor = 'AV'
+                    }
+                    
+                    var qt_produzida = $(this).find('td:eq(5) input').val().trim();
+                    var tipo = $(this).find('td:eq(7) select').val();
+                    var codificacao = $(this).find('td:eq(8)').text().trim();
+
+                    // Adiciona os dados da linha ao array
+                    linhas.push({data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,tipo:tipo,dataPlanejamento:dataPlanejamento,codificacao:codificacao});
+
+                }
+                else {
+                    return;
+                }
+            
+            });
+            
+            if (dataPlanejamento.length === 0) {
+                hideLoading();
+                showAndHideAlert('Preencha o campo de data.', 2000)
+            }
+            else {
+                // Envia os dados para o backend
+                $.ajax({
+                    type: 'POST',
+                    url: '/receber-dados-planejamento',
+                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                    data: JSON.stringify({ linhas: linhas }),
+                    success: function (data) {
+                        console.log('Solicitação POST bem-sucedida:', data);
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        location.reload();
+                    },
+                    error: function (error) {
+                        console.error('Erro na solicitação POST:', error);
+                        // Adiciona um pequeno atraso antes de chamar hideLoading()
+                        hideLoading();
+                        location.reload();
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<!-- Script botão de confirmar -->
+
+<script>
+    $(document).ready(function () {
+        // Adicione um manipulador de clique ao botão de envio
+        $('.btn-info').on('click', function () {
+            var dataPlanejamento = $('#dataPlanejamento').val();
+            
+            // Obtém as linhas com a coluna 5 diferente de vazio
+            var linhas = [];
+            
+            $('#dataTable tbody tr').each(function () {
+                // var qt_produzida = $(this).find('td:eq(9) input').val().trim(); // Obtém o valor da coluna 5
+                // console.log(qt_produzida);
+                
+                if ($(this).find('td:eq(9) input').prop('checked')) {
+                    // Obtém os valores das outras colunas se necessário
+                    var data = $(this).find('td:eq(0)').text().trim();
+                    var codigo = $(this).find('td:eq(1)').text().trim();
+                    var descricao = $(this).find('td:eq(2)').text().trim();
+                    var qt_planejada = $(this).find('td:eq(3)').text().trim();
+                    var cor = $(this).find('td:eq(4)').text().trim();
+                    if (cor === 'Azul') {
+                        cor = 'AN';
+                    } else if (cor === 'Cinza') {
+                        cor = 'CO';
+                    } else if (cor === 'Laranja') {
+                        cor = 'LC';
+                    } else if (cor === 'Verde') {
+                        cor = 'VJ'
+                    } else if (cor === 'Vermelho') {
+                        cor = 'VM'
+                    } else if (cor === 'Amarelo') {
+                        cor = 'AV'
+                    }
+                    
+                    var qt_produzida = $(this).find('td:eq(5) input').val().trim();
+                    var tipo = $(this).find('td:eq(7) select').val();
+
+                    // Adiciona os dados da linha ao array
+                    linhas.push({data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,tipo:tipo,dataPlanejamento:dataPlanejamento});
+
+                }
+                else {
+                    return;
+                }
+            
+            });
+            
+
+            if (linhas.length > 0) {
+                $('#exampleModal').modal('show');
+            }
+            else {
+                showAndHideAlert('Escolha algum item da tabela.', 2000)
+            }
+        });
+    
+    });
+</script>
+
+{% endblock %}
