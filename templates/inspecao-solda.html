@@ -47,9 +47,6 @@
                                 style="cursor: pointer;">Reinspecão</a>
                         </li>
                     </ul>
-                    <button type="button" class="btn btn-info" style="font-size: 12px;"
-                        onclick="">Inspecionar Conjunto <i
-                            class="fa-solid fa-plus"></i></button>
                 </div>
 
                 <div class="card-body" id="AinspecionarSoldaTable" style="display: block;">
@@ -86,8 +83,8 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a id="btn_exec" class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalInspecionarConjunto('{{a_inspecionar[1]}}','{{a_inspecionar[3]}}')">
-                                                        Histórico
+                                                        style="cursor: pointer;" onclick="modalInspecionarConjunto('{{a_inspecionar[0]}}','{{a_inspecionar[1]}}','{{a_inspecionar[3]}}','{{a_inspecionar[4]}}')">
+                                                        Executar inspeção de solda
                                                     </a>
                                                 </div>
                                             </div>
@@ -205,65 +202,51 @@
                             <div class="row">
                                 <div class="col-sm-6 mb-4">
                                     <label>Data da inspeção</label>
-                                    <input type="text" class="form-control" name="data_inspecao_solda"
-                                        id="data_inspecao_solda" style="font-size: 14px;"  disabled>
+                                    <input type="text" class="form-control desabilitado" name="data_inspecao_solda"
+                                        id="data_inspecao_solda" style="font-size: 14px;" disabled>
                                 </div>
                                 <div class="col-sm-6 mb-4">
-                                    <label>Origem</label>
-                                    <div class="input-group">
-                                        <select class="form-control" name="origemInspecaoSolda" id="origemInspecaoSolda"
-                                            style="font-size: 12px;">
-                                            <option value="" selected hidden disabled></option>
-                                            <option value="Corte">Corte</option>
-                                            <option value="Estamparia">Estamparia</option>
-                                            <option value="Usinagem">Usinagem</option>
-                                            <option value="Fornecedor">Fornecedor</option>
-                                            <option value="Solda">Solda</option>
-                                        </select>
-                                    </div>
+                                    <label>Categoria</label>
+                                    <input type="text" class="form-control desabilitado" id="inputCategoria" autocomplete="off"
+                                            aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-sm-6 mb-4">
-                                    <label>Categoria</label>
-                                    <input type="text" class="form-control" id="selectConjunto" autocomplete="off"
-                                            aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
-                                </div>
                                 <div class="col-sm-6 mb-4">
                                     <label>Conjunto</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control" id="inputConjunto" autocomplete="off"
+                                        <input type="text" class="form-control desabilitado" id="inputConjunto" autocomplete="off"
                                             aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>N° peças inspecionadas</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="inputPecasInspecionadasSolda"
+                                            style="font-size: 12px;" disabled>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-sm-6 mb-4">
-                                    <label>N° peças inspecionadas</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" id="inputPecasInspecionadasSolda"
-                                            style="font-size: 12px;">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 mb-4">
-                                    <label>N° conformidades</label>
+                                    <label>Total de conformidades</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="inputConformidadesSolda"
                                             style="font-size: 12px;">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
                                 <div class="col-sm-6 mb-4">
-                                    <label>N° não conformidades</label>
+                                    <label>Total de <strong>NÃO</strong> conformidades</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control" id="inputNaoConformidadesSolda"
+                                        <input type="number" class="form-control desabilitado" id="inputNaoConformidadesSolda"
                                             style="font-size: 12px;" disabled>
                                     </div>
                                 </div>
-                                <div class="col-sm-6 mb-4">
+                            </div>
+                            <div class="row" id="selectContainer">
+                                <div class="col-sm-6 mb-4" id="selectBlock">
                                     <label>Inspetor</label>
-                                    <select class="form-control" name="inspetorSolda" id="inspetorSolda" style="font-size: 14px;">
+                                    <select class="form-control" name="inspetorSolda0" id="inspetorSolda0" style="font-size: 12px;">
                                         <option value="" selected hidden disabled></option>
                                         <option value="Leônidas">Leônidas</option>
                                         <option value="Severiano">Severiano</option>
@@ -274,7 +257,12 @@
                                         <option value="Estefane">Estefane</option>
                                     </select>
                                 </div>
+                                <div class="col-sm-6" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButton" onclick="addSelect()" style="font-size: 10px;">Adicionar insp.</button>
+                                    <button class="btn btn-danger" id="removeButton" onclick="removeSelect()" style="font-size: 10px;" disabled>Remover insp.</button>
+                                </div>
                             </div>
+                            
                             <div class="row">
                                 <div class="col-sm-6 mb-4">
                                     <label>Causa</label>
@@ -311,6 +299,20 @@
                                     <div class="input-group">
                                         <textarea class="form-control desabilitado" name="observacaoSolda"
                                             id="observacaoSolda" cols="5" rows="1" style="font-size: 12px;"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4" id="origemInspecaoCol">
+                                    <label>Origem</label>
+                                    <div class="input-group">
+                                        <select class="form-control" name="origemInspecaoSoldaReinspecionadas"
+                                            id="origemInspecaoSoldaReinspecionadas" style="font-size: 12px;">
+                                            <option value="" selected hidden disabled></option>
+                                            <option value="Corte">Corte</option>
+                                            <option value="Estamparia">Estamparia</option>
+                                            <option value="Usinagem">Usinagem</option>
+                                            <option value="Fornecedor">Fornecedor</option>
+                                            <option value="Solda">Solda</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -472,6 +474,7 @@
         <script src="static/js/qualidade/inspecao-solda.js"></script>
         <script src="static/js/qualidade/inspecao-pintura.js"></script>
         <script src="static/js/qualidade/reinspecao-solda.js"></script>
+        <script src="static/js/qualidade/select_inspetor_solda.js"></script>
 
 
         {% endblock %}

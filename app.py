@@ -1292,48 +1292,54 @@ def solda():
 
     if request.method == 'POST':
 
-        data = request.get_json()
+        print("entrou")
 
-        data_inspecao = data['data_inspecao']
+        # Outros dados enviados no formulário podem ser acessados da seguinte maneira:
+        id_inspecao_solda = request.form.get('id_inspecao')
+
+        data_inspecao = request.form.get('data_inspecao')
+        print(data_inspecao)
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
-
-        # Converter de volta para string no formato desejado
         data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
-        
-        inspetor = data['inspetor']
-        conjunto_especifico = data['conjunto_especifico']
-        num_pecas = data['num_pecas']
-        num_conformidades = data['num_conformidades']
-        num_nao_conformidades = data['num_nao_conformidades']
-        tipo_nao_conformidade = data['tipo_nao_conformidade']
-        causaSolda = data['causaSolda']
-        outraCausaSolda = data['outraCausaSolda']
-        origemInspecaoSolda = data['origemInspecaoSolda']
-        observacaoSolda = data['observacaoSolda']
+
+        inputCategoria = request.form.get('inputCategoria')
+        inputConjunto = request.form.get('inputConjunto')
+
+        num_conformidades = request.form.get('inputConformidadesSolda')
+        num_nao_conformidades = request.form.get('inputNaoConformidadesSolda')
+        causaSolda = request.form.get('causaSolda') 
+        outraCausaSolda = request.form.get('outraCausaSolda')  
+
+        observacaoSolda = request.form.get('observacaoSolda')  
+        origemInspecaoSolda = request.form.get('origemInspecaoSolda')  
+
+        inspetoresSolda = request.form.get('inspetoresSolda')
+        num_pecas = request.form.get('num_pecas')
+        reinspecao = request.form.get('reinspecao')
+
+        print(reinspecao)
+
         setor = 'Solda'
-        reinspecao = data['modal_reinspecao_solda']
 
-        try:
-            id_inspecao_solda = data['id_inspecao_solda']
-        except:
-            id_inspecao_solda = gerar_id_aleatorio()
+        print(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,causaSolda,inspetoresSolda,setor,
+              inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
 
-        if reinspecao:
-            alterar_reinspecao(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,causaSolda,inspetor,setor,
-                               conjunto_especifico,tipo_nao_conformidade,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
+        if reinspecao == True:
+            alterar_reinspecao(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,causaSolda,inspetoresSolda,setor,
+                               inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
             return jsonify("Success")
         
         else:
             if num_conformidades != num_pecas:
-                inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,causaSolda,inspetor,setor,conjunto_especifico,
-                                   tipo_nao_conformidade,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
-                inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetor,setor,conjunto_especifico,
+                inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,causaSolda,inspetoresSolda,setor,inputConjunto,
+                                   inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
+                inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetoresSolda,setor,inputConjunto,
                                       origemInspecaoSolda,observacaoSolda)
             else:
-                inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetor,setor,conjunto_especifico,
+                inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetoresSolda,setor,inputConjunto,
                                       origemInspecaoSolda,observacaoSolda)
 
-            return jsonify("Success")
+        return jsonify("Success")
         
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
