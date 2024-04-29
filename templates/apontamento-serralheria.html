@@ -1,0 +1,1789 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Montagem</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+<style>
+    /* Adicione algum estilo para o ícone "x" dentro do campo */
+    .clear-icon-operador {
+        cursor: pointer;
+        position: absolute;
+        right: 15px;
+        top: 24%;
+        z-index: 999;
+        /* Certifica-se de que está sobre outros elementos */
+        background-color: red;
+        color: white;
+        width: 20px;
+        /* Ajuste o tamanho conforme necessário */
+        height: 20px;
+        /* Ajuste o tamanho conforme necessário */
+        border-radius: 50%;
+        /* Isso tornará o fundo redondo */
+        text-align: center;
+        line-height: 20px;
+        /* Centraliza o texto verticalmente */
+    }
+</style>
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Apontamento Produtos especiais ou Serralheria?</h1>
+        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+    </div>
+
+    <div class="row">
+
+        <!-- tabela iniciar apontamento -->
+        <div class="col-xl-12 mb-2">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Iniciar
+                        Processo</h6>
+                    <div class="btn-group" role="group" aria-label="Criar OP">
+                        <button id="btnModalPecaFora" type="button"
+                            class="btn btn-sm btn-info mr-2" data-toggle="modal"
+                            data-target="#modalPlanejarPeca">Planejar
+                            peça</button>
+                        <button id="btnModalPecaFora" type="button"
+                            class="btn btn-sm btn-secondary" data-toggle="modal"
+                            data-target="#modalPecaFora">Iniciar peça fora do
+                            planejamento</button>
+                    </div>
+                </div>
+                <br>
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control"
+                                    placeholder="Código" aria-label="Código"
+                                    aria-describedby="clear-codigo"
+                                    id="codigoPecaEstamparia">
+                                <button class="btn btn-outline-secondary"
+                                    type="button" id="clear-codigo">X</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="no-more-tables">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="cf">
+                                    <tr>
+                                        <th scope="col">Código</th>
+                                        <th scope="col">Data início</th>
+                                        <th scope="col">Dta Fim</th>
+                                        <th scope="col">Operador</th>
+                                        <th scope="col">Qt. Plan.</th>
+                                        <th scope="col">Qt. Real.</th>
+                                        <th scope="col">Observação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyTablePlanejadas">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <tr>
+                            <td colspan="9">
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination justify-content-end"
+                                        id="pagination">
+                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
+                                    </ul>
+                                </nav>
+                            </td>
+                        </tr>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças em
+                        processo</h6>
+                </div>
+                <div class="card-body"
+                    style="max-height: 700px; overflow-y: auto;">
+                    <div class="row" id="cardsContainer">
+                        <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças
+                        interrompidas</h6>
+                </div>
+                <div class="card-body"
+                    style="max-height: 700px; overflow-y: auto;">
+                    <div class="row" id="cardsContainerInterrompida">
+                        <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal peça fora do planejamento -->
+    <div class="modal fade" id="modalPecaFora" tabindex="-1" role="dialog"
+        aria-labelledby="modalPecaForaLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPecaForaLabel">Gerar
+                        apontamento para peça fora do
+                        planejamento</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-floating mb-3">
+                                <label for="userInput">Peça</label>
+                                <div class="position-relative">
+                                    <input class="form-control" type="text"
+                                        id="userInput"
+                                        oninput="showSuggestionsPecas_()">
+                                    <span id="peca-modal"
+                                        class="clear-icon-operador"
+                                        onclick="clearInput_()">x</span>
+                                    <ul id="suggestionsPecas"
+                                        class="custom-dropdown-menu"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-floating mb-3">
+                                <label for="inputData">Data do
+                                    planejamento</label>
+                                <input class="form-control" type="date"
+                                    id="inputData">
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-floating mb-3">
+                                <label for="inputQuantidade">Quantidade</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidade">
+                                <!-- Quantidade -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnSalvar" type="button"
+                            class="btn btn-primary">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal planejar produção -->
+    <div class="modal fade" id="modalPlanejarPeca" tabindex="-1"
+        role="dialog"
+        aria-labelledby="modalPlanejarPecaLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="modalPlanejarPecaLabel">Planejar
+                        peças</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-floating mb-3">
+                                <label for="userInput_">Peça</label>
+                                <div class="position-relative">
+                                    <input class="form-control" type="text"
+                                        id="userInput_"
+                                        oninput="showSuggestionsPecas()">
+                                    <span id="peca-modal_"
+                                        class="clear-icon-operador"
+                                        onclick="clearInput()">x</span>
+                                    <ul id="suggestionsPecas_"
+                                        class="custom-dropdown-menu"
+                                        style="display: none;">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-floating mb-3">
+                                <label for="inputData_">Data do
+                                    planejamento</label>
+                                <input class="form-control" type="date"
+                                    id="inputData_">
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-floating mb-3">
+                                <label
+                                    for="inputQuantidade_">Quantidade</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidade_">
+                                <!-- Quantidade -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-12 mb-2">
+                            <label
+                                for="maquinaForaDoPlanejado_">Máquina</label>
+                            <div class="position-relative">
+                                <div class="btn-group"
+                                    data-toggle="buttons">
+                                    <label
+                                        class="btn btn-outline-secondary">
+                                        <input type="radio"
+                                            name="maquinaForaDoPlanejado_"
+                                            value="Viradeira 3">
+                                        Viradeira 3
+                                    </label>
+                                    <label
+                                        class="btn btn-outline-secondary">
+                                        <input type="radio"
+                                            name="maquinaForaDoPlanejado_"
+                                            value="Viradeira 4">
+                                        Viradeira 4
+                                    </label>
+                                    <label
+                                        class="btn btn-outline-secondary">
+                                        <input type="radio"
+                                            name="maquinaForaDoPlanejado_"
+                                            value="Viradeira 5">
+                                        Viradeira 5
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnSalvarPlanejamento" type="button"
+                        class="btn btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal finalizar apontamento -->
+    <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1"
+        role="dialog"
+        aria-labelledby="modalExecucaoApontamentoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="modalExecucaoApontamentoLabel">Apontar peça</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col-12 mb-2">
+                            <div class="form-floating mb-3">
+                                <label for="nomePecaApontada">Peça</label>
+                                <input class="form-control" type="text"
+                                    id="nomePecaApontada" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6 mb-2">
+                            <div class="form-floating mb-3">
+                                <label
+                                    for="inputQuantidadePlanejada">Quantidade
+                                    planejada</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidadePlanejada"
+                                    readonly>
+                                <!-- Quantidade -->
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="form-floating mb-3">
+                                <label
+                                    for="inputQuantidadeRealizada">Quantidade
+                                    realizada</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidadeRealizada">
+                                <!-- Quantidade -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <label
+                                for="operadorInputModal_1">Operador</label>
+                            <div class="position-relative">
+                                <input class="form-control" type="text"
+                                    id="operadorInputModal_1"
+                                    autocomplete="false" />
+                                <span id="operador-modal-finalizar"
+                                    class="clear-icon-operador">x</span>
+                                <ul id="sugestaoOperadorModal_1"
+                                    class="custom-dropdown-menu"></ul>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="form-floating mb-3">
+                                <label for="dataHoraInicio">Data e hora de
+                                    início</label>
+                                <input class="form-control"
+                                    type="datetime-local"
+                                    id="dataHoraInicio"
+                                    readonly>
+                                <!-- data e hora que iniciou e finalizou a ordem -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-12 mb-2">
+                            <label
+                                for="textAreaObservacao_">Observação</label>
+                            <textarea class="form-control"
+                                id="textAreaObservacao_"></textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="codificacaoOrdem">Código da
+                                ordem</label>
+                            <input class="form-control" type="text"
+                                id="codificacaoOrdem" readonly>
+                            <!-- codificação da ordem -->
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="celulaOrdem">Célula</label>
+                            <input class="form-control" type="text"
+                                id="celulaOrdem" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="dataCargaFinalizacao">Data
+                                Carga</label>
+                            <input class="form-control" type="text"
+                                id="dataCargaFinalizacao" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="idPecaEmProcesso">Id</label>
+                            <input class="form-control" type="text"
+                                id="idPecaEmProcesso" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="chavePecaProcesso">Chave</label>
+                            <input class="form-control" type="text"
+                                id="chavePecaProcesso" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="origemPecaEmProcesso">Origem</label>
+                            <input class="form-control" type="text"
+                                id="origemPecaEmProcesso" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnFinalizarOrdem" type="button"
+                        class="btn btn-primary">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal confirmar inicio -->
+    <div class="modal fade" id="modalConfirmarInicioProducao" tabindex="-1"
+        role="dialog"
+        aria-labelledby="modalConfirmarInicioProducaoLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="modalConfirmarInicioProducaoLabel">Iniciar</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="labelConfirmar">Confirmar início da produção?</p>
+                    <p id="pecaTextoModalIniciar"></p>
+                    <input id="retornarPecaProducao" style="display: none;">
+                </div>
+                <div class="modal-footer">
+                    <button id="confimarInicioProducao" type="button"
+                        class="btn btn-success">Sim</button>
+                    <button id="confimarRetornoProducao" type="button"
+                        class="btn btn-success">Sim</button>
+                    <button id="desistirInicioProducao" type="button"
+                        class="btn btn-danger">Não</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal motivo de interrompido -->
+    <div class="modal fade" id="modalMotivoInterrompido" tabindex="-1"
+        role="dialog"
+        aria-labelledby="modalMotivoInterrompidoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="modalMotivoInterrompidoLabel">Escolha o motivo
+                        da
+                        parada</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="idPecaInterromper"
+                        style="display: none;">
+                    <select class="form-control" name="motivosParada"
+                        id="idMotivosParada">
+                        <option>Manutenção</option>
+                        <option>Limpeza</option>
+                        <option>Falta de peça</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button id="enviarMotivo" type="button"
+                        class="btn btn-success">Enviar</button>
+                    <button id="desistirMotivo" type="button"
+                        class="btn btn-danger">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <div id="alertBox" class="alert alert-danger">
+        <strong>Erro!</strong> Preencha todos os campos.
+    </div>
+
+    <div id="successAlert" class="alert alert-success" role="alert">
+        Salvo!
+    </div>
+
+    {% endblock %}
+
+    {% block scripts %}
+
+    <!-- Script tabela JQuery -->
+
+    <script
+        src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script
+        src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="static/js/demo/datatables-demo.js"></script>
+    <script src="static/js/serralheria/serralheria.js"></script>
+
+    <!-- Scripts para iniciar tabela -->
+
+    <script>
+        // $(document).ready(function () {
+        //     setInterval(preencherTabela, 1000);
+
+        // Função para iniciar um item
+        function iniciar(chave, codigo, descricao) {
+            $('#modalConfirmarInicioProducao').modal('show');
+            $('#pecaTextoModalIniciar').text(codigo + ' - ' + descricao);
+
+            var botaoRetornar = $('#confimarRetornoProducao');
+            botaoRetornar.hide();
+
+            var botaoIniciar = $('#confimarInicioProducao');
+            botaoIniciar.show();
+
+            botaoIniciar.off('click').on('click', function () {
+                showLoading();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/pecas-em-processo-planejamento/estamparia',
+                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                    data: JSON.stringify({ chave: chave }),
+                    success: function (data) {
+                        console.log('Solicitação POST bem-sucedida:', data);
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        $('#modalConfirmarInicioProducao').modal('hide');
+                        hideLoading();
+                    },
+                    error: function (error) {
+                        console.error('Erro na solicitação POST:', error);
+                        // Adiciona um pequeno atraso antes de chamar hideLoading()
+                        hideLoading();
+                        // location.reload();
+                    }
+                });
+
+            });
+        }
+
+        // Variáveis de paginação
+        var currentPage = 1;
+        var rowsPerPage = 10;
+
+        // Função para preencher a tabela com os dados da página atual
+        function updateTable() {
+            $.ajax({
+                url: '/historico-finalizadas/serralheria',
+                type: 'GET',
+                success: function (data) {
+                    console.log(data);
+                    $('#bodyTablePlanejadas').empty(); // Limpa o corpo da tabela
+
+                    var codigo_peca_estamparia = document.getElementById('codigoPecaEstamparia').value.trim();
+
+                    if (codigo_peca_estamparia !== '') {
+                        // Filtra os dados com base na máquina selecionada
+                        data = data.filter(peca => peca[2] === codigo_peca_estamparia);
+                    }
+
+                    // Calcula o índice inicial e final dos dados da página atual
+                    var startIndex = (currentPage - 1) * rowsPerPage;
+                    var endIndex = startIndex + rowsPerPage;
+                    var currentPageData = data.slice(startIndex, endIndex);
+
+                    // Preenche a tabela com os dados da página atual
+                    currentPageData.forEach(function (item) {
+                        var row = '<tr>' +
+                            '<td data-title="Código">' + item[2] + '</td>' +
+                            '<td data-title="Data Início">' + formatarData(item[3]) + '</td>' +
+                            '<td data-title="Data Fim">' + formatarData(item[4]) + '</td>' +
+                            '<td data-title="Operador">' + item[5] + '</td>' +
+                            '<td data-title="Qt. Planejada">' + item[6] + '</td>' +
+                            '<td data-title="Qt. Realizada">' + item[7] + '</td>' +
+                            '<td data-title="Obs.">' + item[8] + '</td>' +
+                            '</tr>';
+                        var newRow = $(row).appendTo('#bodyTablePlanejadas');
+                        // Captura o valor do item dentro do escopo da função de clique
+                        (function (item) {
+                            newRow.find('.btn-iniciar').click(function () {
+                                iniciar(item[8], item[2], item[3]);
+                            });
+                        })(item);
+                    });
+
+                    // Atualiza a paginação
+                    updatePagination(data.length);
+                },
+                error: function (error) {
+                    console.error('Erro ao obter os dados:', error);
+                }
+            });
+        }
+
+        // Função para atualizar a paginação
+        function updatePagination(totalRows) {
+            var totalPages = Math.ceil(totalRows / rowsPerPage);
+            var pagination = $('#pagination');
+            pagination.empty();
+
+            // Botão "Anterior"
+            var prevButton = '<li class="page-item"><a class="page-link" id="prevButton">Previous</a></li>';
+            pagination.append(prevButton);
+            $('#prevButton').click(function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTable();
+                }
+            });
+
+            // Números das páginas
+            for (var i = 1; i <= totalPages; i++) {
+                var listItem = $('<li class="page-item"><a class="page-link">' + i + '</a></li>');
+                if (i === currentPage) {
+                    listItem.addClass('active');
+                }
+                pagination.append(listItem);
+                listItem.click(function () {
+                    currentPage = parseInt($(this).text());
+                    updateTable();
+                });
+            }
+
+            // Botão "Próximo"
+            var nextButton = '<li class="page-item"><a class="page-link" id="nextButton">Next</a></li>';
+            pagination.append(nextButton);
+            $('#nextButton').click(function () {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    updateTable();
+                }
+            });
+        }
+
+        updateTable()
+
+        // Chamada inicial para preencher a tabela
+        setInterval(updateTable, 1000);
+
+    </script>
+
+    <script>
+
+        // Variável para armazenar o estado do filtro
+        var filterActive = false;
+
+        function applyMaquinaFilter(button, selectedValue) {
+
+            // Se o filtro estiver ativo e o valor do botão for o mesmo que o filtro atual, desative o filtro
+            if (filterActive && $(button).hasClass('active')) {
+                $(button).removeClass('active'); // Remova a classe active do botão
+                filterActive = false; // Marque o filtro como inativo
+                $('#maquinaEscolhida').val('');
+                $('.btn').removeClass('active');
+            } else {
+                // Defina o filtro na coluna específica
+                $('.btn').removeClass('active');
+                $(button).addClass('active'); // Adicione a classe active ao botão
+                filterActive = true; // Marque o filtro como ativo
+                $('#maquinaEscolhida').val(selectedValue);
+            }
+        }
+    </script>
+
+    <!-- Script botão de enviar -->
+
+    <script>
+        $(document).ready(function () {
+            // Adicione um manipulador de clique ao botão de envio
+            $('#enviarBtn').on('click', function () {
+                // Obtém as linhas com a coluna 5 diferente de vazio
+                showLoading();
+                var linhas = [];
+                $('#dataTable tbody tr').each(function () {
+                    var qt_produzida = $(this).find('td:eq(5) input').val(); // Obtém o valor da coluna 5
+                    console.log(qt_produzida);
+                    if (qt_produzida !== '') {
+                        // Obtém os valores das outras colunas se necessário
+                        var data = $(this).find('td:eq(0)').text().trim();
+                        var celula = $(this).find('td:eq(1)').text().trim();
+                        var codigo = $(this).find('td:eq(2)').text().trim();
+                        var descricao = $(this).find('td:eq(3)').text().trim();
+                        // var operador = $(this).find('td:eq(6) input').val();
+                        // var obs = $(this).find('td:eq(7) textarea').val();
+                        // var codificacao = $(this).find('td:eq(8)').text().trim();
+
+                        // Adiciona os dados da linha ao array
+                        linhas.push({
+                            data: data, celula: celula, codigo: codigo, descricao: descricao//, prod: qt_produzida,
+                            // operador: operador, obs: obs, codificacao: codificacao
+                        });
+
+                        console.log(linhas);
+                    }
+                    else {
+                        return;
+                    }
+                });
+
+                // Envia os dados para o backend
+                $.ajax({
+                    type: 'POST',
+                    url: '/salvar-apontamento-montagem',
+                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                    data: JSON.stringify({ linhas: linhas }),
+                    success: function (data) {
+                        console.log('Solicitação POST bem-sucedida:', data);
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        location.reload();
+                    },
+                    error: function (error) {
+                        console.error('Erro na solicitação POST:', error);
+                        // Adiciona um pequeno atraso antes de chamar hideLoading()
+                        hideLoading();
+                        location.reload();
+                    }
+                });
+            });
+        });
+
+    </script>
+
+    <!-- Script tratar data -->
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <!-- Script tela de carregamento -->
+
+    <script>
+        function showLoading() {
+            $('#loading').show();
+        }
+
+        function hideLoading() {
+            $('#loading').hide();
+        }
+    </script>
+
+    <!-- Script para enviar informações de peça fora do sequenciamento para o backend -->
+
+    <script>
+        $(document).ready(function () {
+            $('#btnSalvar').on('click', function () {
+                showLoading();
+                const peca = $('#userInput').val();
+                const dataPlanejamento = $('#inputData').val();
+                const quantidade = $('#inputQuantidade').val();
+
+                var selectedMaquina = document.querySelector('input[name="maquinaForaDoPlanejado"]:checked');
+
+                if (selectedMaquina) {
+                    selectedMaquina = selectedMaquina.value;
+                } else {
+                    selectedMaquina = '';
+                }
+
+                if (peca === '' || dataPlanejamento === '' || quantidade === '' || selectedMaquina === '') {
+                    $('.alert').alert()
+                    hideLoading();
+                    showAndHideAlert('Preencha todos os campos.', 2000);
+                    return;
+                }
+
+                if (peca.split(' - ')[1]) {
+                    descricao = peca.split(' - ')[1];
+                } else {
+                    descricao = '';
+                }
+
+                // Criar objeto com os dados
+                const dados = {
+                    peca: peca.split(' - ')[0],
+                    descricao: descricao,
+                    dataPlanejamento: dataPlanejamento,
+                    qtPlanejada: quantidade,
+                    codificacao: '',
+                    origem: 'Fora do sequenciamento',
+                    selectedMaquina: selectedMaquina,
+                };
+
+                // Enviar dados para o backend
+                $.ajax({
+                    url: '/api/pecas-em-processo/estamparia',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dados),
+                    success: function (response) {
+                        // Tratar a resposta do backend, se necessário
+                        console.log(response);
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        $('#modalPecaFora').modal('hide');
+                    },
+                    error: function (err) {
+                        console.error('Erro ao enviar dados para o backend', err);
+                        hideLoading();
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Script para enviar informações de peça planejada-->
+
+    <script>
+        $(document).ready(function () {
+            $('#btnSalvarPlanejamento').on('click', function () {
+                showLoading();
+
+                var peca_ = $('#userInput_').val();
+                var dataPlanejamento_ = $('#inputData_').val();
+                var quantidade_ = $('#inputQuantidade_').val();
+
+                var selectedMaquina_ = document.querySelector('input[name="maquinaForaDoPlanejado_"]:checked');
+
+                if (selectedMaquina_) {
+                    selectedMaquina_ = selectedMaquina_.value;
+                } else {
+                    selectedMaquina_ = '';
+                }
+
+                console.log(peca_, dataPlanejamento_, quantidade_, selectedMaquina_);
+
+                if (peca_ === '' || dataPlanejamento_ === '' || quantidade_ === '' || selectedMaquina_ === '') {
+                    $('.alert').alert()
+                    hideLoading();
+                    showAndHideAlert('Preencha todos os campos.', 2000);
+                    return;
+                }
+
+                var descricao = peca_.split(' - ')[1];
+                if (!descricao) {
+                    descricao = '';
+                }
+
+                // Criar objeto com os dados
+                const dados = {
+                    peca: peca_.split(' - ')[0],
+                    descricao: descricao,
+                    dataPlanejamento: dataPlanejamento_,
+                    qtPlanejada: quantidade_,
+                    codificacao: '',
+                    origem: 'Sequenciamento',
+                    selectedMaquina: selectedMaquina_,
+                };
+
+                // Enviar dados para o backend
+                $.ajax({
+                    url: '/api/planejar-pecas/estamparia',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dados),
+                    success: function (response) {
+                        // Tratar a resposta do backend, se necessário
+                        console.log(response);
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        $('#modalPecaFora').modal('hide');
+
+                        $('#userInput_').val('');
+                        $('#inputData_').val('');
+                        $('#inputQuantidade_').val('');
+
+                        var radios = document.querySelectorAll('input[name="maquinaForaDoPlanejado_"]');
+
+                        radios.forEach(function (radio) {
+                            radio.checked = false;
+                        });
+
+                    },
+                    error: function (err) {
+                        console.error('Erro ao enviar dados para o backend', err);
+                        hideLoading();
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Script de alertas (Depois jogar em um arquivo.js) -->
+
+    <script>
+        function showAndHideAlert(message, duration) {
+            const alertBox = $('#alertBox');
+            alertBox.html(`<strong>Danger!</strong> ${message}`);
+            alertBox.slideDown();
+
+            setTimeout(function () {
+                alertBox.slideUp();
+            }, duration);
+        }
+
+    </script>
+
+    <script>
+        function showAndHideSuccessAlert(message, duration) {
+            const successAlert = $('#successAlert');
+            successAlert.html(message);
+            successAlert.slideDown();
+
+            setTimeout(function () {
+                successAlert.slideUp();
+            }, duration);
+        }
+    </script>
+
+    <!-- Script para lista input peças dentro do modal de peças fora do planejamento -->
+
+    <script>
+
+        $(document).ready(function () {
+            // Evento de clique no input para mostrar a lista de sugestões
+            $('#userInput').click(function (event) {
+                event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+                showSuggestionsPecas_();
+            });
+
+            // Evento de clique no ícone de limpar para limpar o campo de entrada e esconder a lista de sugestões
+            $('#peca-modal').click(function (event) {
+                event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+                clearInput_();
+            });
+
+            // Evento de clique fora da lista de sugestões para escondê-la
+            $(document).click(function (event) {
+                var suggestionsList = $('#suggestionsPecas');
+                if (!$(event.target).closest('#userInput').length) {
+                    suggestionsList.hide();
+                }
+            });
+
+            // Evento de clique em um item da lista de sugestões para preencher o campo de entrada e esconder a lista
+            $('#suggestionsPecas').on('click', 'li', function () {
+                $('#userInput').val($(this).text());
+                $('#suggestionsPecas').hide();
+            });
+
+            // Evento de entrada para filtrar as sugestões enquanto o usuário digita
+            $('#userInput').on('input', function () {
+                showSuggestionsPecas_();
+            });
+
+            // Função para mostrar sugestões ao digitar
+            function showSuggestionsPecas_() {
+                var input = $('#userInput').val().toLowerCase();
+                var suggestionsList = $('#suggestionsPecas');
+                suggestionsList.empty(); // Limpa a lista de sugestões
+
+                // Filtra os dados com base no texto de entrada
+                var filteredData = suggestionsDataPecaModal.filter(item => item.toLowerCase().includes(input));
+
+                // Preenche a lista de sugestões com os itens filtrados
+                filteredData.forEach(item => {
+                    $('<li>').text(item).appendTo(suggestionsList);
+                });
+
+                // Mostra a lista de sugestões
+                suggestionsList.show();
+            }
+
+            // Função para limpar o campo de entrada e ocultar a lista de sugestões
+            function clearInput_() {
+                $('#userInput').val('');
+                $('#suggestionsPecas').hide();
+            }
+
+            // Variável para armazenar os dados brutos do backend
+            var suggestionsDataPecaModal = [];
+
+            // Função para obter os dados brutos do backend
+            function fetchSuggestionsDataTeste() {
+                $.ajax({
+                    url: '/sugestao-pecas-serralheria',
+                    method: 'GET',
+                    success: function (data) {
+                        suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
+                        console.log('Dados brutos do Backend modal:', suggestionsDataPecaModal);
+                    },
+                    error: function (err) {
+                        console.error('Erro ao obter dados brutos do backend', err);
+                    }
+                });
+            }
+
+            // Chama a função para obter os dados brutos do backend
+            fetchSuggestionsDataTeste();
+        });
+
+
+    </script>
+
+    <!-- Script para lista input peças dentro do modal de planejar peças -->
+
+    <script>
+
+        $(document).ready(function () {
+            // Evento de clique no input para mostrar a lista de sugestões
+            $('#userInput_').click(function (event) {
+                event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+                showSuggestionsPecas();
+            });
+
+            // Evento de clique no ícone de limpar para limpar o campo de entrada e esconder a lista de sugestões
+            $('#peca-modal_').click(function (event) {
+                event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+                clearInput();
+            });
+
+            // Evento de clique fora da lista de sugestões para escondê-la
+            $(document).click(function (event) {
+                var suggestionsList = $('#suggestionsPecas_');
+                if (!$(event.target).closest('#userInput_').length) {
+                    suggestionsList.hide();
+                }
+            });
+
+            // Evento de clique em um item da lista de sugestões para preencher o campo de entrada e esconder a lista
+            $('#suggestionsPecas_').on('click', 'li', function () {
+                $('#userInput_').val($(this).text());
+                $('#suggestionsPecas_').hide();
+            });
+
+            // Evento de entrada para filtrar as sugestões enquanto o usuário digita
+            $('#userInput_').on('input', function () {
+                showSuggestionsPecas();
+            });
+
+            // Função para mostrar sugestões ao digitar
+            function showSuggestionsPecas() {
+                var input = $('#userInput_').val().toLowerCase();
+                var suggestionsList = $('#suggestionsPecas_');
+                suggestionsList.empty(); // Limpa a lista de sugestões
+
+                // Filtra os dados com base no texto de entrada
+                var filteredData = suggestionsDataPecaModal.filter(item => item.toLowerCase().includes(input));
+
+                // Preenche a lista de sugestões com os itens filtrados
+                filteredData.forEach(item => {
+                    $('<li>').text(item).appendTo(suggestionsList);
+                });
+
+                // Mostra a lista de sugestões
+                suggestionsList.show();
+            }
+
+            // Função para limpar o campo de entrada e ocultar a lista de sugestões
+            function clearInput() {
+                $('#userInput_').val('');
+                $('#suggestionsPecas_').hide();
+            }
+
+            // Variável para armazenar os dados brutos do backend
+            var suggestionsDataPecaModal = [];
+
+            // Função para obter os dados brutos do backend
+            function fetchSuggestionsDataTeste() {
+                $.ajax({
+                    url: '/sugestao-pecas-estamparia',
+                    method: 'GET',
+                    success: function (data) {
+                        suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
+                        console.log('Dados brutos do Backend modal:', suggestionsDataPecaModal);
+                    },
+                    error: function (err) {
+                        console.error('Erro ao obter dados brutos do backend', err);
+                    }
+                });
+            }
+
+            // Chama a função para obter os dados brutos do backend
+            fetchSuggestionsDataTeste();
+        });
+
+
+    </script>
+
+    <!-- Script para lista de operadores -->
+
+    <script>
+
+        function hideSuggestions() {
+            $('.suggestions-operadores').css('display', 'none');
+        }
+
+        $(document).on('click', function (event) {
+            const clickedElement = $(event.target);
+
+            if (!clickedElement.closest('.suggestions-operadores, .operador-input').length) {
+                hideSuggestions();
+            }
+        });
+
+        $('.operador-input').on('input', function () {
+            const operadorInput = $(this).val().trim();
+
+            if (!operadorInput.length) {
+                hideSuggestions();
+            }
+        });
+
+        $('.operador-input').on('click', function () {
+            showSuggestionsOperadores(this);
+        });
+
+        let suggestionsData1 = [];
+
+        function fetchSuggestionsData() {
+            $.ajax({
+                url: '/sugestao-operadores-estamparia',
+                method: 'GET',
+                success: function (data) {
+                    suggestionsData1 = data.map(row => row[Object.keys(row)[0]]);
+                    console.log('Dados brutos do Backend:', suggestionsData1);
+                },
+                error: function (err) {
+                    console.error('Erro ao obter dados brutos do backend', err);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            fetchSuggestionsData();
+        });
+
+        function showSuggestionsOperadores(inputElement) {
+            const suggestionsDropdown = $(inputElement).closest('td').find('.suggestions-operadores');
+            const operadorInput = $(inputElement).val().toLowerCase();
+
+            suggestionsDropdown.empty();
+
+            const filteredSuggestions = suggestionsData1.filter(suggestion =>
+                suggestion.toLowerCase().includes(operadorInput)
+            );
+
+            filteredSuggestions.forEach(suggestion => {
+                const li = $('<li>');
+                const a = $('<a>').attr('href', '#').text(suggestion);
+                a.on('click', function (event) {
+                    event.preventDefault();
+                    $(inputElement).val(suggestion);
+                    hideSuggestions();
+                });
+                li.append(a);
+                suggestionsDropdown.append(li);
+            });
+
+            suggestionsDropdown.css('display', filteredSuggestions.length ? 'block' : 'none');
+        }
+
+        $('.clear-icon-operador').on('click', function () {
+            const inputElement = $(this).siblings('.operador-input');
+            limparCampoOperador(inputElement);
+        });
+
+        function limparCampoOperador(inputElement) {
+            $(inputElement).val('');
+        }
+
+    </script>
+
+    <!-- Script para lista input operador dentro do modal -->
+
+    <script>
+
+        // Função para ocultar a lista
+        function hideSuggestionsOperadorModal() {
+            $('#sugestaoOperadorModal').css('display', 'none');
+        }
+
+        // Adicionar um event listener para cliques no documento
+        $(document).on('click', function (event) {
+            const clickedElement = $(event.target);
+
+            // Verificar se o clique foi fora da lista e do campo de entrada
+            if (!clickedElement.closest('#sugestaoOperadorModal, #operadorInputModal').length) {
+                hideSuggestionsOperadorModal();
+            }
+        });
+
+        // Adicionar um event listener para o input para ocultar a lista quando estiver vazio
+        $('#operadorInputModal').on('input', function () {
+            const operadorInputModal = $(this).val().trim();
+
+            if (!operadorInputModal.length) {
+                hideSuggestionsOperadorModal();
+            }
+        });
+
+        $('#operadorInputModal').on('click', function () {
+            showSuggestionsOperadorModal();
+        });
+
+        // Variável para armazenar os dados brutos do backend
+        let suggestionsOperadorModal = [];
+
+        // Função para obter dados brutos do backend
+        function fetchSuggestionsOperadorModal() {
+            $.ajax({
+                url: '/sugestao-operadores-estamparia',
+                method: 'GET',
+                success: function (data) {
+                    suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);
+                    console.log('Dados brutos do Backend modal:', suggestionsOperadorModal);
+                },
+                error: function (err) {
+                    console.error('Erro ao obter dados brutos do backend', err);
+                }
+            });
+        }
+
+        // Chamar a função de obter dados brutos assim que a página carregar
+        $(document).ready(function () {
+            fetchSuggestionsOperadorModal();
+        });
+
+        // Função para exibir sugestões filtradas
+        function showSuggestionsOperadorModal() {
+            const operadorInputModal = document.getElementById('operadorInputModal').value.toLowerCase();
+
+            console.log('User Input:', operadorInputModal);
+
+            // Limpar sugestões anteriores
+            $('#sugestaoOperadorModal').empty();
+
+            // Filtrar sugestões com base no texto inserido pelo usuário
+            const filteredSuggestions = suggestionsOperadorModal.filter(suggestion =>
+                suggestion.toLowerCase().includes(operadorInputModal)
+            );
+
+            console.log('Sugestões Filtradas:', filteredSuggestions);
+
+            // Exibir sugestões filtradas na lista
+            filteredSuggestions.forEach(suggestion => {
+                const li = $('<li>');
+                const a = $('<a>').attr('href', '#').text(suggestion);
+                a.on('click', function (event) {
+                    event.preventDefault();
+                    // Ação ao selecionar uma sugestão (pode ser ajustada conforme necessário)
+                    $('#operadorInputModal').val(suggestion);
+                    hideSuggestionsOperadorModal();
+                });
+                li.append(a);
+                $('#sugestaoOperadorModal').append(li);
+            });
+
+            // Exibir a lista se houver sugestões filtradas, ocultar caso contrário
+            $('#sugestaoOperadorModal').css('display', filteredSuggestions.length ? 'block' : 'none');
+        }
+
+        function limparCampoOperadorModal() {
+            $('#operadorInputModal').val('');
+        }
+
+        // Adiciona o evento de clique ao ícone "x" para limpar o campo 'celula'
+        $('#operador-modal').on('click', function () {
+            limparCampoOperadorModal();
+        });
+
+    </script>
+
+    <!-- Script para lista input operador dentro do modal de finalizar -->
+
+    <script>
+        // Função para obter dados brutos do backend
+        function fetchSuggestionsOperadorModal() {
+            $.ajax({
+                url: '/sugestao-operadores-estamparia',
+                method: 'GET',
+                success: function (data) {
+                    suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);
+                    console.log('Dados brutos do Backend modal:', suggestionsOperadorModal);
+
+                    // Adicione código aqui para exibir as sugestões na lista
+                    updateSuggestionsList(suggestionsOperadorModal);
+                },
+                error: function (err) {
+                    console.error('Erro ao obter dados brutos do backend', err);
+                }
+            });
+        }
+
+        // Função para atualizar a lista de sugestões
+        function updateSuggestionsList(suggestions) {
+            var sugestoesLista = $('#sugestaoOperadorModal_1');
+            sugestoesLista.empty(); // Limpa a lista antes de adicionar novas sugestões
+
+            suggestions.forEach(function (sugestao) {
+                sugestoesLista.append('<li>' + sugestao + '</li>');
+            });
+        }
+
+        // Adiciona um evento de clique ao input
+        $('#operadorInputModal_1').click(function () {
+            // Chama a função para obter sugestões e exibi-las
+            fetchSuggestionsOperadorModal();
+
+            // Adicione aqui o código para exibir a lista de sugestões
+            // Por exemplo, você pode mostrar ou esconder a lista usando CSS ou jQuery.
+            $('#sugestaoOperadorModal_1').show();
+        });
+
+        // Adiciona um manipulador de eventos ao clique nos itens da lista
+        $('#sugestaoOperadorModal_1').on('click', 'li', function () {
+            // Pega o texto do item clicado
+            var sugestaoSelecionada = $(this).text();
+
+            // Define o valor do input como a sugestão selecionada
+            $('#operadorInputModal_1').val(sugestaoSelecionada);
+
+            // Esconde a lista de sugestões após selecionar uma
+            $('#sugestaoOperadorModal_1').hide();
+        });
+
+        // Adiciona um evento de digitação ao input para filtrar a lista
+        $('#operadorInputModal_1').on('input', function () {
+            var textoDigitado = $(this).val().toLowerCase();
+            var sugestoesFiltradas = suggestionsOperadorModal.filter(function (sugestao) {
+                return sugestao.toLowerCase().includes(textoDigitado);
+            });
+
+            // Atualiza a lista de sugestões com base no texto digitado
+            updateSuggestionsList(sugestoesFiltradas);
+
+            // Mostra a lista de sugestões após filtrar
+            $('#sugestaoOperadorModal_1').show();
+        });
+
+        // Adiciona um manipulador de eventos de clique ao documento para esconder a lista ao clicar fora
+        $(document).on('click', function (event) {
+            var target = $(event.target);
+
+            // Verifica se o clique não foi no input e nem na lista de sugestões
+            if (!target.is('#operadorInputModal_1') && !target.closest('#sugestaoOperadorModal_1').length) {
+                // Esconde a lista de sugestões
+                $('#sugestaoOperadorModal_1').hide();
+            }
+        });
+    </script>
+
+    <!-- Script para iniciar ou finalizar produção e listar peças em processo -->
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
+    integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
+    crossorigin="anonymous"></script> -->
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            function chamarAPI() {
+                fetch("/api/consulta-pecas-em-processo/serralheria")
+                    .then(response => response.json())
+                    .then(data => {
+                        // Limpa o conteúdo atual dos cards
+                        document.getElementById('cardsContainer').innerHTML = "";
+                        processarDados(data);
+                    })
+                    .catch(error => console.error('Erro ao chamar a API:', error));
+            }
+
+            function processarDados(data) {
+                data.forEach(peca => {
+                    // Aqui você pode continuar com o processamento dos dados e a criação dos cards
+                    var cardHtml = `
+                <div class="col-sm-6 mb-2">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[2]}</small></h6>
+                            <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
+                            <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-info btn-finalizar-producao"
+                                onclick="finalizarPeca(${peca[0]})">Finalizar
+                            </button>
+                            <button type="button" class="btn btn-warning btn-interromper-producao"
+                                onclick="interromperProcesso(${peca[0]})">Interromper
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+                    document.getElementById('cardsContainer').innerHTML += cardHtml;
+                    // Atualiza o contador imediatamente ao carregar a página
+                    const dataInicial = new Date(formatarData(peca[3]));
+                    atualizarContador(dataInicial, peca[0]);
+                });
+            }
+
+            function chamarAPIInterrompidas() {
+                fetch("/api/consulta-pecas-interrompidas/serralheria")
+                    .then(response => response.json())
+                    .then(data => {
+                        // Limpa o conteúdo atual dos cards
+                        document.getElementById('cardsContainerInterrompida').innerHTML = "";
+
+                        processarDadosInterrompida(data);
+                       
+                    })
+                    .catch(error => console.error('Erro ao chamar a API:', error));
+            }
+
+            function processarDadosInterrompida(data) {
+                data.forEach(peca => {
+                    var cardHtml = `
+                    <div class="col-sm-6 mb-2">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[2]}</small></h6>
+                                <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>  
+                                <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
+                            </div>
+                            <div class="card-body">
+                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
+                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Motivo:</strong> ${peca[6]}</small></h6>
+                            </div>
+                            <div class="card-footer">
+                                <button type="button" class="btn btn-info btn-retornar-producao"
+                                    onclick="retornarPeca(${peca[0]})">Retornar
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+
+                    document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
+
+                    // Atualiza o contador imediatamente ao carregar a página
+                    const dataInicial = new Date(formatarData(peca[3]));
+                    atualizarContador(dataInicial, peca[0]);
+                });
+            }
+
+            chamarAPI()
+            chamarAPIInterrompidas();
+
+            // var socket = io();
+
+            // socket.on('connect', function() {
+            //     console.log('Connected');
+            // });
+
+            // socket.on('my_response', function(data) {
+            //     console.log('Server response:', data);
+            // });
+
+            setInterval(chamarAPI, 1000);
+            setInterval(chamarAPIInterrompidas, 1000);
+
+        });
+
+        function formatarData(dataString) {
+            var data = new Date(dataString);
+            return data.toISOString().slice(0, 16);
+        }
+
+        // function formatarDataSemHora(dataString) {
+        //     // Criar um objeto Date com a data atual
+        //     var data = new Date(dataString);
+
+        //     // Obter os componentes da data
+        //     var dia = data.getDate();
+        //     var mes = data.getMonth() + 1; // Os meses começam do zero, então adicionamos 1
+        //     var ano = data.getFullYear();
+        //     var hora = data.getHours();
+        //     var minutos = data.getMinutes();
+        //     var segundos = data.getSeconds();
+
+        //     // Adicionar zeros à esquerda para garantir que cada componente tenha dois dígitos
+        //     mes = mes < 10 ? '0' + mes : mes;
+        //     dia = dia < 10 ? '0' + dia : dia;
+        //     hora = hora < 10 ? '0' + hora : hora;
+        //     minutos = minutos < 10 ? '0' + minutos : minutos;
+        //     segundos = segundos < 10 ? '0' + segundos : segundos;
+
+        //     var data_formated = dia + '/' + mes + '/' + ano + ' ' + hora + ':' + minutos + ':' + segundos;
+            
+        //     return data_formated
+        // }
+
+        // Função para finalizar a peça e mostrar informações
+        function finalizarPeca(id) {
+            // Exemplo: Mostrar informações em um alerta
+
+            showLoading();
+
+            var dados = {
+                id_peca: id  // Substitua pelos dados reais que você deseja enviar
+            };
+
+            $.ajax({
+                url: '/consulta-id-em-processo/serralheria',
+                method: 'GET',
+                contentType: 'application/json',
+                data: $.param(dados),
+                success: function (data) {
+                    $('#nomePecaApontada').val(data[0][2]);
+                    $('#inputQuantidadePlanejada').val(data[0][7]);
+                    $('#dataHoraInicio').val(formatarData(data[0][3]));
+                    $('#codificacaoOrdem').val(data[0][4]);
+                    $('#chavePecaProcesso').val(data[0][1]);
+                    $('#idPecaEmProcesso').val(data[0][0]);
+
+                    $('#inputQuantidadeRealizada').val();
+                    $('#textAreaObservacao_').val();
+                    $('#operadorInputModal_1').val();
+
+                    hideLoading();
+                    $('#modalExecucaoApontamento').modal('show');
+
+                },
+                error: function (err) {
+                    console.error('Erro:', err);
+                    hideLoading();
+                }
+            });
+
+            // Aqui você pode adicionar lógica adicional conforme necessário
+        }
+
+        function atualizarContador(dataInicial, id_peca) {
+
+            const agora = new Date();
+            const diferenca = agora.getTime() - dataInicial.getTime();
+
+            const segundos = Math.floor(diferenca / 1000);
+            const minutos = Math.floor(segundos / 60);
+            const horas = Math.floor(minutos / 60);
+            const dias = Math.floor(horas / 24); // Calcula o número de dias
+
+            const segundosRestantes = segundos % 60;
+            const minutosRestantes = minutos % 60;
+            const horasRestantes = horas % 24;
+
+            const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
+
+            document.getElementById("contador-" + id_peca).textContent = formatoTempo;
+        }
+
+        function contadorCards() {
+            const elementosContador = document.querySelectorAll('[id^="dataInicial-"]');
+            elementosContador.forEach(input => {
+                id_peca = input.id.replace("dataInicial-", "");
+                atualizarContador(new Date(formatarData(input.value)), id_peca)
+            });
+        }
+
+        setInterval(contadorCards, 1000);
+
+    </script>
+
+    <!-- Script para finalizar a produção -->
+
+    <script>
+        $(document).ready(function () {
+            $('#btnFinalizarOrdem').on('click', function () {
+
+                pecaFinalizada = $('#nomePecaApontada').val();
+                quantidadePlanejada = $('#inputQuantidadePlanejada').val();
+                textAreaObservacao = $('#textAreaObservacao_').val();
+                dataHoraInicio = $('#dataHoraInicio').val();
+                operadorInputModal_1 = $('#operadorInputModal_1').val();
+                inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
+                idPecaEmProcesso = $('#idPecaEmProcesso').val();
+                chavePecaProcesso = $('#chavePecaProcesso').val();
+
+                dados = {
+                    codigo: pecaFinalizada,
+                    qtdePlanejada: quantidadePlanejada,
+                    textAreaObservacao: textAreaObservacao,
+                    dataHoraInicio: dataHoraInicio,
+                    operadorInputModal_1: operadorInputModal_1,
+                    inputQuantidadeRealizada: inputQuantidadeRealizada,
+                    idPecaEmProcesso: idPecaEmProcesso,
+                    chavePecaProcesso: chavePecaProcesso,
+                }
+
+                if (inputQuantidadeRealizada === '') {
+                    showAndHideAlert('Por favor informe a quantidade.', 2000);
+                    return;
+                };
+
+                if (operadorInputModal_1 === '') {
+                    showAndHideAlert('Por favor informar o operador.', 2000);
+                    return;
+                }
+
+                showAndHideSuccessAlert('Enviado!', 2000);
+                $('#modalExecucaoApontamento').modal('hide');
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/finalizar-peca-em-processo/serralheria',
+                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                    data: JSON.stringify(dados),
+                    success: function (data) {
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                    },
+                    error: function (error) {
+                        console.error('Erro na solicitação POST:', error);
+                        hideLoading();
+                    }
+                });
+            });
+        });
+
+    </script>
+
+    <!-- Script para interromper a ordem -->
+
+    <script>
+
+        function interromperProcesso(id) {
+
+            $('#modalMotivoInterrompido').modal('show');
+
+            $('#idPecaInterromper').val(id);
+
+        }
+
+        $(document).ready(function () {
+            $('#enviarMotivo').on('click', function () {
+                idPecaInterromper = $('#idPecaInterromper').val();
+                motivoInterrompido = $('#idMotivosParada option:selected').text();
+
+                showLoading();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/pecas-interrompida/serralheria',
+                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                    data: JSON.stringify({ id: idPecaInterromper, motivo: motivoInterrompido }),
+                    success: function (data) {
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        $('#modalMotivoInterrompido').modal('hide');
+                    },
+                    error: function (error) {
+                        console.error('Erro na solicitação POST:', error);
+                        hideLoading();
+                        $('#modalMotivoInterrompido').modal('hide');
+                    }
+                });
+            });
+
+            $('#desistirMotivo').on('click', function () {
+                $('#modalMotivoInterrompido').modal('hide');
+            })
+        });
+
+    </script>
+
+    <!-- Script para retornar a produção -->
+
+    <script>
+
+        function retornarPeca(id) {
+
+            $('#modalConfirmarInicioProducao').modal('show');
+            document.getElementById('modalConfirmarInicioProducaoLabel').textContent = 'Retorno'
+            document.getElementById('pecaTextoModalIniciar').textContent = ''
+            document.getElementById('labelConfirmar').textContent = 'Confirmar retorno para produção?'
+
+            $('#retornarPecaProducao').val(id);
+
+            var botaoRetornar = document.getElementById('confimarRetornoProducao');
+            botaoRetornar.style.display = 'block';
+
+            var botaoIniciar = document.getElementById('confimarInicioProducao');
+            botaoIniciar.style.display = 'none';
+
+        }
+
+        $(document).ready(function () {
+            $('#confimarRetornoProducao').on('click', function () {
+                idPecaRetornar = $('#retornarPecaProducao').val();
+                console.log(idPecaRetornar);
+
+                showLoading();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/pecas-retornou/serralheria',
+                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                    data: JSON.stringify({ id: idPecaRetornar }),
+                    success: function (data) {
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        $('#modalConfirmarInicioProducao').modal('hide');
+                    },
+                    error: function (error) {
+                        console.error('Erro na solicitação POST:', error);
+                        hideLoading();
+                        $('#modalConfirmarInicioProducao').modal('hide');
+                    }
+                });
+            });
+        });
+
+
+        $(document).ready(function () {
+            $('#desistirInicioProducao').on('click', function () {
+                $('#modalConfirmarInicioProducao').modal('hide');
+            })
+        })
+
+    </script>
+
+    <!-- Script para apagar funcionario do modal de finalizar -->
+
+    <script>
+        function limparCampoOperadorModal_finalizar() {
+            $('#operadorInputModal_1').val('');
+        }
+
+        // Adiciona o evento de clique ao ícone "x" para limpar o campo 'celula'
+        $('#operador-modal-finalizar').on('click', function () {
+            limparCampoOperadorModal_finalizar();
+        });
+    </script>
+
+    <script>
+        document.getElementById('clear-codigo').addEventListener('click', function () {
+
+            $('#codigoPecaEstamparia').val('');
+
+        });
+    </script>
+
+    {% endblock %}
