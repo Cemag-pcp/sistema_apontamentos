@@ -51,17 +51,49 @@
                     
                     <div class="row mb-3">
                         <div class="col-md-3 col-sm-6">
-                            <label for="dataLevantamentoInicial">Data inicial:</label>
-                            <input class="form-control" type="date" id="dataLevantamentoInicial">
+                            <label for="dataReuniaoInicial">Data inicial:</label>
+                            <input class="form-control" type="date" id="dataReuniaoInicial">
                         </div>
                         <div class="col-md-3 col-sm-6">
-                            <label for="dataLevantamentoFinal">Data final:</label>
-                            <input class="form-control" type="date" id="dataLevantamentoFinal">
+                            <label for="dataReuniaoFinal">Data final:</label>
+                            <input class="form-control" type="date" id="dataReuniaoFinal">
                         </div>
                     </div>
-                    
+                    <div class="col-md-3 col-sm-6">
+                        <!-- Botão para filtrar as datas -->
+                        <button id="filtrar_datas" class="btn btn-primary mt-4">Filtrar</button>
+                    </div>
 
+                </div>
+            </div>
 
+            <div class="card shadow mb-4" id="campoTable" style="display: none;">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Conjuntos</h6>
+                </div>
+                <!-- Card tabela a inspecionar -->
+                <div class="card-body" id="reuniaoTables" style="overflow-y: auto;max-height: 600px;">
+                    <div id="no-more-tables">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTableReuniao" width="100%" cellspacing="0">
+                                <thead class="theadConjuntoReuniao">
+                                    <tr>
+                                        <th>Produto</th>
+                                        <th>Data</th>
+                                        <th>Código do Produto</th>
+                                        <th>Descrição</th>
+                                        <th>Código Único</th>
+                                        <th>Quantidade</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyConjuntoReuniao">
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -95,6 +127,42 @@
                             </table>
                         </div>
                         <div class="modal-footer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="infoModalLabel">Detalhes da Linha</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label for="data_carga">Data da Carga:</label>
+                                    <input type="date" name="data_carga" id="data_carga" class="form-control" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label for="codigo_conjunto">Código Conjunto:</label>
+                                    <input type="text" name="codigo_conjunto" id="codigo_conjunto" class="form-control" disabled>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label for="data_carga">Carreta:</label>
+                                    <input type="text" name="carreta_conjunto" id="carreta_conjunto" class="form-control" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label for="codigo_conjunto">Quantidade:</label>
+                                    <input type="number" name="quantidade_conjunto" id="quantidade_conjunto" class="form-control" disabled>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -208,5 +276,6 @@
     <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="static/js/demo/datatables-demo.js"></script>
+    <script src="static/js/resumo-producao/resumo.js"></script>
 
     {% endblock %}

@@ -51,3 +51,12 @@
         content: attr(data-title);
     }
 }
+
+.fp-highlight {
+    background-color: rgba(173, 216, 230, 0.281);
+    cursor: pointer;
+}
+
+.fp-highlight:hover {
+    background-color: rgba(173, 216, 230, 0.616);
+}

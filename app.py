@@ -3899,7 +3899,8 @@ def tabela_resumos():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
-
+    
+    print('Iniciando criação da API')
     # Acessando os parâmetros da URL
     datainicio = request.args.get('datainicio')
     datafim = request.args.get('datafim')
@@ -4000,7 +4001,12 @@ def tabela_resumos():
         )
     
     json_data = df_pivot.reset_index().values.tolist()
-    
+    colunas = df_pivot.reset_index().columns
+
+    print(colunas)
+
+    print('API gerada')
+
     return jsonify({
         'data':json_data,
         })
