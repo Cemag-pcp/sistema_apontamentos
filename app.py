@@ -259,7 +259,7 @@ def dados_inspecionar_reinspecionar():
     return data_inspecao,data_reinspecao,data_inspecionadas
 
 def inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor,setor,arquivo,
-                       conjunto_especifico='',tipo_nao_conformidade='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''):
+                       conjunto_especifico='',categoria='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
@@ -298,7 +298,7 @@ def inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor
     elif setor == 'Solda':
 
         sql = """INSERT INTO pcp.pecas_reinspecao 
-                        (id,nao_conformidades, causa_reinspecao, inspetor,setor,conjunto,tipo_nao_conformidade,outra_causa,origem,observacao) 
+                        (id,nao_conformidades, causa_reinspecao, inspetor,setor,conjunto,categoria,outra_causa,origem,observacao) 
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         values = (
             id_inspecao,
@@ -307,7 +307,7 @@ def inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor
             inspetor,
             setor,
             conjunto_especifico,
-            tipo_nao_conformidade,
+            categoria,
             outraCausaSolda,
             origemInspecaoSolda,
             observacaoSolda
@@ -368,7 +368,7 @@ def inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor,
     print("inserir_inspecionados")
 
 def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,causa_reinspecao,inspetor,setor,arquivo,
-                       conjunto_especifico='',tipo_nao_conformidade='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''):
+                       conjunto_especifico='',categoria='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
@@ -529,7 +529,7 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
         if n_conformidades == "0":
 
             sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, tipo_nao_conformidade = %s,
+                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, categoria = %s,
                     outra_causa = %s, origem = %s, observacao = %s
                     WHERE id = %s """
 
@@ -537,7 +537,7 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
                 n_nao_conformidades,
                 causa_reinspecao,
                 inspetor,
-                tipo_nao_conformidade,
+                categoria,
                 outraCausaSolda,
                 origemInspecaoSolda,
                 observacaoSolda,
@@ -586,7 +586,7 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
         elif n_conformidades > "0" and n_conformidades < qtd_produzida:
 
             sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, tipo_nao_conformidade = %s,
+                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, categoria = %s,
                     outra_causa = %s, origem = %s, observacao = %s
                     WHERE id = %s """
             # conjunto_especifico='',tipo_nao_conformidade='',outraCausaSolda='',origemInspecaoSolda='',observacaoSolda=''
@@ -594,7 +594,7 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
                 n_nao_conformidades,
                 causa_reinspecao,
                 inspetor,
-                tipo_nao_conformidade,
+                categoria,
                 outraCausaSolda,
                 origemInspecaoSolda,
                 observacaoSolda,
@@ -1292,13 +1292,11 @@ def solda():
 
     if request.method == 'POST':
 
-        print("entrou")
-
         # Outros dados enviados no formulário podem ser acessados da seguinte maneira:
         id_inspecao_solda = request.form.get('id_inspecao')
 
         data_inspecao = request.form.get('data_inspecao')
-        print(data_inspecao)
+        print(id_inspecao_solda)
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
         data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
 
@@ -1321,11 +1319,13 @@ def solda():
 
         setor = 'Solda'
 
+        arquivo = ''
+
         print(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,causaSolda,inspetoresSolda,setor,
               inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
 
         if reinspecao == True:
-            alterar_reinspecao(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,causaSolda,inspetoresSolda,setor,
+            alterar_reinspecao(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,causaSolda,inspetoresSolda,setor,arquivo,
                                inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
             return jsonify("Success")
         
