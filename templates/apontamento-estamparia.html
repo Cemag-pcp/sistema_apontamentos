@@ -12,7 +12,8 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
 
 <!-- CSS tables responsive -->
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/no-more-table.css') }}">
 
 <style>
     /* Adicione algum estilo para o ícone "x" dentro do campo */
@@ -61,15 +62,24 @@
                             <input style="display: none;" id="maquinaEscolhida">
                         </div>
                         <div class="row mb-2">
-                            <div class="col mb-2"><button id="filterChassi" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyMaquinaFilter(this, 'Viradeira 3')">Viradeira 3</button></div>
-                            <div class="col mb-2"><button id="filterEixoCompleto" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyMaquinaFilter(this, 'Viradeira 4')">Viradeira 4</button></div>
-                            <div class="col mb-2"><button id="filterEixoSimples" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyMaquinaFilter(this, 'Viradeira 5')">Viradeira 5</button></div>
+                            <div class="col mb-2"><button id="filterChassi"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
+                                    onclick="applyMaquinaFilter(this, 'Viradeira 3')">Viradeira
+                                    3</button></div>
+                            <div class="col mb-2"><button
+                                    id="filterEixoCompleto" type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
+                                    onclick="applyMaquinaFilter(this, 'Viradeira 4')">Viradeira
+                                    4</button></div>
+                            <div class="col mb-2"><button id="filterEixoSimples"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
+                                    onclick="applyMaquinaFilter(this, 'Viradeira 5')">Viradeira
+                                    5</button></div>
                         </div>
                         <div class="row mb-2">
                             <!-- <div class="col-sm-6">
@@ -82,7 +92,9 @@
                                 <div class="form-group">
                                     <label for="maquina">Máquina</label>
                                     <div class="position-relative">
-                                        <input id="maquina" class="form-control" data-column="2" style="width: 250px;">
+                                        <input id="maquina" class="form-control"
+                                            data-column="2"
+                                            style="width: 250px;">
                                     </div>
                                 </div>
                             </div>
@@ -90,13 +102,19 @@
                     </div>
                 </div>
                 <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Iniciar Processo</h6>
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Iniciar
+                        Processo</h6>
                     <div class="btn-group" role="group" aria-label="Criar OP">
-                        <button id="btnModalPecaFora" type="button" class="btn btn-sm btn-info mr-2" data-toggle="modal"
-                            data-target="#modalPlanejarPeca">Planejar peça</button>
-                        <button id="btnModalPecaFora" type="button" class="btn btn-sm btn-secondary" data-toggle="modal"
-                            data-target="#modalPecaFora">Iniciar peça fora do planejamento</button>
+                        <button id="btnModalPecaFora" type="button"
+                            class="btn btn-sm btn-info mr-2" data-toggle="modal"
+                            data-target="#modalPlanejarPeca">Planejar
+                            peça</button>
+                        <button id="btnModalPecaFora" type="button"
+                            class="btn btn-sm btn-secondary" data-toggle="modal"
+                            data-target="#modalPecaFora">Iniciar peça fora do
+                            planejamento</button>
                     </div>
                 </div>
                 <br>
@@ -105,9 +123,12 @@
                     <div class="row mb-2">
                         <div class="col-sm-6 col-md-4 col-lg-3">
                             <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Código" aria-label="Código"
-                                    aria-describedby="clear-codigo" id="codigoPecaEstamparia">
-                                <button class="btn btn-outline-secondary" type="button" id="clear-codigo">X</button>
+                                <input type="text" class="form-control"
+                                    placeholder="Código" aria-label="Código"
+                                    aria-describedby="clear-codigo"
+                                    id="codigoPecaEstamparia">
+                                <button class="btn btn-outline-secondary"
+                                    type="button" id="clear-codigo">X</button>
                             </div>
                         </div>
                     </div>
@@ -116,14 +137,18 @@
                             <table class="table table-bordered">
                                 <thead class="cf">
                                     <tr>
-                                        <th scope="col" style="display: none;">chave</th>
+                                        <th scope="col"
+                                            style="display: none;">chave</th>
                                         <th scope="col">Data Planejamento</th>
                                         <th scope="col">Código</th>
                                         <th scope="col">Descrição</th>
-                                        <th scope="col">Quantidade planjeada</th>
+                                        <th scope="col">Quantidade
+                                            planjeada</th>
                                         <th scope="col">Máquina</th>
-                                        <th style="display: none;" scope="col">Origem</th>
-                                        <th style="display: none;" scope="col">Chave</th>
+                                        <th style="display: none;"
+                                            scope="col">Origem</th>
+                                        <th style="display: none;"
+                                            scope="col">Chave</th>
                                         <th scope="col">Iniciar</th>
                                     </tr>
                                 </thead>
@@ -137,7 +162,8 @@
                         <tr>
                             <td colspan="9">
                                 <nav aria-label="Page navigation example">
-                                    <ul class="pagination justify-content-end" id="pagination">
+                                    <ul class="pagination justify-content-end"
+                                        id="pagination">
                                         <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
                                     </ul>
                                 </nav>
@@ -149,342 +175,410 @@
 
         </div>
 
-        <div class="row">
+    </div>
 
-            <div class="col-xl-6 mb-2">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary">Peças em processo</h6>
-                    </div>
-                    <div class="card-body" style="max-height: 700px; overflow-y: auto;">
-                        <div class="row" id="cardsContainer">
-                            <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
-                        </div>
+    <div class="row">
+
+        <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças em
+                        processo</h6>
+                </div>
+                <div class="card-body"
+                    style="max-height: 700px; overflow-y: auto;">
+                    <div class="row" id="cardsContainer">
+                        <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
                     </div>
                 </div>
-            </div>
-
-            <div class="col-xl-6 mb-2">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                        <h6 class="m-0 font-weight-bold text-primary">Peças interrompidas</h6>
-                    </div>
-                    <div class="card-body" style="max-height: 700px; overflow-y: auto;">
-                        <div class="row" id="cardsContainerInterrompida">
-                            <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Content Row -->
-        <div class="row">
-
-            <!-- Modal peça fora do planejamento -->
-            <div class="modal fade" id="modalPecaFora" tabindex="-1" role="dialog" aria-labelledby="modalPecaForaLabel"
-                aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="modalPecaForaLabel">Gerar apontamento para peça fora do
-                                planejamento</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-floating mb-3">
-                                        <label for="userInput">Peça</label>
-                                        <div class="position-relative">
-                                            <input class="form-control" type="text" id="userInput"
-                                                oninput="showSuggestionsPecas_()">
-                                            <span id="peca-modal" class="clear-icon-operador"
-                                                onclick="clearInput_()">x</span>
-                                            <ul id="suggestionsPecas" class="custom-dropdown-menu"></ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm">
-                                    <div class="form-floating mb-3">
-                                        <label for="inputData">Data do planejamento</label>
-                                        <input class="form-control" type="date" id="inputData">
-                                    </div>
-                                </div>
-                                <div class="col-sm">
-                                    <div class="form-floating mb-3">
-                                        <label for="inputQuantidade">Quantidade</label>
-                                        <input class="form-control" type="number" id="inputQuantidade">
-                                        <!-- Quantidade -->
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-sm-12 mb-2">
-                                    <label for="maquinaForaDoPlanejado">Máquina</label>
-                                    <div class="position-relative">
-                                        <div class="btn-group" data-toggle="buttons">
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 3">
-                                                Viradeira 3
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 4">
-                                                Viradeira 4
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 5">
-                                                Viradeira 5
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="btnSalvar" type="button" class="btn btn-primary">Salvar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal planejar produção -->
-            <div class="modal fade" id="modalPlanejarPeca" tabindex="-1" role="dialog"
-                aria-labelledby="modalPlanejarPecaLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="modalPlanejarPecaLabel">Planejar peças</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-floating mb-3">
-                                        <label for="userInput_">Peça</label>
-                                        <div class="position-relative">
-                                            <input class="form-control" type="text" id="userInput_"
-                                                oninput="showSuggestionsPecas()">
-                                            <span id="peca-modal_" class="clear-icon-operador"
-                                                onclick="clearInput()">x</span>
-                                            <ul id="suggestionsPecas_" class="custom-dropdown-menu"
-                                                style="display: none;">
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm">
-                                    <div class="form-floating mb-3">
-                                        <label for="inputData_">Data do planejamento</label>
-                                        <input class="form-control" type="date" id="inputData_">
-                                    </div>
-                                </div>
-                                <div class="col-sm">
-                                    <div class="form-floating mb-3">
-                                        <label for="inputQuantidade_">Quantidade</label>
-                                        <input class="form-control" type="number" id="inputQuantidade_">
-                                        <!-- Quantidade -->
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-sm-12 mb-2">
-                                    <label for="maquinaForaDoPlanejado_">Máquina</label>
-                                    <div class="position-relative">
-                                        <div class="btn-group" data-toggle="buttons">
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="radio" name="maquinaForaDoPlanejado_" value="Viradeira 3">
-                                                Viradeira 3
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="radio" name="maquinaForaDoPlanejado_" value="Viradeira 4">
-                                                Viradeira 4
-                                            </label>
-                                            <label class="btn btn-outline-secondary">
-                                                <input type="radio" name="maquinaForaDoPlanejado_" value="Viradeira 5">
-                                                Viradeira 5
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="btnSalvarPlanejamento" type="button" class="btn btn-primary">Salvar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal finalizar apontamento -->
-            <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1" role="dialog"
-                aria-labelledby="modalExecucaoApontamentoLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="modalExecucaoApontamentoLabel">Apontar peça</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row mb-2">
-                                <div class="col-12 mb-2">
-                                    <div class="form-floating mb-3">
-                                        <label for="nomePecaApontada">Peça</label>
-                                        <input class="form-control" type="text" id="nomePecaApontada" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-6 mb-2">
-                                    <div class="form-floating mb-3">
-                                        <label for="inputQuantidadePlanejada">Quantidade planejada</label>
-                                        <input class="form-control" type="number" id="inputQuantidadePlanejada"
-                                            readonly>
-                                        <!-- Quantidade -->
-                                    </div>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <div class="form-floating mb-3">
-                                        <label for="inputQuantidadeRealizada">Quantidade realizada</label>
-                                        <input class="form-control" type="number" id="inputQuantidadeRealizada">
-                                        <!-- Quantidade -->
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-6 mb-2">
-                                    <label for="operadorInputModal_1">Operador</label>
-                                    <div class="position-relative">
-                                        <input class="form-control" type="text" id="operadorInputModal_1"
-                                            autocomplete="false" />
-                                        <span id="operador-modal-finalizar" class="clear-icon-operador">x</span>
-                                        <ul id="sugestaoOperadorModal_1" class="custom-dropdown-menu"></ul>
-                                    </div>
-                                </div>
-                                <div class="col-6 mb-2">
-                                    <div class="form-floating mb-3">
-                                        <label for="dataHoraInicio">Data e hora de início</label>
-                                        <input class="form-control" type="datetime-local" id="dataHoraInicio" readonly>
-                                        <!-- data e hora que iniciou e finalizou a ordem -->
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-12 mb-2">
-                                    <label for="textAreaObservacao_">Observação</label>
-                                    <textarea class="form-control" id="textAreaObservacao_"></textarea>
-                                </div>
-                            </div>
-                            <div class="row mb-2" style="display: none;">
-                                <div class="col-12 mb-2">
-                                    <label for="codificacaoOrdem">Código da ordem</label>
-                                    <input class="form-control" type="text" id="codificacaoOrdem" readonly>
-                                    <!-- codificação da ordem -->
-                                </div>
-                            </div>
-                            <div class="row mb-2" style="display: none;">
-                                <div class="col-12 mb-2">
-                                    <label for="celulaOrdem">Célula</label>
-                                    <input class="form-control" type="text" id="celulaOrdem" readonly>
-                                </div>
-                            </div>
-                            <div class="row mb-2" style="display: none;">
-                                <div class="col-12 mb-2">
-                                    <label for="dataCargaFinalizacao">Data Carga</label>
-                                    <input class="form-control" type="text" id="dataCargaFinalizacao" readonly>
-                                </div>
-                            </div>
-                            <div class="row mb-2" style="display: none;">
-                                <div class="col-12 mb-2">
-                                    <label for="idPecaEmProcesso">Id</label>
-                                    <input class="form-control" type="text" id="idPecaEmProcesso" readonly>
-                                </div>
-                            </div>
-                            <div class="row mb-2" style="display: none;">
-                                <div class="col-12 mb-2">
-                                    <label for="origemPecaEmProcesso">Origem</label>
-                                    <input class="form-control" type="text" id="origemPecaEmProcesso" readonly>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="btnFinalizarOrdem" type="button" class="btn btn-primary">Confirmar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal confirmar inicio -->
-            <div class="modal fade" id="modalConfirmarInicioProducao" tabindex="-1" role="dialog"
-                aria-labelledby="modalConfirmarInicioProducaoLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="modalConfirmarInicioProducaoLabel">Iniciar</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <p id="labelConfirmar">Confirmar início da produção?</p>
-                            <p id="pecaTextoModalIniciar"></p>
-                            <input id="retornarPecaProducao" style="display: none;">
-                        </div>
-                        <div class="modal-footer">
-                            <button id="confimarInicioProducao" type="button" class="btn btn-success">Sim</button>
-                            <button id="confimarRetornoProducao" type="button" class="btn btn-success">Sim</button>
-                            <button id="desistirInicioProducao" type="button" class="btn btn-danger">Não</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal motivo de interrompido -->
-            <div class="modal fade" id="modalMotivoInterrompido" tabindex="-1" role="dialog"
-                aria-labelledby="modalMotivoInterrompidoLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="modalMotivoInterrompidoLabel">Escolha o motivo da parada</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <input type="text" id="idPecaInterromper" style="display: none;">
-                            <select class="form-control" name="motivosParada" id="idMotivosParada">
-                                <option>Manutenção</option>
-                                <option>Limpeza</option>
-                                <option>Falta de peça</option>
-                            </select>
-                        </div>
-                        <div class="modal-footer">
-                            <button id="enviarMotivo" type="button" class="btn btn-success">Enviar</button>
-                            <button id="desistirMotivo" type="button" class="btn btn-danger">Fechar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="loading" id="loading" style="display: none;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Loading...</span>
             </div>
         </div>
 
+        <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças
+                        interrompidas</h6>
+                </div>
+                <div class="card-body"
+                    style="max-height: 700px; overflow-y: auto;">
+                    <div class="row" id="cardsContainerInterrompida">
+                        <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal peça fora do planejamento -->
+    <div class="modal fade" id="modalPecaFora" tabindex="-1" role="dialog"
+        aria-labelledby="modalPecaForaLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPecaForaLabel">Gerar
+                        apontamento para peça fora do
+                        planejamento</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-floating mb-3">
+                                <label for="userInput">Peça</label>
+                                <div class="position-relative">
+                                    <input class="form-control" type="text"
+                                        id="userInput"
+                                        oninput="showSuggestionsPecas_()">
+                                    <span id="peca-modal"
+                                        class="clear-icon-operador"
+                                        onclick="clearInput_()">x</span>
+                                    <ul id="suggestionsPecas"
+                                        class="custom-dropdown-menu"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-floating mb-3">
+                                <label for="inputData">Data do
+                                    planejamento</label>
+                                <input class="form-control" type="date"
+                                    id="inputData">
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-floating mb-3">
+                                <label for="inputQuantidade">Quantidade</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidade">
+                                <!-- Quantidade -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-12 mb-2">
+                            <label for="maquinaForaDoPlanejado">Máquina</label>
+                            <div class="position-relative">
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-outline-secondary">
+                                        <input type="radio"
+                                            name="maquinaForaDoPlanejado"
+                                            value="Viradeira 3">
+                                        Viradeira 3
+                                    </label>
+                                    <label class="btn btn-outline-secondary">
+                                        <input type="radio"
+                                            name="maquinaForaDoPlanejado"
+                                            value="Viradeira 4">
+                                        Viradeira 4
+                                    </label>
+                                    <label class="btn btn-outline-secondary">
+                                        <input type="radio"
+                                            name="maquinaForaDoPlanejado"
+                                            value="Viradeira 5">
+                                        Viradeira 5
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnSalvar" type="button"
+                        class="btn btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal planejar produção -->
+    <div class="modal fade" id="modalPlanejarPeca" tabindex="-1" role="dialog"
+        aria-labelledby="modalPlanejarPecaLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPlanejarPecaLabel">Planejar
+                        peças</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-floating mb-3">
+                                <label for="userInput_">Peça</label>
+                                <div class="position-relative">
+                                    <input class="form-control" type="text"
+                                        id="userInput_"
+                                        oninput="showSuggestionsPecas()">
+                                    <span id="peca-modal_"
+                                        class="clear-icon-operador"
+                                        onclick="clearInput()">x</span>
+                                    <ul id="suggestionsPecas_"
+                                        class="custom-dropdown-menu"
+                                        style="display: none;">
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm">
+                            <div class="form-floating mb-3">
+                                <label for="inputData_">Data do
+                                    planejamento</label>
+                                <input class="form-control" type="date"
+                                    id="inputData_">
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                            <div class="form-floating mb-3">
+                                <label for="inputQuantidade_">Quantidade</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidade_">
+                                <!-- Quantidade -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-12 mb-2">
+                            <label for="maquinaForaDoPlanejado_">Máquina</label>
+                            <div class="position-relative">
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-outline-secondary">
+                                        <input type="radio"
+                                            name="maquinaForaDoPlanejado_"
+                                            value="Viradeira 3">
+                                        Viradeira 3
+                                    </label>
+                                    <label class="btn btn-outline-secondary">
+                                        <input type="radio"
+                                            name="maquinaForaDoPlanejado_"
+                                            value="Viradeira 4">
+                                        Viradeira 4
+                                    </label>
+                                    <label class="btn btn-outline-secondary">
+                                        <input type="radio"
+                                            name="maquinaForaDoPlanejado_"
+                                            value="Viradeira 5">
+                                        Viradeira 5
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnSalvarPlanejamento" type="button"
+                        class="btn btn-primary">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal finalizar apontamento -->
+    <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1"
+        role="dialog"
+        aria-labelledby="modalExecucaoApontamentoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="modalExecucaoApontamentoLabel">Apontar peça</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col-12 mb-2">
+                            <div class="form-floating mb-3">
+                                <label for="nomePecaApontada">Peça</label>
+                                <input class="form-control" type="text"
+                                    id="nomePecaApontada" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6 mb-2">
+                            <div class="form-floating mb-3">
+                                <label for="inputQuantidadePlanejada">Quantidade
+                                    planejada</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidadePlanejada"
+                                    readonly>
+                                <!-- Quantidade -->
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="form-floating mb-3">
+                                <label for="inputQuantidadeRealizada">Quantidade
+                                    realizada</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidadeRealizada">
+                                <!-- Quantidade -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-2">
+                            <label for="operadorInputModal_1">Operador</label>
+                            <div class="position-relative">
+                                <input class="form-control" type="text"
+                                    id="operadorInputModal_1"
+                                    autocomplete="false" />
+                                <span id="operador-modal-finalizar"
+                                    class="clear-icon-operador">x</span>
+                                <ul id="sugestaoOperadorModal_1"
+                                    class="custom-dropdown-menu"></ul>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <div class="form-floating mb-3">
+                                <label for="dataHoraInicio">Data e hora de
+                                    início</label>
+                                <input class="form-control"
+                                    type="datetime-local" id="dataHoraInicio"
+                                    readonly>
+                                <!-- data e hora que iniciou e finalizou a ordem -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-12 mb-2">
+                            <label for="textAreaObservacao_">Observação</label>
+                            <textarea class="form-control"
+                                id="textAreaObservacao_"></textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="codificacaoOrdem">Código da
+                                ordem</label>
+                            <input class="form-control" type="text"
+                                id="codificacaoOrdem" readonly>
+                            <!-- codificação da ordem -->
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="celulaOrdem">Célula</label>
+                            <input class="form-control" type="text"
+                                id="celulaOrdem" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="dataCargaFinalizacao">Data Carga</label>
+                            <input class="form-control" type="text"
+                                id="dataCargaFinalizacao" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="idPecaEmProcesso">Id</label>
+                            <input class="form-control" type="text"
+                                id="idPecaEmProcesso" readonly>
+                        </div>
+                    </div>
+                    <div class="row mb-2" style="display: none;">
+                        <div class="col-12 mb-2">
+                            <label for="origemPecaEmProcesso">Origem</label>
+                            <input class="form-control" type="text"
+                                id="origemPecaEmProcesso" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnFinalizarOrdem" type="button"
+                        class="btn btn-primary">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal confirmar inicio -->
+    <div class="modal fade" id="modalConfirmarInicioProducao" tabindex="-1"
+        role="dialog"
+        aria-labelledby="modalConfirmarInicioProducaoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="modalConfirmarInicioProducaoLabel">Iniciar</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="labelConfirmar">Confirmar início da produção?</p>
+                    <p id="pecaTextoModalIniciar"></p>
+                    <input id="retornarPecaProducao" style="display: none;">
+                </div>
+                <div class="modal-footer">
+                    <button id="confimarInicioProducao" type="button"
+                        class="btn btn-success">Sim</button>
+                    <button id="confimarRetornoProducao" type="button"
+                        class="btn btn-success">Sim</button>
+                    <button id="desistirInicioProducao" type="button"
+                        class="btn btn-danger">Não</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal motivo de interrompido -->
+    <div class="modal fade" id="modalMotivoInterrompido" tabindex="-1"
+        role="dialog"
+        aria-labelledby="modalMotivoInterrompidoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="modalMotivoInterrompidoLabel">Escolha o motivo da
+                        parada</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="idPecaInterromper"
+                        style="display: none;">
+                    <select class="form-control" name="motivosParada"
+                        id="idMotivosParada">
+                        <option>Manutenção</option>
+                        <option>Limpeza</option>
+                        <option>Falta de peça</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button id="enviarMotivo" type="button"
+                        class="btn btn-success">Enviar</button>
+                    <button id="desistirMotivo" type="button"
+                        class="btn btn-danger">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
     </div>
 
     <div id="alertBox" class="alert alert-danger">
@@ -502,7 +596,8 @@
     <!-- Script tabela JQuery -->
 
     <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script
+        src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="static/js/demo/datatables-demo.js"></script>
 
     <!-- Scripts para iniciar tabela -->
@@ -740,7 +835,8 @@
 
     <!-- Script tratar data -->
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
     <!-- Script tela de carregamento -->
 
@@ -1356,7 +1452,6 @@
     </script>
 
     <!-- Script para iniciar ou finalizar produção e listar peças em processo -->
-
 
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
     integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="

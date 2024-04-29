@@ -975,6 +975,8 @@ def tela_estamparia():
     Rota para tela de estamparia
     """
 
+    
+
     return render_template('apontamento-estamparia.html') #async_mode=socketio.async_mode)
 
 
@@ -3090,6 +3092,280 @@ def duplicar_op():
 
     return jsonify({'nova_op':ultima_op_criada})
 
+# Apontamento prod especiais
+
+@app.route('/tela-apontamento-prod-especiais', methods=['GET', 'POST'])
+def tela_prod_especiais():
+    """
+    Rota para tela de serralheria
+    """
+
+    return render_template('apontamento-serralheria.html')
+
+@app.route("/sugestao-pecas-serralheria")
+def mostrar_sugestao_peca_serralheria():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select distinct concat(codigo_conjunto,' - ',descricao_conjunto) from pcp.base_produtos_especiais"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    return jsonify(data)
+
+@app.route('/iniciar-producao-serralheria', methods=['POST'])
+def iniciar_producao_serralheria():
+    """
+    Rota para iniciar producao de serralheria
+    """ 
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+    print(data)
+    
+    chave = gerar_id_aleatorio()
+    codigo_conjunto = data['peca']
+    status = 'Em processo'
+    qt_planejada = data['qt_planejada']
+
+    query_processo = """insert into pcp.ordens_processo_serralheria (chave,codigo_conjunto,status,qt_planejada)
+                        values (%s,%s,%s,%s)"""
+
+    cur.execute(query_processo,(chave,codigo_conjunto,status,qt_planejada))
+
+    conn.commit()
+
+    return jsonify('sucess')
+
+@app.route('/finalizar-producao-serralheria', methods=['POST'])
+def finalizar_producao_serralheria():
+    """
+    Rota para finalizar producao de serralheria
+    """ 
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+    print(data)
+    
+    chave = data['chave']
+    codigo_conjunto = data['peca']
+    qt = data['qtde']
+    operador = data['operador']
+
+    # #Buscando data de inicio
+    # query = """select * from pcp.ordens_processo_serralheria where chave = %s order by data_inicio desc"""
+    # cur.execute(query,(chave,))
+    # data_inicio = cur.fetchone()
+
+    # query_processo = """insert into pcp.ordens_serralheria (chave,codigo_conjunto,data_inicio,operador,qt)
+    #                     values (%s,%s,%s,%s,%s)"""
+
+    # cur.execute(query_processo,(chave,codigo_conjunto,data_inicio,operador,qt))
+
+    # conn.commit()
+
+    return jsonify('sucess')
+
+@app.route("/api/consulta-pecas-em-processo/serralheria", methods=['GET'])
+def api_consulta_pecas_em_processo_serralheria():
+    
+    """
+    Api para consultar peças com status "em processo"
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """ 
+            select * from pcp.ordens_processo_serralheria where status = 'Em processo' and data_finalizacao isnull order by id desc
+            """
+
+    cur.execute(query)
+    consulta = cur.fetchall()
+
+    return jsonify(consulta)
+
+@app.route("/consulta-id-em-processo/serralheria", methods=['GET'])
+def consulta_id_em_processo_serralheria():
+    """
+    Api para consultar peça específica com status "em processo" em estamparia
+    """
+
+    data = request.args
+
+    id = data.get('id_peca')
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """ 
+            SELECT * FROM pcp.ordens_processo_serralheria WHERE id = %s
+            """
+
+    cur.execute(query, (id,))
+    consulta = cur.fetchall()
+
+    return jsonify(consulta)
+
+@app.route("/finalizar-peca-em-processo/serralheria", methods=['POST'])
+def finalizar_peca_em_processo_serralheria():
+    """
+    Finalizar ordem de serviço da serralheria
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+
+    agora = datetime.now()
+    status = 'Finalizada'
+    query_update = """update pcp.ordens_processo_serralheria set status = %s, data_finalizacao = %s where id = %s"""
+    cur.execute(query_update, (status, agora, data['idPecaEmProcesso']))
+    
+    chave = data['chavePecaProcesso']
+    codigo = data['codigo']
+    qt_planejada = data['qtdePlanejada']
+    textAreaObservacao = data['textAreaObservacao']
+    dataHoraInicio = pd.to_datetime(
+        data['dataHoraInicio']).strftime("%Y-%m-%d %H:%M:%S")
+    operadorInputModal_1 = data['operadorInputModal_1']
+    inputQuantidadeRealizada = data['inputQuantidadeRealizada']
+
+    query = """ 
+            INSERT INTO pcp.ordens_serralheria (chave,codigo_conjunto,data_inicio,operador,qt,qt_planejada,observacao)
+            VALUES (%s,%s,%s,%s,%s,%s,%s)
+            """
+
+    cur.execute(query, (chave, codigo, dataHoraInicio, operadorInputModal_1, inputQuantidadeRealizada,qt_planejada,textAreaObservacao))
+
+    conn.commit()
+
+    return 'sucess'
+
+@app.route("/api/consulta-pecas-interrompidas/serralheria", methods=['GET'])
+def api_consulta_pecas_interrompidas_serralheria():
+    """
+    Api para consultar peças com status "interrompida"
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """ 
+            select * from pcp.ordens_processo_serralheria where status = 'Interrompida' and data_finalizacao isnull order by id desc
+            """
+
+    cur.execute(query)
+    consulta = cur.fetchall()
+
+    return jsonify(consulta)
+
+@app.route("/api/pecas-retornou/serralheria", methods=['POST'])
+def api_pecas_retornou_serralheria():
+    """
+    rota para enviar peças para status "Em produção" depois de interrompidas serralheria
+    """
+
+    data_request = request.json
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    agora = datetime.now()
+    query_update = """update pcp.ordens_processo_serralheria set data_finalizacao = %s where id = %s"""
+    cur.execute(query_update, (agora, data_request['id']))
+
+    query_consulta = """select * from pcp.ordens_processo_serralheria where id = %s"""
+    cur.execute(query_consulta, (data_request['id'],))
+    data = cur.fetchall()
+
+    data = data[0]
+
+    codigo = data[2]
+    qt_planejada = data[7]
+    status = 'Em processo'
+    chave = data[1]
+
+    query = """ 
+            INSERT INTO pcp.ordens_processo_serralheria (chave,codigo_conjunto,status,qt_planejada) VALUES (%s,%s,%s,%s)
+            """
+
+    cur.execute(query, (chave,codigo,status,qt_planejada))
+
+    conn.commit()
+
+    return 'sucess'
+
+@app.route("/api/pecas-interrompida/serralheria", methods=['POST'])
+def api_pecas_interrompida_serralheria():
+    """
+    rota para enviar peças para status "interrompida" serralheria
+    """
+
+    data_request = request.json
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    agora = datetime.now()
+    query_update = """update pcp.ordens_processo_serralheria set data_finalizacao = %s where id = %s"""
+    cur.execute(query_update, (agora, data_request['id']))
+
+    conn.commit()
+
+    query_consulta = """select * from pcp.ordens_processo_serralheria where id = %s"""
+    cur.execute(query_consulta, (data_request['id'],))
+    data = cur.fetchall()
+
+    data = data[0]
+
+    codigo = data[2]
+    qt_planejada = data[7]
+    status = 'Interrompida'
+    chave = data[1]
+    motivo = data_request['motivo']
+
+    query = """ 
+            INSERT INTO pcp.ordens_processo_serralheria (chave,codigo_conjunto,status,motivo_interrompida,qt_planejada) VALUES (%s,%s,%s,%s,%s)
+            """
+
+    cur.execute(query, (chave,codigo,status,motivo,qt_planejada))
+
+    conn.commit()
+
+    return 'sucess'
+
+@app.route('/historico-finalizadas/serralheria')
+def historico_finalizadas_serralheria():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """select * from pcp.ordens_serralheria order by id desc"""
+
+    cur.execute(query)
+
+    data = cur.fetchall()
+
+    return jsonify(data)
+
 # Levantamento #
 
 @app.route('/levantamento', methods=['GET'])
@@ -3394,122 +3670,6 @@ def baixar_resumo_levantamento():
     # Retorna o arquivo Excel como resposta para o cliente
     return send_file(temp_file_path, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', as_attachment=True, download_name='resumos.xlsx')
 
-@app.route('/resumos-geral')
-def tabela_resumos():
-
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                        password=DB_PASS, host=DB_HOST)
-
-    query = """ 
-                DROP VIEW IF EXISTS tabela_montagem;
-                DROP VIEW IF EXISTS tabela_pintura;
-                
-                CREATE VIEW tabela_pintura AS
-                SELECT 
-                    gop.data_carga,
-                    gop.codigo,
-                    gop.peca,
-                    gop.cor,
-                    gop.celula,
-                    SUM(gop.qt_planejada) / COUNT(gop.qt_planejada) AS qt_planejada,
-                    coalesce(SUM(op.qt_apontada),0) AS qt_apontada_pintura,
-                    (
-                        (SUM(gop.qt_planejada) / COUNT(gop.qt_planejada))
-                        - 
-                        COALESCE((SUM(op.qt_apontada) / COUNT(op.qt_apontada)), 0)
-                    ) AS qt_faltante
-                FROM 
-                    pcp.gerador_ordens_pintura gop
-                LEFT JOIN 
-                    pcp.ordens_pintura op ON gop.id = op.chave
-                WHERE 
-                    gop.data_carga between '2024-04-16' and '2024-04-16'
-                GROUP BY 
-                    gop.data_carga,gop.id, gop.codigo, gop.peca, gop.cor,gop.celula
-                ORDER BY 
-                    gop.data_carga;
-
-                CREATE VIEW tabela_montagem AS
-                select distinct tbce.carreta,
-                    t1.data_carga,
-                    t1.celula,
-                    t1.codigo_conjunto,
-                    t1.peca,
-                    t1.qt_planejada,
-                    t1.qt_apontada_montagem,
-                    t1.qt_faltante,
-                    CASE
-                        WHEN tbce.codigo_pintura = '' THEN t1.codigo_conjunto
-                        ELSE tbce.codigo_pintura
-                    END AS codigo_tratado,
-                    CASE
-                        WHEN tbce.descricao_pintura = '' THEN t1.peca
-                        ELSE tbce.descricao_pintura
-                    END AS descricao_tratada
-                FROM(
-                    SELECT 
-                        gom.data_carga,
-                        gom.celula,
-                        gom.codigo as codigo_conjunto,
-                        gom.peca,
-                        --SUM(gom.qt_planejada) / COUNT(gom.qt_planejada) as qt_planejada,
-                        SUM(gom.qt_planejada) as qt_planejada,
-                        COALESCE(SUM(om.qt_apontada) / COUNT(om.qt_apontada), 0) as qt_apontada_montagem,
-                        (
-                            SUM(gom.qt_planejada)
-                            - 
-                            COALESCE((SUM(om.qt_apontada) / COUNT(om.qt_apontada)), 0)
-                        ) AS qt_faltante
-                    FROM pcp.gerador_ordens_montagem gom
-                    LEFT JOIN pcp.ordens_montagem om ON gom.codigo = om.codigo 
-                                                        AND gom.data_carga = om.data_carga 
-                                                        AND gom.celula = om.celula
-                    WHERE gom.data_carga BETWEEN '2024-04-16' AND '2024-04-16'
-                    GROUP BY 
-                        gom.data_carga,
-                        gom.celula,
-                        gom.codigo,
-                        gom.peca
-                    ) as t1
-                    left join pcp.tb_base_carretas_explodidas tbce on
-                    tbce.conjunto = t1.codigo_conjunto;
-                    
-                SELECT tm.*,tp.cor,tp.celula as celula_montagem,tp.qt_planejada as qt_planejada_pintura,tp.qt_apontada_pintura,tp.qt_faltante as qt_faltante_pintura
-                FROM tabela_montagem as tm
-                left join tabela_pintura as tp on
-                tm.codigo_tratado = tp.codigo
-                where tm.carreta in ('CBHM5000 GR SS RD MM M17','CBHM5000 GR SS RD MM M17','CBHM5000 GR SS RD MM M17','CBHM5000 GR SS RD MM M17','CBHM5000 CA SS RD MM M17','CBH6-2E FO SS RS/RD P750(I) M21');
-                """
-
-    conn.commit()
-
-    resumos = pd.read_sql_query(query,conn)
-
-    resumos_teste = resumos
-    resumos_teste.columns
-    # resumo_montagem = resumos.iloc[:,:8].drop_duplicates().reset_index(drop=True)
-
-    resumos_teste['status_montagem'] = resumos_teste['qt_faltante'].apply(lambda x: 'P/S' if x <= 0 else 'FP - {}'.format(x))
-    resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
-    resumos_teste['status_pintura'] = resumos_teste['qt_faltante_pintura'].apply(lambda x: 'EXP.' if int(x) <= 0 else 'S - {}'.format(x))
-    resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + '\nP: ' + resumos_teste['status_pintura']
-    resumos_teste['quantidade_faltante_geral'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
-
-    df_pivot = resumos_teste[['carreta','data_carga','celula_montagem','codigo_conjunto','peca','codigo_tratado','quantidade_faltante_geral','status_geral']].pivot_table(
-        index=['carreta', 'data_carga', 'codigo_conjunto','peca','codigo_tratado','quantidade_faltante_geral'],
-            columns='celula_montagem',
-            values='status_geral',
-            aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
-            fill_value=''
-        )
-    
-    json_data = df_pivot.values.tolist()
-    
-    return jsonify({
-        'data':json_data,
-        })
-
-
 def tabela_resumo_montagem(data_inicial, data_final):
     
     dados_carga = buscar_dados(filename)
@@ -3725,7 +3885,7 @@ def carretas_planilha_carga(datainicio, datafim):
 
     # data_query = data_query[['conjunto','careta','']]
 
-    return 'sucess'
+    return data_query,carretas_str
 
 # Reunião 
 
@@ -3733,6 +3893,118 @@ def carretas_planilha_carga(datainicio, datafim):
 def tela_reuniao():
 
     return render_template('reuniao.html')
+
+@app.route('/resumos-geral')
+def tabela_resumos():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+
+    # Acessando os parâmetros da URL
+    datainicio = request.args.get('datainicio')
+    datafim = request.args.get('datafim')
+
+    dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
+
+    query_montagem = """
+                    select distinct tbce.carreta,
+                    t1.data_carga,
+                    t1.celula,
+                    t1.codigo_conjunto,
+                    t1.peca,
+                    t1.qt_planejada,
+                    t1.qt_apontada_montagem,
+                    t1.qt_faltante,
+                    CASE
+                        WHEN tbce.codigo_pintura = '' THEN t1.codigo_conjunto
+                        ELSE tbce.codigo_pintura
+                    END AS codigo_tratado,
+                    CASE
+                        WHEN tbce.descricao_pintura = '' THEN t1.peca
+                        ELSE tbce.descricao_pintura
+                    END AS descricao_tratada
+                FROM(
+                    SELECT 
+                        gom.data_carga,
+                        gom.celula,
+                        gom.codigo as codigo_conjunto,
+                        gom.peca,
+                        --SUM(gom.qt_planejada) / COUNT(gom.qt_planejada) as qt_planejada,
+                        SUM(gom.qt_planejada) as qt_planejada,
+                        COALESCE(SUM(om.qt_apontada) / COUNT(om.qt_apontada), 0) as qt_apontada_montagem,
+                        (
+                            SUM(gom.qt_planejada)
+                            - 
+                            COALESCE((SUM(om.qt_apontada) / COUNT(om.qt_apontada)), 0)
+                        ) AS qt_faltante
+                    FROM pcp.gerador_ordens_montagem gom
+                    LEFT JOIN pcp.ordens_montagem om ON gom.codigo = om.codigo 
+                                                        AND gom.data_carga = om.data_carga 
+                                                        AND gom.celula = om.celula
+                    WHERE gom.data_carga BETWEEN '{}' AND '{}'
+                    GROUP BY 
+                        gom.data_carga,
+                        gom.celula,
+                        gom.codigo,
+                        gom.peca
+                    ) as t1
+                    left join pcp.tb_base_carretas_explodidas tbce on
+                    tbce.conjunto = t1.codigo_conjunto;
+                    """.format(datainicio,datafim)
+
+    query_pintura = """
+            SELECT
+                gop.data_carga,
+                gop.codigo,
+                gop.peca,
+                gop.cor,
+                gop.celula,
+                SUM(gop.qt_planejada) / COUNT(gop.qt_planejada) AS qt_planejada,
+                coalesce(SUM(op.qt_apontada),0) AS qt_apontada_pintura,
+                (
+                    (SUM(gop.qt_planejada) / COUNT(gop.qt_planejada))
+                    -
+                    COALESCE((SUM(op.qt_apontada) / COUNT(op.qt_apontada)), 0)
+                ) AS qt_faltante_pintura
+            FROM
+                pcp.gerador_ordens_pintura gop
+            LEFT JOIN
+                pcp.ordens_pintura op ON gop.id = op.chave
+            WHERE
+                gop.data_carga between '{}' and '{}'
+            GROUP BY
+                gop.data_carga,gop.id, gop.codigo, gop.peca, gop.cor,gop.celula
+            ORDER BY
+                gop.data_carga;""".format(datainicio,datafim)
+
+    df_pintura = pd.read_sql_query(query_pintura,conn)
+    df_montagem = pd.read_sql_query(query_montagem,conn)
+    
+    join_dfs = df_pintura.merge(df_montagem, how='left', left_on='codigo', right_on='codigo_tratado')
+    join_dfs = join_dfs[join_dfs['carreta'] == 'F6 CS RS/RS A45 MT M22']
+    
+    resumos_teste = join_dfs
+
+    resumos_teste['status_montagem'] = resumos_teste['qt_faltante'].apply(lambda x: 'P/S' if x <= 0 else 'FP - {}'.format(x))
+    resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
+    resumos_teste['status_pintura'] = resumos_teste['qt_faltante_pintura'].apply(lambda x: 'EXP.' if int(x) <= 0 else 'S - {}'.format(x))
+    resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + '\nP: ' + resumos_teste['status_pintura']
+    resumos_teste['quantidade_faltante_geral'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
+
+    df_pivot = resumos_teste[['carreta','data_carga_x','celula_x','codigo_conjunto','peca_x','codigo_tratado','quantidade_faltante_geral','status_geral']].pivot_table(
+        index=['carreta', 'data_carga_x', 'codigo_conjunto','peca_x','codigo_tratado','quantidade_faltante_geral'],
+            columns='celula_x',
+            values='status_geral',
+            aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
+            fill_value=''
+        )
+    
+    json_data = df_pivot.reset_index().values.tolist()
+    
+    return jsonify({
+        'data':json_data,
+        })
+
 
 # Bases editáveis #
 
