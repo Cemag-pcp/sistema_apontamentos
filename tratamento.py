@@ -16,7 +16,6 @@ for i in range(len(df)):
             if df['Etapa'][i] == '' and df['Etapa2'][i] == 'Pintura' and df['Célula'][i-1] == df['Célula'][i]:
                 df['codigo_pintura'][i-1] = df['Código'][i]
                 df['descricao_pintura'][i-1] = df['Peca'][i]
-
     except:
         continue
 
@@ -30,12 +29,10 @@ df_ = df_[['Código','codigo_pintura','descricao_pintura']].drop_duplicates()
 
 teste_df = pd.merge(df1,df_,how='left',left_on='conjunto',right_on='Código')
 teste_df.to_csv('df_final.csv')
-teste_df[teste_df['codigo_pintura'] == '030588']
+teste_df[teste_df['codigo_pintura'] == '031502']
 
 teste_df = teste_df.drop_duplicates()
-teste_df[teste_df['conjunto'] == '030347'][['codigo_pintura','descricao_pintura']]
+teste_df[teste_df['conjunto'] == '031503'][['codigo_pintura','descricao_pintura']]
 
-030493
-023589
 
 teste_df[teste_df['carreta'] == 'CBH6-2E FO SS RS/RD CB P750(I) M21']

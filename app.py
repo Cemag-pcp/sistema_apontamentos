@@ -10,12 +10,14 @@ from datetime import datetime, timedelta, date
 import cachetools
 import uuid
 import gspread
+import warnings
 # from flask_socketio import SocketIO, emit
 # from threading import Lock
 # import json
 import tempfile
 
 async_mode = None
+warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 app.secret_key = "apontamentopintura"
@@ -3885,7 +3887,7 @@ def carretas_planilha_carga(datainicio, datafim):
 
     # data_query = data_query[['conjunto','careta','']]
 
-    return data_query,carretas_str
+    return data_query,carretas_filtro
 
 # Reunião 
 
@@ -3930,19 +3932,19 @@ def tabela_resumos():
                         gom.celula,
                         gom.codigo as codigo_conjunto,
                         gom.peca,
-                        --SUM(gom.qt_planejada) / COUNT(gom.qt_planejada) as qt_planejada,
-                        SUM(gom.qt_planejada) as qt_planejada,
-                        COALESCE(SUM(om.qt_apontada) / COUNT(om.qt_apontada), 0) as qt_apontada_montagem,
+                        SUM(gom.qt_planejada) / COUNT(gom.qt_planejada) as qt_planejada,
+                        --SUM(gom.qt_planejada) as qt_planejada,
+                        COALESCE(SUM(om.qt_apontada), 0) as qt_apontada_montagem,
                         (
-                            SUM(gom.qt_planejada)
-                            - 
-                            COALESCE((SUM(om.qt_apontada) / COUNT(om.qt_apontada)), 0)
+                            SUM(gom.qt_planejada) / COUNT(gom.qt_planejada)
+                            -
+                            COALESCE(SUM(om.qt_apontada), 0)
                         ) AS qt_faltante
                     FROM pcp.gerador_ordens_montagem gom
                     LEFT JOIN pcp.ordens_montagem om ON gom.codigo = om.codigo 
                                                         AND gom.data_carga = om.data_carga 
                                                         AND gom.celula = om.celula
-                    WHERE gom.data_carga BETWEEN '{}' AND '{}'
+                    WHERE gom.data_carga BETWEEN '{}' AND '{}' 
                     GROUP BY 
                         gom.data_carga,
                         gom.celula,
@@ -3950,7 +3952,7 @@ def tabela_resumos():
                         gom.peca
                     ) as t1
                     left join pcp.tb_base_carretas_explodidas tbce on
-                    tbce.conjunto = t1.codigo_conjunto;
+                    tbce.conjunto = t1.codigo_conjunto
                     """.format(datainicio,datafim)
 
     query_pintura = """
@@ -3965,35 +3967,48 @@ def tabela_resumos():
                 (
                     (SUM(gop.qt_planejada) / COUNT(gop.qt_planejada))
                     -
-                    COALESCE((SUM(op.qt_apontada) / COUNT(op.qt_apontada)), 0)
+                    COALESCE((SUM(op.qt_apontada)), 0)
                 ) AS qt_faltante_pintura
             FROM
                 pcp.gerador_ordens_pintura gop
             LEFT JOIN
                 pcp.ordens_pintura op ON gop.id = op.chave
             WHERE
-                gop.data_carga between '{}' and '{}'
+                gop.data_carga BETWEEN '{}' AND '{}'
             GROUP BY
                 gop.data_carga,gop.id, gop.codigo, gop.peca, gop.cor,gop.celula
             ORDER BY
-                gop.data_carga;""".format(datainicio,datafim)
+                gop.data_carga desc;""".format(datainicio,datafim)
 
     df_pintura = pd.read_sql_query(query_pintura,conn)
     df_montagem = pd.read_sql_query(query_montagem,conn)
+
+    print(carretas)
     
     join_dfs = df_pintura.merge(df_montagem, how='left', left_on='codigo', right_on='codigo_tratado')
-    join_dfs = join_dfs[join_dfs['carreta'] == 'F6 CS RS/RS A45 MT M22']
+    join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
     
     resumos_teste = join_dfs
 
     resumos_teste['status_montagem'] = resumos_teste['qt_faltante'].apply(lambda x: 'P/S' if x <= 0 else 'FP - {}'.format(x))
     resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
     resumos_teste['status_pintura'] = resumos_teste['qt_faltante_pintura'].apply(lambda x: 'EXP.' if int(x) <= 0 else 'S - {}'.format(x))
-    resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + '\nP: ' + resumos_teste['status_pintura']
-    resumos_teste['quantidade_faltante_geral'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
+    resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + 'P: ' + resumos_teste['status_pintura']
+    resumos_teste['Quantidade Faltante'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
 
-    df_pivot = resumos_teste[['carreta','data_carga_x','celula_x','codigo_conjunto','peca_x','codigo_tratado','quantidade_faltante_geral','status_geral']].pivot_table(
-        index=['carreta', 'data_carga_x', 'codigo_conjunto','peca_x','codigo_tratado','quantidade_faltante_geral'],
+    alterar_nomes = {
+        'carreta': 'Carreta',
+        'data_carga_x': 'Data da Carga',
+        'codigo_conjunto': 'Codigo do Conjunto',
+        'peca_x': 'Peça',
+        'codigo_tratado': 'Codigo Tratado',
+        # Adicione mais substituições conforme necessário
+    }
+
+    resumos_teste.rename(columns=alterar_nomes,inplace=True)
+
+    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','Codigo do Conjunto','Peça','Codigo Tratado','qt_planejada_x','Quantidade Faltante','status_geral']].pivot_table(
+        index=['Carreta', 'Data da Carga', 'Codigo do Conjunto','Peça','Codigo Tratado','qt_planejada_x','Quantidade Faltante'],
             columns='celula_x',
             values='status_geral',
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
@@ -4001,14 +4016,13 @@ def tabela_resumos():
         )
     
     json_data = df_pivot.reset_index().values.tolist()
-    colunas = df_pivot.reset_index().columns
-
-    print(colunas)
+    colunas = df_pivot.reset_index().columns.tolist()
 
     print('API gerada')
 
     return jsonify({
         'data':json_data,
+        'colunas':colunas
         })
 
 

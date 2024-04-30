@@ -11,9 +11,11 @@ function getResumo() {
     xhr.open('GET', url);
     xhr.onload = function() {
         if (xhr.status === 200) {
-            var data = JSON.parse(xhr.responseText);
+            var response = JSON.parse(xhr.responseText);
+            var data = response.data;
+            var colunas = response.colunas;
             // Manipular os dados recebidos da API aqui
-            buildTable(data)
+            buildTable(data,colunas)
             $("#loading").hide();
         } else {
             console.error('Erro ao chamar a API:', xhr.statusText);
@@ -34,7 +36,7 @@ document.addEventListener('DOMContentLoaded',function(){
     })
 })
 
-function buildTable(jsonData) {
+function buildTable(jsonData,colunas) {
     const thead = document.querySelector('#dataTableReuniao thead tr');
     const tbody = document.querySelector('#tbodyConjuntoReuniao');
     const campoTable = document.getElementById('campoTable');
@@ -43,38 +45,37 @@ function buildTable(jsonData) {
     thead.innerHTML = '';
     tbody.innerHTML = '';
 
-    const maxColumns = getMaxColumns(jsonData);
-    const baseColumnNames = getBaseColumnNames(maxColumns);
-    populateTableHeader(thead, baseColumnNames);
-    populateTableBody(tbody, jsonData, baseColumnNames);
-}
-
-function getMaxColumns(jsonData) {
-    return jsonData.data.reduce((max, row) => Math.max(max, row.length), 0);
-}
-
-function getBaseColumnNames(maxColumns) {
-    const columnNames = ["Produto", "Data", "Código do Conjunto", "Descrição", "Código da Pintura", "Quantidade", "Chassi", "Conj. Intermed", "Eixo Completo", "Fueiro","Icamento",
-"Lateral","Plat.Tranque","Cacamba"];
-    columnNames.length = maxColumns; // Ajusta o tamanho do array de cabeçalhos para o máximo encontrado
-    return columnNames;
+    populateTableHeader(thead, colunas);
+    populateTableBody(tbody, jsonData, colunas);
 }
 
 function populateTableHeader(thead, columnNames) {
     columnNames.forEach(name => {
         const th = document.createElement('th');
         th.textContent = name;
+        th.style.width = '100px'
         thead.appendChild(th);
     });
 }
 
 function populateTableBody(tbody, jsonData, columnNames) {
-    jsonData.data.forEach(row => {
+    jsonData.forEach(row => {
         const tr = document.createElement('tr');
         row.forEach((cell, index) => {
             const td = document.createElement('td');
-            if (cell || columnNames[index] === "Quantidade") {
-                td.textContent = cell || "0";
+            td.setAttribute('data-title', columnNames[index]);
+            let cellContent = cell;
+            if (typeof cell === 'string' && cell.includes('P:')) {
+                // Substitui 'P:' por '<br>P:' para adicionar quebra de linha no HTML
+                cellContent = cell.replace('P:', '<br>P:');
+            }
+
+            // Verifica se a célula precisa de formatação especial para zero
+            if (cellContent || columnNames[index] === "Quantidade Faltante") {
+                td.innerHTML = cellContent || "0";
+                if (cellContent === row[1]) {
+                    td.innerHTML = formatDate(cellContent,'T')
+                } 
                 if (typeof cell === 'string' && cell.includes('FP -')) {
                     td.classList.add('fp-highlight');
                     td.addEventListener('click', function() {
@@ -90,7 +91,7 @@ function populateTableBody(tbody, jsonData, columnNames) {
     });
 }
 
-function formatDate(dataString) {
+function formatDate(dataString,parameter) {
     var data = new Date(dataString);
     // Ajustar para o fuso horário local
     data.setMinutes(data.getMinutes() - data.getTimezoneOffset());
@@ -98,15 +99,16 @@ function formatDate(dataString) {
     var dia = ("0" + data.getDate()).slice(-2);
     var mes = ("0" + (data.getMonth() + 1)).slice(-2);
     var ano = data.getFullYear();
-    return ano + '-' + mes + '-' + dia;
+    if(parameter == 'I'){
+        return ano + '-' + mes + '-' + dia;
+    } else {
+        return dia + '/' + mes + '/' + ano;
+    }
 }
 
 function openModal(row) {
     // Pega os elementos de input pelo ID
-    console.log(row[1])
-    console.log(formatDate(row[1]))
-
-    document.getElementById('data_carga').value = formatDate(row[1]) || '';
+    document.getElementById('data_carga').value = formatDate(row[1],'I') || '';
     document.getElementById('codigo_conjunto').value = row[2];
     document.getElementById('carreta_conjunto').value = row[0] || '';
     document.getElementById('quantidade_conjunto').value = row[5] || '0'; // Coluna 'Quantidade' preenchida com '0' se vazia
@@ -114,5 +116,3 @@ function openModal(row) {
     // Mostra o modal
     $('#infoModal').modal('show');
 }
-
-
