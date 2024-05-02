@@ -3866,7 +3866,7 @@ def carretas_planilha_carga(datainicio, datafim):
     filtrar_data = data[(data['PED_PREVISAOEMISSAODOC'] >= pd.to_datetime(datainicio)) &
                          (data['PED_PREVISAOEMISSAODOC'] <= pd.to_datetime(datafim))]
 
-    filtrar_data = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE']]
+    filtrar_data = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat']]
     
     dados_lista = filtrar_data[['Carreta Trat']].values.tolist()
 
@@ -3887,7 +3887,7 @@ def carretas_planilha_carga(datainicio, datafim):
 
     # data_query = data_query[['conjunto','careta','']]
 
-    return data_query,carretas_filtro
+    return filtrar_data,carretas_filtro
 
 # Reunião 
 
@@ -3983,11 +3983,25 @@ def tabela_resumos():
     df_pintura = pd.read_sql_query(query_pintura,conn)
     df_montagem = pd.read_sql_query(query_montagem,conn)
 
-    print(carretas)
+    dfA = dados_explodido
+    dfB = df_montagem
+
+    dfA = dfA.rename(columns={'PED_PREVISAOEMISSAODOC': 'data_carga', 'Carreta Trat': 'carreta'})
+
+    # Convertendo a coluna 'data_carga' para datetime em ambos os dataframes para garantir consistência
+    dfA['data_carga'] = pd.to_datetime(dfA['data_carga'])
+    dfB['data_carga'] = pd.to_datetime(dfB['data_carga'])
+    df_pintura['data_carga'] = pd.to_datetime(df_pintura['data_carga'])
+
+    # Realizar o merge:
+    result = pd.merge(dfB, dfA, on=['carreta', 'data_carga'], how='inner')
+    df_pintura['codigo'] = df_pintura['codigo'].astype(str)
+    result['codigo_tratado'] = result['codigo_tratado'].astype(str)
     
-    join_dfs = df_pintura.merge(df_montagem, how='left', left_on='codigo', right_on='codigo_tratado')
+    join_dfs = df_pintura.merge(result, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
+
     join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
-    
+
     resumos_teste = join_dfs
 
     resumos_teste['status_montagem'] = resumos_teste['qt_faltante'].apply(lambda x: 'P/S' if x <= 0 else 'FP - {}'.format(x))
@@ -3998,22 +4012,26 @@ def tabela_resumos():
 
     alterar_nomes = {
         'carreta': 'Carreta',
-        'data_carga_x': 'Data da Carga',
+        'data_carga': 'Data da Carga',
         'codigo_conjunto': 'Codigo do Conjunto',
+        'qt_planejada_x':'Quantidade Planejada',
         'peca_x': 'Peça',
         'codigo_tratado': 'Codigo Tratado',
-        # Adicione mais substituições conforme necessário
     }
 
     resumos_teste.rename(columns=alterar_nomes,inplace=True)
 
-    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','Codigo do Conjunto','Peça','Codigo Tratado','qt_planejada_x','Quantidade Faltante','status_geral']].pivot_table(
-        index=['Carreta', 'Data da Carga', 'Codigo do Conjunto','Peça','Codigo Tratado','qt_planejada_x','Quantidade Faltante'],
+    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','Codigo do Conjunto','Peça','Codigo Tratado','Quantidade Planejada','Quantidade Faltante','status_geral']].pivot_table(
+        index=['Carreta', 'Data da Carga', 'Codigo do Conjunto','Peça','Codigo Tratado','Quantidade Planejada','Quantidade Faltante'],
             columns='celula_x',
             values='status_geral',
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
             fill_value=''
         )
+    
+    df_pivot = df_pivot.sort_values(by=['Data da Carga', 'Carreta'], ascending=[True, True])
+
+    print(df_pivot)
     
     json_data = df_pivot.reset_index().values.tolist()
     colunas = df_pivot.reset_index().columns.tolist()
@@ -4024,7 +4042,6 @@ def tabela_resumos():
         'data':json_data,
         'colunas':colunas
         })
-
 
 # Bases editáveis #
 
