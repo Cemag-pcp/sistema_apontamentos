@@ -536,7 +536,7 @@ def mostrar_sugestao_operadores_montagem():
                     password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select distinct(concat(matricula,' - ', nome)) from pcp.operadores_montagem"
+    sql = "select distinct(concat(matricula,' - ', nome)) from pcp.operadores"
 
     cur.execute(sql)
     data = cur.fetchall()
