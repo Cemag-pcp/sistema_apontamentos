@@ -3866,7 +3866,7 @@ def carretas_planilha_carga(datainicio, datafim):
     filtrar_data = data[(data['PED_PREVISAOEMISSAODOC'] >= pd.to_datetime(datainicio)) &
                          (data['PED_PREVISAOEMISSAODOC'] <= pd.to_datetime(datafim))]
 
-    filtrar_data = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat']]
+    filtrar_data = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE']]
     
     dados_lista = filtrar_data[['Carreta Trat']].values.tolist()
 
@@ -3995,16 +3995,17 @@ def tabela_resumos():
 
     # Realizar o merge:
     result = pd.merge(dfB, dfA, on=['carreta', 'data_carga'], how='inner')
+
     df_pintura['codigo'] = df_pintura['codigo'].astype(str)
     result['codigo_tratado'] = result['codigo_tratado'].astype(str)
     
     join_dfs = df_pintura.merge(result, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
-
+    
     join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
 
     resumos_teste = join_dfs
 
-    resumos_teste['status_montagem'] = resumos_teste['qt_faltante'].apply(lambda x: 'P/S' if x <= 0 else 'FP - {}'.format(x))
+    resumos_teste['status_montagem'] = resumos_teste['qt_faltante'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
     resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
     resumos_teste['status_pintura'] = resumos_teste['qt_faltante_pintura'].apply(lambda x: 'EXP.' if int(x) <= 0 else 'S - {}'.format(x))
     resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + 'P: ' + resumos_teste['status_pintura']
@@ -4013,16 +4014,16 @@ def tabela_resumos():
     alterar_nomes = {
         'carreta': 'Carreta',
         'data_carga': 'Data da Carga',
-        'codigo_conjunto': 'Codigo do Conjunto',
+        'codigo_conjunto': 'Codigo da Montagem',
         'qt_planejada_x':'Quantidade Planejada',
-        'peca_x': 'Peça',
-        'codigo_tratado': 'Codigo Tratado',
+        'peca_x': 'Descrição',
+        'codigo_tratado': 'Codigo da Pintura',
     }
 
     resumos_teste.rename(columns=alterar_nomes,inplace=True)
 
-    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','Codigo do Conjunto','Peça','Codigo Tratado','Quantidade Planejada','Quantidade Faltante','status_geral']].pivot_table(
-        index=['Carreta', 'Data da Carga', 'Codigo do Conjunto','Peça','Codigo Tratado','Quantidade Planejada','Quantidade Faltante'],
+    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','Codigo da Montagem','Descrição','Codigo da Pintura','Quantidade Planejada','status_geral']].pivot_table(
+        index=['Carreta', 'Data da Carga', 'Codigo da Montagem','Descrição','Codigo da Pintura','Quantidade Planejada'],
             columns='celula_x',
             values='status_geral',
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
@@ -4041,7 +4042,33 @@ def tabela_resumos():
     return jsonify({
         'data':json_data,
         'colunas':colunas
-        })
+    })
+
+@app.route('/pecas_conjunto', methods=['POST'])
+def pecas_conjunto():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+
+    codigo = data['codigo_conjunto']
+    carreta = data['carreta_conjunto']
+
+    query = """
+        SELECT codigo, descricao, materia_prima, quantidade * qt_conjunto as qt_pecas
+        FROM pcp.tb_base_carretas_explodidas
+        WHERE conjunto = %s AND carreta = %s
+    """
+
+    # Execução da query com segurança contra injeção de SQL
+    cur.execute(query, (codigo, carreta))
+    data_conjunto = cur.fetchall()
+
+    conn.close()
+
+    return jsonify(data_conjunto)
 
 # Bases editáveis #
 

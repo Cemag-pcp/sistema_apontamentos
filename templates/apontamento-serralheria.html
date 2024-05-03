@@ -789,70 +789,6 @@
         }
     </script>
 
-    <!-- Script para enviar informações de peça fora do sequenciamento para o backend -->
-
-    <script>
-        $(document).ready(function () {
-            $('#btnSalvar').on('click', function () {
-                showLoading();
-                const peca = $('#userInput').val();
-                const dataPlanejamento = $('#inputData').val();
-                const quantidade = $('#inputQuantidade').val();
-
-                var selectedMaquina = document.querySelector('input[name="maquinaForaDoPlanejado"]:checked');
-
-                if (selectedMaquina) {
-                    selectedMaquina = selectedMaquina.value;
-                } else {
-                    selectedMaquina = '';
-                }
-
-                if (peca === '' || dataPlanejamento === '' || quantidade === '' || selectedMaquina === '') {
-                    $('.alert').alert()
-                    hideLoading();
-                    showAndHideAlert('Preencha todos os campos.', 2000);
-                    return;
-                }
-
-                if (peca.split(' - ')[1]) {
-                    descricao = peca.split(' - ')[1];
-                } else {
-                    descricao = '';
-                }
-
-                // Criar objeto com os dados
-                const dados = {
-                    peca: peca.split(' - ')[0],
-                    descricao: descricao,
-                    dataPlanejamento: dataPlanejamento,
-                    qtPlanejada: quantidade,
-                    codificacao: '',
-                    origem: 'Fora do sequenciamento',
-                    selectedMaquina: selectedMaquina,
-                };
-
-                // Enviar dados para o backend
-                $.ajax({
-                    url: '/api/pecas-em-processo/estamparia',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(dados),
-                    success: function (response) {
-                        // Tratar a resposta do backend, se necessário
-                        console.log(response);
-                        hideLoading();
-                        showAndHideSuccessAlert('Salvo.', 2000);
-                        $('#modalPecaFora').modal('hide');
-                    },
-                    error: function (err) {
-                        console.error('Erro ao enviar dados para o backend', err);
-                        hideLoading();
-                    }
-                });
-            });
-        });
-    </script>
-
     <!-- Script para enviar informações de peça planejada-->
 
     <script>
@@ -864,17 +800,9 @@
                 var dataPlanejamento_ = $('#inputData_').val();
                 var quantidade_ = $('#inputQuantidade_').val();
 
-                var selectedMaquina_ = document.querySelector('input[name="maquinaForaDoPlanejado_"]:checked');
+                console.log(peca_, dataPlanejamento_, quantidade_);
 
-                if (selectedMaquina_) {
-                    selectedMaquina_ = selectedMaquina_.value;
-                } else {
-                    selectedMaquina_ = '';
-                }
-
-                console.log(peca_, dataPlanejamento_, quantidade_, selectedMaquina_);
-
-                if (peca_ === '' || dataPlanejamento_ === '' || quantidade_ === '' || selectedMaquina_ === '') {
+                if (peca_ === '' || dataPlanejamento_ === '' || quantidade_ === '') {
                     $('.alert').alert()
                     hideLoading();
                     showAndHideAlert('Preencha todos os campos.', 2000);
@@ -894,7 +822,6 @@
                     qtPlanejada: quantidade_,
                     codificacao: '',
                     origem: 'Sequenciamento',
-                    selectedMaquina: selectedMaquina_,
                 };
 
                 // Enviar dados para o backend

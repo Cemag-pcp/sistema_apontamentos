@@ -60,3 +60,14 @@
 .fp-highlight:hover {
     background-color: rgba(173, 216, 230, 0.616);
 }
+
+.table-responsive-header {
+    height: 800px; /* Ajuste essa altura conforme necessário */
+    overflow-y: auto;
+}
+.table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1; /* Isso garante que o cabeçalho fique sobre o corpo da tabela ao rolar */
+    background-color: #fff; /* Cor de fundo para evitar transparência */
+}

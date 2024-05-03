@@ -32,6 +32,7 @@ function getResumo() {
 document.addEventListener('DOMContentLoaded',function(){
     var botaoFiltrar = document.getElementById('filtrar_datas');
     botaoFiltrar.addEventListener('click',function () {
+        document.getElementById('filtro_faltando_pecas').checked = false
         getResumo();
     })
 })
@@ -107,12 +108,59 @@ function formatDate(dataString,parameter) {
 }
 
 function openModal(row) {
+
+    $("#loading").show();
+    $("#infoModalLabel").text(row[3])
+    $("#informacoes_pecas").text("Informações das peças ref. o conjunto - " + row[3])
     // Pega os elementos de input pelo ID
     document.getElementById('data_carga').value = formatDate(row[1],'I') || '';
     document.getElementById('codigo_conjunto').value = row[2];
     document.getElementById('carreta_conjunto').value = row[0] || '';
     document.getElementById('quantidade_conjunto').value = row[5] || '0'; // Coluna 'Quantidade' preenchida com '0' se vazia
     
-    // Mostra o modal
-    $('#infoModal').modal('show');
+    $.ajax({
+        url: '/pecas_conjunto',
+        type: 'POST',  // Alterado para POST
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({'codigo_conjunto': row[2] ,'carreta_conjunto':row[0]}),  // Enviando um objeto JSON
+        success: function(response) {
+            console.log(response);
+            
+            $('#formContainer').empty();
+
+            response.forEach(function(item,index) {
+                const html = `
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label for="codigo_conjunto_${index}">Codigo da Peça:</label>
+                            <input type="text" name="codigo_conjunto_${index}" id="codigo_conjunto_${index}" value="${item[0]}" class="form-control" disabled>
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label for="descricao_conjunto_${index}">Descrição da Peça:</label>
+                            <input type="text" name="descricao_conjunto_${index}" id="descricao_conjunto_${index}" value="${item[1]}" class="form-control" disabled>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label for="materia_prima_${index}">Matéria Prima:</label>
+                            <input type="text" name="materia_prima_${index}" id="materia_prima_${index}" value="${item[2]}" class="form-control" disabled>
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label for="qt_pecas_${index}">Quantidade de Peças:</label>
+                            <input type="text" name="qt_pecas_${index}" id="qt_pecas_${index}" value="${item[3]}" class="form-control" disabled>
+                        </div>
+                    </div>
+                    <hr>`;
+                $('#formContainer').append(html);
+            })
+            
+            $("#loading").hide();
+            $('#infoModal').modal('show');
+        },
+        error: function(error) {
+            console.log(error);
+            $("#loading").hide();
+        }
+    });
 }
