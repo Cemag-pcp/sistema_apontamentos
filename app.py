@@ -3866,9 +3866,15 @@ def carretas_planilha_carga(datainicio, datafim):
     filtrar_data = data[(data['PED_PREVISAOEMISSAODOC'] >= pd.to_datetime(datainicio)) &
                          (data['PED_PREVISAOEMISSAODOC'] <= pd.to_datetime(datafim))]
 
-    filtrar_data = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE']]
+    filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE']]
+
+    filtrar_data_carreta['PED_QUANTIDADE'] = filtrar_data_carreta['PED_QUANTIDADE'].astype(int)
+
+    result = filtrar_data_carreta.groupby(['PED_PREVISAOEMISSAODOC', 'Carreta Trat'], as_index=False)['PED_QUANTIDADE'].sum()
+
+    print(result)
     
-    dados_lista = filtrar_data[['Carreta Trat']].values.tolist()
+    dados_lista = result[['Carreta Trat']].values.tolist()
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -3887,9 +3893,18 @@ def carretas_planilha_carga(datainicio, datafim):
 
     # data_query = data_query[['conjunto','careta','']]
 
-    return filtrar_data,carretas_filtro
+    return result,carretas_filtro
 
 # Reunião 
+
+def verificar_status(row):
+    
+    if int(row['qt_faltante_pintura']) == 0 and int(row['qt_faltante']) == 0:
+        return 'Finalizado'
+    elif int(row['qt_faltante_pintura']) > 0 and int(row['qt_faltante']) > 0:
+        return 'Aguardando'
+    else:
+        return 'S - {}'.format(row['qt_faltante_pintura'])
 
 @app.route('/reuniao')
 def tela_reuniao():
@@ -3944,7 +3959,7 @@ def tabela_resumos():
                     LEFT JOIN pcp.ordens_montagem om ON gom.codigo = om.codigo 
                                                         AND gom.data_carga = om.data_carga 
                                                         AND gom.celula = om.celula
-                    WHERE gom.data_carga BETWEEN '{}' AND '{}' 
+                    WHERE gom.data_carga BETWEEN '{}' AND '{}' AND gom.celula not in ('CONJ INTERMED','CUBO DE RODA','QUALIDADE','FILIPE SILVA SANTOS','Carpintaria','ESTAMPARIA') 
                     GROUP BY 
                         gom.data_carga,
                         gom.celula,
@@ -3960,7 +3975,7 @@ def tabela_resumos():
                 gop.data_carga,
                 gop.codigo,
                 gop.peca,
-                gop.cor,
+                --gop.cor,
                 gop.celula,
                 SUM(gop.qt_planejada) / COUNT(gop.qt_planejada) AS qt_planejada,
                 coalesce(SUM(op.qt_apontada),0) AS qt_apontada_pintura,
@@ -3983,10 +3998,12 @@ def tabela_resumos():
     df_pintura = pd.read_sql_query(query_pintura,conn)
     df_montagem = pd.read_sql_query(query_montagem,conn)
 
+    df_pintura = df_pintura.groupby(['data_carga','codigo','peca','celula']).sum().reset_index()
+
     dfA = dados_explodido
     dfB = df_montagem
 
-    dfA = dfA.rename(columns={'PED_PREVISAOEMISSAODOC': 'data_carga', 'Carreta Trat': 'carreta'})
+    dfA = dfA.rename(columns={'PED_PREVISAOEMISSAODOC': 'data_carga', 'Carreta Trat': 'carreta','PED_QUANTIDADE':'quantidade_carretas'})
 
     # Convertendo a coluna 'data_carga' para datetime em ambos os dataframes para garantir consistência
     dfA['data_carga'] = pd.to_datetime(dfA['data_carga'])
@@ -4007,8 +4024,9 @@ def tabela_resumos():
 
     resumos_teste['status_montagem'] = resumos_teste['qt_faltante'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
     resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
-    resumos_teste['status_pintura'] = resumos_teste['qt_faltante_pintura'].apply(lambda x: 'EXP.' if int(x) <= 0 else 'S - {}'.format(x))
-    resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + 'P: ' + resumos_teste['status_pintura']
+    resumos_teste['status_solda'] = resumos_teste.apply(verificar_status, axis=1)
+    resumos_teste['status_pintura'] = resumos_teste['qt_faltante_pintura'].apply(lambda x: 'EXP.' if int(x) <= 0 else 'Aguardando'.format(x))
+    resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + 'S: ' + resumos_teste['status_solda'] + 'P: ' + resumos_teste['status_pintura']
     resumos_teste['Quantidade Faltante'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
 
     alterar_nomes = {
@@ -4018,12 +4036,13 @@ def tabela_resumos():
         'qt_planejada_x':'Quantidade Planejada',
         'peca_x': 'Descrição',
         'codigo_tratado': 'Codigo da Pintura',
+        'quantidade_carretas':'Quantidade de Carretas'
     }
 
     resumos_teste.rename(columns=alterar_nomes,inplace=True)
 
-    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','Codigo da Montagem','Descrição','Codigo da Pintura','Quantidade Planejada','status_geral']].pivot_table(
-        index=['Carreta', 'Data da Carga', 'Codigo da Montagem','Descrição','Codigo da Pintura','Quantidade Planejada'],
+    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','Codigo da Montagem','Descrição','Codigo da Pintura','Quantidade Planejada','Quantidade de Carretas','status_geral']].pivot_table(
+        index=['Carreta', 'Data da Carga', 'Codigo da Montagem','Descrição','Codigo da Pintura','Quantidade Planejada','Quantidade de Carretas'],
             columns='celula_x',
             values='status_geral',
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
@@ -4031,8 +4050,6 @@ def tabela_resumos():
         )
     
     df_pivot = df_pivot.sort_values(by=['Data da Carga', 'Carreta'], ascending=[True, True])
-
-    print(df_pivot)
     
     json_data = df_pivot.reset_index().values.tolist()
     colunas = df_pivot.reset_index().columns.tolist()

@@ -54,21 +54,28 @@ function populateTableHeader(thead, columnNames) {
     columnNames.forEach(name => {
         const th = document.createElement('th');
         th.textContent = name;
-        th.style.width = '100px'
+        if(name === 'Quantidade de Carretas'){
+            th.style.display = 'none';
+        }
+        th.style.minWidth = '100px'
         thead.appendChild(th);
     });
 }
 
 function populateTableBody(tbody, jsonData, columnNames) {
     jsonData.forEach(row => {
+        console.log(row)
         const tr = document.createElement('tr');
         row.forEach((cell, index) => {
+            if (index === 6) {
+                return;
+            }
             const td = document.createElement('td');
             td.setAttribute('data-title', columnNames[index]);
             let cellContent = cell;
-            if (typeof cell === 'string' && cell.includes('P:')) {
+            if (typeof cell === 'string' && (cell.includes('P:') || cell.includes('S:'))) {
                 // Substitui 'P:' por '<br>P:' para adicionar quebra de linha no HTML
-                cellContent = cell.replace('P:', '<br>P:');
+                cellContent = cell.replace('S:', '<br>S:').replace('P:', '<br>P:');
             }
 
             // Verifica se a célula precisa de formatação especial para zero
@@ -117,6 +124,7 @@ function openModal(row) {
     document.getElementById('codigo_conjunto').value = row[2];
     document.getElementById('carreta_conjunto').value = row[0] || '';
     document.getElementById('quantidade_conjunto').value = row[5] || '0'; // Coluna 'Quantidade' preenchida com '0' se vazia
+    document.getElementById('qtd_carreta').value = row[6] || '0';
     
     $.ajax({
         url: '/pecas_conjunto',
@@ -148,7 +156,7 @@ function openModal(row) {
                         </div>
                         <div class="col-sm-6 mb-4">
                             <label for="qt_pecas_${index}">Quantidade de Peças:</label>
-                            <input type="text" name="qt_pecas_${index}" id="qt_pecas_${index}" value="${item[3]}" class="form-control" disabled>
+                            <input type="text" name="qt_pecas_${index}" id="qt_pecas_${index}" value="${item[3] * row[5]}" class="form-control" disabled>
                         </div>
                     </div>
                     <hr>`;

@@ -62,7 +62,7 @@
 }
 
 .table-responsive-header {
-    height: 800px; /* Ajuste essa altura conforme necessário */
+    height: 600px; /* Ajuste essa altura conforme necessário */
     overflow-y: auto;
 }
 .table thead th {
