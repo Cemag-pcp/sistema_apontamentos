@@ -67,9 +67,6 @@ function populateTableBody(tbody, jsonData, columnNames) {
         console.log(row)
         const tr = document.createElement('tr');
         row.forEach((cell, index) => {
-            if (index === 6) {
-                return;
-            }
             const td = document.createElement('td');
             td.setAttribute('data-title', columnNames[index]);
             let cellContent = cell;
@@ -90,8 +87,6 @@ function populateTableBody(tbody, jsonData, columnNames) {
                         openModal(row);
                     });
                 }
-            } else {
-                td.textContent = row[index] || "";
             }
             tr.appendChild(td);
         });

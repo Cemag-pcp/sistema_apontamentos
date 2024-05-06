@@ -3871,8 +3871,6 @@ def carretas_planilha_carga(datainicio, datafim):
     filtrar_data_carreta['PED_QUANTIDADE'] = filtrar_data_carreta['PED_QUANTIDADE'].astype(int)
 
     result = filtrar_data_carreta.groupby(['PED_PREVISAOEMISSAODOC', 'Carreta Trat'], as_index=False)['PED_QUANTIDADE'].sum()
-
-    print(result)
     
     dados_lista = result[['Carreta Trat']].values.tolist()
 
@@ -4000,27 +3998,36 @@ def tabela_resumos():
 
     df_pintura = df_pintura.groupby(['data_carga','codigo','peca','celula']).sum().reset_index()
 
-    dfA = dados_explodido
-    dfB = df_montagem
+    planilha_cargas = dados_explodido
 
-    dfA = dfA.rename(columns={'PED_PREVISAOEMISSAODOC': 'data_carga', 'Carreta Trat': 'carreta','PED_QUANTIDADE':'quantidade_carretas'})
+    planilha_cargas = planilha_cargas.rename(columns={'PED_PREVISAOEMISSAODOC': 'data_carga', 'Carreta Trat': 'carreta'})
 
     # Convertendo a coluna 'data_carga' para datetime em ambos os dataframes para garantir consistência
-    dfA['data_carga'] = pd.to_datetime(dfA['data_carga'])
-    dfB['data_carga'] = pd.to_datetime(dfB['data_carga'])
+    planilha_cargas['data_carga'] = pd.to_datetime(planilha_cargas['data_carga'])
+    df_montagem['data_carga'] = pd.to_datetime(df_montagem['data_carga'])
     df_pintura['data_carga'] = pd.to_datetime(df_pintura['data_carga'])
 
     # Realizar o merge:
-    result = pd.merge(dfB, dfA, on=['carreta', 'data_carga'], how='inner')
+    carga_e_montagem = pd.merge(df_montagem, planilha_cargas, on=['carreta', 'data_carga'], how='inner')
+
+    print(carga_e_montagem[carga_e_montagem['carreta'] == 'CBH5 FO SS T P750(I) M21'])
+
+    print(carga_e_montagem.columns)
 
     df_pintura['codigo'] = df_pintura['codigo'].astype(str)
-    result['codigo_tratado'] = result['codigo_tratado'].astype(str)
+    carga_e_montagem['codigo_tratado'] = carga_e_montagem['codigo_tratado'].astype(str)
     
-    join_dfs = df_pintura.merge(result, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
+    join_dfs = df_pintura.merge(carga_e_montagem, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
     
     join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
 
     resumos_teste = join_dfs
+
+
+
+
+
+
 
     resumos_teste['status_montagem'] = resumos_teste['qt_faltante'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
     resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
@@ -4041,13 +4048,13 @@ def tabela_resumos():
 
     resumos_teste.rename(columns=alterar_nomes,inplace=True)
 
-    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','Codigo da Montagem','Descrição','Codigo da Pintura','Quantidade Planejada','Quantidade de Carretas','status_geral']].pivot_table(
-        index=['Carreta', 'Data da Carga', 'Codigo da Montagem','Descrição','Codigo da Pintura','Quantidade Planejada','Quantidade de Carretas'],
+    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','status_geral']].pivot_table(
+        index=['Carreta', 'Data da Carga'],
             columns='celula_x',
             values='status_geral',
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
             fill_value=''
-        )
+    )
     
     df_pivot = df_pivot.sort_values(by=['Data da Carga', 'Carreta'], ascending=[True, True])
     
