@@ -8,8 +8,7 @@ df['descricao_pintura'] = ''
 
 df = df.sort_values(by=['Recurso','Célula'], ascending=False).reset_index(drop=True)
 
-df[df['Recurso'] == 'CBHM8000 SS T M20'] # CBHM8000 SS T M20 ; CBH7-2E FO-1M SS RS/RD M21
-df[df['Recurso'] == 'CBHM8000 SS RD P700(R) M17'] # CBHM8000 SS T M20 ; CBH7-2E FO-1M SS RS/RD M21
+df[df['Recurso'] == 'CBHM5000 CA SS RD MM M17'] # CBHM8000 SS T M20 ; CBH7-2E FO-1M SS RS/RD M21
 
 for i in range(1,len(df)):
     try:
@@ -22,8 +21,6 @@ for i in range(1,len(df)):
                 df['descricao_pintura'][i-1] = df['Peca'][i]
     except:
         continue
-
-df[(df['Célula'] == 'CHASSI') & (df['Peca'] == 'CHASSI CBH7-2E RS/RD SS')]
 
 df_ = df[df['codigo_pintura'] != '']
 

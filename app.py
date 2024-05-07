@@ -3895,14 +3895,14 @@ def carretas_planilha_carga(datainicio, datafim):
 
 # Reunião 
 
-def verificar_status(row):
+def verificar_status(row,setor):
     
-    if int(row['qt_faltante_pintura']) == 0 and int(row['qt_faltante']) == 0:
+    if int(row['Total Faltante Pintura']) == 0 and int(row['Total Faltante']) == 0:
         return 'Finalizado'
-    elif int(row['qt_faltante_pintura']) > 0 and int(row['qt_faltante']) > 0:
-        return 'Aguardando'
+    elif int(row['Total Faltante']) != int(row['qt_planejada_x']):
+        return setor.format(row['Total Faltante Pintura'] - row['Total Faltante'])
     else:
-        return 'S - {}'.format(row['qt_faltante_pintura'])
+        return setor.format(row['Total Faltante Pintura'])
 
 @app.route('/reuniao')
 def tela_reuniao():
@@ -3914,16 +3914,15 @@ def tabela_resumos():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
-    
-    print('Iniciando criação da API')
-    # Acessando os parâmetros da URL
-    datainicio = request.args.get('datainicio')
-    datafim = request.args.get('datafim')
+        # Acessando os parâmetros da URL
+    datainicio = '2024-05-08'#request.args.get('datainicio')
+    datafim = '2024-05-08'#request.args.get('datafim')
 
     dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
 
     query_montagem = """
                     select distinct tbce.carreta,
+                    tbce.processo,
                     t1.data_carga,
                     t1.celula,
                     t1.codigo_conjunto,
@@ -3932,13 +3931,10 @@ def tabela_resumos():
                     t1.qt_apontada_montagem,
                     t1.qt_faltante,
                     CASE
-                        WHEN tbce.codigo_pintura = '' THEN t1.codigo_conjunto
+                        WHEN tbce.codigo_pintura = '' or tbce.codigo_pintura ISNULL THEN t1.codigo_conjunto
                         ELSE tbce.codigo_pintura
                     END AS codigo_tratado,
-                    CASE
-                        WHEN tbce.descricao_pintura = '' THEN t1.peca
-                        ELSE tbce.descricao_pintura
-                    END AS descricao_tratada
+                    t1.peca AS descricao_tratada
                 FROM(
                     SELECT 
                         gom.data_carga,
@@ -4010,29 +4006,38 @@ def tabela_resumos():
     # Realizar o merge:
     carga_e_montagem = pd.merge(df_montagem, planilha_cargas, on=['carreta', 'data_carga'], how='inner')
 
-    print(carga_e_montagem[carga_e_montagem['carreta'] == 'CBH5 FO SS T P750(I) M21'])
+    print(carga_e_montagem[carga_e_montagem['carreta'] == 'CBHM5000 CA SS RD MM M17'])
 
-    print(carga_e_montagem.columns)
+    tb_agrupada = carga_e_montagem.groupby(['processo', 'carreta', 'data_carga'])['qt_faltante'].sum().reset_index()
+
+    tb_agrupada.rename(columns={'qt_faltante': 'Total Faltante'}, inplace=True)
+
+    # Realizando o merge entre carga_e_montagem e tb_agrupada
+    carga_e_montagem = carga_e_montagem.merge(tb_agrupada, on=['data_carga', 'carreta', 'processo'], how='left')
 
     df_pintura['codigo'] = df_pintura['codigo'].astype(str)
     carga_e_montagem['codigo_tratado'] = carga_e_montagem['codigo_tratado'].astype(str)
     
     join_dfs = df_pintura.merge(carga_e_montagem, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
+
+    tb_agrupado_pintura = join_dfs.groupby(['data_carga', 'carreta', 'processo'])['qt_faltante_pintura'].sum().reset_index()
+
+    # Renomeando a coluna resultante para 'Total Faltante Pintura'
+    tb_agrupado_pintura.rename(columns={'qt_faltante_pintura': 'Total Faltante Pintura'}, inplace=True)
+
+    # Realizando o merge de volta para join_dfs
+    join_dfs = join_dfs.merge(tb_agrupado_pintura, on=['data_carga', 'carreta'], how='left')
+    
+    # print(join_dfs)#[join_dfs['carreta'] == 'CBHM5000 CA SS RD MM M17'][['data_carga','carreta','celula_x','qt_faltante','qt_faltante_pintura','descricao_tratada','Total Faltante','Total Faltante Pintura']])
     
     join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
 
     resumos_teste = join_dfs
 
-
-
-
-
-
-
-    resumos_teste['status_montagem'] = resumos_teste['qt_faltante'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
+    resumos_teste['status_montagem'] = resumos_teste['Total Faltante'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
     resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
-    resumos_teste['status_solda'] = resumos_teste.apply(verificar_status, axis=1)
-    resumos_teste['status_pintura'] = resumos_teste['qt_faltante_pintura'].apply(lambda x: 'EXP.' if int(x) <= 0 else 'Aguardando'.format(x))
+    resumos_teste['status_solda'] = resumos_teste.apply(lambda row: verificar_status(row,'S - {}'), axis=1)
+    resumos_teste['status_pintura'] = resumos_teste.apply(lambda row: verificar_status(row,'P - {}'), axis=1)
     resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + 'S: ' + resumos_teste['status_solda'] + 'P: ' + resumos_teste['status_pintura']
     resumos_teste['Quantidade Faltante'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
 
@@ -4042,15 +4047,16 @@ def tabela_resumos():
         'codigo_conjunto': 'Codigo da Montagem',
         'qt_planejada_x':'Quantidade Planejada',
         'peca_x': 'Descrição',
-        'codigo_tratado': 'Codigo da Pintura',
-        'quantidade_carretas':'Quantidade de Carretas'
+        'codigo_tratado': 'Codigo da Pintura'
     }
 
     resumos_teste.rename(columns=alterar_nomes,inplace=True)
 
-    df_pivot = resumos_teste[['Carreta','Data da Carga','celula_x','status_geral']].pivot_table(
+    # resumos_teste.to_csv('resumo.csv')
+
+    df_pivot = resumos_teste[['Carreta','Data da Carga','processo','status_geral']].pivot_table(
         index=['Carreta', 'Data da Carga'],
-            columns='celula_x',
+            columns='processo',
             values='status_geral',
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
             fill_value=''
@@ -4060,8 +4066,6 @@ def tabela_resumos():
     
     json_data = df_pivot.reset_index().values.tolist()
     colunas = df_pivot.reset_index().columns.tolist()
-
-    print('API gerada')
 
     return jsonify({
         'data':json_data,
