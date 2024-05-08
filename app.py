@@ -3899,6 +3899,8 @@ def verificar_status(row,setor):
     
     if int(row['Total Faltante Pintura']) == 0 and int(row['Total Faltante']) == 0:
         return 'Finalizado'
+    elif int(row['Total Faltante']) == int(row['Total Faltante Pintura']):
+        return 'Aguardando'
     elif int(row['Total Faltante']) != int(row['qt_planejada_x']):
         return setor.format(row['Total Faltante Pintura'] - row['Total Faltante'])
     else:
@@ -4006,7 +4008,6 @@ def tabela_resumos():
     # Realizar o merge:
     carga_e_montagem = pd.merge(df_montagem, planilha_cargas, on=['carreta', 'data_carga'], how='inner')
 
-    print(carga_e_montagem[carga_e_montagem['carreta'] == 'CBHM5000 CA SS RD MM M17'])
 
     tb_agrupada = carga_e_montagem.groupby(['processo', 'carreta', 'data_carga'])['qt_faltante'].sum().reset_index()
 
@@ -4020,6 +4021,8 @@ def tabela_resumos():
     
     join_dfs = df_pintura.merge(carga_e_montagem, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
 
+    # print(join_dfs[join_dfs['carreta'] == 'CBHM5000 CA SS RD MM M17'][['data_carga','peca_x','celula_x','Total Faltante']])
+
     tb_agrupado_pintura = join_dfs.groupby(['data_carga', 'carreta', 'processo'])['qt_faltante_pintura'].sum().reset_index()
 
     # Renomeando a coluna resultante para 'Total Faltante Pintura'
@@ -4027,6 +4030,10 @@ def tabela_resumos():
 
     # Realizando o merge de volta para join_dfs
     join_dfs = join_dfs.merge(tb_agrupado_pintura, on=['data_carga', 'carreta'], how='left')
+
+    print(join_dfs)
+
+    # join_dfs.to_csv('resumo.csv')
     
     # print(join_dfs)#[join_dfs['carreta'] == 'CBHM5000 CA SS RD MM M17'][['data_carga','carreta','celula_x','qt_faltante','qt_faltante_pintura','descricao_tratada','Total Faltante','Total Faltante Pintura']])
     
@@ -4054,9 +4061,9 @@ def tabela_resumos():
 
     # resumos_teste.to_csv('resumo.csv')
 
-    df_pivot = resumos_teste[['Carreta','Data da Carga','processo','status_geral']].pivot_table(
+    df_pivot = resumos_teste[['Carreta','Data da Carga','processo_x','status_geral']].pivot_table(
         index=['Carreta', 'Data da Carga'],
-            columns='processo',
+            columns='processo_x',
             values='status_geral',
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
             fill_value=''
