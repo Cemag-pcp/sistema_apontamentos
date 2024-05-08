@@ -70,9 +70,9 @@ function populateTableBody(tbody, jsonData, columnNames) {
             const td = document.createElement('td');
             td.setAttribute('data-title', columnNames[index]);
             let cellContent = cell;
-            if (typeof cell === 'string' && (cell.includes('P:') || cell.includes('S:'))) {
+            if (typeof cell === 'string' && (cell.includes('P:') || cell.includes('M:'))) {
                 // Substitui 'P:' por '<br>P:' para adicionar quebra de linha no HTML
-                cellContent = cell.replace('S:', '<br>S:').replace('P:', '<br>P:');
+                cellContent = cell.replace('M:', '<br>M:').replace('P:', '<br>P:');
             }
 
             // Verifica se a célula precisa de formatação especial para zero

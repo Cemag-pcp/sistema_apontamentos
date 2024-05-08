@@ -3893,8 +3893,8 @@ def tabela_resumos():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
         # Acessando os parâmetros da URL
-    datainicio = request.args.get('datainicio')
-    datafim = request.args.get('datafim')
+    datainicio = request.args.get('datainicio') #'2024-05-08'
+    datafim = request.args.get('datafim') 
 
     dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
 
@@ -4000,9 +4000,10 @@ def tabela_resumos():
     ##########################################
 
     # Lógica de status
+    df_final_com_processos['status_total'] = df_final_com_processos['qt_planejada_montagem'].apply(lambda x: 'Total Planej: {}'.format(x))
     df_final_com_processos['status_montagem'] = df_final_com_processos['qt_faltante_montagem'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
     df_final_com_processos['status_pintura'] = df_final_com_processos.apply(lambda row: verificar_status(row), axis=1)
-    df_final_com_processos['status_geral'] = "M: " + df_final_com_processos['status_montagem'] + "\n" + df_final_com_processos['status_pintura'] 
+    df_final_com_processos['status_geral'] = df_final_com_processos['status_total'] + "M: " + df_final_com_processos['status_montagem'] + "\n" + df_final_com_processos['status_pintura'] 
     
     df_final_com_processos = df_final_com_processos.reset_index()
 
