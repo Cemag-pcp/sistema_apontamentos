@@ -3917,8 +3917,8 @@ def tabela_resumos():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
         # Acessando os parâmetros da URL
-    datainicio = '2024-05-08'#request.args.get('datainicio')
-    datafim = '2024-05-08'#request.args.get('datafim')
+    datainicio = '2024-05-08' #request.args.get('datainicio')
+    datafim = '2024-05-08' #request.args.get('datafim')
 
     dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
 
@@ -3964,6 +3964,7 @@ def tabela_resumos():
                     ) as t1
                     left join pcp.tb_base_carretas_explodidas tbce on
                     tbce.conjunto = t1.codigo_conjunto
+                    WHERE tbce.codigo_pintura <> 'Excluir' OR tbce.codigo_pintura IS NULL OR tbce.codigo_pintura = ''
                     """.format(datainicio,datafim)
 
     query_pintura = """
@@ -4021,8 +4022,6 @@ def tabela_resumos():
     
     join_dfs = df_pintura.merge(carga_e_montagem, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
 
-    # print(join_dfs[join_dfs['carreta'] == 'CBHM5000 CA SS RD MM M17'][['data_carga','peca_x','celula_x','Total Faltante']])
-
     tb_agrupado_pintura = join_dfs.groupby(['data_carga', 'carreta', 'processo'])['qt_faltante_pintura'].sum().reset_index()
 
     # Renomeando a coluna resultante para 'Total Faltante Pintura'
@@ -4031,11 +4030,9 @@ def tabela_resumos():
     # Realizando o merge de volta para join_dfs
     join_dfs = join_dfs.merge(tb_agrupado_pintura, on=['data_carga', 'carreta'], how='left')
 
-    print(join_dfs)
+    print(join_dfs[join_dfs['carreta'] == 'CBHM5000 CA SC RD MM M17'])
 
     # join_dfs.to_csv('resumo.csv')
-    
-    # print(join_dfs)#[join_dfs['carreta'] == 'CBHM5000 CA SS RD MM M17'][['data_carga','carreta','celula_x','qt_faltante','qt_faltante_pintura','descricao_tratada','Total Faltante','Total Faltante Pintura']])
     
     join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
 

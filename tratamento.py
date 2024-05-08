@@ -24,17 +24,13 @@ for i in range(1,len(df)):
 
 df_ = df[df['codigo_pintura'] != '']
 
-df1 = pd.read_csv('tb_base_carretas_explodidas_202404151521.csv',dtype={'codigo': str,'conjunto':str})
+df1 = pd.read_csv('base_nova.csv',dtype={'codigo': str,'conjunto':str,'Recurso_x':str,'Recurso_y':str})
 
-df_ = df_[['Código','codigo_pintura','descricao_pintura']].drop_duplicates()
+df_ = df_.rename(columns={'Código':'conjunto'})
 
-teste_df = pd.merge(df1,df_,how='left',left_on='conjunto',right_on='Código')
-teste_df.to_csv('df_final.csv')
+df_ = df_[['conjunto','codigo_pintura']].drop_duplicates()
+
+teste_df = pd.merge(df1,df_,how='left',on='conjunto')
+teste_df.to_csv('df_final.csv',index=False)
 
 teste_df[teste_df['codigo_pintura'] == '030588']
-
-teste_df = teste_df.drop_duplicates()
-teste_df[teste_df['conjunto'] == '030347'][['codigo_pintura','descricao_pintura']]
-
-
-teste_df[(teste_df['carreta'] == 'CBH3,5 UG SS RS M21') & (teste_df['processo'] == 'CHASSI')]
