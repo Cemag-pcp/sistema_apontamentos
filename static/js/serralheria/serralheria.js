@@ -1,6 +1,8 @@
 // Iniciar produção 
 
 document.getElementById('btnSalvar').addEventListener('click', function () {
+    
+    showLoading();
 
     var peca = document.getElementById('userInput').value;
     var dt_planejada = document.getElementById('inputData').value;
@@ -18,10 +20,21 @@ document.getElementById('btnSalvar').addEventListener('click', function () {
         body: JSON.stringify(_data),
         headers: { "Content-type": "application/json; charset=UTF-8" }
     })
-        .then(response => response.json())
-        .then(json => console.log(json))
-        .catch(err => console.log(err));
-
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro na solicitação');
+            }
+            return response.json();
+        })
+        .then(json => {
+            console.log(json);
+            $('#modalPecaFora').modal('hide');
+            hideLoading(); 
+        })
+        .catch(err => {
+            hideLoading();
+            console.log(err);
+        });
 });
 
 // Finalizar produção
