@@ -2034,31 +2034,6 @@ def planejar_pecas_estamparia():
 
     return 'sucess'
 
-# def background_thread():
-#     """Example of how to send server generated events to clients."""
-#     count = 0
-#     while True:
-#         socketio.sleep(3)
-#         count += 1
-#         data = api_consulta_pecas_em_processo_estamparia()
-#         print(data)
-#         socketio.emit('my_response',
-#                       {'data': data})
-
-# @socketio.event
-# def my_event(message):
-#     session['receive_count'] = session.get('receive_count', 0) + 1
-#     emit('my_response',
-#          {'data': message['data'], 'count': session['receive_count']})
-
-# @socketio.event
-# def connect():
-#     global thread
-#     with thread_lock:
-#         if thread is None:
-#             thread = socketio.start_background_task(background_thread)
-#     emit('my_response', {'data': 'Connected', 'count': 0})
-
 @app.route("/api/consulta-pecas-em-processo/estamparia", methods=['GET'])
 def api_consulta_pecas_em_processo_estamparia():
     
@@ -3895,16 +3870,17 @@ def carretas_planilha_carga(datainicio, datafim):
 
 # Reunião 
 
-def verificar_status(row,setor):
+def verificar_status(row):
+    setor = 'P'
     
-    if int(row['Total Faltante Pintura']) == 0 and int(row['Total Faltante']) == 0:
-        return 'Finalizado'
-    elif int(row['Total Faltante']) == int(row['Total Faltante Pintura']):
-        return 'Aguardando'
-    elif int(row['Total Faltante']) != int(row['qt_planejada_x']):
-        return setor.format(row['Total Faltante Pintura'] - row['Total Faltante'])
+    if int(row['qt_faltante_pintura']) <= 0 and int(row['qt_faltante_montagem']) <= 0:
+        return f'{setor}: Finalizado'
+    elif int(row['qt_apontada_pintura']) > 0:
+        return f"{setor}: Pendente: {int(row['qt_faltante_pintura'])}\n Finalizada: {int(row['qt_apontada_pintura'])}"
     else:
-        return setor.format(row['Total Faltante Pintura'])
+        return f'{setor}: Aguardando'
+
+
 
 @app.route('/reuniao')
 def tela_reuniao():
@@ -3917,8 +3893,8 @@ def tabela_resumos():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
         # Acessando os parâmetros da URL
-    datainicio = '2024-05-08' #request.args.get('datainicio')
-    datafim = '2024-05-08' #request.args.get('datafim')
+    datainicio = request.args.get('datainicio')
+    datafim = request.args.get('datafim')
 
     dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
 
@@ -4008,65 +3984,92 @@ def tabela_resumos():
 
     # Realizar o merge:
     carga_e_montagem = pd.merge(df_montagem, planilha_cargas, on=['carreta', 'data_carga'], how='inner')
+    carga_e_montagem = carga_e_montagem.rename(columns={'qt_planejada':'qt_planejada_montagem','qt_faltante':'qt_faltante_montagem','PED_QUANTIDADE':'qtd_carretas'})
+    carga_e_montagem = carga_e_montagem.drop(columns=['celula','codigo_conjunto'])
 
-
-    tb_agrupada = carga_e_montagem.groupby(['processo', 'carreta', 'data_carga'])['qt_faltante'].sum().reset_index()
-
-    tb_agrupada.rename(columns={'qt_faltante': 'Total Faltante'}, inplace=True)
-
-    # Realizando o merge entre carga_e_montagem e tb_agrupada
-    carga_e_montagem = carga_e_montagem.merge(tb_agrupada, on=['data_carga', 'carreta', 'processo'], how='left')
-
+    ############# QUANTIDADE FALTANTE MONTAGEM ##################
+    # montagem_agrupada = carga_e_montagem.groupby(['processo', 'carreta', 'data_carga'])[['qt_faltante_montagem','qtd_carretas']].sum().reset_index()
+    
+    ############# QUANTIDADE FALTANTE PINTURA ##################
     df_pintura['codigo'] = df_pintura['codigo'].astype(str)
-    carga_e_montagem['codigo_tratado'] = carga_e_montagem['codigo_tratado'].astype(str)
+    pintura_agrupada = df_pintura.groupby(['celula', 'codigo', 'data_carga'])[['qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum().reset_index()
+
+    ##########################################
+    df_final_com_codigos = carga_e_montagem.merge(pintura_agrupada, how='left', left_on=['data_carga','codigo_tratado'], right_on=['data_carga','codigo'])
+    df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura','qtd_carretas']].sum()
+    ##########################################
+
+    # Lógica de status
+    df_final_com_processos['status_montagem'] = df_final_com_processos['qt_faltante_montagem'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
+    df_final_com_processos['status_pintura'] = df_final_com_processos.apply(lambda row: verificar_status(row), axis=1)
+    df_final_com_processos['status_geral'] = "M: " + df_final_com_processos['status_montagem'] + "\n" + df_final_com_processos['status_pintura'] 
     
-    join_dfs = df_pintura.merge(carga_e_montagem, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
+    df_final_com_processos = df_final_com_processos.reset_index()
 
-    tb_agrupado_pintura = join_dfs.groupby(['data_carga', 'carreta', 'processo'])['qt_faltante_pintura'].sum().reset_index()
-
-    # Renomeando a coluna resultante para 'Total Faltante Pintura'
-    tb_agrupado_pintura.rename(columns={'qt_faltante_pintura': 'Total Faltante Pintura'}, inplace=True)
-
-    # Realizando o merge de volta para join_dfs
-    join_dfs = join_dfs.merge(tb_agrupado_pintura, on=['data_carga', 'carreta'], how='left')
-
-    print(join_dfs[join_dfs['carreta'] == 'CBHM5000 CA SC RD MM M17'])
-
-    # join_dfs.to_csv('resumo.csv')
-    
-    join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
-
-    resumos_teste = join_dfs
-
-    resumos_teste['status_montagem'] = resumos_teste['Total Faltante'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
-    resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
-    resumos_teste['status_solda'] = resumos_teste.apply(lambda row: verificar_status(row,'S - {}'), axis=1)
-    resumos_teste['status_pintura'] = resumos_teste.apply(lambda row: verificar_status(row,'P - {}'), axis=1)
-    resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + 'S: ' + resumos_teste['status_solda'] + 'P: ' + resumos_teste['status_pintura']
-    resumos_teste['Quantidade Faltante'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
-
-    alterar_nomes = {
-        'carreta': 'Carreta',
-        'data_carga': 'Data da Carga',
-        'codigo_conjunto': 'Codigo da Montagem',
-        'qt_planejada_x':'Quantidade Planejada',
-        'peca_x': 'Descrição',
-        'codigo_tratado': 'Codigo da Pintura'
-    }
-
-    resumos_teste.rename(columns=alterar_nomes,inplace=True)
-
-    # resumos_teste.to_csv('resumo.csv')
-
-    df_pivot = resumos_teste[['Carreta','Data da Carga','processo_x','status_geral']].pivot_table(
-        index=['Carreta', 'Data da Carga'],
-            columns='processo_x',
+    df_pivot = df_final_com_processos[['carreta','data_carga','processo','status_geral']].pivot_table(
+        index=['carreta', 'data_carga'],
+            columns='processo',
             values='status_geral',
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
             fill_value=''
     )
+
+
+
+    # tb_agrupada.rename(columns={'qt_faltante': 'Total Faltante'}, inplace=True)
+
+    # Realizando o merge entre carga_e_montagem e tb_agrupada
+    # carga_e_montagem = carga_e_montagem.merge(montagem_agrupada, on=['data_carga', 'carreta', 'processo'], how='left')
     
-    df_pivot = df_pivot.sort_values(by=['Data da Carga', 'Carreta'], ascending=[True, True])
+    # carga_e_montagem['codigo_tratado'] = carga_e_montagem['codigo_tratado'].astype(str)
+    
+    # join_dfs = df_pintura.merge(carga_e_montagem, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
+
+    # tb_agrupado_pintura = join_dfs.groupby(['data_carga', 'carreta', 'processo'])['qt_faltante_pintura'].sum().reset_index()
+
+    # # Renomeando a coluna resultante para 'Total Faltante Pintura'
+    # tb_agrupado_pintura.rename(columns={'qt_faltante_pintura': 'Total Faltante Pintura'}, inplace=True)
+
+    # # Realizando o merge de volta para join_dfs
+    # join_dfs = join_dfs.merge(tb_agrupado_pintura, on=['data_carga', 'carreta'], how='left')
+
+    # print(join_dfs[join_dfs['carreta'] == 'CBHM5000 CA SC RD MM M17'])
+
+    # # join_dfs.to_csv('resumo.csv')
+    
+    # join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
+
+    # resumos_teste = join_dfs
+
+    # resumos_teste['status_montagem'] = resumos_teste['Total Faltante'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
+    # resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
+    # resumos_teste['status_solda'] = resumos_teste.apply(lambda row: verificar_status(row,'S - {}'), axis=1)
+    # resumos_teste['status_pintura'] = resumos_teste.apply(lambda row: verificar_status(row,'P - {}'), axis=1)
+    # resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + 'S: ' + resumos_teste['status_solda'] + 'P: ' + resumos_teste['status_pintura']
+    # resumos_teste['Quantidade Faltante'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
+
+    # alterar_nomes = {
+    #     'carreta': 'Carreta',
+    #     'data_carga': 'Data da Carga',
+    #     'codigo_conjunto': 'Codigo da Montagem',
+    #     'qt_planejada_x':'Quantidade Planejada',
+    #     'peca_x': 'Descrição',
+    #     'codigo_tratado': 'Codigo da Pintura'
+    # }
+
+    # resumos_teste.rename(columns=alterar_nomes,inplace=True)
+
+    # # resumos_teste.to_csv('resumo.csv')
+
+    # df_pivot = resumos_teste[['Carreta','Data da Carga','processo_x','status_geral']].pivot_table(
+    #     index=['Carreta', 'Data da Carga'],
+    #         columns='processo_x',
+    #         values='status_geral',
+    #         aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
+    #         fill_value=''
+    # )
+    
+    df_pivot = df_pivot.sort_values(by=['data_carga', 'carreta'], ascending=[True, True])
     
     json_data = df_pivot.reset_index().values.tolist()
     colunas = df_pivot.reset_index().columns.tolist()
