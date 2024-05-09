@@ -3996,8 +3996,11 @@ def tabela_resumos():
 
     ##########################################
     df_final_com_codigos = carga_e_montagem.merge(pintura_agrupada, how='left', left_on=['data_carga','codigo_tratado'], right_on=['data_carga','codigo'])
-    df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura','qtd_carretas']].sum()
+    df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum()
     ##########################################
+
+    df_final_com_processos = df_final_com_processos.reset_index()
+    df_final_com_processos = df_final_com_processos.merge(dados_explodido,how='left',left_on='carreta', right_on = 'Carreta Trat')
 
     # Lógica de status
     df_final_com_processos['status_total'] = df_final_com_processos['qt_planejada_montagem'].apply(lambda x: 'Total Planej: {}'.format(x))
@@ -4007,15 +4010,13 @@ def tabela_resumos():
     
     df_final_com_processos = df_final_com_processos.reset_index()
 
-    df_pivot = df_final_com_processos[['carreta','data_carga','processo','status_geral']].pivot_table(
-        index=['carreta', 'data_carga'],
+    df_pivot = df_final_com_processos[['data_carga','carreta','PED_QUANTIDADE','processo','status_geral']].pivot_table(
+        index=['carreta', 'data_carga','PED_QUANTIDADE'],
             columns='processo',
             values='status_geral',
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
             fill_value=''
     )
-
-
 
     # tb_agrupada.rename(columns={'qt_faltante': 'Total Faltante'}, inplace=True)
 
