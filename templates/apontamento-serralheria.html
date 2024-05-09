@@ -46,7 +46,7 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Apontamento Produtos especiais ou Serralheria?</h1>
+        <h1 class="h3 mb-0 text-gray-800">Apontamento Produtos especiais</h1>
         <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                 class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
     </div>
@@ -62,14 +62,13 @@
                     <h6 class="m-0 font-weight-bold text-primary">Iniciar
                         Processo</h6>
                     <div class="btn-group" role="group" aria-label="Criar OP">
-                        <button id="btnModalPecaFora" type="button"
+                        <!-- <button id="btnModalPecaFora" type="button"
                             class="btn btn-sm btn-info mr-2" data-toggle="modal"
                             data-target="#modalPlanejarPeca">Planejar
-                            peça</button>
+                            peça</button> -->
                         <button id="btnModalPecaFora" type="button"
                             class="btn btn-sm btn-secondary" data-toggle="modal"
-                            data-target="#modalPecaFora">Iniciar peça fora do
-                            planejamento</button>
+                            data-target="#modalPecaFora">Iniciar produção</button>
                     </div>
                 </div>
                 <br>
@@ -169,9 +168,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalPecaForaLabel">Gerar
-                        apontamento para peça fora do
-                        planejamento</h5>
+                    <h5 class="modal-title" id="modalPecaForaLabel">Iniciar produção</h5>
                     <button type="button" class="close" data-dismiss="modal"
                         aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -1176,7 +1173,7 @@
         // Função para obter dados brutos do backend
         function fetchSuggestionsOperadorModal() {
             $.ajax({
-                url: '/sugestao-operadores-estamparia',
+                url: '/sugestao-operadores-serralheria',
                 method: 'GET',
                 success: function (data) {
                     suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);
@@ -1244,7 +1241,7 @@
         // Função para obter dados brutos do backend
         function fetchSuggestionsOperadorModal() {
             $.ajax({
-                url: '/sugestao-operadores-estamparia',
+                url: '/sugestao-operadores-serralheria',
                 method: 'GET',
                 success: function (data) {
                     suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);

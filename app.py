@@ -3343,6 +3343,20 @@ def historico_finalizadas_serralheria():
 
     return jsonify(data)
 
+@app.route("/sugestao-operadores-serralheria")
+def mostrar_sugestao_operadores_serralheria():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = "select distinct(concat(matricula,' - ', nome)) from pcp.operadores where setor = 'Serralheria' and status = 'ativo'"
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    return jsonify(data)
+
 # Levantamento #
 
 @app.route('/levantamento', methods=['GET'])
@@ -3999,6 +4013,9 @@ def tabela_resumos():
     df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum()
     ##########################################
 
+    df_final_com_codigos.to_csv('v2.csv')
+    df_final_com_processos.to_csv('v3.csv')
+
     df_final_com_processos = df_final_com_processos.reset_index()
     df_final_com_processos = df_final_com_processos.merge(dados_explodido,how='left',left_on='carreta', right_on = 'Carreta Trat')
 
@@ -4017,59 +4034,6 @@ def tabela_resumos():
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
             fill_value=''
     )
-
-    # tb_agrupada.rename(columns={'qt_faltante': 'Total Faltante'}, inplace=True)
-
-    # Realizando o merge entre carga_e_montagem e tb_agrupada
-    # carga_e_montagem = carga_e_montagem.merge(montagem_agrupada, on=['data_carga', 'carreta', 'processo'], how='left')
-    
-    # carga_e_montagem['codigo_tratado'] = carga_e_montagem['codigo_tratado'].astype(str)
-    
-    # join_dfs = df_pintura.merge(carga_e_montagem, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
-
-    # tb_agrupado_pintura = join_dfs.groupby(['data_carga', 'carreta', 'processo'])['qt_faltante_pintura'].sum().reset_index()
-
-    # # Renomeando a coluna resultante para 'Total Faltante Pintura'
-    # tb_agrupado_pintura.rename(columns={'qt_faltante_pintura': 'Total Faltante Pintura'}, inplace=True)
-
-    # # Realizando o merge de volta para join_dfs
-    # join_dfs = join_dfs.merge(tb_agrupado_pintura, on=['data_carga', 'carreta'], how='left')
-
-    # print(join_dfs[join_dfs['carreta'] == 'CBHM5000 CA SC RD MM M17'])
-
-    # # join_dfs.to_csv('resumo.csv')
-    
-    # join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
-
-    # resumos_teste = join_dfs
-
-    # resumos_teste['status_montagem'] = resumos_teste['Total Faltante'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
-    # resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
-    # resumos_teste['status_solda'] = resumos_teste.apply(lambda row: verificar_status(row,'S - {}'), axis=1)
-    # resumos_teste['status_pintura'] = resumos_teste.apply(lambda row: verificar_status(row,'P - {}'), axis=1)
-    # resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + 'S: ' + resumos_teste['status_solda'] + 'P: ' + resumos_teste['status_pintura']
-    # resumos_teste['Quantidade Faltante'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
-
-    # alterar_nomes = {
-    #     'carreta': 'Carreta',
-    #     'data_carga': 'Data da Carga',
-    #     'codigo_conjunto': 'Codigo da Montagem',
-    #     'qt_planejada_x':'Quantidade Planejada',
-    #     'peca_x': 'Descrição',
-    #     'codigo_tratado': 'Codigo da Pintura'
-    # }
-
-    # resumos_teste.rename(columns=alterar_nomes,inplace=True)
-
-    # # resumos_teste.to_csv('resumo.csv')
-
-    # df_pivot = resumos_teste[['Carreta','Data da Carga','processo_x','status_geral']].pivot_table(
-    #     index=['Carreta', 'Data da Carga'],
-    #         columns='processo_x',
-    #         values='status_geral',
-    #         aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
-    #         fill_value=''
-    # )
     
     df_pivot = df_pivot.sort_values(by=['data_carga', 'carreta'], ascending=[True, True])
     
