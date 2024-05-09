@@ -5,7 +5,7 @@ function getResumo() {
     var dataInicial = document.getElementById('dataReuniaoInicial').value;
     var dataFinal = document.getElementById('dataReuniaoFinal').value;
 
-    var url = '/resumos-geral?datainicio='+ encodeURIComponent(dataInicial) +'&datafim='+ encodeURIComponent(dataFinal);
+    var url = 'https://cemagprod.onrender.com/resumos-geral?datainicio='+ encodeURIComponent(dataInicial) +'&datafim='+ encodeURIComponent(dataFinal);
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url);
