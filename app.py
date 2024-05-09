@@ -4013,9 +4013,6 @@ def tabela_resumos():
     df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum()
     ##########################################
 
-    df_final_com_codigos.to_csv('v2.csv')
-    df_final_com_processos.to_csv('v3.csv')
-
     df_final_com_processos = df_final_com_processos.reset_index()
     df_final_com_processos = df_final_com_processos.merge(dados_explodido,how='left',left_on='carreta', right_on = 'Carreta Trat')
 

@@ -51,7 +51,7 @@
                             <div class="form-group">
                                 <label for="cor">Cor</label>
                                 <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
-                                <input list="listaCor" id="cor" class="form-control" data-column="5">
+                                <input list="listaCor" id="cor" class="form-control" data-column="6">
                                 <datalist id="listaCor">
                                 </datalist>
                             </div>
@@ -339,7 +339,7 @@
             // Define o filtro na coluna específica
             table.column(columnIndex).search(filterValue).draw();
 
-            populateDatalistOptions('listaCor', 5);
+            populateDatalistOptions('listaCor', 6);
         }
 
         function applyColorFilter() {
@@ -352,7 +352,7 @@
         }
 
         // Carrega as opções do datalist quando a página é carregada
-        populateDatalistOptions('listaCor', 5);
+        populateDatalistOptions('listaCor', 6);
 
         // Aplica o filtro ao carregar a página
         applyDateFilter();
@@ -364,7 +364,7 @@
 
         $('#cor').on('input', function () {
             applyColorFilter();
-            populateDatalistOptions('listaCor', 5);
+            populateDatalistOptions('listaCor', 6);
         });
     });
 </script>
