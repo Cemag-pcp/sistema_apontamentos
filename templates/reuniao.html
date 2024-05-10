@@ -147,7 +147,7 @@
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="infoModalLabel">********</h5>
+                            <h5 class="modal-title" id="infoModalLabel"></h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -159,28 +159,22 @@
                                     <input type="date" name="data_carga" id="data_carga" class="form-control" disabled>
                                 </div>
                                 <div class="col-sm-6 mb-4">
-                                    <label for="codigo_conjunto">Código Conjunto:</label>
-                                    <input type="text" name="codigo_conjunto" id="codigo_conjunto" class="form-control" disabled>
-                                </div>
-                                <div class="col-sm-4 mb-4" style="display: none;">
-                                    <label for="qtd_carreta">Quantidade de Carreta:</label>
-                                    <input type="text" name="qtd_carreta" id="qtd_carreta" class="form-control" disabled>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-6 mb-4">
                                     <label for="data_carga">Carreta:</label>
                                     <input type="text" name="carreta_conjunto" id="carreta_conjunto" class="form-control" disabled>
                                 </div>
-                                <div class="col-sm-6 mb-4">
-                                    <label for="codigo_conjunto">Quantidade Planejada:</label>
-                                    <input type="number" name="quantidade_conjunto" id="quantidade_conjunto" class="form-control" disabled>
-                                </div>
                             </div>
                             <hr>
-                            <h6 id="informacoes_pecas" class="m-0 font-weight-bold text-primary"></h6>
+                            <h6 id="informacoes_conjuntos" class="m-0 font-weight-bold text-primary"></h6>
                             <hr>
-                            <div id="formContainer"></div>
+                            <div id="formContainerConjunto">
+
+                            </div>
+                            <hr>
+                            <h6 id="informacoes_pecas" class="m-0 font-weight-bold text-primary">Peças Faltantes</h6>
+                            <hr>
+                            <div id="formContainerPecas">
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -294,6 +288,7 @@
     <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="static/js/demo/datatables-demo.js"></script>
+    <script src="static/js/resumo-producao/modal_faltando_peca.js"></script>
     <script src="static/js/resumo-producao/resumo.js"></script>
     <script src="static/js/resumo-producao/filtros_resumo.js"></script>
 

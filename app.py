@@ -7,6 +7,7 @@ import psycopg2  # pip install psycopg2
 import psycopg2.extras
 from psycopg2.extras import execute_values
 from datetime import datetime, timedelta, date
+from oauth2client.service_account import ServiceAccountCredentials
 import cachetools
 import uuid
 import gspread
@@ -33,6 +34,7 @@ filename = "service_account.json"
 
 cache_historico_pintura = cachetools.LRUCache(maxsize=128)
 cache_carretas = cachetools.LRUCache(maxsize=128)
+cache_saldo = cachetools.LRUCache(maxsize=128)
 
 def resetar_cache(cache):
 
@@ -3381,6 +3383,36 @@ def buscar_dados(filename):
 
     return base_carretas
 
+@cachetools.cached(cache_saldo)
+def buscar_planilha_saldo(filename):
+
+    """
+    Função para acessar google sheets via api e
+    buscar dados da base de carretas.
+    """
+
+    sheet_id = '1u2Iza-ocp6ROUBXG9GpfHvEJwLHuW7F2uiO583qqLIE'
+    worksheet1 = 'saldo de recurso'
+
+    sa = gspread.service_account(filename)
+    sh = sa.open_by_key(sheet_id)
+
+    wks = sh.worksheet(worksheet1)
+
+    headers = wks.row_values(1)
+
+    tabela = wks.get()
+    tabela = pd.DataFrame(tabela)
+    tabela_saldo = tabela.set_axis(headers, axis=1)[1:]
+
+    # Filtrar linhas onde a coluna '1o. Agrupamento' é 'Almox Mont Carretas'
+    tabela_saldo_mont = tabela_saldo[tabela_saldo['1o. Agrupamento'] == 'Almox Mont Carretas']
+
+    # Selecionar apenas as colunas '1o. Agrupamento', 'codigo_peca' e 'Saldo'
+    tabela_saldo_mont = tabela_saldo_mont[['codigo_peca', 'Saldo']]
+
+    return tabela_saldo_mont
+
 @app.route('/consultar-carreta/levantamento', methods=['GET'])
 def consultar_carretas_levantamento():
     """
@@ -3875,12 +3907,10 @@ def verificar_status(row):
     
     if int(row['qt_faltante_pintura']) <= 0 and int(row['qt_faltante_montagem']) <= 0:
         return f'{setor}: Finalizado'
-    elif int(row['qt_apontada_pintura']) > 0:
+    elif int(row['qt_apontada_pintura']) >= 0 and int(row['qt_apontada_montagem']) >= 0:
         return f"{setor}: Pendente: {int(row['qt_faltante_pintura'])}\n Finalizada: {int(row['qt_apontada_pintura'])}"
     else:
         return f'{setor}: Aguardando'
-
-
 
 @app.route('/reuniao')
 def tela_reuniao():
@@ -3893,7 +3923,7 @@ def tabela_resumos():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
         # Acessando os parâmetros da URL
-    datainicio = request.args.get('datainicio') #'2024-05-08'
+    datainicio = request.args.get('datainicio') 
     datafim = request.args.get('datafim') 
 
     dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
@@ -4001,7 +4031,7 @@ def tabela_resumos():
 
     # Lógica de status
     df_final_com_processos['status_total'] = df_final_com_processos['qt_planejada_montagem'].apply(lambda x: 'Total Planej: {}'.format(x))
-    df_final_com_processos['status_montagem'] = df_final_com_processos['qt_faltante_montagem'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
+    df_final_com_processos['status_montagem'] = df_final_com_processos['qt_faltante_montagem'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP -> {}'.format(x))
     df_final_com_processos['status_pintura'] = df_final_com_processos.apply(lambda row: verificar_status(row), axis=1)
     df_final_com_processos['status_geral'] = df_final_com_processos['status_total'] + "M: " + df_final_com_processos['status_montagem'] + "\n" + df_final_com_processos['status_pintura'] 
     
@@ -4014,8 +4044,6 @@ def tabela_resumos():
             aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
             fill_value=''
     )
-
-
 
     # tb_agrupada.rename(columns={'qt_faltante': 'Total Faltante'}, inplace=True)
 
@@ -4073,38 +4101,75 @@ def tabela_resumos():
     df_pivot = df_pivot.sort_values(by=['data_carga', 'carreta'], ascending=[True, True])
     
     json_data = df_pivot.reset_index().values.tolist()
+    df_final_com_codigos.fillna('', inplace=True)
+    df_final_com_codigos_list = df_final_com_codigos.values.tolist()
     colunas = df_pivot.reset_index().columns.tolist()
 
     return jsonify({
         'data':json_data,
-        'colunas':colunas
+        'colunas':colunas,
+        'df_com_codigos':df_final_com_codigos_list
     })
 
-@app.route('/pecas_conjunto', methods=['POST'])
+@app.route('/pecas_conjunto')
 def pecas_conjunto():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    data = request.get_json()
+    tabela = buscar_planilha_saldo(filename)
 
-    codigo = data['codigo_conjunto']
-    carreta = data['carreta_conjunto']
+    carreta = request.args.get('carreta') 
+    codigos = request.args.getlist('codigo')
+    quantidade = request.args.getlist('quantidade')
+    
+    dicionario_codigo_quantidade = dict(zip(codigos, map(int, quantidade))) # {'031290': 8, '031289': 8}
 
-    query = """
-        SELECT codigo, descricao, materia_prima, quantidade * qt_conjunto as qt_pecas
-        FROM pcp.tb_base_carretas_explodidas
-        WHERE conjunto = %s AND carreta = %s
-    """
+    codigos_str = ','.join(f"'{codigo}'" for codigo in codigos)
 
-    # Execução da query com segurança contra injeção de SQL
-    cur.execute(query, (codigo, carreta))
-    data_conjunto = cur.fetchall()
+    query_tb_explodidas = f""" SELECT DISTINCT codigo,descricao,quantidade,conjunto
+                    FROM pcp.tb_base_carretas_explodidas
+                    WHERE conjunto in ({codigos_str}) AND carreta = '{carreta}' """
+    
+    print(query_tb_explodidas)
+    
+    # Executar a query
+    cur.execute(query_tb_explodidas)
+    pecas = cur.fetchall()
 
-    conn.close()
+    # Dicionário que contém as quantidades multiplicadas
+    query_quantidade_multiplicada = []
 
-    return jsonify(data_conjunto)
+    # Iterar sobre cada peça resultante da query
+    for peca in pecas:
+        conjunto = peca['conjunto']
+        quantidade_original = peca['quantidade']
+        
+        # Verificar se o conjunto está no dicionário
+        if conjunto in dicionario_codigo_quantidade:
+            # Multiplicar quantidade pela quantidade do dicionário
+            quantidade_multiplicada = quantidade_original * dicionario_codigo_quantidade[conjunto]
+            query_quantidade_multiplicada.append({
+                'codigo': peca['codigo'],
+                'descricao': peca['descricao'],
+                'quantidade_multiplicada': quantidade_multiplicada,
+                'conjunto': conjunto
+            })
+
+    lista_saldo = []
+
+    for i in range(len(pecas)):
+        codigo_pecas = pecas[i][0]
+        resultado_filtrado = tabela[tabela['codigo_peca'] == codigo_pecas].values.tolist()
+        if resultado_filtrado:  # Verifica se há resultados
+            lista_saldo.append(resultado_filtrado[0])
+        else:
+            lista_saldo.append([codigo_pecas,0])
+    
+    print(query_quantidade_multiplicada)
+
+    return jsonify(query_quantidade_multiplicada,lista_saldo)
 
 # Bases editáveis #
 
