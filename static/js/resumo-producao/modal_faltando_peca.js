@@ -41,30 +41,46 @@ function openModal(row,columnIndex,df_com_codigos) {
         if (xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
             console.log(response)
+            var pecas = response[0];
             var saldo = response[1];
+            var count = 0
             pecas.forEach(function (item,index) {
-                console.log(saldo[index][1])
-                const inputs =`
-                <div class="row">
+                if((saldo[index][1] - item.quantidade_total) < 0){
+                    var inputs =`
+                    <div class="row">
                         <div class="col-sm-3 mb-4">
                             <label for="codigo_peca_${index}">Codigo da Peça:</label>
-                            <input type="text" name="codigo_peca_${index}" id="codigo_peca_${index}" value="${item[0]}" class="form-control" disabled>
+                            <input type="text" name="codigo_peca_${index}" id="codigo_peca_${index}" value="${item.codigo}" class="form-control" disabled>
                         </div>
-                        <div class="col-sm-3 mb-4">
+                        <div class="col-sm-7 mb-4">
                             <label for="descricao_peca_${index}">Descrição da Peça:</label>
-                            <input type="text" name="descricao_peca_${index}" id="descricao_peca_${index}" value="${item[1]}" class="form-control" disabled>
+                            <input type="text" name="descricao_peca_${index}" id="descricao_peca_${index}" value="${item.descricao}" class="form-control" disabled>
                         </div>
-                        <div class="col-sm-3 mb-4">
+                        <div class="col-sm-2 mb-4">
                             <label for="qtd_faltante_peca_${index}">Faltante:</label>
-                            <input type="text" name="qtd_faltante_peca_${index}" id="qtd_faltante_peca_${index}" value="${item[2]}" class="form-control" disabled>
-                        </div>
-                        <div class="col-sm-3 mb-4">
-                            <label for="saldo_peca_${index}">Saldo:</label>
-                            <input type="text" name="saldo_peca_${index}" id="saldo_peca_${index}" value="${saldo[index][1]}" class="form-control" disabled>
+                            <input type="text" name="qtd_faltante_peca_${index}" id="qtd_faltante_peca_${index}" value="${saldo[index][1] - item.quantidade_total}" class="form-control" disabled>
                         </div>
                     </div>`;
+                    count += 1
+                    console.log(count)
+                } else {
+                    var inputs = ''
+                }
+
                 $('#formContainerPecas').append(inputs);
             })
+
+            if(count == 0) {
+
+                var inputs = `
+                <div class="row">
+                    <div class="d-flex flex-row justify-content-center m-auto">
+                        <h5>Todas as peças necessárias estão disponíveis no estoque</h5>
+                    </div>
+                </div>`
+
+                $('#formContainerPecas').append(inputs);
+            }
 
             $("#loading").hide();
             $("#infoModal").modal('show')

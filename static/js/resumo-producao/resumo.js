@@ -12,6 +12,18 @@ function getResumo() {
     xhr.onload = function() {
         if (xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
+            if(response == 'Pintura'){
+                buildTable('','','')
+                alert("Não possui dados de Pintura nesse intervalo de data")
+                $("#loading").hide();
+                return
+            } else if(response == 'Montagem'){
+                buildTable('','','')
+                alert("Não possui dados de Montagem nesse intervalo de data")
+                $("#loading").hide();
+                return
+            }
+
             var data = response.data;
             var colunas = response.colunas;
             var df_com_codigos = response.df_com_codigos;
@@ -44,11 +56,17 @@ function buildTable(jsonData,colunas,df_com_codigos) {
     const campoTable = document.getElementById('campoTable');
 
     campoTable.style.display = 'block';
-    thead.innerHTML = '';
-    tbody.innerHTML = '';
-
-    populateTableHeader(thead, colunas);
-    populateTableBody(tbody, jsonData, colunas, df_com_codigos);
+    
+    if(colunas !== ''){
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+        populateTableHeader(thead, colunas);
+        populateTableBody(tbody, jsonData, colunas, df_com_codigos);
+    } else {
+        campoTable.style.display = 'block';
+        thead.innerHTML = '';
+        tbody.innerHTML = '';
+    }
 }
 
 function populateTableHeader(thead, columnNames) {
