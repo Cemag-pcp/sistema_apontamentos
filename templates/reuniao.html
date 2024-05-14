@@ -70,20 +70,17 @@
             <div class="card shadow mb-4" id="campoTable" style="display: none; font-size: 14px;">
                 <!-- Card Header - Dropdown -->
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Conjuntos</h6>
-                    <div class="mb-3">
-                        <label for="filtrar_carreta" class="form-label f-14">Filtrar Carreta</label>
-                        <input type="text" class="form-control form-control-sm" id="filtrar_carreta">
-                    </div>
-                    <div class="form-check form-check-reverse">
-                        <input class="form-check-input" type="checkbox" value="" id="filtro_faltando_pecas">
-                        <label class="form-check-label" for="filtro_faltando_pecas">
-                          Faltando Peças
-                        </label>
-                    </div>
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" onclick="changeTab('reuniao')" style="cursor: pointer; font-size: 14px; width: 150px;">Reunião</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="changeTab('baseFinal')" style="cursor: pointer; font-size: 14px; width: 150px;">Base atualizada</a>
+                        </li>
+                    </ul>
                 </div>
                 <!-- Card tabela a inspecionar -->
-                <div class="card-body" id="reuniaoTables">
+                <div class="table-body" id="reuniaoTable">
                     <div id="no-more-tables">
                         <div class="table-responsive-header">
                             <table class="table table-bordered" id="dataTableReuniao" width="100%" cellspacing="0">
@@ -99,6 +96,27 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tbodyConjuntoReuniao" >
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-body" id="baseFinalTable" style="display: none;">
+                    <div id="no-more-tables">
+                        <div class="table-responsive-header">
+                            <table class="table table-bordered" id="dataTableReuniao" width="100%" cellspacing="0">
+                                <thead class="theadConjuntoReuniao">
+                                    <tr>
+                                        <th>Data da Carga</th>
+                                        <th>Processo</th>
+                                        <th>Código do Conjunto</th>
+                                        <th>Código da Peça</th> 
+                                        <th>Descrição</th>
+                                        <th>Quantidade Atualizada</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyBaseFinal" >
                                 
                                 </tbody>
                             </table>

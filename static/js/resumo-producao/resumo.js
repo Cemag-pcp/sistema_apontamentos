@@ -13,25 +13,27 @@ function getResumo() {
         if (xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
             if(response == 'Pintura'){
-                buildTable('','','')
+                buildTable('','','','')
                 alert("Não possui dados de Pintura nesse intervalo de data")
                 $("#loading").hide();
                 return
             } else if(response == 'Montagem'){
-                buildTable('','','')
+                buildTable('','','','')
                 alert("Não possui dados de Montagem nesse intervalo de data")
                 $("#loading").hide();
                 return
-            }
+            } 
 
             var data = response.data;
             var colunas = response.colunas;
             var df_com_codigos = response.df_com_codigos;
+            var base_final = response.base_final;
+            console.log(base_final)
             // Manipular os dados recebidos da API aqui
-            buildTable(data,colunas,df_com_codigos)
+            buildTable(data,colunas,df_com_codigos,base_final)
             $("#loading").hide();
         } else {
-            console.error('Erro ao chamar a API:', xhr.statusText);
+            console.error('Erro ao chamar a API:', response);
             $("#loading").hide();
         }
     };
@@ -42,30 +44,30 @@ function getResumo() {
     xhr.send();
 };
 
-document.addEventListener('DOMContentLoaded',function(){
+document.addEventListener('DOMContentLoaded',function() {
     var botaoFiltrar = document.getElementById('filtrar_datas');
     botaoFiltrar.addEventListener('click',function () {
-        document.getElementById('filtro_faltando_pecas').checked = false
+        // document.getElementById('filtro_faltando_pecas').checked = false
         getResumo();
     })
 })
 
-function buildTable(jsonData,colunas,df_com_codigos) {
+function buildTable(jsonData,colunas,df_com_codigos,base_final) {
     const thead = document.querySelector('#dataTableReuniao thead tr');
     const tbody = document.querySelector('#tbodyConjuntoReuniao');
+    const tbodyBaseFinal = document.querySelector('#tbodyBaseFinal');
     const campoTable = document.getElementById('campoTable');
 
     campoTable.style.display = 'block';
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+    tbodyBaseFinal.innerHTML = '';
     
-    if(colunas !== ''){
-        thead.innerHTML = '';
-        tbody.innerHTML = '';
+    if(colunas !== '') {
         populateTableHeader(thead, colunas);
-        populateTableBody(tbody, jsonData, colunas, df_com_codigos);
-    } else {
-        campoTable.style.display = 'block';
-        thead.innerHTML = '';
-        tbody.innerHTML = '';
+        populateTableBodyReuniao(tbody, jsonData, colunas, df_com_codigos);
+    } if(base_final !== ''){
+        populateTableBodyBaseFinal(tbodyBaseFinal,base_final)
     }
 }
 
@@ -73,7 +75,7 @@ function populateTableHeader(thead, columnNames) {
     columnNames.forEach(name => {
         const th = document.createElement('th');
         th.textContent = name;
-        if(name === 'Quantidade de Carretas'){
+        if(name === 'Quantidade de Carretas') {
             th.style.display = 'none';
         }
         th.style.minWidth = '100px'
@@ -81,7 +83,28 @@ function populateTableHeader(thead, columnNames) {
     });
 }
 
-function populateTableBody(tbody, jsonData, columnNames,df_com_codigos) {
+function populateTableBodyBaseFinal(tbody,base_final) {
+
+    base_final.forEach(function(item) {
+        // Cria uma nova linha da tabela
+        var newRow = document.createElement("tr");
+    
+        // Define o HTML das células da linha com os dados correspondentes
+        newRow.innerHTML = `
+            <td>${formatDate(item["data_carga"],'T')}</td>
+            <td>${item["processo"]}</td>
+            <td>${item["codigo_conjunto"]}</td>
+            <td>${item["codigo"]}</td>
+            <td>${item["descricao"]}</td>
+            <td>${item["qt_atualizada"]}</td>
+        `;
+    
+        // Adiciona a nova linha ao corpo da tabela
+        tbody.appendChild(newRow);
+    });
+}
+
+function populateTableBodyReuniao(tbody, jsonData, columnNames,df_com_codigos) {
     jsonData.forEach(row => {
         const tr = document.createElement('tr');
         row.forEach((cell, index) => {

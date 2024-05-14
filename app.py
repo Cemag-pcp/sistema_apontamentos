@@ -3783,6 +3783,7 @@ def tabela_resumo_estamparia(data_inicial, data_final):
             t1.codigo_conjunto,
             tbce.codigo,
             tbce.descricao,
+            tbce.quantidade,
             t1.peca,
             t1.qt_planejada,
             t1.qt_apontada_montagem,
@@ -3827,18 +3828,28 @@ def tabela_resumo_estamparia(data_inicial, data_final):
 
     resumo_estamparia = resumo_estamparia[resumo_estamparia['carreta'].isin(carretas)]
 
+    
+
     base_recurso = saldo_recurso_levantamento()
 
     base_recurso = base_recurso[base_recurso['1o. Agrupamento'] == 'Almox Mont Carretas']
 
-    join = pd.merge(resumo_estamparia,base_recurso, how='left', right_on='codigo_peca',left_on='codigo_tratado')
+    join = pd.merge(resumo_estamparia,base_recurso, how='left', right_on='codigo_peca',left_on='codigo')
+
+
+    join = join.drop(columns={'carreta'})
+
+    join = join.fillna(0)
+
+    join = join.groupby(['processo', 'data_carga', 'celula', 'codigo_conjunto', 'codigo', 'descricao', 'quantidade', 'peca','qt_apontada_montagem', 'codigo_tratado','descricao_tratada', '1o. Agrupamento', 'codigo_peca', 'Saldo', 'data']).mean(['qt_planejada','qt_faltante']).reset_index()
+
     join['Saldo'] = join['Saldo'].fillna(0)
     data_atualizacao_saldo = join['data'].drop_duplicates()[0]
     join['data'] = join['data'].fillna(data_atualizacao_saldo)
 
     join = join.rename(columns={'data':'data_saldo'})
 
-    base_final = join.sort_values(by=['codigo_peca','data_carga']).reset_index(drop=True)
+    base_final = join.sort_values(by=['codigo','data_carga']).reset_index(drop=True)
     base_final['qt_atualizada'] = ''
 
     base_final['Saldo'] = base_final['Saldo'].astype(str)
@@ -3850,12 +3861,14 @@ def tabela_resumo_estamparia(data_inicial, data_final):
         
         try:    
             if base_final['codigo'][i] == base_final['codigo'][i-1]:
-                base_final['qt_atualizada'][i] = base_final['qt_atualizada'][i-1] - base_final['qt_faltante'][i]
+                base_final['qt_atualizada'][i] = base_final['qt_atualizada'][i-1] - float(base_final['qt_faltante'][i] * base_final['quantidade'][i])
             else:
-                base_final['qt_atualizada'][i] = float(base_final['Saldo'][i]) - base_final['qt_faltante'][i]
+                base_final['qt_atualizada'][i] = float(base_final['Saldo'][i]) - float(base_final['qt_faltante'][i] * base_final['quantidade'][i])
         except:
             base_final['qt_atualizada'][i] = float(base_final['Saldo'][i]) - base_final['qt_faltante'][i]
             continue
+
+    base_final = base_final[base_final['qt_atualizada'] < 0]
 
     return base_final
 
@@ -3940,6 +3953,8 @@ def tabela_resumos():
         datafim = request.args.get('datafim') 
 
         dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
+
+        base_final = tabela_resumo_estamparia(datainicio, datafim)
 
         query_montagem = """
                         select distinct tbce.carreta,
@@ -4039,6 +4054,7 @@ def tabela_resumos():
 
         ##########################################
         df_final_com_codigos = carga_e_montagem.merge(pintura_agrupada, how='left', left_on=['data_carga','codigo_tratado'], right_on=['data_carga','codigo'])
+        print(df_final_com_codigos.columns)
         df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura','qtd_carretas']].sum()
         ##########################################
 
@@ -4121,14 +4137,18 @@ def tabela_resumos():
         return jsonify({
             'data':json_data,
             'colunas':colunas,
-            'df_com_codigos':df_final_com_codigos_list
+            'df_com_codigos':df_final_com_codigos_list,
+            'base_final':base_final.to_dict(orient='records')
          })
 
-    except:
+    except Exception as e:
+        print("O erro foi ",e)
         if df_pintura.empty: 
             return jsonify('Pintura')
+        elif df_montagem.empty:
+            return jsonify('Montagem')
         else:
-            return jsonify(f'Montagem')
+            return jsonify(e)
 
 @app.route('/pecas_conjunto')
 def pecas_conjunto():
