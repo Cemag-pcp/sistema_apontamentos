@@ -465,6 +465,7 @@
         function processarDados(data) {
             data.forEach(peca => {
                 // Aqui você pode continuar com o processamento dos dados e a criação dos cards
+                
                 var cardHtml = `
                 <div class="col-sm-6 mb-2">
                     <div class="card shadow mb-4">
@@ -493,10 +494,14 @@
                         </div>
                     </div>
                 </div>`;
+            
                 document.getElementById('cardsContainer').innerHTML += cardHtml;
+            
                 // Atualiza o contador imediatamente ao carregar a página
                 const dataInicial = new Date(formatarData(peca[2]));
+                console.log(peca[2]);
                 atualizarContador(dataInicial, peca[0]);
+            
             });
         }
 
@@ -555,6 +560,7 @@
 
                 // Atualiza o contador imediatamente ao carregar a página
                 const dataInicial = new Date(formatarData(peca[2]));
+                
                 atualizarContador(dataInicial, peca[0]);
             });
         }
@@ -570,7 +576,7 @@
 
     function formatarData(dataString) {
         var data = new Date(dataString);
-        return data.toISOString().slice(0, 16);
+        return data.toISOString().slice(0, 19);
     }
 
     function formatarDataSemHora(dataString) {
@@ -652,6 +658,7 @@
     function atualizarContador(dataInicial, id_peca) {
 
         const agora = new Date();
+
         const diferenca = agora.getTime() - dataInicial.getTime();
 
         const segundos = Math.floor(diferenca / 1000);
@@ -664,7 +671,7 @@
         const horasRestantes = horas % 24;
 
         const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
-
+        
         document.getElementById("contador-" + id_peca).textContent = formatoTempo;
     }
 

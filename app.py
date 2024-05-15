@@ -4408,6 +4408,8 @@ def adicionar_operador_bases():
 
         return jsonify({'verificacao_insert':"Cadastrado com sucesso!"})
 
+
+
 if __name__ == '__main__':
     app.run(debug=True)
     # socketio.run(app)
