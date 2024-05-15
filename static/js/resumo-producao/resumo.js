@@ -12,24 +12,30 @@ function getResumo() {
     xhr.onload = function() {
         if (xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
-            if(response == 'Pintura'){
+            if(response == 'Verifique se contém carga para esses dias'){
                 buildTable('','','','')
-                alert("Não possui dados de Pintura nesse intervalo de data")
+                alert(response)
                 $("#loading").hide();
                 return
-            } else if(response == 'Montagem'){
+            } else if(response ==='Pintura' || response === 'Montagem'){
                 buildTable('','','','')
-                alert("Não possui dados de Montagem nesse intervalo de data")
+                alert("Não possui dados de" + response +"nesse intervalo de data")
                 $("#loading").hide();
                 return
-            } 
+            }
 
             var data = response.data;
             var colunas = response.colunas;
             var df_com_codigos = response.df_com_codigos;
             var base_final = response.base_final;
+            var carretas_dentro_da_base = response.carretas_dentro_da_base;
+            
             console.log(base_final)
+
+            $('#bodyCarretasCadastradasReuniao').empty();
             // Manipular os dados recebidos da API aqui
+            carretCadastradas('#bodyCarretasCadastradasReuniao',carretas_dentro_da_base);
+            // baixar_resumo(dataInicial,dataFinal)
             buildTable(data,colunas,df_com_codigos,base_final)
             $("#loading").hide();
         } else {
@@ -91,12 +97,13 @@ function populateTableBodyBaseFinal(tbody,base_final) {
     
         // Define o HTML das células da linha com os dados correspondentes
         newRow.innerHTML = `
-            <td>${formatDate(item["data_carga"],'T')}</td>
-            <td>${item["processo"]}</td>
-            <td>${item["codigo_conjunto"]}</td>
-            <td>${item["codigo"]}</td>
-            <td>${item["descricao"]}</td>
-            <td>${item["qt_atualizada"]}</td>
+            <td data-title='Data da Carga'>${formatDate(item["data_carga"],'T')}</td>
+            <td data-title='Processo'>${item["processo"]}</td>
+            <td data-title='Código do Conjunto'>${item["codigo_conjunto"]}</td>
+            <td data-title='Descrição do Conjunto'>${item["peca"]}</td>
+            <td data-title='Código da Peça'>${item["codigo"]}</td>
+            <td data-title='Descrição da Peça'>${item["descricao"]}</td>
+            <td data-title='Quantidade Atualizada'>${item["qt_atualizada"]}</td>
         `;
     
         // Adiciona a nova linha ao corpo da tabela

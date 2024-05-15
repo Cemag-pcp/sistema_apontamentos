@@ -38,11 +38,8 @@
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
                     <div class="btn-group" role="group" aria-label="Criar OP">
-                        <button id="btnModalHistoricoLevantamento" type="button" class="btn btn-sm btn-info mr-2"
-                            data-toggle="modal" data-target="#modalHistoricoLevantamento">Histórico</button>
                         <button id="btnModalCarretasCadastradas" type="button" class="btn btn-sm btn-secondary mr-2"
                             data-toggle="modal" data-target="#modalCarretasCadastradas">Carretas</button>
-                        <button id="btnExportarResumo" type="button" class="btn btn-sm btn-primary">Resumo</button>
                     </div>
                 </div>
                 <br>
@@ -69,21 +66,33 @@
 
             <div class="card shadow mb-4" id="campoTable" style="display: none; font-size: 14px;">
                 <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <ul class="nav nav-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link active" onclick="changeTab('reuniao')" style="cursor: pointer; font-size: 14px; width: 150px;">Reunião</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" onclick="changeTab('baseFinal')" style="cursor: pointer; font-size: 14px; width: 150px;">Base atualizada</a>
-                        </li>
-                    </ul>
+                <div class="card-header py-3 d-flex bd-highlight mb-3 align-items-center">
+                    <div class="mr-auto p-2 bd-highlight">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" onclick="changeTab('reuniao')" style="cursor: pointer; font-size: 16px; width: 160px;">Reunião</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" onclick="changeTab('baseFinal')" style="cursor: pointer; font-size: 16px; width: 160px;">Base atualizada</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="row justify-content-end" id="filtros_resumo_reuniao" style="display: none;">
+                        <div class="p-2 bd-highlight">
+                            <label>Filtro Processo</label>
+                            <input type="text" id="filtrar_processo" class="form-control">
+                        </div>
+                        <div class="p-2 bd-highlight">
+                            <label>Filtrar Conjunto</label>
+                            <input type="text" id="filtrar_conjunto" class="form-control">
+                        </div>
+                    </div>
                 </div>
                 <!-- Card tabela a inspecionar -->
                 <div class="table-body" id="reuniaoTable">
                     <div id="no-more-tables">
                         <div class="table-responsive-header">
-                            <table class="table table-bordered" id="dataTableReuniao" width="100%" cellspacing="0">
+                            <table class="table table-bordered table-sticky" id="dataTableReuniao" width="100%" cellspacing="0">
                                 <thead class="theadConjuntoReuniao">
                                     <tr>
                                         <th>Produto</th>
@@ -105,14 +114,15 @@
                 <div class="table-body" id="baseFinalTable" style="display: none;">
                     <div id="no-more-tables">
                         <div class="table-responsive-header">
-                            <table class="table table-bordered" id="dataTableReuniao" width="100%" cellspacing="0">
+                            <table class="table table-bordered table-sticky" id="dataTableBaseFinal" width="100%" cellspacing="0">
                                 <thead class="theadConjuntoReuniao">
                                     <tr>
                                         <th>Data da Carga</th>
                                         <th>Processo</th>
                                         <th>Código do Conjunto</th>
+                                        <th>Descrição do Conjunto</th>
                                         <th>Código da Peça</th> 
-                                        <th>Descrição</th>
+                                        <th>Descrição da Peça</th>
                                         <th>Quantidade Atualizada</th>
                                     </tr>
                                 </thead>
@@ -149,7 +159,7 @@
                                         <th scope="col">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody id="bodyCarretasCadastradas">
+                                <tbody id="bodyCarretasCadastradasReuniao">
 
                                 </tbody>
                             </table>
@@ -309,5 +319,6 @@
     <script src="static/js/resumo-producao/modal_faltando_peca.js"></script>
     <script src="static/js/resumo-producao/resumo.js"></script>
     <script src="static/js/resumo-producao/filtros_resumo.js"></script>
+    <script src="static/js/resumo-producao/baixar-resumo.js"></script>
 
     {% endblock %}

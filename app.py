@@ -3414,34 +3414,10 @@ def buscar_planilha_saldo(filename):
 
     return tabela_saldo_mont
 
-@app.route('/consultar-carreta/levantamento', methods=['GET'])
-def consultar_carretas_levantamento():
-    """
-    Rota para enviar itens de ops ja criadas
-    """
+def consultar_carretas(data_inicial,data_final):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    # Obter o número da página atual do parâmetro da solicitação
-    page = request.args.get('page', 1, type=int)
-
-    # Obter o filtro OP do parâmetro da solicitação
-    data = request.args.get('data', None)
-    conjunto = request.args.get('conjunto', None)
-    celula = request.args.get('celula', None)
-    peca = request.args.get('peca', None)
-    mp = request.args.get('mp', None)
-
-    data_inicial = pd.to_datetime(data.split(' ')[0])
-    
-    data_final = data.split(' ')[2]
-    
-    if data_final == '':
-        data_final = data_inicial
-    else:
-        data_final = pd.to_datetime(data.split(' ')[2])
 
     dados_carga = buscar_dados(filename)
     dados_carga['PED_PREVISAOEMISSAODOC'] = pd.to_datetime(dados_carga['PED_PREVISAOEMISSAODOC'])
@@ -3469,6 +3445,35 @@ def consultar_carretas_levantamento():
 
     carretas_dentro_da_base=df_explodido.merge(dados_carga_data_filtrada,how='right',left_on='carreta',right_on='Carreta Trat')
     carretas_dentro_da_base = carretas_dentro_da_base[['Carreta Trat','carreta']].drop_duplicates().fillna('').values.tolist()
+
+    return df_final,carretas_dentro_da_base
+
+@app.route('/consultar-carreta/levantamento', methods=['GET'])
+def consultar_carretas_levantamento():
+    """
+    Rota para enviar itens de ops ja criadas
+    """
+
+    # Obter o número da página atual do parâmetro da solicitação
+    page = request.args.get('page', 1, type=int)
+
+    # Obter o filtro OP do parâmetro da solicitação
+    data = request.args.get('data', None)
+    conjunto = request.args.get('conjunto', None)
+    celula = request.args.get('celula', None)
+    peca = request.args.get('peca', None)
+    mp = request.args.get('mp', None)
+
+    data_inicial = pd.to_datetime(data.split(' ')[0])
+    
+    data_final = data.split(' ')[2]
+    
+    if data_final == '':
+        data_final = data_inicial
+    else:
+        data_final = pd.to_datetime(data.split(' ')[2])
+
+    df_final,carretas_dentro_da_base = consultar_carretas(data_inicial,data_final)
 
     df_final['quantidade'] = df_final['quantidade'] * df_final['PED_QUANTIDADE']
     
@@ -3652,9 +3657,6 @@ def consultar_historico_levantamento():
 @app.route('/baixar-resumo/levantamento', methods=['GET'])
 def baixar_resumo_levantamento():
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-
     data_inicial = request.args.get('dataInicio', None)
     data_final = request.args.get('dataFinal', None)
     
@@ -3828,8 +3830,6 @@ def tabela_resumo_estamparia(data_inicial, data_final):
 
     resumo_estamparia = resumo_estamparia[resumo_estamparia['carreta'].isin(carretas)]
 
-    
-
     base_recurso = saldo_recurso_levantamento()
 
     base_recurso = base_recurso[base_recurso['1o. Agrupamento'] == 'Almox Mont Carretas']
@@ -3868,7 +3868,7 @@ def tabela_resumo_estamparia(data_inicial, data_final):
             base_final['qt_atualizada'][i] = float(base_final['Saldo'][i]) - base_final['qt_faltante'][i]
             continue
 
-    base_final = base_final[base_final['qt_atualizada'] < 0]
+    base_final = base_final[(base_final['qt_atualizada'] < 0) & (base_final['qt_faltante'] != 0)]
 
     return base_final
 
@@ -3952,10 +3952,6 @@ def tabela_resumos():
         datainicio = request.args.get('datainicio') 
         datafim = request.args.get('datafim') 
 
-        dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
-
-        base_final = tabela_resumo_estamparia(datainicio, datafim)
-
         query_montagem = """
                         select distinct tbce.carreta,
                         tbce.processo,
@@ -4029,6 +4025,12 @@ def tabela_resumos():
         df_pintura = pd.read_sql_query(query_pintura,conn)
         df_montagem = pd.read_sql_query(query_montagem,conn)
 
+        dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
+
+        base_final = tabela_resumo_estamparia(datainicio, datafim)
+
+        df_final,carretas_dentro_da_base = consultar_carretas(datainicio,datafim)
+
         df_pintura = df_pintura.groupby(['data_carga','codigo','peca','celula']).sum().reset_index()
 
         planilha_cargas = dados_explodido
@@ -4054,7 +4056,6 @@ def tabela_resumos():
 
         ##########################################
         df_final_com_codigos = carga_e_montagem.merge(pintura_agrupada, how='left', left_on=['data_carga','codigo_tratado'], right_on=['data_carga','codigo'])
-        print(df_final_com_codigos.columns)
         df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura','qtd_carretas']].sum()
         ##########################################
 
@@ -4073,59 +4074,6 @@ def tabela_resumos():
                 aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
                 fill_value=''
         )
-
-        # tb_agrupada.rename(columns={'qt_faltante': 'Total Faltante'}, inplace=True)
-
-        # Realizando o merge entre carga_e_montagem e tb_agrupada
-        # carga_e_montagem = carga_e_montagem.merge(montagem_agrupada, on=['data_carga', 'carreta', 'processo'], how='left')
-        
-        # carga_e_montagem['codigo_tratado'] = carga_e_montagem['codigo_tratado'].astype(str)
-        
-        # join_dfs = df_pintura.merge(carga_e_montagem, how='left', left_on=['codigo', 'data_carga'], right_on=['codigo_tratado', 'data_carga'])
-
-        # tb_agrupado_pintura = join_dfs.groupby(['data_carga', 'carreta', 'processo'])['qt_faltante_pintura'].sum().reset_index()
-
-        # # Renomeando a coluna resultante para 'Total Faltante Pintura'
-        # tb_agrupado_pintura.rename(columns={'qt_faltante_pintura': 'Total Faltante Pintura'}, inplace=True)
-
-        # # Realizando o merge de volta para join_dfs
-        # join_dfs = join_dfs.merge(tb_agrupado_pintura, on=['data_carga', 'carreta'], how='left')
-
-        # print(join_dfs[join_dfs['carreta'] == 'CBHM5000 CA SC RD MM M17'])
-
-        # # join_dfs.to_csv('resumo.csv')
-        
-        # join_dfs = join_dfs[join_dfs['carreta'].isin(carretas)]
-
-        # resumos_teste = join_dfs
-
-        # resumos_teste['status_montagem'] = resumos_teste['Total Faltante'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
-        # resumos_teste['qt_faltante_pintura'] = resumos_teste['qt_faltante_pintura'].fillna(0)
-        # resumos_teste['status_solda'] = resumos_teste.apply(lambda row: verificar_status(row,'S - {}'), axis=1)
-        # resumos_teste['status_pintura'] = resumos_teste.apply(lambda row: verificar_status(row,'P - {}'), axis=1)
-        # resumos_teste['status_geral'] = 'M: ' + resumos_teste['status_montagem'] + 'S: ' + resumos_teste['status_solda'] + 'P: ' + resumos_teste['status_pintura']
-        # resumos_teste['Quantidade Faltante'] = abs(resumos_teste['qt_faltante_pintura'] - resumos_teste['qt_faltante'])
-
-        # alterar_nomes = {
-        #     'carreta': 'Carreta',
-        #     'data_carga': 'Data da Carga',
-        #     'codigo_conjunto': 'Codigo da Montagem',
-        #     'qt_planejada_x':'Quantidade Planejada',
-        #     'peca_x': 'Descrição',
-        #     'codigo_tratado': 'Codigo da Pintura'
-        # }
-
-        # resumos_teste.rename(columns=alterar_nomes,inplace=True)
-
-        # # resumos_teste.to_csv('resumo.csv')
-
-        # df_pivot = resumos_teste[['Carreta','Data da Carga','processo_x','status_geral']].pivot_table(
-        #     index=['Carreta', 'Data da Carga'],
-        #         columns='processo_x',
-        #         values='status_geral',
-        #         aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
-        #         fill_value=''
-        # )
         
         df_pivot = df_pivot.sort_values(by=['data_carga', 'carreta'], ascending=[True, True])
         
@@ -4138,17 +4086,18 @@ def tabela_resumos():
             'data':json_data,
             'colunas':colunas,
             'df_com_codigos':df_final_com_codigos_list,
-            'base_final':base_final.to_dict(orient='records')
+            'base_final':base_final.to_dict(orient='records'),
+            'carretas_dentro_da_base':carretas_dentro_da_base
          })
 
     except Exception as e:
-        print("O erro foi ",e)
+        print("ERRO ", e)
         if df_pintura.empty: 
             return jsonify('Pintura')
         elif df_montagem.empty:
             return jsonify('Montagem')
         else:
-            return jsonify(e)
+            return jsonify('Verifique se contém carga para esse dia')
 
 @app.route('/pecas_conjunto')
 def pecas_conjunto():

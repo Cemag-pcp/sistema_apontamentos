@@ -65,7 +65,8 @@
     height: 600px;
     overflow-y: auto;
 }
-.table thead th {
+
+.table-sticky thead th {
     position: sticky;
     top: 0;
     z-index: 1; 
