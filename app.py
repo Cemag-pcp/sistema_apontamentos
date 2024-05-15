@@ -4409,6 +4409,36 @@ def adicionar_operador_bases():
         return jsonify({'verificacao_insert':"Cadastrado com sucesso!"})
 
 
+### teste api depois apaga
+
+@app.route('/receber_dataframe_nf_compras', methods=['POST'])
+def receber_dataframe():
+    # Verificar se os dados JSON foram recebidos corretamente
+    if not request.json:
+        return jsonify({'error': 'Dados JSON ausentes'}), 400
+
+    # Obter os dados JSON recebidos
+    data = request.json
+
+    # Criar um DataFrame a partir dos dados
+    df = pd.DataFrame(json.loads(data))
+
+    gc = gspread.service_account(filename='service_account.json')
+
+    # Abra a planilha com base no ID
+    planilha = gc.open_by_key("1ukzOH-ERdJlGMvZjau1ivTrgqOlxOWUhlPsXLY0Y0nY")
+
+    # Acessar a aba "BD_saldo_diario"
+    aba = planilha.worksheet("NFe 2024")
+    
+    df_values = df.values.tolist()
+        
+    aba.append_rows(df_values)
+
+    return jsonify({'message': 'DataFrame recebido com sucesso'}), 200
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
