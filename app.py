@@ -4044,11 +4044,11 @@ def tabela_resumos():
 
         # Realizar o merge:
         carga_e_montagem = pd.merge(df_montagem, planilha_cargas, on=['carreta', 'data_carga'], how='inner')
-        carga_e_montagem = carga_e_montagem.rename(columns={'qt_planejada':'qt_planejada_montagem','qt_faltante':'qt_faltante_montagem','PED_QUANTIDADE':'qtd_carretas'})
+        carga_e_montagem = carga_e_montagem.rename(columns={'qt_planejada':'qt_planejada_montagem','qt_faltante':'qt_faltante_montagem','PED_QUANTIDADE':'Qtd. Carretas'})
         carga_e_montagem = carga_e_montagem.drop(columns=['celula','codigo_conjunto'])
 
         ############# QUANTIDADE FALTANTE MONTAGEM ##################
-        # montagem_agrupada = carga_e_montagem.groupby(['processo', 'carreta', 'data_carga'])[['qt_faltante_montagem','qtd_carretas']].sum().reset_index()
+        # montagem_agrupada = carga_e_montagem.groupby(['processo', 'carreta', 'data_carga'])[['qt_faltante_montagem','Qtd. Carretas']].sum().reset_index()
         
         ############# QUANTIDADE FALTANTE PINTURA ##################
         df_pintura['codigo'] = df_pintura['codigo'].astype(str)
@@ -4056,7 +4056,7 @@ def tabela_resumos():
 
         ##########################################
         df_final_com_codigos = carga_e_montagem.merge(pintura_agrupada, how='left', left_on=['data_carga','codigo_tratado'], right_on=['data_carga','codigo'])
-        df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura','qtd_carretas']].sum()
+        df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga','Qtd. Carretas'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum()
         ##########################################
 
         # Lógica de status
@@ -4067,15 +4067,17 @@ def tabela_resumos():
         
         df_final_com_processos = df_final_com_processos.reset_index()
 
-        df_pivot = df_final_com_processos[['carreta','data_carga','processo','status_geral']].pivot_table(
-            index=['carreta', 'data_carga'],
+        df_final_com_processos = df_final_com_processos.rename(columns={'data_carga': 'Data Carga', 'carreta': 'Carreta'})
+
+        df_pivot = df_final_com_processos[['Carreta','Data Carga','processo','Qtd. Carretas','status_geral']].pivot_table(
+            index=['Carreta', 'Data Carga','Qtd. Carretas'],
                 columns='processo',
                 values='status_geral',
                 aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
                 fill_value=''
         )
         
-        df_pivot = df_pivot.sort_values(by=['data_carga', 'carreta'], ascending=[True, True])
+        df_pivot = df_pivot.sort_values(by=['Data Carga', 'Carreta'], ascending=[True, True])
         
         json_data = df_pivot.reset_index().values.tolist()
         df_final_com_codigos.fillna('', inplace=True)

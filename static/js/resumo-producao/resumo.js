@@ -19,7 +19,7 @@ function getResumo() {
                 return
             } else if(response ==='Pintura' || response === 'Montagem'){
                 buildTable('','','','')
-                alert("Não possui dados de" + response +"nesse intervalo de data")
+                alert("Não possui dados de " + response +" nesse intervalo de data")
                 $("#loading").hide();
                 return
             }
@@ -35,7 +35,7 @@ function getResumo() {
             $('#bodyCarretasCadastradasReuniao').empty();
             // Manipular os dados recebidos da API aqui
             carretCadastradas('#bodyCarretasCadastradasReuniao',carretas_dentro_da_base);
-            // baixar_resumo(dataInicial,dataFinal)
+            baixar_resumo(dataInicial,dataFinal)
             buildTable(data,colunas,df_com_codigos,base_final)
             $("#loading").hide();
         } else {
