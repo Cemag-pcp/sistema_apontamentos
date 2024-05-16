@@ -7,7 +7,7 @@ import psycopg2  # pip install psycopg2
 import psycopg2.extras
 from psycopg2.extras import execute_values
 from datetime import datetime, timedelta, date
-from oauth2client.service_account import ServiceAccountCredentials
+# from oauth2client.service_account import ServiceAccountCredentials
 import cachetools
 import uuid
 import gspread
@@ -3789,7 +3789,7 @@ def tabela_resumo_estamparia(data_inicial, data_final):
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query = f"""
+    dados_explodido, carretas = carretas_planilha_carga(data_inicial, data_final)
 
     query = """
             select distinct tbce.carreta,
@@ -3839,7 +3839,7 @@ def tabela_resumo_estamparia(data_inicial, data_final):
                 WHERE tbce.codigo_pintura <> 'Excluir' OR tbce.codigo_pintura IS NULL OR tbce.codigo_pintura = ''
                 """.format(data_inicial,data_final)
 
-    resumo_estamparia = pd.read_sql_query(query_montagem,conn)
+    resumo_estamparia = pd.read_sql_query(query,conn)
     resumo_estamparia = resumo_estamparia.sort_values(by=['data_carga','celula'], ascending=True)
 
     resumo_estamparia = resumo_estamparia[resumo_estamparia['carreta'].isin(carretas)]
