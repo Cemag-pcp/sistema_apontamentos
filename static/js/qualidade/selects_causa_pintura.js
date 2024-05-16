@@ -95,4 +95,3 @@ document.getElementById("n_conformidades").addEventListener("input", function() 
 document.getElementById("n_conformidades_reinspecao").addEventListener("input", () => {
     adicionarSelects("n_nao_conformidades_reinspecao","coluna_causa_reinspecao","campo_arquivos_reinspecao");
 });
-
