@@ -3762,7 +3762,7 @@ def adicionar_operador_bases():
 
     cur.execute(sql_verificar,(matricula,))
     data_verificacao = cur.fetchall()
-
+    # //
     if len(data_verificacao) > 0:
         return jsonify({'verificacao_consulta':"Matrícula ja existe!"})
     
