@@ -38,11 +38,8 @@
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
                     <div class="btn-group" role="group" aria-label="Criar OP">
-                        <button id="btnModalHistoricoLevantamento" type="button" class="btn btn-sm btn-info mr-2"
-                            data-toggle="modal" data-target="#modalHistoricoLevantamento">Histórico</button>
                         <button id="btnModalCarretasCadastradas" type="button" class="btn btn-sm btn-secondary mr-2"
                             data-toggle="modal" data-target="#modalCarretasCadastradas">Carretas</button>
-                        <button id="btnExportarResumo" type="button" class="btn btn-sm btn-primary">Resumo</button>
                     </div>
                 </div>
                 <br>
@@ -69,24 +66,33 @@
 
             <div class="card shadow mb-4" id="campoTable" style="display: none; font-size: 14px;">
                 <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Conjuntos</h6>
-                    <div class="mb-3">
-                        <label for="filtrar_carreta" class="form-label f-14">Filtrar Carreta</label>
-                        <input type="text" class="form-control form-control-sm" id="filtrar_carreta">
+                <div class="card-header py-3 d-flex bd-highlight mb-3 align-items-center">
+                    <div class="mr-auto p-2 bd-highlight">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" onclick="changeTab('reuniao')" style="cursor: pointer; font-size: 16px; width: 160px;">Reunião</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" onclick="changeTab('baseFinal')" style="cursor: pointer; font-size: 16px; width: 160px;">Base atualizada</a>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="form-check form-check-reverse">
-                        <input class="form-check-input" type="checkbox" value="" id="filtro_faltando_pecas">
-                        <label class="form-check-label" for="filtro_faltando_pecas">
-                          Faltando Peças
-                        </label>
+                    <div class="row justify-content-end" id="filtros_resumo_reuniao" style="display: none;">
+                        <div class="p-2 bd-highlight">
+                            <label>Filtro Processo</label>
+                            <input type="text" id="filtrar_processo" class="form-control">
+                        </div>
+                        <div class="p-2 bd-highlight">
+                            <label>Filtrar Conjunto</label>
+                            <input type="text" id="filtrar_conjunto" class="form-control">
+                        </div>
                     </div>
                 </div>
                 <!-- Card tabela a inspecionar -->
-                <div class="card-body" id="reuniaoTables">
+                <div class="table-body" id="reuniaoTable">
                     <div id="no-more-tables">
                         <div class="table-responsive-header">
-                            <table class="table table-bordered" id="dataTableReuniao" width="100%" cellspacing="0">
+                            <table class="table table-bordered table-sticky" id="dataTableReuniao" width="100%" cellspacing="0">
                                 <thead class="theadConjuntoReuniao">
                                     <tr>
                                         <th>Produto</th>
@@ -99,6 +105,28 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tbodyConjuntoReuniao" >
+                                
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-body" id="baseFinalTable" style="display: none;">
+                    <div id="no-more-tables">
+                        <div class="table-responsive-header">
+                            <table class="table table-bordered table-sticky" id="dataTableBaseFinal" width="100%" cellspacing="0">
+                                <thead class="theadConjuntoReuniao">
+                                    <tr>
+                                        <th>Data da Carga</th>
+                                        <th>Processo</th>
+                                        <th>Código do Conjunto</th>
+                                        <th>Descrição do Conjunto</th>
+                                        <th>Código da Peça</th> 
+                                        <th>Descrição da Peça</th>
+                                        <th>Quantidade Atualizada</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyBaseFinal" >
                                 
                                 </tbody>
                             </table>
@@ -131,7 +159,7 @@
                                         <th scope="col">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody id="bodyCarretasCadastradas">
+                                <tbody id="bodyCarretasCadastradasReuniao">
 
                                 </tbody>
                             </table>
@@ -147,7 +175,7 @@
                 <div class="modal-dialog modal-lg" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="infoModalLabel">********</h5>
+                            <h5 class="modal-title" id="infoModalLabel"></h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -159,28 +187,22 @@
                                     <input type="date" name="data_carga" id="data_carga" class="form-control" disabled>
                                 </div>
                                 <div class="col-sm-6 mb-4">
-                                    <label for="codigo_conjunto">Código Conjunto:</label>
-                                    <input type="text" name="codigo_conjunto" id="codigo_conjunto" class="form-control" disabled>
-                                </div>
-                                <div class="col-sm-4 mb-4" style="display: none;">
-                                    <label for="qtd_carreta">Quantidade de Carreta:</label>
-                                    <input type="text" name="qtd_carreta" id="qtd_carreta" class="form-control" disabled>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-6 mb-4">
                                     <label for="data_carga">Carreta:</label>
                                     <input type="text" name="carreta_conjunto" id="carreta_conjunto" class="form-control" disabled>
                                 </div>
-                                <div class="col-sm-6 mb-4">
-                                    <label for="codigo_conjunto">Quantidade Planejada:</label>
-                                    <input type="number" name="quantidade_conjunto" id="quantidade_conjunto" class="form-control" disabled>
-                                </div>
                             </div>
                             <hr>
-                            <h6 id="informacoes_pecas" class="m-0 font-weight-bold text-primary"></h6>
+                            <h6 id="informacoes_conjuntos" class="m-0 font-weight-bold text-primary"></h6>
                             <hr>
-                            <div id="formContainer"></div>
+                            <div id="formContainerConjunto">
+
+                            </div>
+                            <hr>
+                            <h6 id="informacoes_pecas" class="m-0 font-weight-bold text-primary">Peças Faltantes</h6>
+                            <hr>
+                            <div id="formContainerPecas">
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -294,7 +316,9 @@
     <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="static/js/demo/datatables-demo.js"></script>
+    <script src="static/js/resumo-producao/modal_faltando_peca.js"></script>
     <script src="static/js/resumo-producao/resumo.js"></script>
     <script src="static/js/resumo-producao/filtros_resumo.js"></script>
+    <script src="static/js/resumo-producao/baixar-resumo.js"></script>
 
     {% endblock %}

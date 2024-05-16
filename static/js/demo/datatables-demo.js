@@ -48,11 +48,11 @@ $(document).ready(function() {
   });
 });
 
-$(document).ready(function(){
-  $('#dataTableReuniao').DataTable({
-    "info":false,
-    "aLengthMenu":[5,10,25],
-    "iDisplayLength":10,
-    order: [[0, 'desc']]
-  })
-})
+// $(document).ready(function(){
+//   $('#dataTableReuniao').DataTable({
+//     "info":false,
+//     "aLengthMenu":[5,10,25],
+//     "iDisplayLength":10,
+//     order: [[0, 'desc']]
+//   })
+// })

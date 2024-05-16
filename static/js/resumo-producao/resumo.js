@@ -12,13 +12,34 @@ function getResumo() {
     xhr.onload = function() {
         if (xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
+            if(response == 'Verifique se contém carga para esses dias'){
+                buildTable('','','','')
+                alert(response)
+                $("#loading").hide();
+                return
+            } else if(response ==='Pintura' || response === 'Montagem'){
+                buildTable('','','','')
+                alert("Não possui dados de " + response +" nesse intervalo de data")
+                $("#loading").hide();
+                return
+            }
+
             var data = response.data;
             var colunas = response.colunas;
+            var df_com_codigos = response.df_com_codigos;
+            var base_final = response.base_final;
+            var carretas_dentro_da_base = response.carretas_dentro_da_base;
+            
+            console.log(base_final)
+
+            $('#bodyCarretasCadastradasReuniao').empty();
             // Manipular os dados recebidos da API aqui
-            buildTable(data,colunas)
+            carretCadastradas('#bodyCarretasCadastradasReuniao',carretas_dentro_da_base);
+            baixar_resumo(dataInicial,dataFinal)
+            buildTable(data,colunas,df_com_codigos,base_final)
             $("#loading").hide();
         } else {
-            console.error('Erro ao chamar a API:', xhr.statusText);
+            console.error('Erro ao chamar a API:', response);
             $("#loading").hide();
         }
     };
@@ -29,32 +50,38 @@ function getResumo() {
     xhr.send();
 };
 
-document.addEventListener('DOMContentLoaded',function(){
+document.addEventListener('DOMContentLoaded',function() {
     var botaoFiltrar = document.getElementById('filtrar_datas');
     botaoFiltrar.addEventListener('click',function () {
-        document.getElementById('filtro_faltando_pecas').checked = false
+        // document.getElementById('filtro_faltando_pecas').checked = false
         getResumo();
     })
 })
 
-function buildTable(jsonData,colunas) {
+function buildTable(jsonData,colunas,df_com_codigos,base_final) {
     const thead = document.querySelector('#dataTableReuniao thead tr');
     const tbody = document.querySelector('#tbodyConjuntoReuniao');
+    const tbodyBaseFinal = document.querySelector('#tbodyBaseFinal');
     const campoTable = document.getElementById('campoTable');
 
     campoTable.style.display = 'block';
     thead.innerHTML = '';
     tbody.innerHTML = '';
-
-    populateTableHeader(thead, colunas);
-    populateTableBody(tbody, jsonData, colunas);
+    tbodyBaseFinal.innerHTML = '';
+    
+    if(colunas !== '') {
+        populateTableHeader(thead, colunas);
+        populateTableBodyReuniao(tbody, jsonData, colunas, df_com_codigos);
+    } if(base_final !== ''){
+        populateTableBodyBaseFinal(tbodyBaseFinal,base_final)
+    }
 }
 
 function populateTableHeader(thead, columnNames) {
     columnNames.forEach(name => {
         const th = document.createElement('th');
         th.textContent = name;
-        if(name === 'Quantidade de Carretas'){
+        if(name === 'Quantidade de Carretas') {
             th.style.display = 'none';
         }
         th.style.minWidth = '100px'
@@ -62,21 +89,39 @@ function populateTableHeader(thead, columnNames) {
     });
 }
 
-function populateTableBody(tbody, jsonData, columnNames) {
+function populateTableBodyBaseFinal(tbody,base_final) {
+
+    base_final.forEach(function(item) {
+        // Cria uma nova linha da tabela
+        var newRow = document.createElement("tr");
+    
+        // Define o HTML das células da linha com os dados correspondentes
+        newRow.innerHTML = `
+            <td data-title='Data da Carga'>${formatDate(item["data_carga"],'T')}</td>
+            <td data-title='Processo'>${item["processo"]}</td>
+            <td data-title='Código do Conjunto'>${item["codigo_conjunto"]}</td>
+            <td data-title='Descrição do Conjunto'>${item["peca"]}</td>
+            <td data-title='Código da Peça'>${item["codigo"]}</td>
+            <td data-title='Descrição da Peça'>${item["descricao"]}</td>
+            <td data-title='Quantidade Atualizada'>${item["qt_atualizada"]}</td>
+        `;
+    
+        // Adiciona a nova linha ao corpo da tabela
+        tbody.appendChild(newRow);
+    });
+}
+
+function populateTableBodyReuniao(tbody, jsonData, columnNames,df_com_codigos) {
     jsonData.forEach(row => {
-        console.log(row)
         const tr = document.createElement('tr');
         row.forEach((cell, index) => {
             const td = document.createElement('td');
             td.setAttribute('data-title', columnNames[index]);
             let cellContent = cell;
             if (typeof cell === 'string' && (cell.includes('P:') || cell.includes('M:'))) {
-                // Substitui 'P:' por '<br>P:' para adicionar quebra de linha no HTML
                 cellContent = cell.replace('M:', '<br>M:').replace('P:', '<br>P:');
             }
-
-            // Verifica se a célula precisa de formatação especial para zero
-            if (cellContent || columnNames[index] === "Quantidade Faltante") {
+            if (cellContent) {
                 td.innerHTML = cellContent || "0";
                 if (cellContent === row[1]) {
                     td.innerHTML = formatDate(cellContent,'T')
@@ -84,7 +129,7 @@ function populateTableBody(tbody, jsonData, columnNames) {
                 if (typeof cell === 'string' && cell.includes('FP -')) {
                     td.classList.add('fp-highlight');
                     td.addEventListener('click', function() {
-                        openModal(row);
+                        openModal(row, columnNames[index],df_com_codigos);
                     });
                 }
             }
@@ -107,63 +152,4 @@ function formatDate(dataString,parameter) {
     } else {
         return dia + '/' + mes + '/' + ano;
     }
-}
-
-function openModal(row) {
-
-    $("#loading").show();
-    $("#infoModalLabel").text(row[3])
-    $("#informacoes_pecas").text("Informações das peças ref. o conjunto - " + row[3])
-    // Pega os elementos de input pelo ID
-    document.getElementById('data_carga').value = formatDate(row[1],'I') || '';
-    document.getElementById('codigo_conjunto').value = row[2];
-    document.getElementById('carreta_conjunto').value = row[0] || '';
-    document.getElementById('quantidade_conjunto').value = row[5] || '0'; // Coluna 'Quantidade' preenchida com '0' se vazia
-    document.getElementById('qtd_carreta').value = row[6] || '0';
-    
-    $.ajax({
-        url: '/pecas_conjunto',
-        type: 'POST',  // Alterado para POST
-        dataType: 'json',
-        contentType: 'application/json',
-        data: JSON.stringify({'codigo_conjunto': row[2] ,'carreta_conjunto':row[0]}),  // Enviando um objeto JSON
-        success: function(response) {
-            console.log(response);
-            
-            $('#formContainer').empty();
-
-            response.forEach(function(item,index) {
-                const html = `
-                    <div class="row">
-                        <div class="col-sm-6 mb-4">
-                            <label for="codigo_conjunto_${index}">Codigo da Peça:</label>
-                            <input type="text" name="codigo_conjunto_${index}" id="codigo_conjunto_${index}" value="${item[0]}" class="form-control" disabled>
-                        </div>
-                        <div class="col-sm-6 mb-4">
-                            <label for="descricao_conjunto_${index}">Descrição da Peça:</label>
-                            <input type="text" name="descricao_conjunto_${index}" id="descricao_conjunto_${index}" value="${item[1]}" class="form-control" disabled>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-6 mb-4">
-                            <label for="materia_prima_${index}">Matéria Prima:</label>
-                            <input type="text" name="materia_prima_${index}" id="materia_prima_${index}" value="${item[2]}" class="form-control" disabled>
-                        </div>
-                        <div class="col-sm-6 mb-4">
-                            <label for="qt_pecas_${index}">Quantidade de Peças:</label>
-                            <input type="text" name="qt_pecas_${index}" id="qt_pecas_${index}" value="${item[3] * row[5]}" class="form-control" disabled>
-                        </div>
-                    </div>
-                    <hr>`;
-                $('#formContainer').append(html);
-            })
-            
-            $("#loading").hide();
-            $('#infoModal').modal('show');
-        },
-        error: function(error) {
-            console.log(error);
-            $("#loading").hide();
-        }
-    });
 }

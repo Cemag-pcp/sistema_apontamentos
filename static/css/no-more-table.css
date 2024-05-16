@@ -62,12 +62,13 @@
 }
 
 .table-responsive-header {
-    height: 600px; /* Ajuste essa altura conforme necessário */
+    height: 600px;
     overflow-y: auto;
 }
-.table thead th {
+
+.table-sticky thead th {
     position: sticky;
     top: 0;
-    z-index: 1; /* Isso garante que o cabeçalho fique sobre o corpo da tabela ao rolar */
-    background-color: #fff; /* Cor de fundo para evitar transparência */
+    z-index: 1; 
+    background-color: #fff;
 }

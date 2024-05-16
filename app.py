@@ -7,10 +7,12 @@ import psycopg2  # pip install psycopg2
 import psycopg2.extras
 from psycopg2.extras import execute_values
 from datetime import datetime, timedelta, date
+from oauth2client.service_account import ServiceAccountCredentials
 import cachetools
 import uuid
 import gspread
 import warnings
+from collections import defaultdict
 # from flask_socketio import SocketIO, emit
 # from threading import Lock
 import json
@@ -33,6 +35,7 @@ filename = "service_account.json"
 
 cache_historico_pintura = cachetools.LRUCache(maxsize=128)
 cache_carretas = cachetools.LRUCache(maxsize=128)
+cache_saldo = cachetools.LRUCache(maxsize=128)
 
 def resetar_cache(cache):
 
@@ -3395,34 +3398,40 @@ def buscar_dados(filename):
 
     return base_carretas
 
-@app.route('/consultar-carreta/levantamento', methods=['GET'])
-def consultar_carretas_levantamento():
+@cachetools.cached(cache_saldo)
+def buscar_planilha_saldo(filename):
+
     """
-    Rota para enviar itens de ops ja criadas
+    Função para acessar google sheets via api e
+    buscar dados da base de carretas.
     """
+
+    sheet_id = '1u2Iza-ocp6ROUBXG9GpfHvEJwLHuW7F2uiO583qqLIE'
+    worksheet1 = 'saldo de recurso'
+
+    sa = gspread.service_account(filename)
+    sh = sa.open_by_key(sheet_id)
+
+    wks = sh.worksheet(worksheet1)
+
+    headers = wks.row_values(1)
+
+    tabela = wks.get()
+    tabela = pd.DataFrame(tabela)
+    tabela_saldo = tabela.set_axis(headers, axis=1)[1:]
+
+    # Filtrar linhas onde a coluna '1o. Agrupamento' é 'Almox Mont Carretas'
+    tabela_saldo_mont = tabela_saldo[tabela_saldo['1o. Agrupamento'] == 'Almox Mont Carretas']
+
+    # Selecionar apenas as colunas 'codigo_peca' e 'Saldo'
+    tabela_saldo_mont = tabela_saldo_mont[['codigo_peca', 'Saldo']]
+
+    return tabela_saldo_mont
+
+def consultar_carretas(data_inicial,data_final):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    # Obter o número da página atual do parâmetro da solicitação
-    page = request.args.get('page', 1, type=int)
-
-    # Obter o filtro OP do parâmetro da solicitação
-    data = request.args.get('data', None)
-    conjunto = request.args.get('conjunto', None)
-    celula = request.args.get('celula', None)
-    peca = request.args.get('peca', None)
-    mp = request.args.get('mp', None)
-
-    data_inicial = pd.to_datetime(data.split(' ')[0])
-    
-    data_final = data.split(' ')[2]
-    
-    if data_final == '':
-        data_final = data_inicial
-    else:
-        data_final = pd.to_datetime(data.split(' ')[2])
 
     dados_carga = buscar_dados(filename)
     dados_carga['PED_PREVISAOEMISSAODOC'] = pd.to_datetime(dados_carga['PED_PREVISAOEMISSAODOC'])
@@ -3450,6 +3459,35 @@ def consultar_carretas_levantamento():
 
     carretas_dentro_da_base=df_explodido.merge(dados_carga_data_filtrada,how='right',left_on='carreta',right_on='Carreta Trat')
     carretas_dentro_da_base = carretas_dentro_da_base[['Carreta Trat','carreta']].drop_duplicates().fillna('').values.tolist()
+
+    return df_final,carretas_dentro_da_base
+
+@app.route('/consultar-carreta/levantamento', methods=['GET'])
+def consultar_carretas_levantamento():
+    """
+    Rota para enviar itens de ops ja criadas
+    """
+
+    # Obter o número da página atual do parâmetro da solicitação
+    page = request.args.get('page', 1, type=int)
+
+    # Obter o filtro OP do parâmetro da solicitação
+    data = request.args.get('data', None)
+    conjunto = request.args.get('conjunto', None)
+    celula = request.args.get('celula', None)
+    peca = request.args.get('peca', None)
+    mp = request.args.get('mp', None)
+
+    data_inicial = pd.to_datetime(data.split(' ')[0])
+    
+    data_final = data.split(' ')[2]
+    
+    if data_final == '':
+        data_final = data_inicial
+    else:
+        data_final = pd.to_datetime(data.split(' ')[2])
+
+    df_final,carretas_dentro_da_base = consultar_carretas(data_inicial,data_final)
 
     df_final['quantidade'] = df_final['quantidade'] * df_final['PED_QUANTIDADE']
     
@@ -3633,22 +3671,19 @@ def consultar_historico_levantamento():
 @app.route('/baixar-resumo/levantamento', methods=['GET'])
 def baixar_resumo_levantamento():
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-
     data_inicial = request.args.get('dataInicio', None)
     data_final = request.args.get('dataFinal', None)
     
-    # resumo_montagem = tabela_resumo_montagem(data_inicial, data_final)
-    # resumo_pintura = tabela_resumo_pintura(data_inicial, data_final)
+    # # resumo_montagem = tabela_resumo_montagem(data_inicial, data_final)
+    # # resumo_pintura = tabela_resumo_pintura(data_inicial, data_final)
     resumo_estamparia = tabela_resumo_estamparia(data_inicial, data_final)
 
 
     # Crie um objeto ExcelWriter para escrever em um arquivo Excel temporário
     with pd.ExcelWriter('planilha.xlsx') as writer:
         # Escreva cada DataFrame em uma aba separada
-        # resumo_montagem.to_excel(writer, sheet_name='Resumo Montagem', index=False)
-        # resumo_pintura.to_excel(writer, sheet_name='Resumo Pintura', index=False)
+        # # resumo_montagem.to_excel(writer, sheet_name='Resumo Montagem', index=False)
+        # # resumo_pintura.to_excel(writer, sheet_name='Resumo Pintura', index=False)
         resumo_estamparia.to_excel(writer, sheet_name='Resumo Estamparia', index=False)
 
     # Salva a planilha em um arquivo temporário
@@ -3754,63 +3789,75 @@ def tabela_resumo_estamparia(data_inicial, data_final):
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    dados_explodido, carretas = carretas_planilha_carga(data_inicial, data_final)
+    query = f"""
 
-    query_montagem = """
-                    select distinct tbce.carreta,
-                    tbce.processo,
-                    t1.data_carga,
-                    t1.celula,
-                    t1.codigo_conjunto,
-                    tbce.codigo,
-                    tbce.descricao,
-                    t1.peca,
-                    t1.qt_planejada,
-                    t1.qt_apontada_montagem,
-                    t1.qt_faltante,
-                    CASE
-                        WHEN tbce.codigo_pintura = '' or tbce.codigo_pintura ISNULL THEN t1.codigo_conjunto
-                        ELSE tbce.codigo_pintura
-                    END AS codigo_tratado,
-                    t1.peca AS descricao_tratada
-                FROM(
-                    SELECT 
-                        gom.data_carga,
-                        gom.celula,
-                        gom.codigo as codigo_conjunto,
-                        gom.peca,
-                        SUM(gom.qt_planejada) / COUNT(gom.qt_planejada) as qt_planejada,
-                        --SUM(gom.qt_planejada) as qt_planejada,
-                        COALESCE(SUM(om.qt_apontada), 0) as qt_apontada_montagem,
-                        (
-                            SUM(gom.qt_planejada) / COUNT(gom.qt_planejada)
-                            -
-                            COALESCE(SUM(om.qt_apontada), 0)
-                        ) AS qt_faltante
-                    FROM pcp.gerador_ordens_montagem gom
-                    LEFT JOIN pcp.ordens_montagem om ON gom.codigo = om.codigo 
-                                                        AND gom.data_carga = om.data_carga 
-                                                        AND gom.celula = om.celula
-                    WHERE gom.data_carga BETWEEN '{}' AND '{}' AND gom.celula not in ('CONJ INTERMED','CUBO DE RODA','QUALIDADE','FILIPE SILVA SANTOS','Carpintaria','ESTAMPARIA') 
-                    GROUP BY 
-                        gom.data_carga,
-                        gom.celula,
-                        gom.codigo,
-                        gom.peca
-                    ) as t1
-                    left join pcp.tb_base_carretas_explodidas tbce on
-                    tbce.conjunto = t1.codigo_conjunto
-                    WHERE tbce.codigo_pintura IS NULL OR tbce.codigo_pintura = ''
-                    """.format(data_inicial,data_final)
+    query = """
+            select distinct tbce.carreta,
+            tbce.processo,
+            t1.data_carga,
+            t1.celula,
+            t1.codigo_conjunto,
+            tbce.codigo,
+            tbce.descricao,
+            tbce.quantidade,
+            t1.peca,
+            t1.qt_planejada,
+            t1.qt_apontada_montagem,
+            t1.qt_faltante,
+            CASE
+                WHEN tbce.codigo_pintura = '' or tbce.codigo_pintura ISNULL THEN t1.codigo_conjunto
+                ELSE tbce.codigo_pintura
+            END AS codigo_tratado,
+            t1.peca AS descricao_tratada
+            FROM(
+                SELECT 
+                    gom.data_carga,
+                    gom.celula,
+                    gom.codigo as codigo_conjunto,
+                    gom.peca,
+                    SUM(gom.qt_planejada) / COUNT(gom.qt_planejada) as qt_planejada,
+                    --SUM(gom.qt_planejada) as qt_planejada,
+                    COALESCE(SUM(om.qt_apontada), 0) as qt_apontada_montagem,
+                    (
+                        SUM(gom.qt_planejada) / COUNT(gom.qt_planejada)
+                        -
+                        COALESCE(SUM(om.qt_apontada), 0)
+                    ) AS qt_faltante
+                FROM pcp.gerador_ordens_montagem gom
+                LEFT JOIN pcp.ordens_montagem om ON gom.codigo = om.codigo 
+                                                    AND gom.data_carga = om.data_carga 
+                                                    AND gom.celula = om.celula
+                WHERE gom.data_carga BETWEEN '{}' AND '{}' AND gom.celula not in ('CONJ INTERMED','CUBO DE RODA','QUALIDADE','FILIPE SILVA SANTOS','Carpintaria','ESTAMPARIA') 
+                GROUP BY 
+                    gom.data_carga,
+                    gom.celula,
+                    gom.codigo,
+                    gom.peca
+                ) as t1
+                left join pcp.tb_base_carretas_explodidas tbce on
+                tbce.conjunto = t1.codigo_conjunto
+                WHERE tbce.codigo_pintura <> 'Excluir' OR tbce.codigo_pintura IS NULL OR tbce.codigo_pintura = ''
+                """.format(data_inicial,data_final)
 
     resumo_estamparia = pd.read_sql_query(query_montagem,conn)
     resumo_estamparia = resumo_estamparia.sort_values(by=['data_carga','celula'], ascending=True)
+
     resumo_estamparia = resumo_estamparia[resumo_estamparia['carreta'].isin(carretas)]
 
     base_recurso = saldo_recurso_levantamento()
     base_recurso = base_recurso[base_recurso['1o. Agrupamento'] == 'Almox Mont Carretas']
 
-    join = pd.merge(resumo_estamparia,base_recurso, how='left', left_on='codigo', right_on='codigo_peca')
+    base_recurso = base_recurso[base_recurso['1o. Agrupamento'] == 'Almox Mont Carretas']
+
+    join = pd.merge(resumo_estamparia,base_recurso, how='left', right_on='codigo_peca',left_on='codigo')
+
+
+    join = join.drop(columns={'carreta'})
+
+    join = join.fillna(0)
+
+    join = join.groupby(['processo', 'data_carga', 'celula', 'codigo_conjunto', 'codigo', 'descricao', 'quantidade', 'peca','qt_apontada_montagem', 'codigo_tratado','descricao_tratada', '1o. Agrupamento', 'codigo_peca', 'Saldo', 'data']).mean(['qt_planejada','qt_faltante']).reset_index()
+
     join['Saldo'] = join['Saldo'].fillna(0)
     data_atualizacao_saldo = join['data'].drop_duplicates()[0]
     join['data'] = join['data'].fillna(data_atualizacao_saldo)
@@ -3823,18 +3870,20 @@ def tabela_resumo_estamparia(data_inicial, data_final):
     base_final['Saldo'] = base_final['Saldo'].astype(str)
     base_final['Saldo'] = base_final['Saldo'].apply(lambda x: x.replace(".","").replace(",","."))
 
-    base_final['qt_faltante'] = base_final['qt_faltante'].apply(lambda x: 0 if x<0 else x)
+    base_final['qt_faltante'] = base_final['qt_faltante'].apply(lambda x: 0 if x < 0 else x)
 
     for i in range(len(base_final)):
         
         try:    
             if base_final['codigo'][i] == base_final['codigo'][i-1]:
-                base_final['qt_atualizada'][i] = base_final['qt_atualizada'][i-1] - base_final['qt_faltante'][i]
+                base_final['qt_atualizada'][i] = base_final['qt_atualizada'][i-1] - float(base_final['qt_faltante'][i] * base_final['quantidade'][i])
             else:
-                base_final['qt_atualizada'][i] = float(base_final['Saldo'][i]) - base_final['qt_faltante'][i]
+                base_final['qt_atualizada'][i] = float(base_final['Saldo'][i]) - float(base_final['qt_faltante'][i] * base_final['quantidade'][i])
         except:
             base_final['qt_atualizada'][i] = float(base_final['Saldo'][i]) - base_final['qt_faltante'][i]
             continue
+
+    base_final = base_final[(base_final['qt_atualizada'] < 0) & (base_final['qt_faltante'] != 0)]
 
     return base_final
 
@@ -3886,9 +3935,6 @@ def carretas_planilha_carga(datainicio, datafim):
     carretas_str = ", ".join(["'{}'".format(carreta) for carreta in carretas_filtro])
 
     # Substituir na query SQL
-    query = """select * from pcp.tb_base_carretas_explodidas tbce where carreta in ({})""".format(carretas_str)
-
-    data_query = pd.read_sql_query(query, conn)
 
     # data_query = data_query[['conjunto','careta','']]
 
@@ -3901,7 +3947,7 @@ def verificar_status(row):
     
     if int(row['qt_faltante_pintura']) <= 0 and int(row['qt_faltante_montagem']) <= 0:
         return f'{setor}: Finalizado'
-    elif int(row['qt_apontada_pintura']) > 0:
+    elif int(row['qt_apontada_pintura']) >= 0 and int(row['qt_apontada_montagem']) >= 0:
         return f"{setor}: Pendente: {int(row['qt_faltante_pintura'])}\n Finalizada: {int(row['qt_apontada_pintura'])}"
     else:
         return f'{setor}: Aguardando'
@@ -3914,169 +3960,231 @@ def tela_reuniao():
 @app.route('/resumos-geral')
 def tabela_resumos():
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                        password=DB_PASS, host=DB_HOST)
-        # Acessando os parâmetros da URL
-    datainicio = request.args.get('datainicio') #'2024-05-08'
-    datafim = request.args.get('datafim') 
+    try:
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+            # Acessando os parâmetros da URL
+        datainicio = request.args.get('datainicio') 
+        datafim = request.args.get('datafim') 
 
-    dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
+        query_montagem = """
+                        select distinct tbce.carreta,
+                        tbce.processo,
+                        t1.data_carga,
+                        t1.celula,
+                        t1.codigo_conjunto,
+                        t1.peca,
+                        t1.qt_planejada,
+                        t1.qt_apontada_montagem,
+                        t1.qt_faltante,
+                        CASE
+                            WHEN tbce.codigo_pintura = '' or tbce.codigo_pintura ISNULL THEN t1.codigo_conjunto
+                            ELSE tbce.codigo_pintura
+                        END AS codigo_tratado,
+                        t1.peca AS descricao_tratada
+                    FROM(
+                        SELECT 
+                            gom.data_carga,
+                            gom.celula,
+                            gom.codigo as codigo_conjunto,
+                            gom.peca,
+                            SUM(gom.qt_planejada) / COUNT(gom.qt_planejada) as qt_planejada,
+                            --SUM(gom.qt_planejada) as qt_planejada,
+                            COALESCE(SUM(om.qt_apontada), 0) as qt_apontada_montagem,
+                            (
+                                SUM(gom.qt_planejada) / COUNT(gom.qt_planejada)
+                                -
+                                COALESCE(SUM(om.qt_apontada), 0)
+                            ) AS qt_faltante
+                        FROM pcp.gerador_ordens_montagem gom
+                        LEFT JOIN pcp.ordens_montagem om ON gom.codigo = om.codigo 
+                                                            AND gom.data_carga = om.data_carga 
+                                                            AND gom.celula = om.celula
+                        WHERE gom.data_carga BETWEEN '{}' AND '{}' AND gom.celula not in ('CONJ INTERMED','CUBO DE RODA','QUALIDADE','FILIPE SILVA SANTOS','Carpintaria','ESTAMPARIA') 
+                        GROUP BY 
+                            gom.data_carga,
+                            gom.celula,
+                            gom.codigo,
+                            gom.peca
+                        ) as t1
+                        left join pcp.tb_base_carretas_explodidas tbce on
+                        tbce.conjunto = t1.codigo_conjunto
+                        WHERE tbce.codigo_pintura <> 'Excluir' OR tbce.codigo_pintura IS NULL OR tbce.codigo_pintura = ''
+                        """.format(datainicio,datafim)
 
-    query_montagem = """
-                    select distinct tbce.carreta,
-                    tbce.processo,
-                    t1.data_carga,
-                    t1.celula,
-                    t1.codigo_conjunto,
-                    t1.peca,
-                    t1.qt_planejada,
-                    t1.qt_apontada_montagem,
-                    t1.qt_faltante,
-                    CASE
-                        WHEN tbce.codigo_pintura = '' or tbce.codigo_pintura ISNULL THEN t1.codigo_conjunto
-                        ELSE tbce.codigo_pintura
-                    END AS codigo_tratado,
-                    t1.peca AS descricao_tratada
-                FROM(
-                    SELECT 
-                        gom.data_carga,
-                        gom.celula,
-                        gom.codigo as codigo_conjunto,
-                        gom.peca,
-                        SUM(gom.qt_planejada) / COUNT(gom.qt_planejada) as qt_planejada,
-                        --SUM(gom.qt_planejada) as qt_planejada,
-                        COALESCE(SUM(om.qt_apontada), 0) as qt_apontada_montagem,
-                        (
-                            SUM(gom.qt_planejada) / COUNT(gom.qt_planejada)
-                            -
-                            COALESCE(SUM(om.qt_apontada), 0)
-                        ) AS qt_faltante
-                    FROM pcp.gerador_ordens_montagem gom
-                    LEFT JOIN pcp.ordens_montagem om ON gom.codigo = om.codigo 
-                                                        AND gom.data_carga = om.data_carga 
-                                                        AND gom.celula = om.celula
-                    WHERE gom.data_carga BETWEEN '{}' AND '{}' AND gom.celula not in ('CONJ INTERMED','CUBO DE RODA','QUALIDADE','FILIPE SILVA SANTOS','Carpintaria','ESTAMPARIA') 
-                    GROUP BY 
-                        gom.data_carga,
-                        gom.celula,
-                        gom.codigo,
-                        gom.peca
-                    ) as t1
-                    left join pcp.tb_base_carretas_explodidas tbce on
-                    tbce.conjunto = t1.codigo_conjunto
-                    WHERE tbce.codigo_pintura <> 'Excluir' OR tbce.codigo_pintura IS NULL OR tbce.codigo_pintura = ''
-                    """.format(datainicio,datafim)
+        query_pintura = """
+                SELECT
+                    gop.data_carga,
+                    gop.codigo,
+                    gop.peca,
+                    --gop.cor,
+                    gop.celula,
+                    SUM(gop.qt_planejada) / COUNT(gop.qt_planejada) AS qt_planejada,
+                    coalesce(SUM(op.qt_apontada),0) AS qt_apontada_pintura,
+                    (
+                        (SUM(gop.qt_planejada) / COUNT(gop.qt_planejada))
+                        -
+                        COALESCE((SUM(op.qt_apontada)), 0)
+                    ) AS qt_faltante_pintura
+                FROM
+                    pcp.gerador_ordens_pintura gop
+                LEFT JOIN
+                    pcp.ordens_pintura op ON gop.id = op.chave
+                WHERE
+                    gop.data_carga BETWEEN '{}' AND '{}'
+                GROUP BY
+                    gop.data_carga,gop.id, gop.codigo, gop.peca, gop.cor,gop.celula
+                ORDER BY
+                    gop.data_carga desc;""".format(datainicio,datafim)
 
-    query_pintura = """
-            SELECT
-                gop.data_carga,
-                gop.codigo,
-                gop.peca,
-                --gop.cor,
-                gop.celula,
-                SUM(gop.qt_planejada) / COUNT(gop.qt_planejada) AS qt_planejada,
-                coalesce(SUM(op.qt_apontada),0) AS qt_apontada_pintura,
-                (
-                    (SUM(gop.qt_planejada) / COUNT(gop.qt_planejada))
-                    -
-                    COALESCE((SUM(op.qt_apontada)), 0)
-                ) AS qt_faltante_pintura
-            FROM
-                pcp.gerador_ordens_pintura gop
-            LEFT JOIN
-                pcp.ordens_pintura op ON gop.id = op.chave
-            WHERE
-                gop.data_carga BETWEEN '{}' AND '{}'
-            GROUP BY
-                gop.data_carga,gop.id, gop.codigo, gop.peca, gop.cor,gop.celula
-            ORDER BY
-                gop.data_carga desc;""".format(datainicio,datafim)
+        df_pintura = pd.read_sql_query(query_pintura,conn)
+        df_montagem = pd.read_sql_query(query_montagem,conn)
 
-    df_pintura = pd.read_sql_query(query_pintura,conn)
-    df_montagem = pd.read_sql_query(query_montagem,conn)
+        dados_explodido, carretas = carretas_planilha_carga(datainicio, datafim)
 
-    df_pintura = df_pintura.groupby(['data_carga','codigo','peca','celula']).sum().reset_index()
+        base_final = tabela_resumo_estamparia(datainicio, datafim)
 
-    planilha_cargas = dados_explodido
+        df_final,carretas_dentro_da_base = consultar_carretas(datainicio,datafim)
 
-    planilha_cargas = planilha_cargas.rename(columns={'PED_PREVISAOEMISSAODOC': 'data_carga', 'Carreta Trat': 'carreta'})
+        df_pintura = df_pintura.groupby(['data_carga','codigo','peca','celula']).sum().reset_index()
 
-    # Convertendo a coluna 'data_carga' para datetime em ambos os dataframes para garantir consistência
-    planilha_cargas['data_carga'] = pd.to_datetime(planilha_cargas['data_carga'])
-    df_montagem['data_carga'] = pd.to_datetime(df_montagem['data_carga'])
-    df_pintura['data_carga'] = pd.to_datetime(df_pintura['data_carga'])
+        planilha_cargas = dados_explodido
 
-    # Realizar o merge:
-    carga_e_montagem = pd.merge(df_montagem, planilha_cargas, on=['carreta', 'data_carga'], how='inner')
-    carga_e_montagem = carga_e_montagem.rename(columns={'qt_planejada':'qt_planejada_montagem','qt_faltante':'qt_faltante_montagem','PED_QUANTIDADE':'qtd_carretas'})
-    carga_e_montagem = carga_e_montagem.drop(columns=['celula','codigo_conjunto'])
+        planilha_cargas = planilha_cargas.rename(columns={'PED_PREVISAOEMISSAODOC': 'data_carga', 'Carreta Trat': 'carreta'})
 
-    ############# QUANTIDADE FALTANTE MONTAGEM ##################
-    # montagem_agrupada = carga_e_montagem.groupby(['processo', 'carreta', 'data_carga'])[['qt_faltante_montagem','qtd_carretas']].sum().reset_index()
-    
-    ############# QUANTIDADE FALTANTE PINTURA ##################
-    df_pintura['codigo'] = df_pintura['codigo'].astype(str)
-    pintura_agrupada = df_pintura.groupby(['celula', 'codigo', 'data_carga'])[['qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum().reset_index()
+        # Convertendo a coluna 'data_carga' para datetime em ambos os dataframes para garantir consistência
+        planilha_cargas['data_carga'] = pd.to_datetime(planilha_cargas['data_carga'])
+        df_montagem['data_carga'] = pd.to_datetime(df_montagem['data_carga'])
+        df_pintura['data_carga'] = pd.to_datetime(df_pintura['data_carga'])
 
-    ##########################################
-    df_final_com_codigos = carga_e_montagem.merge(pintura_agrupada, how='left', left_on=['data_carga','codigo_tratado'], right_on=['data_carga','codigo'])
-    df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum()
-    ##########################################
+        # Realizar o merge:
+        carga_e_montagem = pd.merge(df_montagem, planilha_cargas, on=['carreta', 'data_carga'], how='inner')
+        carga_e_montagem = carga_e_montagem.rename(columns={'qt_planejada':'qt_planejada_montagem','qt_faltante':'qt_faltante_montagem','PED_QUANTIDADE':'Qtd. Carretas'})
+        carga_e_montagem = carga_e_montagem.drop(columns=['celula','codigo_conjunto'])
 
-    df_final_com_processos = df_final_com_processos.reset_index()
-    df_final_com_processos = df_final_com_processos.merge(dados_explodido,how='left',left_on='carreta', right_on = 'Carreta Trat')
+        ############# QUANTIDADE FALTANTE MONTAGEM ##################
+        # montagem_agrupada = carga_e_montagem.groupby(['processo', 'carreta', 'data_carga'])[['qt_faltante_montagem','Qtd. Carretas']].sum().reset_index()
+        
+        ############# QUANTIDADE FALTANTE PINTURA ##################
+        df_pintura['codigo'] = df_pintura['codigo'].astype(str)
+        pintura_agrupada = df_pintura.groupby(['celula', 'codigo', 'data_carga'])[['qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum().reset_index()
 
-    # Lógica de status
-    df_final_com_processos['status_total'] = df_final_com_processos['qt_planejada_montagem'].apply(lambda x: 'Total Planej: {}'.format(x))
-    df_final_com_processos['status_montagem'] = df_final_com_processos['qt_faltante_montagem'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP - {}'.format(x))
-    df_final_com_processos['status_pintura'] = df_final_com_processos.apply(lambda row: verificar_status(row), axis=1)
-    df_final_com_processos['status_geral'] = df_final_com_processos['status_total'] + "M: " + df_final_com_processos['status_montagem'] + "\n" + df_final_com_processos['status_pintura'] 
-    
-    df_final_com_processos = df_final_com_processos.reset_index()
+        ##########################################
+        df_final_com_codigos = carga_e_montagem.merge(pintura_agrupada, how='left', left_on=['data_carga','codigo_tratado'], right_on=['data_carga','codigo'])
+        df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga','Qtd. Carretas'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum()
+        ##########################################
 
-    df_pivot = df_final_com_processos[['data_carga','carreta','PED_QUANTIDADE','processo','status_geral']].pivot_table(
-        index=['carreta', 'data_carga','PED_QUANTIDADE'],
-            columns='processo',
-            values='status_geral',
-            aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
-            fill_value=''
-    )
-    
-    df_pivot = df_pivot.sort_values(by=['data_carga', 'carreta'], ascending=[True, True])
-    
-    json_data = df_pivot.reset_index().values.tolist()
-    colunas = df_pivot.reset_index().columns.tolist()
+        # Lógica de status
+        df_final_com_processos['status_total'] = df_final_com_processos['qt_planejada_montagem'].apply(lambda x: 'Total Planej: {}'.format(x))
+        df_final_com_processos['status_montagem'] = df_final_com_processos['qt_faltante_montagem'].apply(lambda x: 'Finalizado' if x <= 0 else 'FP -> {}'.format(x))
+        df_final_com_processos['status_pintura'] = df_final_com_processos.apply(lambda row: verificar_status(row), axis=1)
+        df_final_com_processos['status_geral'] = df_final_com_processos['status_total'] + "M: " + df_final_com_processos['status_montagem'] + "\n" + df_final_com_processos['status_pintura'] 
+        
+        df_final_com_processos = df_final_com_processos.reset_index()
 
-    return jsonify({
-        'data':json_data,
-        'colunas':colunas
-    })
+        df_final_com_processos = df_final_com_processos.rename(columns={'data_carga': 'Data Carga', 'carreta': 'Carreta'})
 
-@app.route('/pecas_conjunto', methods=['POST'])
+        df_pivot = df_final_com_processos[['Carreta','Data Carga','processo','Qtd. Carretas','status_geral']].pivot_table(
+            index=['Carreta', 'Data Carga','Qtd. Carretas'],
+                columns='processo',
+                values='status_geral',
+                aggfunc='first',  # Usar join para combinar valores de status para o mesmo grupo
+                fill_value=''
+        )
+        
+        df_pivot = df_pivot.sort_values(by=['Data Carga', 'Carreta'], ascending=[True, True])
+        
+        json_data = df_pivot.reset_index().values.tolist()
+        df_final_com_codigos.fillna('', inplace=True)
+        df_final_com_codigos_list = df_final_com_codigos.values.tolist()
+        colunas = df_pivot.reset_index().columns.tolist()
+
+        return jsonify({
+            'data':json_data,
+            'colunas':colunas,
+            'df_com_codigos':df_final_com_codigos_list,
+            'base_final':base_final.to_dict(orient='records'),
+            'carretas_dentro_da_base':carretas_dentro_da_base
+         })
+
+    except Exception as e:
+        print("ERRO ", e)
+        if df_pintura.empty: 
+            return jsonify('Pintura')
+        elif df_montagem.empty:
+            return jsonify('Montagem')
+        else:
+            return jsonify('Verifique se contém carga para esse dia')
+
+@app.route('/pecas_conjunto')
 def pecas_conjunto():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    data = request.get_json()
+    tabela = buscar_planilha_saldo(filename)
 
-    codigo = data['codigo_conjunto']
-    carreta = data['carreta_conjunto']
+    carreta = request.args.get('carreta') 
+    codigos = request.args.getlist('codigo')
+    quantidade = request.args.getlist('quantidade')
+    
+    dicionario_codigo_quantidade = dict(zip(codigos, map(int, quantidade))) # {'031290': 8, '031289': 8}
 
-    query = """
-        SELECT codigo, descricao, materia_prima, quantidade * qt_conjunto as qt_pecas
-        FROM pcp.tb_base_carretas_explodidas
-        WHERE conjunto = %s AND carreta = %s
-    """
+    codigos_str = ','.join(f"'{codigo}'" for codigo in codigos)
 
-    # Execução da query com segurança contra injeção de SQL
-    cur.execute(query, (codigo, carreta))
-    data_conjunto = cur.fetchall()
+    query_tb_explodidas = f""" SELECT DISTINCT codigo,descricao,quantidade,COALESCE(codigo_pintura,conjunto) as conjunto
+                    FROM pcp.tb_base_carretas_explodidas
+                    WHERE COALESCE(codigo_pintura,conjunto) in ({codigos_str}) AND carreta = '{carreta}' """
+                    
+    # Executar a query
+    cur.execute(query_tb_explodidas)
+    pecas = cur.fetchall()
 
-    conn.close()
+    print(query_tb_explodidas)
 
-    return jsonify(data_conjunto)
+    # Dicionário que contém as quantidades multiplicadas
+
+    codigos_agrupados = defaultdict(int)
+
+    # Dicionário para rastrear as descrições correspondentes a cada código
+    descricao_por_codigo = {}
+
+    # Iterar sobre cada peça resultante da query
+    for peca in pecas:
+        conjunto = peca['conjunto']
+        quantidade_original = peca['quantidade']
+        
+        # Verificar se o conjunto está no dicionário
+        if conjunto in dicionario_codigo_quantidade:
+            # Multiplicar quantidade pela quantidade do dicionário
+            quantidade_multiplicada = quantidade_original * dicionario_codigo_quantidade[conjunto]
+            # Adicionar a quantidade multiplicada ao código correspondente
+            codigos_agrupados[peca['codigo']] += quantidade_multiplicada
+            # Armazenar a descrição correspondente ao código
+            descricao_por_codigo[peca['codigo']] = peca['descricao']
+
+    # Converter os dicionários de códigos agrupados e descrições para uma lista de dicionários
+    pecas_agrupadas = []
+
+    for codigo, quantidade_total in codigos_agrupados.items():
+        pecas_agrupadas.append({
+            'codigo': codigo,
+            'descricao': descricao_por_codigo[codigo],
+            'quantidade_total': quantidade_total
+    })
+
+    lista_saldo = []
+
+    for i in range(len(pecas_agrupadas)):
+        codigo_pecas = pecas_agrupadas[i]['codigo']
+        resultado_filtrado = tabela[tabela['codigo_peca'] == codigo_pecas].values.tolist()
+        if resultado_filtrado:  # Verifica se há resultados
+            lista_saldo.append(resultado_filtrado[0])
+        else:
+            lista_saldo.append([codigo_pecas,0])
+
+    return jsonify(pecas_agrupadas,lista_saldo)
 
 # Bases editáveis #
 
