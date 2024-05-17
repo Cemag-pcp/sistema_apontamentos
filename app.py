@@ -280,24 +280,46 @@ def inserir_reinspecao(id_inspecao,n_nao_conformidades,causa_reinspecao,inspetor
 
         cur.execute(delete_table_inspecao)
 
-        update_pecas_inspecionadas = f"""UPDATE pcp.pecas_inspecionadas 
-                                    SET causa_reinspecao = '{causa_reinspecao}', caminho_foto = '{arquivo}'
-                                    WHERE id_inspecao = '{id_inspecao}'"""
-
-        cur.execute(update_pecas_inspecionadas)
+        query_fotos = """DO $$
+                        BEGIN
+                            IF EXISTS (SELECT 1 FROM pcp.inspecao_foto WHERE id = %s) THEN
+                                INSERT INTO pcp.inspecao_foto
+                                    (id, caminho_foto, causa, num_inspecao) 
+                                VALUES 
+                                    (%s, %s, %s,
+                                        (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                    );
+                            ELSE
+                                INSERT INTO pcp.inspecao_foto
+                                    (id, caminho_foto, causa, num_inspecao) 
+                                VALUES 
+                                    (%s, %s, %s, 0);
+                            END IF;
+                        END $$;
+                    """
         
-        # cur.execute(delete_table_inspecao)
+        values_fotos = (
+            id_inspecao,
+            id_inspecao,
+            arquivo,
+            causa_reinspecao,
+            id_inspecao,   
+            id_inspecao,
+            arquivo,
+            causa_reinspecao
+        )
+
+        cur.execute(query_fotos, values_fotos)
 
         sql = """INSERT INTO pcp.pecas_reinspecao 
-                        (id,nao_conformidades, causa_reinspecao, inspetor,setor,caminho_foto) 
-                        VALUES (%s, %s, %s, %s, %s, %s)"""
+                        (id,nao_conformidades, causa_reinspecao, inspetor,setor) 
+                        VALUES (%s, %s, %s, %s, %s)"""
         values = (
             id_inspecao,
             n_nao_conformidades,
             causa_reinspecao,
             inspetor,
-            setor,
-            arquivo
+            setor
         )
 
     elif setor == 'Solda':
@@ -385,33 +407,63 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
 
         if n_conformidades == "0":
 
+            query_fotos = """DO $$
+                            BEGIN
+                                IF EXISTS (SELECT 1 FROM pcp.inspecao_foto WHERE id = %s) THEN
+                                    INSERT INTO pcp.inspecao_foto
+                                        (id, caminho_foto, causa, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s,
+                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                        );
+                                ELSE
+                                    INSERT INTO pcp.inspecao_foto
+                                        (id, caminho_foto, causa, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, 0);
+                                END IF;
+                            END $$;
+                        """
+            
+            values_fotos = (
+                id_inspecao,
+                id_inspecao,
+                arquivo,
+                causa_reinspecao,
+                id_inspecao,   
+                id_inspecao,
+                arquivo,
+                causa_reinspecao
+            )
+
+            cur.execute(query_fotos, values_fotos)
+
             sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                    SET causa_reinspecao = %s, inspetor = %s, caminho_foto = %s
+                    SET causa_reinspecao = %s, inspetor = %s
                     WHERE id = %s """
             
-            values = (
+            values_update = (
                 causa_reinspecao,
                 inspetor,
-                arquivo,
                 id_inspecao
             )
 
-            cur.execute(sql_uptdade, values)
+            cur.execute(sql_uptdade, values_update)
 
             sql_insert = """DO $$
                             BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
                                     INSERT INTO pcp.pecas_inspecionadas
-                                        (id_inspecao, total_conformidades, inspetor, setor, caminho_foto,causa_reinspecao, num_inspecao) 
+                                        (id_inspecao, total_conformidades, inspetor, setor,causa_reinspecao, num_inspecao) 
                                     VALUES 
-                                        (%s, %s, %s, %s, %s, %s,
+                                        (%s, %s, %s, %s, %s,
                                             (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
                                         );
                                 ELSE
                                     INSERT INTO pcp.pecas_inspecionadas
-                                        (id_inspecao, total_conformidades, inspetor, setor, caminho_foto,causa_reinspecao, num_inspecao) 
+                                        (id_inspecao, total_conformidades, inspetor, setor,causa_reinspecao, num_inspecao) 
                                     VALUES 
-                                        (%s, %s, %s, %s, %s, %s, 0);
+                                        (%s, %s, %s, %s, %s, 0);
                                 END IF;
                             END $$;
                         """
@@ -422,23 +474,53 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
                 n_conformidades,
                 inspetor,
                 setor,
-                arquivo,
                 causa_reinspecao,
                 id_inspecao,
                 id_inspecao,
                 n_conformidades,
                 inspetor,
                 setor,
-                arquivo,
                 causa_reinspecao
             )
 
             cur.execute(sql_insert, values)
 
         elif n_conformidades > "0" and n_conformidades < qtd_produzida:
+            
+
+            query_fotos = """DO $$
+                            BEGIN
+                                IF EXISTS (SELECT 1 FROM pcp.inspecao_foto WHERE id = %s) THEN
+                                    INSERT INTO pcp.inspecao_foto
+                                        (id, caminho_foto, causa, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s,
+                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                        );
+                                ELSE
+                                    INSERT INTO pcp.inspecao_foto
+                                        (id, caminho_foto, causa, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, %s, 0);
+                                END IF;
+                            END $$;
+                        """
+            
+            values_fotos = (
+                id_inspecao,
+                id_inspecao,
+                arquivo,
+                causa_reinspecao,
+                id_inspecao,   
+                id_inspecao,
+                arquivo,
+                causa_reinspecao
+            )
+
+            cur.execute(query_fotos, values_fotos)
 
             sql_uptdade = """UPDATE pcp.pecas_reinspecao 
-                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, caminho_foto = %s
+                    SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s
                     WHERE id = %s """
             
             values = (
@@ -455,16 +537,16 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
                             BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
                                     INSERT INTO pcp.pecas_inspecionadas
-                                        (id_inspecao, total_conformidades, inspetor, setor, caminho_foto, causa_reinspecao, num_inspecao) 
+                                        (id_inspecao, total_conformidades, inspetor, setor, causa_reinspecao, num_inspecao) 
                                     VALUES 
-                                        (%s, %s, %s, %s, %s, %s,
+                                        (%s, %s, %s, %s, %s,
                                             (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
                                         );
                                 ELSE
                                     INSERT INTO pcp.pecas_inspecionadas
-                                        (id_inspecao, total_conformidades, inspetor, setor, caminho_foto, causa_reinspecao, num_inspecao) 
+                                        (id_inspecao, total_conformidades, inspetor, setor, causa_reinspecao, num_inspecao) 
                                     VALUES 
-                                        (%s, %s, %s, %s, %s, %s, 0);
+                                        (%s, %s, %s, %s, %s, 0);
                                 END IF;
                             END $$;
                         """
@@ -475,14 +557,12 @@ def alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformid
                 n_conformidades,
                 inspetor,
                 setor,
-                arquivo,
                 causa_reinspecao,
                 id_inspecao,
                 id_inspecao,
                 n_conformidades,
                 inspetor,
                 setor,
-                arquivo,
                 causa_reinspecao
             )
 

@@ -1,12 +1,34 @@
+document.querySelectorAll('[id^="foto_inspecao"]').forEach(function(inputElement) {
+    console.log(inputElement)
+    inputElement.addEventListener("change", function() {
+        console.log('mudou')
+        var files = this.files;
+        var label = this.parentElement.querySelector('.custom-file-label'); // Obter a label correspondente
+        console.log(label)
+        var fileNames = [];
+        for (var i = 0; i < files.length; i++) {
+            fileNames.push(files[i].name);
+        }
+        if (files.length == 1) {
+            label.textContent = "Possui " + files.length + " arquivo";
+        } else if (files.length == 0) {
+            label.textContent = "Escolha os arquivos";
+        } else {
+            label.textContent = "Possui " + files.length + " arquivos";
+        }
+        console.log(fileNames)
+    });
+});
+
 // Array com as causas
 var causas = ["Faltando Solda", "Olho de Peixe", "Arranhão", "Escorrimento", "Empoeiramento","Casca de Laranja","Manchas",
 "Contato","Amassando","Camada Baixa","Corrosão","Marcação por Água","Marcação por Óleo","Tonalidade","Marca texto industrial","Respingo de Solda",
 "Marcação de Peça","Falta de aderência","Decapante","Desplacamento","Água"];
 
-function adicionarSelects(n_nao_conformidades,coluna_causa,coluna_arquivos) {
+function adicionarSelects(n_nao_conformidades,coluna_causa) {
+    
     var n_nao_conformidades = document.getElementById(n_nao_conformidades).value;
     var coluna_causa = document.getElementById(coluna_causa);
-    var coluna_arquivos = document.getElementById(coluna_arquivos);
 
     coluna_causa.innerHTML = "";
 
@@ -15,7 +37,6 @@ function adicionarSelects(n_nao_conformidades,coluna_causa,coluna_arquivos) {
 
     if (n_nao_conformidades > 0) {
         coluna_causa.style.display = 'block';
-        coluna_arquivos.style.display = 'block';
         for (var i = 1; i <= n_nao_conformidades; i++) {
             var div = document.createElement("div");
             div.className = "col-sm-6 mb-4";
@@ -43,55 +64,80 @@ function adicionarSelects(n_nao_conformidades,coluna_causa,coluna_arquivos) {
                 select.appendChild(option);
             }
 
+            var campoArquivos = criandoHTMLFiles(i)
+
             div.appendChild(label);
             div.appendChild(select);
-            div_row.appendChild(div)
+            div_row.append(div,campoArquivos)
             coluna_causa.appendChild(div_row);
         }
+        coluna_causa.querySelectorAll('[id^="foto_inspecao_"]').forEach(function(inputElement) {
+            inputElement.addEventListener("change", function() {
+                var files = this.files;
+                var label = this.parentNode.querySelector('.custom-file-label'); // Obter a label correspondente
+                var fileNames = [];
+                for (var i = 0; i < files.length; i++) {
+                    fileNames.push(files[i].name);
+                }
+                if (files.length == 1) {
+                    label.textContent = "Possui " + files.length + " arquivo";
+                } else if (files.length == 0) {
+                    label.textContent = "Escolha os arquivos";
+                } else {
+                    label.textContent = "Possui " + files.length + " arquivos";
+                }
+            });
+        });
     } else {
         coluna_causa.style.display = 'none';
-        coluna_arquivos.style.display = 'none';
     }
 }
 
-document.getElementById("foto_inspecao").addEventListener("change", function() {
-    var files = this.files;
-    var label = document.querySelector('.custom-file-label');
-    var fileNames = [];
-    for (var i = 0; i < files.length; i++) {
-        fileNames.push(files[i].name);
-    }
-    if(files.length == 1){
-        label.textContent = "Possui " + files.length + " arquivo";
-    } else if(files.length == 0){
-        label.textContent = "";
-    } else {
-        label.textContent = "Possui " + files.length + " arquivos";
-    }
-});
+function criandoHTMLFiles(i) {
+    // Criar o contêiner principal 'div'
+    var campoArquivos = document.createElement('div');
+    campoArquivos.id = "campo_arquivos_" + i;
+    campoArquivos.name = "campo_arquivos_" + i;
+    campoArquivos.className = 'col-sm-6 mb-4';
 
-document.getElementById("foto_reinspecao").addEventListener("change", function() {
-    var files = this.files;
-    console.log(files)
-    var label = document.querySelector('.label-reinspecao');
-    var fileNames = [];
-    for (var i = 0; i < files.length; i++) {
-        fileNames.push(files[i].name);
-    }
-    if(files.length == 1){
-        label.textContent = "Possui " + files.length + " arquivo";
-    } else if(files.length == 0){
-        label.textContent = "";
-    } else {
-        label.textContent = "Possui " + files.length + " arquivos";
-    }
-});
+    // Criar o 'label' para os arquivos
+    var labelArquivos = document.createElement('label');
+    labelArquivos.textContent = 'Escolha os arquivos da causa '+i+':';
+
+    // Criar a 'div' customizada para o arquivo
+    var customFileDiv = document.createElement('div');
+    customFileDiv.className = 'custom-file';
+
+    // Criar o 'input' para selecionar arquivos
+    var inputFile = document.createElement('input');
+    inputFile.type = 'file';
+    inputFile.className = 'custom-file-input';
+    inputFile.id = 'foto_inspecao_'+i;
+    inputFile.name = 'foto_inspecao_'+i;
+    inputFile.accept = 'image/*';
+    inputFile.multiple = true;
+
+    // Criar o 'label' para o input de arquivos
+    var labelInputFile = document.createElement('label');
+    labelInputFile.className = 'custom-file-label';
+    labelInputFile.htmlFor = 'foto_inspecao_'+i;
+    labelInputFile.textContent = 'Escolha os arquivos';
+
+    // Anexar os elementos na estrutura correta
+    customFileDiv.appendChild(inputFile);
+    customFileDiv.appendChild(labelInputFile);
+
+    campoArquivos.appendChild(labelArquivos);
+    campoArquivos.appendChild(customFileDiv);
+
+    return campoArquivos
+}
 
 // Event listener para chamar a função quando o valor de n_nao_conformidades mudar
 document.getElementById("n_conformidades").addEventListener("input", function() {
-    adicionarSelects("n_nao_conformidades","coluna_causa","campo_arquivos");
+    adicionarSelects("n_nao_conformidades","coluna_causa");
 });
 
 document.getElementById("n_conformidades_reinspecao").addEventListener("input", () => {
-    adicionarSelects("n_nao_conformidades_reinspecao","coluna_causa_reinspecao","campo_arquivos_reinspecao");
+    adicionarSelects("n_nao_conformidades_reinspecao","coluna_causa_reinspecao");
 });

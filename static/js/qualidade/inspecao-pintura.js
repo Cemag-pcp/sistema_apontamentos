@@ -25,7 +25,7 @@ $('#n_conformidades').on('input',function() {
 
     let n_conformidades_value = parseInt($('#n_conformidades').val(), 10);
     let qtd_produzida_value = parseInt($('#qtd_produzida').val(), 10);
-
+    
     $('#n_nao_conformidades').val(qtd_produzida_value - n_conformidades_value);
 
     if(n_conformidades_value >= qtd_produzida_value || n_conformidades_value < 0 || n_conformidades_value === '') {

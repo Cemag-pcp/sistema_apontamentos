@@ -17,6 +17,15 @@
 
 {% block containerFluid %}
 
+{% set color_map = {
+    'LC': '#ff6d01',
+    'AV': '#ffff00',
+    'VM': '#8b0000',
+    'CO': '#a9a9a9',
+    'AN': '#3F00FF',
+    'VJ': '#006400'
+} %}
+
 <div class="container-fluid f-14">
 
     <!-- Page Heading -->
@@ -73,7 +82,12 @@
                                         <td data-title="Data Finalizada">{{inpecao[1]}}</td>
                                         <td data-title="Código">{{inpecao[2]}}</td>
                                         <td data-title="Descrição">{{inpecao[3]}}</td>
-                                        <td data-title="Cor">{{inpecao[4]}}</td>
+                                        <td data-title="Cor">{{inpecao[4]}} 
+                                            {% if inpecao[4] in color_map %}
+                                            <input class="text-truncate" data-toggle="tooltip" data-placement="top"
+                                                title="{{ color_map[inpecao[4]] }}" type="color" value="{{ color_map[inpecao[4]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
+                                            {% endif %}
+                                        </td>
                                         <td data-title="Qt. produzida">{{inpecao[5]}}</td>
                                         <td data-title="Tipo">{{inpecao[6]}}</td>
                                         <td data-title="Exec" style="align-items: center;">
@@ -124,7 +138,12 @@
                                     <tr>
                                         <td data-title="#">{{inspecionada[0]}}</td>
                                         <td data-title="Peca">{{inspecionada[11]}}</td>
-                                        <td data-title="Cor">{{inspecionada[12]}}</td>
+                                        <td data-title="Cor">{{inspecionada[12]}} 
+                                            {% if inspecionada[12] in color_map %}
+                                            <input class="text-truncate" data-toggle="tooltip" data-placement="top"
+                                                title="{{ color_map[inspecionada[12]] }}" type="color" value="{{ color_map[inspecionada[12]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
+                                            {% endif %}
+                                        </td>
                                         <td data-title="Tipo">{{inspecionada[13]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
@@ -159,8 +178,7 @@
                                         <th>#</th>
                                         <th>Data Inspeção</th>
                                         <th>Peça</th>
-                                        <th class="text-truncate" data-toggle="tooltip" data-placement="top"
-                                            title="N° de Conformidades" style="max-width: 60px;">Não Conformidade</th>
+                                        <th>Não Conformidade</th>
                                         <th>Inspetor</th>
                                         <th>Cor</th>
                                         <th>Exec</th>
@@ -174,7 +192,12 @@
                                         <td data-title="Peça">{{reinspecao[13]}}</td>
                                         <td data-title="Ñ conformidade">{{reinspecao[2]}}</td>
                                         <td data-title="Inspetor">{{reinspecao[4]}}</td>
-                                        <td data-title="Cor">{{reinspecao[14]}}</td>
+                                        <td data-title="Cor">{{reinspecao[14]}} 
+                                            {% if reinspecao[14] in color_map %}
+                                            <input class="text-truncate" data-toggle="tooltip" data-placement="top"
+                                                title="{{ color_map[reinspecao[14]] }}" type="color" value="{{ color_map[reinspecao[14]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
+                                            {% endif %}
+                                        </td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -279,13 +302,6 @@
                                         <option value="Elenilson">Elenilson</option>
                                         <option value="Marcelo">Marcelo</option>
                                     </select>
-                                </div>
-                                <div id="campo_arquivos" class="col-sm-6 mb-4" style="display: none;">
-                                    <label>Escolha os arquivos:</label>
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="foto_inspecao" name="foto_inspecao" accept="image/*" multiple>
-                                        <label class="custom-file-label" for="foto_inspecao">Escolha os arquivos</label>
-                                    </div>  
                                 </div>
                             </div>                         
                         </div>
