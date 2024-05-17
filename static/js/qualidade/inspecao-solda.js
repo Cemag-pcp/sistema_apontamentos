@@ -120,13 +120,6 @@ $('#envio_inspecao_solda').on('click',function() {
         return; // Interrompe a execução
     }
 
-    if (causaSolda === null || observacaoSolda.trim() === "" ) {
-        alert('Verifique se os campos de causa e observação estão com os valores corretos');
-        $('#envio_inspecao_solda').prop('disabled',false);
-        $("#loading").hide();
-        return; // Interrompe a execução
-    }
-   
     $('select[id^="inspetorSolda"]').each(function() {
         if($(this).val() !== null){
             inspetoresSolda.push($(this).val()); // Adiciona o valor de cada select à lista
