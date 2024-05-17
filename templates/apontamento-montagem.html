@@ -1219,8 +1219,6 @@
 
                         var celulaEscolhida = document.getElementById('celula').value;
 
-                        console.log(celulaEscolhida);
-
                         if (celulaEscolhida === '') {
                             // Se a célula escolhida estiver vazia, não há necessidade de filtrar os dados
                             // Você pode passar os dados diretamente para o forEach
@@ -1239,36 +1237,37 @@
                 data.forEach(peca => {
                     // Aqui você pode continuar com o processamento dos dados e a criação dos cards
                     var cardHtml = `
-                <div class="col-sm-6 mb-2">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-                            <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
-                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
-                                </div>
-                                <div class="col-sm-6">
-                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Origem:</strong> ${peca[13]}</small></h6>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button type="button" class="btn btn-info btn-finalizar-producao"
-                                onclick="finalizarPeca(${peca[0]})">Finalizar
-                            </button>
-                            <button type="button" class="btn btn-warning btn-interromper-producao"
-                                onclick="interromperProcesso(${peca[0]})">Interromper
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
+                                <div class="col-sm-6 mb-2">
+                                    <div class="card shadow mb-4">
+                                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                            <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
+                                            <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
+                                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Origem:</strong> ${peca[13]}</small></h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-info btn-finalizar-producao"
+                                                onclick="finalizarPeca(${peca[0]})">Finalizar
+                                            </button>
+                                            <button type="button" class="btn btn-warning btn-interromper-producao"
+                                                onclick="interromperProcesso(${peca[0]})">Interromper
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>`;
                     document.getElementById('cardsContainer').innerHTML += cardHtml;
                     // Atualiza o contador imediatamente ao carregar a página
                     const dataInicial = new Date(formatarData(peca[3]));
+                    console.log(dataInicial);
                     atualizarContador(dataInicial, peca[0]);
                 });
             }
@@ -1326,52 +1325,14 @@
                 });
             }
 
-            // function chamarAPIInterrompidas() {
-            //     fetch("/api/consulta-pecas-interrompidas/montagem")
-            //         .then(response => response.json())
-            //         .then(data => {
-            //             console.log(data);
-
-            //             // Limpa o conteúdo atual dos cards
-            //             document.getElementById('cardsContainerInterrompida').innerHTML = "";
-
-            //             data.forEach(peca => {
-            //                 var cardHtml = `
-            //                 <div class="col-sm-6 mb-2">
-            //                     <div class="card shadow mb-4">
-            //                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-            //                             <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-            //                             <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
-            //                         </div>
-            //                         <div class="card-body">
-            //                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
-            //                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
-            //                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Motivo:</strong> ${peca[12]}</small></h6>
-            //                         </div>
-            //                         <div class="card-footer">
-            //                             <button type="button" class="btn btn-info btn-retornar-producao"
-            //                                 onclick="retornarPeca(${peca[0]})">Retornar
-            //                             </button>
-            //                         </div>
-            //                     </div>
-            //                 </div>`;
-
-            //                 document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
-
-            //                 // Atualiza o contador imediatamente ao carregar a página
-            //                 const dataInicial = new Date(formatarData(peca[3]));
-            //                 atualizarContador(dataInicial, peca[0]);
-            //             });
-            //         })
-            //         .catch(error => console.error('Erro ao chamar a API:', error));
-            // }
-
             // Chama a API imediatamente ao carregar a página
             chamarAPI();
             chamarAPIInterrompidas();
 
+            
+
             // Chama a API a cada segundo
-            // setInterval(chamarAPI, 1000);
+            setInterval(atualizarContador, 1000);
             // setInterval(chamarAPIInterrompidas, 1000);
         });
 
@@ -1424,6 +1385,8 @@
         }
 
         function atualizarContador(dataInicial, id_peca) {
+
+            
 
             const agora = new Date();
             const diferenca = agora.getTime() - dataInicial.getTime();
