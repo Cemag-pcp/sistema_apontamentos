@@ -1322,7 +1322,10 @@
 
     <script>
 
-        document.addEventListener("DOMContentLoaded", function () {
+            document.addEventListener('DOMContentLoaded', () => {
+                chamarAPI();
+                chamarAPIInterrompidas();
+            });
 
             function chamarAPI() {
                 fetch("/api/consulta-pecas-em-processo/serralheria")
@@ -1338,9 +1341,6 @@
             function processarDados(data) {
                 
                 data.forEach(peca => {
-                
-                    
-                
                     // Aqui você pode continuar com o processamento dos dados e a criação dos cards
                     var cardHtml = `
                 <div class="col-sm-6 mb-2">
@@ -1368,10 +1368,11 @@
                     </div>
                 </div>`;
                     document.getElementById('cardsContainer').innerHTML += cardHtml;
-                    // Atualiza o contador imediatamente ao carregar a página
-                    const dataInicial = new Date(formatarData(peca[3]));
-                    atualizarContador(dataInicial, peca[0]);
                 });
+
+                atualizarContador(data);
+
+                setInterval(() => atualizarContador(data), 1000);
             }
 
             function chamarAPIInterrompidas() {
@@ -1411,14 +1412,12 @@
 
                     document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
 
-                    // Atualiza o contador imediatamente ao carregar a página
-                    const dataInicial = new Date(formatarData(peca[3]));
-                    atualizarContador(dataInicial, peca[0]);
                 });
-            }
 
-            chamarAPI()
-            chamarAPIInterrompidas();
+                atualizarContador(data);
+
+                setInterval(() => atualizarContador(data), 1000);
+            }
 
             // var socket = io();
 
@@ -1432,8 +1431,6 @@
 
             // setInterval(chamarAPI, 1000);
             // setInterval(chamarAPIInterrompidas, 1000);
-
-        });
 
         function formatarData(dataString) {
             var data = new Date(dataString);
@@ -1504,23 +1501,28 @@
             // Aqui você pode adicionar lógica adicional conforme necessário
         }
 
-        function atualizarContador(dataInicial, id_peca) {
+        function atualizarContador(data) {
 
-            const agora = new Date();
-            const diferenca = agora.getTime() - dataInicial.getTime();
+            data.forEach(peca => {
 
-            const segundos = Math.floor(diferenca / 1000);
-            const minutos = Math.floor(segundos / 60);
-            const horas = Math.floor(minutos / 60);
-            const dias = Math.floor(horas / 24); // Calcula o número de dias
+                const agora = new Date();
+                const dataInicial = new Date(formatarData(peca[3]));
+                const diferenca = agora.getTime() - dataInicial.getTime();
 
-            const segundosRestantes = segundos % 60;
-            const minutosRestantes = minutos % 60;
-            const horasRestantes = horas % 24;
+                const segundos = Math.floor(diferenca / 1000);
+                const minutos = Math.floor(segundos / 60);
+                const horas = Math.floor(minutos / 60);
+                const dias = Math.floor(horas / 24); // Calcula o número de dias
 
-            const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
+                const segundosRestantes = segundos % 60;
+                const minutosRestantes = minutos % 60;
+                const horasRestantes = horas % 24;
 
-            document.getElementById("contador-" + id_peca).textContent = formatoTempo;
+                const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
+
+                document.getElementById(`contador-${peca[0]}`).textContent = formatoTempo;
+
+            })
         }
 
         function contadorCards() {

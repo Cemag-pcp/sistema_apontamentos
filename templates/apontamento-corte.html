@@ -448,7 +448,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener('DOMContentLoaded', () => {
+            chamarAPI();
+            chamarAPIInterrompidas();
+        });
 
         function chamarAPI() {
             fetch("/api/consulta-pecas-em-processo/corte")
@@ -497,12 +500,11 @@
             
                 document.getElementById('cardsContainer').innerHTML += cardHtml;
             
-                // Atualiza o contador imediatamente ao carregar a página
-                const dataInicial = new Date(formatarData(peca[2]));
-                console.log(peca[2]);
-                atualizarContador(dataInicial, peca[0]);
-            
             });
+            
+            atualizarContador(data);
+
+            setInterval(() => atualizarContador(data), 1000);
         }
 
         function chamarAPIInterrompidas() {
@@ -558,21 +560,17 @@
 
                 document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
 
-                // Atualiza o contador imediatamente ao carregar a página
-                const dataInicial = new Date(formatarData(peca[2]));
-                
-                atualizarContador(dataInicial, peca[0]);
             });
-        }
 
-        chamarAPI();
-        chamarAPIInterrompidas();
+            atualizarContador(data);
+
+            setInterval(() => atualizarContador(data), 1000);
+        }
 
         // Chama a API a cada segundo
         // setInterval(chamarAPI, 1000);
         // setInterval(chamarAPIInterrompidas, 1000);
 
-    });
 
     function formatarData(dataString) {
         var data = new Date(dataString);
@@ -655,24 +653,28 @@
         // Aqui você pode adicionar lógica adicional conforme necessário
     }
 
-    function atualizarContador(dataInicial, id_peca) {
+    function atualizarContador(data) {
 
-        const agora = new Date();
+        data.forEach(peca => {
 
-        const diferenca = agora.getTime() - dataInicial.getTime();
+            const agora = new Date();
+            const dataInicial = new Date(formatarData(peca[2]));
+            const diferenca = agora.getTime() - dataInicial.getTime();
 
-        const segundos = Math.floor(diferenca / 1000);
-        const minutos = Math.floor(segundos / 60);
-        const horas = Math.floor(minutos / 60);
-        const dias = Math.floor(horas / 24); // Calcula o número de dias
+            const segundos = Math.floor(diferenca / 1000);
+            const minutos = Math.floor(segundos / 60);
+            const horas = Math.floor(minutos / 60);
+            const dias = Math.floor(horas / 24); // Calcula o número de dias
 
-        const segundosRestantes = segundos % 60;
-        const minutosRestantes = minutos % 60;
-        const horasRestantes = horas % 24;
+            const segundosRestantes = segundos % 60;
+            const minutosRestantes = minutos % 60;
+            const horasRestantes = horas % 24;
 
-        const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
-        
-        document.getElementById("contador-" + id_peca).textContent = formatoTempo;
+            const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
+
+            document.getElementById(`contador-${peca[0]}`).textContent = formatoTempo;
+
+        })
     }
 
     function buscarPecas(op) {
