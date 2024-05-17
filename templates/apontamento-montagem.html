@@ -697,34 +697,6 @@
         });
     </script>
 
-    <script>
-        var table = $('#dataTable').DataTable();
-
-        // Variável para armazenar o estado do filtro
-        var filterActive = false;
-
-        function applyCelulaFilter(button, selectedValue) {
-            var columnIndex = $('#celula').data('column');
-
-
-            // Se o filtro estiver ativo e o valor do botão for o mesmo que o filtro atual, desative o filtro
-            if (filterActive && $(button).hasClass('active')) {
-                table.column(columnIndex).search('').draw();
-                $(button).removeClass('active'); // Remova a classe active do botão
-                filterActive = false; // Marque o filtro como inativo
-                $('#celula').val('');
-                $('.btn').removeClass('active');
-            } else {
-                // Defina o filtro na coluna específica
-                $('.btn').removeClass('active');
-                table.column(columnIndex).search(selectedValue).draw();
-                $(button).addClass('active'); // Adicione a classe active ao botão
-                filterActive = true; // Marque o filtro como ativo
-                $('#celula').val(selectedValue);
-            }
-        }
-    </script>
-
     <!-- Script botão de enviar -->
 
     <script>
@@ -1291,6 +1263,7 @@
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalConfirmarInicioProducao').modal('hide');
+                        location.reload();
                     },
                     error: function (err) {
                         console.error('Erro ao enviar dados para o backend', err);
@@ -1345,7 +1318,7 @@
                 // Aqui você pode continuar com o processamento dos dados e a criação dos cards
                 var cardHtml = `
                             <div class="col-sm-6 mb-2">
-                                <div class="card shadow mb-4">
+                                <div class="card shadow mb-4" name="${peca[8]}">
                                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                         <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
                                         <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
@@ -1410,7 +1383,7 @@
             data.forEach(peca => {
                 var cardHtml = `
                 <div class="col-sm-6 mb-2">
-                    <div class="card shadow mb-4">
+                    <div class="card shadow mb-4" name="${peca[8]}">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
                             <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
@@ -1569,6 +1542,7 @@
                     success: function (data) {
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
+                        location.reload();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
@@ -1608,6 +1582,7 @@
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalMotivoInterrompido').modal('hide');
+                        location.reload();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
@@ -1661,6 +1636,7 @@
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalConfirmarInicioProducao').modal('hide');
+                        location.reload();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
@@ -1691,6 +1667,68 @@
         $('#operador-modal-finalizar').on('click', function () {
             limparCampoOperadorModal_finalizar();
         });
+    </script>
+
+    <script>
+        function filtrarCards(celula) {
+            const cardsContainer = document.getElementById('cardsContainer');
+            const cards = cardsContainer.querySelectorAll('.card');
+    
+            cards.forEach(card => {
+                if (celula === '' || card.getAttribute('name') === celula) {
+                    card.parentElement.style.display = '';
+                } else {
+                    card.parentElement.style.display = 'none';
+                }
+            });
+        }
+    
+        function filtrarCardsInterrompidas(celula) {
+            const cardsContainer = document.getElementById('cardsContainerInterrompida');
+            const cards = cardsContainer.querySelectorAll('.card');
+    
+            cards.forEach(card => {
+                if (celula === '' || card.getAttribute('name') === celula) {
+                    card.parentElement.style.display = '';
+                } else {
+                    card.parentElement.style.display = 'none';
+                }
+            });
+        }
+    
+        var table = $('#dataTable').DataTable();
+
+        // Variável para armazenar o estado do filtro
+        var filterActive = false;
+
+        function applyCelulaFilter(button, selectedValue) {
+            var columnIndex = $('#celula').data('column');
+
+            // Se o filtro estiver ativo e o valor do botão for o mesmo que o filtro atual, desative o filtro
+            if (filterActive && $(button).hasClass('active')) {
+                table.column(columnIndex).search('').draw();
+                $(button).removeClass('active'); // Remova a classe active do botão
+                filterActive = false; // Marque o filtro como inativo
+                $('#celula').val('');
+                $('.btn').removeClass('active');
+
+                filtrarCards($('#celula').val());
+                filtrarCardsInterrompidas($('#celula').val());
+
+            } else {
+                // Defina o filtro na coluna específica
+                $('.btn').removeClass('active');
+                table.column(columnIndex).search(selectedValue).draw();
+                $(button).addClass('active'); // Adicione a classe active ao botão
+                filterActive = true; // Marque o filtro como ativo
+                $('#celula').val(selectedValue);
+
+                filtrarCards(selectedValue);
+                filtrarCardsInterrompidas(selectedValue);
+
+            }
+        }
+
     </script>
 
     {% endblock %}

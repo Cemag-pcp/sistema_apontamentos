@@ -13,7 +13,8 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
 
 <!-- CSS tables responsive -->
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/no-more-table.css') }}">
 
 {% endblock %}
 
@@ -34,8 +35,10 @@
         <div class="col-xl-12 mb-2">
             <div class="card shadow mb-4">
                 <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Iniciar Processo</h6>
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Iniciar
+                        Processo</h6>
                 </div>
                 <br>
                 <!-- Card Body -->
@@ -43,18 +46,21 @@
                     <div class="row mb-2">
                         <div class="col-sm-4 mb-3">
                             <label for="opFilter">OP:</label>
-                            <input class="form-control" type="text" id="opFilter">
+                            <input class="form-control" type="text"
+                                id="opFilter">
                         </div>
                         <div class="col-sm-4 mb-3">
                             <label for="maquinaFilter">Máquina</label>
-                            <select class="form-control" name="maquinaFilter" id="maquinaFilter">
-                                <option value=""></option>
+                            <select class="form-control" name="maquinaFilter"
+                                id="maquinaFilter">
+                                <option value></option>
                                 <option value="Plasma">Plasma</option>
                                 <option value="Laser">Laser</option>
                             </select>
                         </div>
                         <div class="col-sm-4 align-self-end">
-                            <button id="btnFilter" class="btn btn-primary">Filtrar</button>
+                            <button id="btnFilter"
+                                class="btn btn-primary">Filtrar</button>
                         </div>
                     </div>
                     <div id="no-more-tables">
@@ -82,7 +88,8 @@
                     <tr>
                         <td colspan="9">
                             <nav aria-label="Page navigation example">
-                                <ul class="pagination justify-content-end" id="pagination">
+                                <ul class="pagination justify-content-end"
+                                    id="pagination">
                                     <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
                                 </ul>
                             </nav>
@@ -98,10 +105,13 @@
 
         <div class="col-xl-6 mb-2">
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Peças em processo</h6>
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças em
+                        processo</h6>
                 </div>
-                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
+                <div class="card-body"
+                    style="max-height: 700px; overflow-y: auto;">
                     <div class="row" id="cardsContainer">
                         <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
                     </div>
@@ -111,10 +121,13 @@
 
         <div class="col-xl-6 mb-2">
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Peças interrompidas</h6>
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças
+                        interrompidas</h6>
                 </div>
-                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
+                <div class="card-body"
+                    style="max-height: 700px; overflow-y: auto;">
                     <div class="row" id="cardsContainerInterrompida">
                         <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
                     </div>
@@ -124,34 +137,42 @@
 
     </div>
 
-<!-- Content Row -->
+    <!-- Content Row -->
     <div class="row">
 
         <!-- Modal criar op laser -->
-        <div class="modal fade" id="modalOpLaser" tabindex="-1" role="dialog" aria-labelledby="modalOpLaserLabel"
+        <div class="modal fade" id="modalOpLaser" tabindex="-1" role="dialog"
+            aria-labelledby="modalOpLaserLabel"
             aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="TittleModalOpLaser">Gerar apontamento para peça fora do
+                        <h5 class="modal-title" id="TittleModalOpLaser">Gerar
+                            apontamento para peça fora do
                             planejamento</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-sm-4">
-                                <label for="comprimentoLaser">Comprimento</label>
-                                <input type="number" class="form-control" id="comprimentoLaser">
+                                <label
+                                    for="comprimentoLaser">Comprimento</label>
+                                <input type="number" class="form-control"
+                                    id="comprimentoLaser">
                             </div>
                             <div class="col-sm-4">
                                 <label for="larguraLaser">Largura</label>
-                                <input type="number" class="form-control" id="larguraLaser">
+                                <input type="number" class="form-control"
+                                    id="larguraLaser">
                             </div>
                             <div class="col-sm-4">
                                 <label for="espessuraLaser">Espessura</label>
-                                <select class="form-control" name="nameEspessuraLaser" id="espessuraLaser">
+                                <select class="form-control"
+                                    name="nameEspessuraLaser"
+                                    id="espessuraLaser">
                                     <option></option>
                                     <option value="14">14</option>
                                     <option value="13">13</option>
@@ -175,10 +196,14 @@
                             <div class="col-sm-12">
                                 <div class="input-group mb-3">
                                     <div class="custom-file">
-                                        <label for="inputGroupFile02">Inserir arquivo</label>
-                                        <input type="file" class="custom-file-input" id="inputGroupFile02"
+                                        <label for="inputGroupFile02">Inserir
+                                            arquivo</label>
+                                        <input type="file"
+                                            class="custom-file-input"
+                                            id="inputGroupFile02"
                                             onchange="mostrarNomeArquivo('inputGroupFile02')">
-                                        <label class="custom-file-label" for="inputGroupFile02">Escolha um
+                                        <label class="custom-file-label"
+                                            for="inputGroupFile02">Escolha um
                                             arquivo</label>
                                     </div>
                                 </div>
@@ -186,7 +211,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button id="buttonCriarOpLaser" type="button" class="btn btn-primary btn-sm">Salvar</button>
+                        <button id="buttonCriarOpLaser" type="button"
+                            class="btn btn-primary btn-sm">Salvar</button>
                     </div>
                 </div>
             </div>
@@ -198,73 +224,94 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Criar OP plasma</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
                         <div class="input-group mb-3">
                             <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="inputGroupFile01"
+                                <input type="file" class="custom-file-input"
+                                    id="inputGroupFile01"
                                     onchange="mostrarNomeArquivo('inputGroupFile01')">
-                                <label class="custom-file-label" for="inputGroupFile01">Escolha um arquivo</label>
+                                <label class="custom-file-label"
+                                    for="inputGroupFile01">Escolha um
+                                    arquivo</label>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="buttonCriarOpPlasma" class="btn btn-sm btn-primary">Criar</button>
-                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Fechar</button>
+                        <button type="button" id="buttonCriarOpPlasma"
+                            class="btn btn-sm btn-primary">Criar</button>
+                        <button type="button" class="btn btn-sm btn-secondary"
+                            data-dismiss="modal">Fechar</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Modal visualizar peças dentro da op -->
-        <div class="modal fade" id="modalVisualizarPecas" tabindex="-1" role="dialog"
+        <div class="modal fade" id="modalVisualizarPecas" tabindex="-1"
+            role="dialog"
             aria-labelledby="modalVisualizarPecasLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalVisualizarPecasLabel">Peças dentro da op</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <h5 class="modal-title"
+                            id="modalVisualizarPecasLabel">Peças dentro da
+                            op</h5>
+                        <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div style="max-height: 400px; overflow-y: auto;" class="modal-body" id="bodyModalVisualizarPecas">
+                    <div style="max-height: 400px; overflow-y: auto;"
+                        class="modal-body" id="bodyModalVisualizarPecas">
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Modal finalizar apontamento -->
-        <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1" role="dialog"
+        <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1"
+            role="dialog"
             aria-labelledby="modalExecucaoApontamentoLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalExecucaoApontamentoLabel">Apontar peça</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <h5 class="modal-title"
+                            id="modalExecucaoApontamentoLabel">Apontar peça</h5>
+                        <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body" style="max-height: 400px; overflow-y: auto;" id="bodyModalFinalizar">
+                    <div class="modal-body"
+                        style="max-height: 400px; overflow-y: auto;"
+                        id="bodyModalFinalizar">
 
                     </div>
                     <div class="modal-footer">
-                        <button id="btnFinalizarOrdem" type="button" class="btn btn-sm btn-primary">Confirmar</button>
+                        <button id="btnFinalizarOrdem" type="button"
+                            class="btn btn-sm btn-primary">Confirmar</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Modal confirmar inicio -->
-        <div class="modal fade" id="modalConfirmarInicioProducao" tabindex="-1" role="dialog"
-            aria-labelledby="modalConfirmarInicioProducaoLabel" aria-hidden="true">
+        <div class="modal fade" id="modalConfirmarInicioProducao" tabindex="-1"
+            role="dialog"
+            aria-labelledby="modalConfirmarInicioProducaoLabel"
+            aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalConfirmarInicioProducaoLabel">Iniciar</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <h5 class="modal-title"
+                            id="modalConfirmarInicioProducaoLabel">Iniciar</h5>
+                        <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -274,36 +321,47 @@
                         <input id="retornarPecaProducao" style="display: none;">
                     </div>
                     <div class="modal-footer">
-                        <button id="confimarInicioProducao" type="button" class="btn btn-sm btn-success">Sim</button>
-                        <button id="confimarRetornoProducao" type="button" class="btn btn-sm btn-success">Sim</button>
-                        <button id="desistirInicioProducao" type="button" class="btn btn-sm btn-danger">Não</button>
+                        <button id="confimarInicioProducao" type="button"
+                            class="btn btn-sm btn-success">Sim</button>
+                        <button id="confimarRetornoProducao" type="button"
+                            class="btn btn-sm btn-success">Sim</button>
+                        <button id="desistirInicioProducao" type="button"
+                            class="btn btn-sm btn-danger">Não</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Modal motivo de interrompido -->
-        <div class="modal fade" id="modalMotivoInterrompido" tabindex="-1" role="dialog"
+        <div class="modal fade" id="modalMotivoInterrompido" tabindex="-1"
+            role="dialog"
             aria-labelledby="modalMotivoInterrompidoLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalMotivoInterrompidoLabel">Escolha o motivo da parada</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <h5 class="modal-title"
+                            id="modalMotivoInterrompidoLabel">Escolha o motivo
+                            da parada</h5>
+                        <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <input type="text" id="idPecaInterromper" style="display: none;">
-                        <select class="form-control" name="motivosParada" id="idMotivosParada">
+                        <input type="text" id="idPecaInterromper"
+                            style="display: none;">
+                        <select class="form-control" name="motivosParada"
+                            id="idMotivosParada">
                             <option>Manutenção</option>
                             <option>Limpeza</option>
                             <option>Falta de peça</option>
                         </select>
                     </div>
                     <div class="modal-footer">
-                        <button id="enviarMotivo" type="button" class="btn btn-sm btn-success">Enviar</button>
-                        <button id="desistirMotivo" type="button" class="btn btn-sm btn-danger">Fechar</button>
+                        <button id="enviarMotivo" type="button"
+                            class="btn btn-sm btn-success">Enviar</button>
+                        <button id="desistirMotivo" type="button"
+                            class="btn btn-sm btn-danger">Fechar</button>
                     </div>
                 </div>
             </div>
@@ -445,7 +503,8 @@
 </script>
 
 <!-- Script para listar peças em processo e interrompidas -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -468,7 +527,7 @@
                 
                 var cardHtml = `
                 <div class="col-sm-6 mb-2">
-                    <div class="card shadow mb-4">
+                    <div class="card shadow mb-4" name="${peca[6]}"> 
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1]}</small></h6>
                             <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
@@ -521,7 +580,7 @@
             data.forEach(peca => {
                 var cardHtml = `
                     <div class="col-sm-6 mb-2">
-                        <div class="card shadow mb-4">
+                        <div class="card shadow mb-4" name="${peca[6]}">
                             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                 <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1]}</small></h6>
                                 <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
@@ -1123,6 +1182,41 @@
             $('#modalConfirmarInicioProducao').modal('hide');
         })
     })
+
+</script>
+
+<script>
+
+    function filtrarCards(celula) {
+        const cardsContainer = document.getElementById('cardsContainer');
+        const cards = cardsContainer.querySelectorAll('.card');
+
+        cards.forEach(card => {
+            if (celula === '' || card.getAttribute('name') === celula) {
+                card.parentElement.style.display = '';
+            } else {
+                card.parentElement.style.display = 'none';
+            }
+        });
+    }
+
+    function filtrarCardsInterrompidas(celula) {
+        const cardsContainer = document.getElementById('cardsContainerInterrompida');
+        const cards = cardsContainer.querySelectorAll('.card');
+
+        cards.forEach(card => {
+            if (celula === '' || card.getAttribute('name') === celula) {
+                card.parentElement.style.display = '';
+            } else {
+                card.parentElement.style.display = 'none';
+            }
+        });
+    }
+
+    document.getElementById('maquinaFilter').addEventListener('change', function(){
+        filtrarCards(document.getElementById('maquinaFilter').value);
+        filtrarCardsInterrompidas(document.getElementById('maquinaFilter').value);
+    });
 
 </script>
 
