@@ -1,25 +1,3 @@
-document.querySelectorAll('[id^="foto_inspecao"]').forEach(function(inputElement) {
-    console.log(inputElement)
-    inputElement.addEventListener("change", function() {
-        console.log('mudou')
-        var files = this.files;
-        var label = this.parentElement.querySelector('.custom-file-label'); // Obter a label correspondente
-        console.log(label)
-        var fileNames = [];
-        for (var i = 0; i < files.length; i++) {
-            fileNames.push(files[i].name);
-        }
-        if (files.length == 1) {
-            label.textContent = "Possui " + files.length + " arquivo";
-        } else if (files.length == 0) {
-            label.textContent = "Escolha os arquivos";
-        } else {
-            label.textContent = "Possui " + files.length + " arquivos";
-        }
-        console.log(fileNames)
-    });
-});
-
 // Array com as causas
 var causas = ["Faltando Solda", "Olho de Peixe", "Arranhão", "Escorrimento", "Empoeiramento","Casca de Laranja","Manchas",
 "Contato","Amassando","Camada Baixa","Corrosão","Marcação por Água","Marcação por Óleo","Tonalidade","Marca texto industrial","Respingo de Solda",
