@@ -12,7 +12,8 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
 
 <!-- CSS tables responsive -->
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/no-more-table.css') }}">
 
 <style>
     /* Adicione algum estilo para o ícone "x" dentro do campo */
@@ -56,38 +57,61 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <div class="row mb-2">
-                            <div class="col mb-2"><button id="filterChassi" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                            <div class="col mb-2"><button id="filterChassi"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
                                     onclick="applyCelulaFilter(this, 'CHASSI')">CHASSI</button></div>
-                            <div class="col mb-2"><button id="filterEixoCompleto" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'EIXO COMPLETO')">EIXO COMPLETO</button></div>
-                            <div class="col mb-2"><button id="filterEixoSimples" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                            <div class="col mb-2"><button
+                                    id="filterEixoCompleto" type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
+                                    onclick="applyCelulaFilter(this, 'EIXO COMPLETO')">EIXO
+                                    COMPLETO</button></div>
+                            <div class="col mb-2"><button id="filterEixoSimples"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
                                     onclick="applyCelulaFilter(this, 'EIXO SIMPLES')">EIXO
                                     SIMPLES</button></div>
-                            <div class="col mb-2"><button id="filterConjInterm" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'CONJ INTERMED')">CONJ INTERMED</button></div>
-                            <div class="col mb-2"><button id="filterEstamparia" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                            <div class="col mb-2"><button id="filterConjInterm"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
+                                    onclick="applyCelulaFilter(this, 'CONJ INTERMED')">CONJ
+                                    INTERMED</button></div>
+                            <div class="col mb-2"><button id="filterEstamparia"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
                                     onclick="applyCelulaFilter(this, 'ESTAMPARIA')">ESTAMPARIA</button></div>
-                            <div class="col mb-2"><button id="filterCilindro" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                            <div class="col mb-2"><button id="filterCilindro"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
                                     onclick="applyCelulaFilter(this, 'CILINDRO')">CILINDRO</button></div>
-                            <div class="col mb-2"><button id="filterPlat" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'PLAT. TANQUE. CAÇAM.')">PLAT. TANQUE.
+                            <div class="col mb-2"><button id="filterPlat"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
+                                    onclick="applyCelulaFilter(this, 'PLAT. TANQUE. CAÇAM.')">PLAT.
+                                    TANQUE.
                                     CAÇAM.</button>
                             </div>
-                            <div class="col mb-2"><button id="filterFueiro" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                            <div class="col mb-2"><button id="filterFueiro"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
                                     onclick="applyCelulaFilter(this, 'FUEIRO')">FUEIRO</button></div>
-                            <div class="col mb-2"><button id="filterIcamento" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                            <div class="col mb-2"><button id="filterIcamento"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
                                     onclick="applyCelulaFilter(this, 'IÇAMENTO')">IÇAMENTO</button></div>
-                            <div class="col mb-2"><button id="filterCuboDeRoda" type="button"
-                                    class="btn btn-outline-secondary" style="width: 149px; height: 62px;"
+                            <div class="col mb-2"><button id="filterCuboDeRoda"
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    style="width: 149px; height: 62px;"
                                     onclick="applyCelulaFilter(this, 'CUBO DE RODA')">CUBO
                                     DE RODA</button></div>
                         </div>
@@ -95,7 +119,8 @@
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label for="dataCarga">Data da carga</label>
-                                    <input type="date" id="dataCarga" class="form-control" data-column="0">
+                                    <input type="date" id="dataCarga"
+                                        class="form-control" data-column="0">
                                 </div>
                             </div>
                             <div class="col-sm" style="display: none;">
@@ -103,9 +128,13 @@
                                     <label for="celula">Célula</label>
                                     <div class="position-relative">
                                         <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
-                                        <input id="celula" class="form-control" data-column="2" style="width: 250px;">
-                                        <span id="clear-lista-celula" class="clear-icon-operador">x</span>
-                                        <ul id="listaCelulas" class="custom-dropdown-menu">
+                                        <input id="celula" class="form-control"
+                                            data-column="2"
+                                            style="width: 250px;">
+                                        <span id="clear-lista-celula"
+                                            class="clear-icon-operador">x</span>
+                                        <ul id="listaCelulas"
+                                            class="custom-dropdown-menu">
                                         </ul>
                                     </div>
                                 </div>
@@ -114,9 +143,12 @@
                     </div>
                 </div>
                 <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Iniciar Processo</h6>
-                    <button id="btnModalPecaFora" type="button" class="btn btn-info" data-toggle="modal"
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Iniciar
+                        Processo</h6>
+                    <button id="btnModalPecaFora" type="button"
+                        class="btn btn-info" data-toggle="modal"
                         data-target="#modalPecaFora">Peça
                         fora planejamento</button>
                 </div>
@@ -135,7 +167,8 @@
                                         <th>Descrição</th>
                                         <th>Qt. planejada</th>
                                         <th>Iniciar</th>
-                                        <th style="display: none;">codificacao</th>
+                                        <th
+                                            style="display: none;">codificacao</th>
                                         <th style="display: none;">id</th>
                                     </tr>
                                 </thead>
@@ -143,24 +176,39 @@
                                     {% if sheet_data %}
                                     {% for data in sheet_data %}
                                     <tr>
-                                        <td data-title="Data da carga">{{ data[0] }}</td>
-                                        <td data-title="Data planejada">{{ data[1] }}</td>
-                                        <td data-title="Célula" style="display: none;">{{ data[2] }}</td>
-                                        <td data-title="Código">{{ data[3] }}</td>
-                                        <td data-title="Descrição">{{ data[4] }}</td>
-                                        <td data-title="Qt. planejada">{{ data[5] }}</td>
-                                        <td data-title="Iniciar"><button id="btnIniciarProducao" type="button"
-                                                class="btn btn-info" data-toggle="modal"
+                                        <td data-title="Data da carga">{{
+                                            data[0] }}</td>
+                                        <td data-title="Data planejada">{{
+                                            data[1] }}</td>
+                                        <td data-title="Célula"
+                                            style="display: none;">{{ data[2]
+                                            }}</td>
+                                        <td data-title="Código">{{ data[3]
+                                            }}</td>
+                                        <td data-title="Descrição">{{ data[4]
+                                            }}</td>
+                                        <td data-title="Qt. planejada">{{
+                                            data[5] }}</td>
+                                        <td data-title="Iniciar"><button
+                                                id="btnIniciarProducao"
+                                                type="button"
+                                                class="btn btn-info"
+                                                data-toggle="modal"
                                                 data-target="#modalConfirmarInicioProducao">Iniciar</button>
                                         </td>
-                                        <td data-title="codificacao" style="display: none;">{{ data[7] }}</td>
-                                        <td data-title="id" style="display: none;">{{ data[8] }}</td>
+                                        <td data-title="codificacao"
+                                            style="display: none;">{{ data[7]
+                                            }}</td>
+                                        <td data-title="id"
+                                            style="display: none;">{{ data[8]
+                                            }}</td>
                                     </tr>
                                     {% endfor %}
 
                                     {% else %}
                                     <tr>
-                                        <td colspan="7">Nenhum dado disponível</td>
+                                        <td colspan="7">Nenhum dado
+                                            disponível</td>
                                     </tr>
                                     {% endif %}
                                 </tbody>
@@ -177,10 +225,13 @@
 
         <div class="col-xl-6 mb-2">
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Peças em processo</h6>
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças em
+                        processo</h6>
                 </div>
-                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
+                <div class="card-body"
+                    style="max-height: 700px; overflow-y: auto;">
                     <div class="row" id="cardsContainer">
                         <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
                     </div>
@@ -190,10 +241,13 @@
 
         <div class="col-xl-6 mb-2">
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Peças interrompidas</h6>
+                <div
+                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Peças
+                        interrompidas</h6>
                 </div>
-                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
+                <div class="card-body"
+                    style="max-height: 700px; overflow-y: auto;">
                     <div class="row" id="cardsContainerInterrompida">
                         <!-- Aqui serão inseridos os cards dinamicamente com JavaScript -->
                     </div>
@@ -204,14 +258,17 @@
     </div>
 
     <!-- Modal peça fora do sequenciamento -->
-    <div class="modal fade" id="modalPecaFora" tabindex="-1" role="dialog" aria-labelledby="modalPecaForaLabel"
+    <div class="modal fade" id="modalPecaFora" tabindex="-1" role="dialog"
+        aria-labelledby="modalPecaForaLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalPecaForaLabel">Gerar apontamento para peça fora do
+                    <h5 class="modal-title" id="modalPecaForaLabel">Gerar
+                        apontamento para peça fora do
                         sequenciamento</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -221,10 +278,13 @@
                             <div class="form-floating mb-3">
                                 <label for="userInput">Peça</label>
                                 <div class="position-relative">
-                                    <input class="form-control" type="text" id="userInput"
+                                    <input class="form-control" type="text"
+                                        id="userInput"
                                         oninput="showSuggestionsPecas()">
-                                    <span id="peca-modal" class="clear-icon-operador">x</span>
-                                    <ul id="suggestionsPecas" class="custom-dropdown-menu"></ul>
+                                    <span id="peca-modal"
+                                        class="clear-icon-operador">x</span>
+                                    <ul id="suggestionsPecas"
+                                        class="custom-dropdown-menu"></ul>
                                 </div>
                             </div>
                         </div>
@@ -233,22 +293,26 @@
                         <div class="col-sm">
                             <div class="form-floating mb-3">
                                 <label for="inputData">Data da carga</label>
-                                <input class="form-control" type="date" id="inputData"> <!-- Data da carga -->
+                                <input class="form-control" type="date"
+                                    id="inputData"> <!-- Data da carga -->
                             </div>
                         </div>
                         <div class="col-sm">
                             <div class="form-floating mb-3">
                                 <label for="inputQuantidade">Quantidade</label>
-                                <input class="form-control" type="number" id="inputQuantidade">
+                                <input class="form-control" type="number"
+                                    id="inputQuantidade">
                                 <!-- Quantidade -->
                             </div>
                         </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col-sm-12 mb-2">
-                            <label for="celulaModalForaSequenciamento">Célula</label>
+                            <label
+                                for="celulaModalForaSequenciamento">Célula</label>
                             <div class="position-relative">
-                                <select class="form-control" id="celulaModalForaSequenciamento">
+                                <select class="form-control"
+                                    id="celulaModalForaSequenciamento">
                                     <option></option>
                                     <option>LATERAL</option>
                                     <option>EIXO COMPLETO</option>
@@ -268,25 +332,30 @@
                     <div class="row">
                         <div class="col-12">
                             <label for="textAreaObservacao">Observação</label>
-                            <textarea class="form-control" id='textAreaObservacao'></textarea>
+                            <textarea class="form-control"
+                                id='textAreaObservacao'></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="btnSalvar" type="button" class="btn btn-primary">Salvar</button>
+                    <button id="btnSalvar" type="button"
+                        class="btn btn-primary">Salvar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Modal finalizar apontamento -->
-    <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1" role="dialog"
+    <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1"
+        role="dialog"
         aria-labelledby="modalExecucaoApontamentoLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalExecucaoApontamentoLabel">Apontar peça</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title"
+                        id="modalExecucaoApontamentoLabel">Apontar peça</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -295,22 +364,27 @@
                         <div class="col-12 mb-2">
                             <div class="form-floating mb-3">
                                 <label for="nomePecaApontada">Peça</label>
-                                <input class="form-control" type="text" id="nomePecaApontada" readonly>
+                                <input class="form-control" type="text"
+                                    id="nomePecaApontada" readonly>
                             </div>
                         </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col-6 mb-2">
                             <div class="form-floating mb-3">
-                                <label for="inputQuantidadePlanejada">Quantidade planejada</label>
-                                <input class="form-control" type="number" id="inputQuantidadePlanejada" readonly>
+                                <label for="inputQuantidadePlanejada">Quantidade
+                                    planejada</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidadePlanejada" readonly>
                                 <!-- Quantidade -->
                             </div>
                         </div>
                         <div class="col-6 mb-2">
                             <div class="form-floating mb-3">
-                                <label for="inputQuantidadeRealizada">Quantidade realizada</label>
-                                <input class="form-control" type="number" id="inputQuantidadeRealizada">
+                                <label for="inputQuantidadeRealizada">Quantidade
+                                    realizada</label>
+                                <input class="form-control" type="number"
+                                    id="inputQuantidadeRealizada">
                                 <!-- Quantidade -->
                             </div>
                         </div>
@@ -319,16 +393,22 @@
                         <div class="col-6 mb-2">
                             <label for="operadorInputModal_1">Operador</label>
                             <div class="position-relative">
-                                <input class="form-control" type="text" id="operadorInputModal_1"
+                                <input class="form-control" type="text"
+                                    id="operadorInputModal_1"
                                     autocomplete="false" />
-                                <span id="operador-modal-finalizar" class="clear-icon-operador">x</span>
-                                <ul id="sugestaoOperadorModal_1" class="custom-dropdown-menu"></ul>
+                                <span id="operador-modal-finalizar"
+                                    class="clear-icon-operador">x</span>
+                                <ul id="sugestaoOperadorModal_1"
+                                    class="custom-dropdown-menu"></ul>
                             </div>
                         </div>
                         <div class="col-6 mb-2">
                             <div class="form-floating mb-3">
-                                <label for="dataHoraInicio">Data e hora de início</label>
-                                <input class="form-control" type="datetime-local" id="dataHoraInicio" readonly>
+                                <label for="dataHoraInicio">Data e hora de
+                                    início</label>
+                                <input class="form-control"
+                                    type="datetime-local" id="dataHoraInicio"
+                                    readonly>
                                 <!-- data e hora que iniciou e finalizou a ordem -->
                             </div>
                         </div>
@@ -336,56 +416,67 @@
                     <div class="row mb-2">
                         <div class="col-12 mb-2">
                             <label for="textAreaObservacao_">Observação</label>
-                            <textarea class="form-control" id="textAreaObservacao_"></textarea>
+                            <textarea class="form-control"
+                                id="textAreaObservacao_"></textarea>
                         </div>
                     </div>
                     <div class="row mb-2" style="display: none;">
                         <div class="col-12 mb-2">
-                            <label for="codificacaoOrdem">Código da ordem</label>
-                            <input class="form-control" type="text" id="codificacaoOrdem" readonly>
+                            <label for="codificacaoOrdem">Código da
+                                ordem</label>
+                            <input class="form-control" type="text"
+                                id="codificacaoOrdem" readonly>
                             <!-- codificação da ordem -->
                         </div>
                     </div>
                     <div class="row mb-2" style="display: none;">
                         <div class="col-12 mb-2">
                             <label for="celulaOrdem">Célula</label>
-                            <input class="form-control" type="text" id="celulaOrdem" readonly>
+                            <input class="form-control" type="text"
+                                id="celulaOrdem" readonly>
                         </div>
                     </div>
                     <div class="row mb-2" style="display: none;">
                         <div class="col-12 mb-2">
                             <label for="dataCargaFinalizacao">Data Carga</label>
-                            <input class="form-control" type="text" id="dataCargaFinalizacao" readonly>
+                            <input class="form-control" type="text"
+                                id="dataCargaFinalizacao" readonly>
                         </div>
                     </div>
                     <div class="row mb-2" style="display: none;">
                         <div class="col-12 mb-2">
                             <label for="idPecaEmProcesso">Id</label>
-                            <input class="form-control" type="text" id="idPecaEmProcesso" readonly>
+                            <input class="form-control" type="text"
+                                id="idPecaEmProcesso" readonly>
                         </div>
                     </div>
                     <div class="row mb-2" style="display: none;">
                         <div class="col-12 mb-2">
                             <label for="origemPecaEmProcesso">Origem</label>
-                            <input class="form-control" type="text" id="origemPecaEmProcesso" readonly>
+                            <input class="form-control" type="text"
+                                id="origemPecaEmProcesso" readonly>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="btnFinalizarOrdem" type="button" class="btn btn-primary">Confirmar</button>
+                    <button id="btnFinalizarOrdem" type="button"
+                        class="btn btn-primary">Confirmar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Modal confirmar inicio -->
-    <div class="modal fade" id="modalConfirmarInicioProducao" tabindex="-1" role="dialog"
+    <div class="modal fade" id="modalConfirmarInicioProducao" tabindex="-1"
+        role="dialog"
         aria-labelledby="modalConfirmarInicioProducaoLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalConfirmarInicioProducaoLabel">Iniciar</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title"
+                        id="modalConfirmarInicioProducaoLabel">Iniciar</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -395,36 +486,47 @@
                     <input id="retornarPecaProducao" style="display: none;">
                 </div>
                 <div class="modal-footer">
-                    <button id="confimarInicioProducao" type="button" class="btn btn-success">Sim</button>
-                    <button id="confimarRetornoProducao" type="button" class="btn btn-success">Sim</button>
-                    <button id="desistirInicioProducao" type="button" class="btn btn-danger">Não</button>
+                    <button id="confimarInicioProducao" type="button"
+                        class="btn btn-success">Sim</button>
+                    <button id="confimarRetornoProducao" type="button"
+                        class="btn btn-success">Sim</button>
+                    <button id="desistirInicioProducao" type="button"
+                        class="btn btn-danger">Não</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Modal motivo de interrompido -->
-    <div class="modal fade" id="modalMotivoInterrompido" tabindex="-1" role="dialog"
+    <div class="modal fade" id="modalMotivoInterrompido" tabindex="-1"
+        role="dialog"
         aria-labelledby="modalMotivoInterrompidoLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalMotivoInterrompidoLabel">Escolha o motivo da parada</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <h5 class="modal-title"
+                        id="modalMotivoInterrompidoLabel">Escolha o motivo da
+                        parada</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" id="idPecaInterromper" style="display: none;">
-                    <select class="form-control" name="motivosParada" id="idMotivosParada">
+                    <input type="text" id="idPecaInterromper"
+                        style="display: none;">
+                    <select class="form-control" name="motivosParada"
+                        id="idMotivosParada">
                         <option>Manutenção</option>
                         <option>Limpeza</option>
                         <option>Falta de peça</option>
                     </select>
                 </div>
                 <div class="modal-footer">
-                    <button id="enviarMotivo" type="button" class="btn btn-success">Enviar</button>
-                    <button id="desistirMotivo" type="button" class="btn btn-danger">Fechar</button>
+                    <button id="enviarMotivo" type="button"
+                        class="btn btn-success">Enviar</button>
+                    <button id="desistirMotivo" type="button"
+                        class="btn btn-danger">Fechar</button>
                 </div>
             </div>
         </div>
@@ -451,7 +553,8 @@
     <!-- Script tabela JQuery -->
 
     <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script
+        src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="static/js/demo/datatables-demo.js"></script>
 
     <!-- Scripts campos de filtro -->
@@ -683,7 +786,8 @@
 
     <!-- Script tratar data -->
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
     <!-- Script tela de carregamento -->
 
@@ -1208,9 +1312,12 @@
     <!-- Script para iniciar ou finalizar produção e listar peças em processo -->
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener('DOMContentLoaded', () => {
+            chamarAPI();
+            chamarAPIInterrompidas();
+        });
 
-            function chamarAPI() {
+        function chamarAPI() {
                 fetch("/api/consulta-pecas-em-processo/montagem")
                     .then(response => response.json())
                     .then(data => {
@@ -1233,108 +1340,107 @@
                     .catch(error => console.error('Erro ao chamar a API:', error));
             }
 
-            function processarDados(data) {
-                data.forEach(peca => {
-                    // Aqui você pode continuar com o processamento dos dados e a criação dos cards
-                    var cardHtml = `
-                                <div class="col-sm-6 mb-2">
-                                    <div class="card shadow mb-4">
-                                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                            <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-                                            <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-sm-6">
-                                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
-                                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
-                                                </div>
-                                                <div class="col-sm-6">
-                                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Origem:</strong> ${peca[13]}</small></h6>
-                                                </div>
+        function processarDados(data) {
+            data.forEach(peca => {
+                // Aqui você pode continuar com o processamento dos dados e a criação dos cards
+                var cardHtml = `
+                            <div class="col-sm-6 mb-2">
+                                <div class="card shadow mb-4">
+                                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                        <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
+                                        <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
+                                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Origem:</strong> ${peca[13]}</small></h6>
                                             </div>
                                         </div>
-                                        <div class="card-footer">
-                                            <button type="button" class="btn btn-info btn-finalizar-producao"
-                                                onclick="finalizarPeca(${peca[0]})">Finalizar
-                                            </button>
-                                            <button type="button" class="btn btn-warning btn-interromper-producao"
-                                                onclick="interromperProcesso(${peca[0]})">Interromper
-                                            </button>
-                                        </div>
                                     </div>
-                                </div>`;
-                    document.getElementById('cardsContainer').innerHTML += cardHtml;
-                    // Atualiza o contador imediatamente ao carregar a página
-                    const dataInicial = new Date(formatarData(peca[3]));
-                    console.log(dataInicial);
-                    atualizarContador(dataInicial, peca[0]);
-                });
-            }
+                                    <div class="card-footer">
+                                        <button type="button" class="btn btn-info btn-finalizar-producao"
+                                            onclick="finalizarPeca(${peca[0]})">Finalizar
+                                        </button>
+                                        <button type="button" class="btn btn-warning btn-interromper-producao"
+                                            onclick="interromperProcesso(${peca[0]})">Interromper
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>`;
+                document.getElementById('cardsContainer').innerHTML += cardHtml;
+                // Atualiza o contador imediatamente ao carregar a página
+                const dataInicial = new Date(formatarData(peca[3]));
 
-            function chamarAPIInterrompidas() {
-                fetch("/api/consulta-pecas-interrompidas/montagem")
-                    .then(response => response.json())
-                    .then(data => {
-                        // Limpa o conteúdo atual dos cards
-                        document.getElementById('cardsContainerInterrompida').innerHTML = "";
+            });
 
-                        var celulaEscolhida = document.getElementById('celula').value;
+            atualizarContador(data);
 
-                        if (celulaEscolhida === '') {
-                            // Se a célula escolhida estiver vazia, não há necessidade de filtrar os dados
-                            // Você pode passar os dados diretamente para o forEach
-                            processarDadosInterrompida(data);
-                        } else {
-                            // Filtra os dados com base na célula escolhida
-                            const dadosFiltrados = data.filter(peca => peca[8] === celulaEscolhida);
-                            // Processa os dados filtrados
-                            processarDadosInterrompida(dadosFiltrados);
-                        }
-                    })
-                    .catch(error => console.error('Erro ao chamar a API:', error));
-            }
+            setInterval(() => atualizarContador(data), 1000);
 
-            function processarDadosInterrompida(data) {
-                data.forEach(peca => {
-                    var cardHtml = `
-                    <div class="col-sm-6 mb-2">
-                        <div class="card shadow mb-4">
-                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-                                <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
-                            </div>
-                            <div class="card-body">
-                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
-                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
-                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Motivo:</strong> ${peca[12]}</small></h6>
-                            </div>
-                            <div class="card-footer">
-                                <button type="button" class="btn btn-info btn-retornar-producao"
-                                    onclick="retornarPeca(${peca[0]})">Retornar
-                                </button>
-                            </div>
+        }
+        
+        function chamarAPIInterrompidas() {
+            fetch("/api/consulta-pecas-interrompidas/montagem")
+                .then(response => response.json())
+                .then(data => {
+                    // Limpa o conteúdo atual dos cards
+                    document.getElementById('cardsContainerInterrompida').innerHTML = "";
+
+                    var celulaEscolhida = document.getElementById('celula').value;
+
+                    if (celulaEscolhida === '') {
+                        // Se a célula escolhida estiver vazia, não há necessidade de filtrar os dados
+                        // Você pode passar os dados diretamente para o forEach
+                        processarDadosInterrompida(data);
+                    } else {
+                        // Filtra os dados com base na célula escolhida
+                        const dadosFiltrados = data.filter(peca => peca[8] === celulaEscolhida);
+                        // Processa os dados filtrados
+                        processarDadosInterrompida(dadosFiltrados);
+                    }
+                })
+                .catch(error => console.error('Erro ao chamar a API:', error));
+        }
+
+        function processarDadosInterrompida(data) {
+            data.forEach(peca => {
+                var cardHtml = `
+                <div class="col-sm-6 mb-2">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
+                            <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
                         </div>
-                    </div>`;
+                        <div class="card-body">
+                            <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
+                            <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
+                            <h6 class="m-0 font-weight-bold text-primary"><small><strong>Motivo:</strong> ${peca[12]}</small></h6>
+                        </div>
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-info btn-retornar-producao"
+                                onclick="retornarPeca(${peca[0]})">Retornar
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
 
-                    document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
+                document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
+            });
 
-                    // Atualiza o contador imediatamente ao carregar a página
-                    const dataInicial = new Date(formatarData(peca[3]));
-                    atualizarContador(dataInicial, peca[0]);
-                });
-            }
+            atualizarContador(data);
 
-            // Chama a API imediatamente ao carregar a página
-            chamarAPI();
-            chamarAPIInterrompidas();
+            setInterval(() => atualizarContador(data), 1000);
+        }
 
-            
-
-            // Chama a API a cada segundo
-            setInterval(atualizarContador, 1000);
-            // setInterval(chamarAPIInterrompidas, 1000);
-        });
+        // Chama a API imediatamente ao carregar a página
+        // chamarAPI();
+        // chamarAPIInterrompidas();
+        
+        // setInterval(chamarAPIInterrompidas, 1000);
 
         function formatarData(dataString) {
             var data = new Date(dataString);
@@ -1384,25 +1490,28 @@
             // Aqui você pode adicionar lógica adicional conforme necessário
         }
 
-        function atualizarContador(dataInicial, id_peca) {
+        function atualizarContador(data) {
 
-            
+            data.forEach(peca => {
 
-            const agora = new Date();
-            const diferenca = agora.getTime() - dataInicial.getTime();
+                const agora = new Date();
+                const dataInicial = new Date(formatarData(peca[3]));
+                const diferenca = agora.getTime() - dataInicial.getTime();
 
-            const segundos = Math.floor(diferenca / 1000);
-            const minutos = Math.floor(segundos / 60);
-            const horas = Math.floor(minutos / 60);
-            const dias = Math.floor(horas / 24); // Calcula o número de dias
+                const segundos = Math.floor(diferenca / 1000);
+                const minutos = Math.floor(segundos / 60);
+                const horas = Math.floor(minutos / 60);
+                const dias = Math.floor(horas / 24); // Calcula o número de dias
 
-            const segundosRestantes = segundos % 60;
-            const minutosRestantes = minutos % 60;
-            const horasRestantes = horas % 24;
+                const segundosRestantes = segundos % 60;
+                const minutosRestantes = minutos % 60;
+                const horasRestantes = horas % 24;
 
-            const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
+                const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
 
-            document.getElementById("contador-" + id_peca).textContent = formatoTempo;
+                document.getElementById(`contador-${peca[0]}`).textContent = formatoTempo;
+
+            })
         }
 
     </script>
