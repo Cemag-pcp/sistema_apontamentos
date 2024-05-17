@@ -647,7 +647,8 @@
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalConfirmarInicioProducao').modal('hide');
                         hideLoading();
-                        location.reload();
+                        chamarAPI();
+                        chamarAPIInterrompidas();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
@@ -1088,7 +1089,6 @@
                     method: 'GET',
                     success: function (data) {
                         suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
-                        console.log('Dados brutos do Backend modal:', suggestionsDataPecaModal);
                     },
                     error: function (err) {
                         console.error('Erro ao obter dados brutos do backend', err);
@@ -1173,7 +1173,6 @@
                     method: 'GET',
                     success: function (data) {
                         suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
-                        console.log('Dados brutos do Backend modal:', suggestionsDataPecaModal);
                     },
                     error: function (err) {
                         console.error('Erro ao obter dados brutos do backend', err);
@@ -1314,7 +1313,6 @@
                 method: 'GET',
                 success: function (data) {
                     suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);
-                    console.log('Dados brutos do Backend modal:', suggestionsOperadorModal);
                 },
                 error: function (err) {
                     console.error('Erro ao obter dados brutos do backend', err);
@@ -1382,7 +1380,6 @@
                 method: 'GET',
                 success: function (data) {
                     suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);
-                    console.log('Dados brutos do Backend modal:', suggestionsOperadorModal);
 
                     // Adicione código aqui para exibir as sugestões na lista
                     updateSuggestionsList(suggestionsOperadorModal);
@@ -1749,7 +1746,8 @@
                     success: function (data) {
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
-                        location.reload();
+                        chamarAPI();
+                        chamarAPIInterrompidas();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
@@ -1789,7 +1787,8 @@
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalMotivoInterrompido').modal('hide');
-                        location.reload();
+                        chamarAPI();
+                        chamarAPIInterrompidas();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);

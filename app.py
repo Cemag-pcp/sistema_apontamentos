@@ -1453,7 +1453,6 @@ def receber_dados_planejamento():
 
     return redirect(url_for("planejar_pintura"))
 
-
 @app.route('/planejar-montagem', methods=['GET', 'POST'])
 def planejar_montagem():
     """
@@ -1471,7 +1470,6 @@ def planejar_montagem():
     sheet_data = table.values.tolist()
 
     return render_template('planejar-montagem.html', sheet_data=sheet_data)
-
 
 @app.route("/receber-dados-planejamento-montagem", methods=['POST'])
 def receber_dados_planejamento_montagem():
@@ -1509,7 +1507,6 @@ def receber_dados_planejamento_montagem():
 
     return redirect(url_for("planejar_montagem"))
 
-
 @app.route("/api/publica/apontamento/pintura")
 def api_apontamento_pintura():
 
@@ -1527,7 +1524,6 @@ def api_apontamento_pintura():
         linha[9] = linha[9].strftime("%d/%m/%Y")
 
     return jsonify(data)
-
 
 @app.route("/api/publica/apontamento/montagem", methods=['GET'])
 def api_apontamento_montagem():
@@ -1582,7 +1578,6 @@ def api_apontamento_corte():
 
     return jsonify(data)
 
-
 @app.route("/painel-montagem")
 def painel_montagem():
     """
@@ -1592,7 +1587,6 @@ def painel_montagem():
     today = datetime.now().date().strftime("%d/%m/%Y")
 
     return render_template("painel-montagem.html", today=today)
-
 
 @app.route("/atualizar-painel-montagem")
 def atualizar_painel_montagem():
@@ -1617,7 +1611,6 @@ def atualizar_painel_montagem():
         'data_pecas_planejada': data_pecas_planejada,
         'today': today
     })
-
 
 @app.route("/api/planejamento/montagem")
 def api_planejamento_montagem_csv():
@@ -1650,7 +1643,6 @@ def api_planejamento_montagem_csv():
     # Retorna o arquivo CSV como resposta
     return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='planejamento_montagem.csv')
 
-
 @app.route("/api/apontamento/montagem")
 def api_apontamento_montagem_csv():
 
@@ -1671,7 +1663,6 @@ def api_apontamento_montagem_csv():
 
     # Retorna o arquivo CSV como resposta
     return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='apontamento_montagem.csv')
-
 
 @app.route("/api/planejamento/pintura")
 def api_planejamento_pintura_csv():
@@ -1706,7 +1697,6 @@ def api_planejamento_pintura_csv():
 
     # Retorna o arquivo CSV como resposta
     return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='planejamento_pintura.csv')
-
 
 @app.route("/api/apontamento/pintura")
 def api_apontamento_pintura_csv():
@@ -1749,9 +1739,9 @@ def api_apontamento_pintura_csv():
     # Retorna o arquivo CSV como resposta
     return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='apontamento_pintura.csv')
 
-
 @app.route("/api/pecas-em-processo/montagem", methods=['POST'])
 def api_pecas_em_processo_montagem():
+    
     """
     rota para enviar peças para status "em processo"
     """
@@ -1787,7 +1777,7 @@ def api_pecas_em_processo_montagem():
 
     conn.commit()
 
-    return 'sucess'
+    return 'success'
 
 
 @app.route("/api/consulta-pecas-em-processo/montagem", methods=['GET'])
@@ -3371,7 +3361,7 @@ def api_pecas_retornou_serralheria():
 
     conn.commit()
 
-    return 'sucess'
+    return jsonify('sucess')
 
 @app.route("/api/pecas-interrompida/serralheria", methods=['POST'])
 def api_pecas_interrompida_serralheria():
@@ -3388,8 +3378,6 @@ def api_pecas_interrompida_serralheria():
     agora = datetime.now()
     query_update = """update pcp.ordens_processo_serralheria set data_finalizacao = %s where id = %s"""
     cur.execute(query_update, (agora, data_request['id']))
-
-    conn.commit()
 
     query_consulta = """select * from pcp.ordens_processo_serralheria where id = %s"""
     cur.execute(query_consulta, (data_request['id'],))
@@ -3411,7 +3399,7 @@ def api_pecas_interrompida_serralheria():
 
     conn.commit()
 
-    return 'sucess'
+    return jsonify('sucess')
 
 @app.route('/historico-finalizadas/serralheria')
 def historico_finalizadas_serralheria():

@@ -742,13 +742,13 @@
                         console.log('Solicitação POST bem-sucedida:', data);
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
-                        location.reload();
+                        // location.reload();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
                         // Adiciona um pequeno atraso antes de chamar hideLoading()
                         hideLoading();
-                        location.reload();
+                        // location.reload();
                     }
                 });
             });
@@ -897,7 +897,6 @@
                 method: 'GET',
                 success: function (data) {
                     suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
-                    console.log('Dados brutos do Backend modal:', suggestionsDataPecaModal);
                 },
                 error: function (err) {
                     console.error('Erro ao obter dados brutos do backend', err);
@@ -1081,7 +1080,6 @@
                 method: 'GET',
                 success: function (data) {
                     suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);
-                    console.log('Dados brutos do Backend modal:', suggestionsOperadorModal);
                 },
                 error: function (err) {
                     console.error('Erro ao obter dados brutos do backend', err);
@@ -1149,7 +1147,6 @@
                 method: 'GET',
                 success: function (data) {
                     suggestionsOperadorModal = data.map(row => row[Object.keys(row)[0]]);
-                    console.log('Dados brutos do Backend modal:', suggestionsOperadorModal);
 
                     // Adicione código aqui para exibir as sugestões na lista
                     updateSuggestionsList(suggestionsOperadorModal);
@@ -1222,7 +1219,7 @@
 
     <script>
         $(document).on('click', '#btnIniciarProducao', function () {
-            // Obter os dados da linha da tabela
+
             var rowData = $(this).closest('tr').find('td').map(function () {
                 return $(this).text();
             }).get();
@@ -1259,11 +1256,11 @@
                     data: JSON.stringify(dados),
                     success: function (response) {
                         // Tratar a resposta do backend, se necessário
-                        console.log(response);
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalConfirmarInicioProducao').modal('hide');
-                        location.reload();
+                        chamarAPI();
+                        chamarAPIInterrompidas();
                     },
                     error: function (err) {
                         console.error('Erro ao enviar dados para o backend', err);
@@ -1542,7 +1539,8 @@
                     success: function (data) {
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
-                        location.reload();
+                        chamarAPI();
+                        chamarAPIInterrompidas();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
@@ -1582,7 +1580,8 @@
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalMotivoInterrompido').modal('hide');
-                        location.reload();
+                        chamarAPI();
+                        chamarAPIInterrompidas();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
@@ -1636,7 +1635,8 @@
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalConfirmarInicioProducao').modal('hide');
-                        location.reload();
+                        chamarAPI();
+                        chamarAPIInterrompidas();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);

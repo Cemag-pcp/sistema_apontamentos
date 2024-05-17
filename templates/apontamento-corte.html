@@ -834,6 +834,8 @@
                 console.log('Tabela enviada com sucesso');
                 $('#modalExecucaoApontamento').modal('hide');
                 hideLoading();
+                chamarAPI();
+                chamarAPIInterrompidas();
             },
             error: function (err) {
                 console.error('Erro:', err);
@@ -887,6 +889,8 @@
                                     $('#modalConfirmarInicioProducao').modal('hide');
                                     hideLoading();
                                     updateTable(1, '', '');
+                                    chamarAPI();
+                                    chamarAPIInterrompidas();
                                 },
                                 error: function (error) {
                                     console.error('Erro na solicitação POST:', error);
@@ -1115,6 +1119,8 @@
                     hideLoading();
                     showAndHideSuccessAlert('Salvo.', 2000);
                     $('#modalMotivoInterrompido').modal('hide');
+                    chamarAPI();
+                    chamarAPIInterrompidas();
                 },
                 error: function (error) {
                     console.error('Erro na solicitação POST:', error);
@@ -1168,6 +1174,8 @@
                     hideLoading();
                     showAndHideSuccessAlert('Salvo.', 2000);
                     $('#modalConfirmarInicioProducao').modal('hide');
+                    chamarAPI();
+                    chamarAPIInterrompidas();
                 },
                 error: function (error) {
                     console.error('Erro na solicitação POST:', error);
