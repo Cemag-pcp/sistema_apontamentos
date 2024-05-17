@@ -3988,7 +3988,8 @@ def carretas_planilha_carga(datainicio, datafim):
 
     filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE']]
 
-    filtrar_data_carreta['PED_QUANTIDADE'] = filtrar_data_carreta['PED_QUANTIDADE'].astype(int)
+    filtrar_data_carreta['PED_QUANTIDADE'] = filtrar_data_carreta['PED_QUANTIDADE'].apply(lambda x: x.replace('.',"").replace(",","."))
+    filtrar_data_carreta['PED_QUANTIDADE'] = filtrar_data_carreta['PED_QUANTIDADE'].astype(float)
 
     result = filtrar_data_carreta.groupby(['PED_PREVISAOEMISSAODOC', 'Carreta Trat'], as_index=False)['PED_QUANTIDADE'].sum()
     
