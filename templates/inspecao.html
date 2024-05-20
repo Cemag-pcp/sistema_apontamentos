@@ -20,7 +20,7 @@
 {% set color_map = {
     'LC': '#ff6d01',
     'AV': '#ffff00',
-    'VM': '#8b0000',
+    'VM': '#ff0000',
     'CO': '#a9a9a9',
     'AN': '#3F00FF',
     'VJ': '#006400'
@@ -137,14 +137,14 @@
                                     {% for inspecionada in inspecionadas %}
                                     <tr>
                                         <td data-title="#">{{inspecionada[0]}}</td>
-                                        <td data-title="Peca">{{inspecionada[11]}}</td>
-                                        <td data-title="Cor">{{inspecionada[12]}} 
-                                            {% if inspecionada[12] in color_map %}
+                                        <td data-title="Peca">{{inspecionada[9]}}</td>
+                                        <td data-title="Cor">{{inspecionada[10]}} 
+                                            {% if inspecionada[10] in color_map %}
                                             <input class="text-truncate" data-toggle="tooltip" data-placement="top"
-                                                title="{{ color_map[inspecionada[12]] }}" type="color" value="{{ color_map[inspecionada[12]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
+                                                title="{{ color_map[inspecionada[10]] }}" type="color" value="{{ color_map[inspecionada[10]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
                                             {% endif %}
                                         </td>
-                                        <td data-title="Tipo">{{inspecionada[13]}}</td>
+                                        <td data-title="Tipo">{{inspecionada[11]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -154,7 +154,7 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a id="btn_exec" class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecionada[0]}}')">
+                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecionada[0]}}','{{inspecionada[5]}}')">
                                                         Histórico
                                                     </a>
                                                 </div>
@@ -244,7 +244,7 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body p-4" style="font-size: 14px;">
+                        <div class="modal-body p-4" style="font-size: 14px; height: 500px; overflow-y: auto;">
                             <div class="row">
                                 <input type="date" name="id_peca" id="id_peca" class="form-control" readonly="readonly"
                                     style="display: none;">

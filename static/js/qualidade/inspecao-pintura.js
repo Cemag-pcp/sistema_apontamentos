@@ -31,7 +31,7 @@ $('#n_conformidades').on('input',function() {
     if(n_conformidades_value >= qtd_produzida_value || n_conformidades_value < 0 || n_conformidades_value === '') {
         $("#causa_reinspecao").prop('disabled', true);
         $("#causa_reinspecao").val('');
-        $('#n_nao_conformidades').val('');
+        $('#n_nao_conformidades').val(0);
     } else {
         $("#causa_reinspecao").prop('disabled', false);
     }
@@ -96,7 +96,6 @@ $('#envio_inspecao').on('click', function () {
 
     let id_inspecao = $('#inspecaoModalLabel').text();
     let data_inspecao = $('#data_inspecao').val();
-    var files = $('#foto_inspecao')[0].files; // Obtenha os arquivos selecionados corretamente
     let n_conformidades = $('#n_conformidades').val();
     let n_nao_conformidades = $('#n_nao_conformidades').val();
     let list_causas = [];
@@ -124,8 +123,16 @@ $('#envio_inspecao').on('click', function () {
         list_causas.push(causas);
     }
 
-    for (var i = 0; i < files.length; i++) {
-        formData.append('foto_inspecao[]', files[i]); // Use [] se quiser lidar com vários arquivos
+    for (let i = 1; i <= n_nao_conformidades; i++) {
+        let inputId = '#foto_inspecao_' + i;
+        let files = $(inputId)[0].files;
+        for (let file of files) {
+            formData.append('foto_inspecao_' + i + '[]', file);
+        }
+    }
+
+    for (var pair of formData.entries()) {
+        console.log(pair[0]+ ': ' + pair[1]);
     }
 
     formData.append('id_inspecao', id_inspecao);
@@ -187,45 +194,62 @@ function modalReinspecao(id, data, peca, cor,n_nao_conformidades,inspetor) {
 }
 
 
-function modalVisualizarCausas(causas, fotos) {
-    var causasLista = JSON.parse(causas);
-    var fotosArray = fotos.split(';').map(function(foto) {
-        return decodeURIComponent(foto);
-    });
+function modalVisualizarCausas(concatenatedPhotos) {
+    // Limpar qualquer conteúdo anterior do modal
+    $('#visualizacaoCausasModal .modal-body').empty();
 
-    $("#visualizacaoCausasModalLabel").text("Contém " + causasLista.length + " não conformidades");
+    $("#visualizacaoCausasModalLabel").text("Contém " + Object.keys(concatenatedPhotos).length + " não conformidades");
 
-    // Limpa a lista existente
-    $('#lista_nao_ordenada').empty();
+    // Iterar sobre as chaves e valores do objeto concatenatedPhotos
+    for (var key in concatenatedPhotos) {
+        if (concatenatedPhotos.hasOwnProperty(key)) {
+            // Separar as imagens com base no delimitador ';'
+            var photos = concatenatedPhotos[key].split(';').filter(function(photo) {
+                return photo.trim() !== ''; // Retorna verdadeiro se a foto não estiver vazia
+            });
+            // Iterar sobre as imagens e criar elementos de imagem correspondentes
+            for (var i = 0; i < photos.length; i++) {
+                var photoUrl = photos[i];
 
-    // Limpa as imagens existentes
-    $('#visualizacaoCausasModal .modal-body div').empty();
+                // Criar o elemento de cartão (card)
+                var card = $('<div>', {
+                    class: 'card mb-3'
+                });
 
-    console.log(fotosArray.length)
+                // Criar o elemento de imagem do cartão
+                var image = $('<img>', {
+                    class: 'card-img-top top-card-causas',
+                    src: photoUrl,
+                    alt: 'Imagem'
+                });
 
-    console.log(fotosArray)
-    // Verifica se há fotos
-    if (fotosArray[0] != "None") {
-        // Itera sobre as fotos e cria elementos <img>
-        $('#visualizacaoCausasModal .modal-body div').show();
-        fotosArray.forEach(function(foto) {
-            $('<img>').attr('src', foto).addClass('img-fluid').appendTo('#visualizacaoCausasModal .modal-body div').addClass('mb-4');
-        });
-    } else {
-        // Se não houver fotos, oculta a área de imagens
-        $('#visualizacaoCausasModal .modal-body div').hide();
+                // Criar o elemento do corpo do cartão
+                var cardBody = $('<div>', {
+                    class: 'card-body'
+                });
+
+                // Criar o parágrafo com o texto do cartão
+                var cardText = $('<h5>', {
+                    class: 'card-title',
+                    text: key
+                });
+
+                // Adicionar a imagem e o texto ao corpo do cartão
+                cardBody.append(cardText);
+
+                // Adicionar a imagem ao cartão
+                card.append(image);
+
+                // Adicionar o corpo do cartão ao cartão
+                card.append(cardBody);
+
+                // Adicionar o cartão ao modal
+                $('#visualizacaoCausasModal .modal-body').append(card);
+            }
+        }
     }
 
-    // Itera sobre os elementos da lista causas
-    causasLista.forEach(function(causa) {
-        // Cria um novo elemento <li> com o texto da causa e adiciona à lista
-        $('<li>').text(causa).addClass('list-group-item').appendTo('#lista_nao_ordenada');
-    });
-
-    // Torna a lista ordenável e itens movíveis
-    Sortable.create(lista_nao_ordenada);
-    
-    // Mostra o modal
+    // Exibir o modal
     $('#visualizacaoCausasModal').modal('show');
 }
 
@@ -241,7 +265,7 @@ $('#n_conformidades_reinspecao').on('input',function() {
     if(n_conformidades_value >= qtd_produzida_value || n_conformidades_value < 0 || n_conformidades_value === '') {
         $("#causa_nova_reinspecao").prop('disabled', true);
         $("#causa_nova_reinspecao").val('');
-        $('#n_nao_conformidades_reinspecao').val('');
+        $('#n_nao_conformidades_reinspecao').val(0);
     } else {
         $("#causa_nova_reinspecao").prop('disabled', false);
     }
@@ -259,7 +283,6 @@ $('#envio_reinspecao').on('click',function() {
 
     let id_inspecao = $('#reinspecaoModalLabel').text();
     let data_inspecao = $('#data_nova_inspecao').val();
-    var files = $('#foto_reinspecao')[0].files; // Obtenha os arquivos selecionados corretamente
     let n_conformidades = $('#n_conformidades_reinspecao').val();
     let n_nao_conformidades = $('#n_nao_conformidades_reinspecao').val();
     let list_causas = [];
@@ -285,8 +308,16 @@ $('#envio_reinspecao').on('click',function() {
         list_causas.push(causas);
     }
 
-    for (var i = 0; i < files.length; i++) {
-        formData.append('foto_inspecao[]', files[i]); // Use [] se quiser lidar com vários arquivos
+    for (let i = 1; i <= n_nao_conformidades; i++) {
+        let inputId = '#foto_inspecao_' + i;
+        let files = $(inputId)[0].files;
+        for (let file of files) {
+            formData.append('foto_inspecao_' + i + '[]', file);
+        }
+    }
+
+    for (var pair of formData.entries()) {
+        console.log(pair[0]+ ': ' + pair[1]);
     }
 
     formData.append('id_inspecao', id_inspecao);
@@ -362,6 +393,29 @@ function formatarDataBrComHora(dataString) {
     return formatoDesejado;
 }
 
+function concatPhotosByCriteria(foto_causa, execucaoDesejada) {
+    var concatenatedPhotos = {};
+
+    // Itera sobre o array foto_causa
+    for (var i = 0; i < foto_causa.length; i++) {
+        var key = foto_causa[i][2]; // A chave é o valor da terceira posição do subarray
+        var execucao = foto_causa[i][3]; // Número da execução
+
+        // Verifica se a execução corresponde à execução desejada
+        if (execucao === execucaoDesejada) {
+            // Se a chave ainda não existir no objeto concatenatedPhotos, inicializa como uma string vazia
+            if (!concatenatedPhotos[key]) {
+                concatenatedPhotos[key] = '';
+            }
+
+            // Concatena o valor da primeira posição do subarray à string correspondente à chave
+            concatenatedPhotos[key] += foto_causa[i][1];
+        }
+    }
+
+    return concatenatedPhotos;
+}
+
 function modalTimeline(idinspecao) {
 
     $("#loading").show();
@@ -373,18 +427,21 @@ function modalTimeline(idinspecao) {
         contentType: 'application/json',
         data: JSON.stringify({ 'idinspecao': idinspecao }),  // Enviando um objeto JSON
         success: function(response) {
-            // Limpar conteúdo atual da lista
-            $("#modalTimeline .modal-header h5").text("Possui " + response.length + " inspeções")
+
+            var historico = response[0]
+            var foto_causa = response[1]
+
+            $("#modalTimeline .modal-header h5").text("Possui " + historico.length + " inspeções")
         
             $('#listaHistorico').empty();
         
             $('#modalTimeline').modal('show');
         
             $("#loading").hide();
-        
+
             // Loop pelos dados e gerar elementos da lista
-            for (var i = 0; i < response.length; i++) {
-                var item = response[i];
+            for (var i = 0; i < historico.length; i++) {
+                var item = historico[i];
 
                 // Criar elemento da lista e definir atributos de dados
                 var listItem = $('<a>', {
@@ -398,7 +455,7 @@ function modalTimeline(idinspecao) {
         
                 var content = `
                     <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">${item[11]}</h6>
+                        <h6 class="mb-1">${item[9]}</h6>
                         <div class="d-flex flex-column align-items-end">
                             <small>N° Conformidade : ${item[2]}</small>
                             <small>Inspetor : ${item[3]}</small>
@@ -414,14 +471,14 @@ function modalTimeline(idinspecao) {
             }
             $(".modal-edit").on('click', function() {
                 var dataItemString = $(this).data('item');
-
-                try {
-                    $("#modalTimeline").modal('hide')
-                    modalVisualizarCausas(dataItemString[10],dataItemString[9])
-                } catch (error) {
-                    alert("Ultima execução não possui imagens nem causas de não conformidades")
+                $("#modalTimeline").modal('hide')
+                var concatenatedPhotos = concatPhotosByCriteria(foto_causa, dataItemString[5]);
+                console.log()
+                if (Object.keys(concatenatedPhotos).length !== 0) {
+                    modalVisualizarCausas(concatenatedPhotos);
+                } else{
+                    alert("Não possui nenhuma não conformidade")
                 }
-                
             }); 
         },
         error: function(error) {

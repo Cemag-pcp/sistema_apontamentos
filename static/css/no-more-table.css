@@ -72,3 +72,8 @@
     z-index: 1; 
     background-color: #fff;
 }
+
+.top-card-causas {
+    width: auto;
+    height: 300px;
+}
