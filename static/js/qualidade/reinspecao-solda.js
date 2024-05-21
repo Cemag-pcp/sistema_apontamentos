@@ -21,6 +21,7 @@ $('#inputReinspecionadasConformidadesSolda').on('input',function() {
     let numNaoConformidadesSolda = $('#inputReinspecionadasNaoConformidadesSolda');
     let selectNaoConformidadesSolda = $("#selectReinspecionadasNaoConformidadesSolda");
     let causaSolda = $("#causaSoldaReinspecionadas");
+    let outraCausaSoldaReinspecionadas = $("#outraCausaSoldaReinspecionadas");
 
     numNaoConformidadesSolda.val(pecasInspecionadasSolda - numConformidadesSolda);
 
@@ -31,6 +32,7 @@ $('#inputReinspecionadasConformidadesSolda').on('input',function() {
     if(numNaoConformidadesSolda.val() === '' || numNaoConformidadesSolda.val() <= 0 || numConformidadesSolda < 0){
         selectNaoConformidadesSolda.prop('disabled',true);
         causaSolda.prop('disabled',true);
+        outraCausaSoldaReinspecionadas.prop('disabled',true);
         $('#outraCausaSolda').prop('disabled',true)
         selectNaoConformidadesSolda.val('')
         causaSolda.val('')

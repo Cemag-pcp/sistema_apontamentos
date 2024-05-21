@@ -189,13 +189,13 @@
                                     <tr>
                                         <td data-title="#">{{reinspecao[0]}}</td>
                                         <td data-title="Data Inspeção">{{reinspecao[1]}}</td>
-                                        <td data-title="Peça">{{reinspecao[13]}}</td>
+                                        <td data-title="Peça">{{reinspecao[12]}}</td>
                                         <td data-title="Ñ conformidade">{{reinspecao[2]}}</td>
                                         <td data-title="Inspetor">{{reinspecao[4]}}</td>
-                                        <td data-title="Cor">{{reinspecao[14]}} 
-                                            {% if reinspecao[14] in color_map %}
+                                        <td data-title="Cor">{{reinspecao[13]}} 
+                                            {% if reinspecao[13] in color_map %}
                                             <input class="text-truncate" data-toggle="tooltip" data-placement="top"
-                                                title="{{ color_map[reinspecao[14]] }}" type="color" value="{{ color_map[reinspecao[14]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
+                                                title="{{ color_map[reinspecao[13]] }}" type="color" value="{{ color_map[reinspecao[13]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
                                             {% endif %}
                                         </td>
                                         <td data-title="Exec">
@@ -207,18 +207,14 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a id="btn_exec" class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalVisualizarCausas('{{reinspecao[3]}}','{{reinspecao[11]}}')">
-                                                        Visualize as causas
-                                                    </a>
-                                                    <a id="btn_exec" class="dropdown-item dropdown_os"
                                                         style="cursor: pointer;" onclick="modalReinspecao(
-                                                '{{reinspecao[0]}}',
-                                                '{{reinspecao[1]}}',
-                                                '{{reinspecao[13]}}',
-                                                '{{reinspecao[14]}}',
-                                                '{{reinspecao[2]}}',
-                                                '{{reinspecao[4]}}'
-                                            )">
+                                                        '{{reinspecao[0]}}',
+                                                        '{{reinspecao[1]}}',
+                                                        '{{reinspecao[13]}}',
+                                                        '{{reinspecao[14]}}',
+                                                        '{{reinspecao[2]}}',
+                                                        '{{reinspecao[4]}}'
+                                                    )">
                                                         Reinspecionar
                                                     </a>
                                                 </div>

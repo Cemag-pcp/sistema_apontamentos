@@ -106,7 +106,7 @@ $('#envio_inspecao_solda').on('click',function() {
     let inputPecasInspecionadasSolda = $('#inputPecasInspecionadasSolda').val();
     let inputConformidadesSolda = $('#inputConformidadesSolda').val();
     let inputNaoConformidadesSolda = $('#inputNaoConformidadesSolda').val();
-    let inspetoresSolda = []
+    let inspetorSolda = $('#inspetorSolda').val();
     let causaSolda = $('#causaSolda').val();
     let outraCausaSolda = $('#outraCausaSolda').val();
     let observacaoSolda = $('#observacaoSolda').val();
@@ -120,17 +120,11 @@ $('#envio_inspecao_solda').on('click',function() {
         return; // Interrompe a execução
     }
 
-    $('select[id^="inspetorSolda"]').each(function() {
-        if($(this).val() !== null){
-            inspetoresSolda.push($(this).val()); // Adiciona o valor de cada select à lista
-        } 
-    });
-
     formData.append('id_inspecao', id_inspecao);
     formData.append('data_inspecao', data_inspecao);
     formData.append('inputCategoria', inputCategoria);
     formData.append('inputConjunto', inputConjunto);
-    formData.append('inspetoresSolda', JSON.stringify(inspetoresSolda));
+    formData.append('inspetorSolda', inspetorSolda);
     formData.append('num_pecas', inputPecasInspecionadasSolda);
     formData.append('inputConformidadesSolda', inputConformidadesSolda);
     formData.append('inputNaoConformidadesSolda', inputNaoConformidadesSolda);

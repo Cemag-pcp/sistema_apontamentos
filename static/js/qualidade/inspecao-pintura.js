@@ -96,17 +96,22 @@ $('#envio_inspecao').on('click', function () {
 
     let id_inspecao = $('#inspecaoModalLabel').text();
     let data_inspecao = $('#data_inspecao').val();
-    let n_conformidades = $('#n_conformidades').val();
-    let n_nao_conformidades = $('#n_nao_conformidades').val();
+    let n_conformidades = parseInt($('#n_conformidades').val());
+    let n_nao_conformidades = parseInt($('#n_nao_conformidades').val());
     let list_causas = [];
     let inspetor = $("#inspetor").val();
-    let qtd_produzida_value = $('#qtd_produzida').val();
+    let qtd_produzida_value = parseInt($('#qtd_produzida').val());
     let reinspecao = 'False';
 
     console.log(inspetor)
 
-    if (n_conformidades.trim() === "" || inspetor === null || n_conformidades.trim() > qtd_produzida_value || n_conformidades.trim() < 0) {
+    if (n_conformidades === "" || inspetor === null || n_conformidades > qtd_produzida_value || n_conformidades < 0) {
         alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
+        console.log('Entrou')
+        console.log(n_conformidades === "")
+        console.log(inspetor === null)
+        console.log(n_conformidades > qtd_produzida_value)
+        console.log(n_conformidades < 0)
         $('#envio_inspecao').prop('disabled',false);
         $("#loading").hide();
         return; // Interrompe a execução
@@ -165,7 +170,7 @@ $('#envio_inspecao').on('click', function () {
 
 // Exibindo modal de Reinspecao
 
-function modalReinspecao(id, data, peca, cor,n_nao_conformidades,inspetor) {
+function modalReinspecao(id,data,peca,cor,n_nao_conformidades,inspetor) {
 
     const timeElapsed = Date.now();
     const today = new Date(timeElapsed);
@@ -200,6 +205,7 @@ function modalVisualizarCausas(concatenatedPhotos) {
 
     $("#visualizacaoCausasModalLabel").text("Contém " + Object.keys(concatenatedPhotos).length + " não conformidades");
 
+    console.log(concatenatedPhotos)
     // Iterar sobre as chaves e valores do objeto concatenatedPhotos
     for (var key in concatenatedPhotos) {
         if (concatenatedPhotos.hasOwnProperty(key)) {
@@ -216,13 +222,17 @@ function modalVisualizarCausas(concatenatedPhotos) {
                     class: 'card mb-3'
                 });
 
-                // Criar o elemento de imagem do cartão
-                var image = $('<img>', {
-                    class: 'card-img-top top-card-causas',
-                    src: photoUrl,
-                    alt: 'Imagem'
-                });
+                if (photoUrl != "null"){
+                    // Criar o elemento de imagem do cartão
+                    var image = $('<img>', {
+                        class: 'card-img-top top-card-causas',
+                        src: photoUrl,
+                        alt: 'Imagem'
+                    });
 
+                    card.append(image);
+                }
+                
                 // Criar o elemento do corpo do cartão
                 var cardBody = $('<div>', {
                     class: 'card-body'
@@ -236,9 +246,6 @@ function modalVisualizarCausas(concatenatedPhotos) {
 
                 // Adicionar a imagem e o texto ao corpo do cartão
                 cardBody.append(cardText);
-
-                // Adicionar a imagem ao cartão
-                card.append(image);
 
                 // Adicionar o corpo do cartão ao cartão
                 card.append(cardBody);
@@ -283,14 +290,14 @@ $('#envio_reinspecao').on('click',function() {
 
     let id_inspecao = $('#reinspecaoModalLabel').text();
     let data_inspecao = $('#data_nova_inspecao').val();
-    let n_conformidades = $('#n_conformidades_reinspecao').val();
-    let n_nao_conformidades = $('#n_nao_conformidades_reinspecao').val();
+    let n_conformidades = parseInt($('#n_conformidades_reinspecao').val());
+    let n_nao_conformidades = parseInt($('#n_nao_conformidades_reinspecao').val());
     let list_causas = [];
     let inspetor = $("#inspetor_reinspecao").val();
-    let qtd_produzida_value = $('#qtd_produzida_reinspecao').val();
+    let qtd_produzida_value = parseInt($('#qtd_produzida_reinspecao').val());
     let reinspecao = true;
 
-    if (n_conformidades.trim() === "" || inspetor === null || n_conformidades.trim() > qtd_produzida_value || n_conformidades.trim() < 0) {
+    if (n_conformidades === "" || inspetor === null || n_conformidades > qtd_produzida_value || n_conformidades < 0) {
         alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
         $('#envio_reinspecao').prop('disabled',false);
         $("#loading").hide();
@@ -431,6 +438,9 @@ function modalTimeline(idinspecao) {
             var historico = response[0]
             var foto_causa = response[1]
 
+            console.log(foto_causa)
+            console.log(historico)
+
             $("#modalTimeline .modal-header h5").text("Possui " + historico.length + " inspeções")
         
             $('#listaHistorico').empty();
@@ -473,7 +483,7 @@ function modalTimeline(idinspecao) {
                 var dataItemString = $(this).data('item');
                 $("#modalTimeline").modal('hide')
                 var concatenatedPhotos = concatPhotosByCriteria(foto_causa, dataItemString[5]);
-                console.log()
+                console.log(concatenatedPhotos)
                 if (Object.keys(concatenatedPhotos).length !== 0) {
                     modalVisualizarCausas(concatenatedPhotos);
                 } else{
