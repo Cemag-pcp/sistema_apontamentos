@@ -109,7 +109,8 @@
                                         <th>Data Inspeção</th>
                                         <th>Conjunto</th>
                                         <th>Inspetor</th>
-                                        <th>Total Conformidades</th>
+                                        <th>Célula</th>
+                                        <th>Código</th>
                                         <th>Execução</th>
                                     </tr>
                                 </thead>
@@ -120,7 +121,8 @@
                                         <td data-title="Data Inspeção">{{inspecao_solda[1]}}</td>
                                         <td data-title="Peca">{{inspecao_solda[6]}}</td>
                                         <td data-title="Inspetor">{{inspecao_solda[3]}}</td>
-                                        <td data-title="Total Conformidades">{{inspecao_solda[2]}}</td>
+                                        <td data-title="Célula">{{inspecao_solda[9]}}</td>
+                                        <td data-title="Código">{{inspecao_solda[10]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -130,8 +132,8 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a id="btn_exec" class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="">
-                                                        Editar inspeção
+                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecao_solda[0]}}','Solda')">
+                                                        Editar Inspeção
                                                     </a>
                                                 </div>
                                             </div>
@@ -262,8 +264,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" id="selectContainer">
-                                <div class="col-sm-6 mb-4" id="selectBlock">
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
                                     <label>Inspetor</label>
                                     <select class="form-control" name="inspetorSolda" id="inspetorSolda" style="font-size: 12px;">
                                         <option value="" selected hidden disabled></option>
@@ -276,10 +278,6 @@
                                         <option value="Estefane">Estefane</option>
                                     </select>
                                 </div>
-                                <!-- <div class="col-sm-6" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <button class="btn btn-primary" id="addButton" onclick="addSelect()" style="font-size: 10px;">Adicionar insp.</button>
-                                    <button class="btn btn-danger" id="removeButton" onclick="removeSelect()" style="font-size: 10px;" disabled>Remover insp.</button>
-                                </div> -->
                             
                                 <div class="col-sm-6 mb-4">
                                     <label>Causa</label>
@@ -455,10 +453,41 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row" id="selectContainer">
+                                <div class="col-sm-6 mb-4" id="selectBlock">
+                                    <label>Retrabalho</label>
+                                    <select class="form-control" name="retrabalhoSolda" id="retrabalhoSolda" style="font-size: 12px;">
+                                        <option value="" selected hidden disabled></option>
+                                        {% for soldador in lista_soldadores %}
+                                        <option value="{{soldador}}">{{soldador}}</option> 
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-sm-6" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButton" onclick="addSelect()" style="font-size: 10px;">Adicionar insp.</button>
+                                    <button class="btn btn-danger" id="removeButton" onclick="removeSelect()" style="font-size: 10px;" disabled>Remover insp.</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Inspetores</label>
+                                    <select class="form-control" name="inspetoresSoldaReinspecao" id="inspetoresSoldaReinspecao" style="font-size: 12px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Leônidas">Leônidas</option>
+                                        <option value="Severiano">Severiano</option>
+                                        <option value="Marcelo">Marcelo</option>
+                                        <option value="Henrique">Henrique</option>
+                                        <option value="Guthemberg">Guthemberg</option>
+                                        <option value="Elenilson">Elenilson</option>
+                                        <option value="Estefane">Estefane</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button id="envio_reinspecao_Solda" class="btn btn-primary">Enviar</button>
                         </div>
+                      </div>
                     </div>
                 </div>
             </div>

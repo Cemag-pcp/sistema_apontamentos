@@ -154,7 +154,7 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a id="btn_exec" class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecionada[0]}}','{{inspecionada[5]}}')">
+                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecionada[0]}}','Pintura')">
                                                         Histórico
                                                     </a>
                                                 </div>
@@ -419,7 +419,7 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="m-0 font-weight-bold text-info">Histórico</h5>
+                            <h5 class="m-0 font-weight-bold text-primary">Histórico</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -429,8 +429,9 @@
                                 
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            
+                        <div class="modal-footer d-flex justify-content-between">
+                            <p id="modal-footer-quantidade-produzida"></p>
+                            <p id="modal-footer-quantidade-conformidade"></p>
                         </div>
                     </div>
                 </div>
