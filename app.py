@@ -39,7 +39,7 @@ DB_USER = "postgres"
 DB_PASS = "15512332"
 filename = "service_account.json"
 
-classe_inspecao = Inspecao(DB_NAME, DB_USER, DB_PASS, DB_HOST)
+classe_inspecao = Inspecao(DB_NAME, DB_USER, DB_PASS, DB_HOST, UPLOAD_FOLDER)
 
 cache_historico_pintura = cachetools.LRUCache(maxsize=128)
 cache_carretas = cachetools.LRUCache(maxsize=128)
@@ -753,66 +753,12 @@ def inspecao():
     
     if request.method == 'POST':
 
-        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                        password=DB_PASS, host=DB_HOST)
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-        arquivos = ''
         n_nao_conformidades = int(request.form.get('n_nao_conformidades', 0))
         id_inspecao = request.form.get('id_inspecao')
         # list_causas = request.form.get('list_causas') 
         list_causas = json.loads(request.form.get('list_causas'))
 
-        # Processa cada grupo de arquivos baseados no número de não conformidades
-        for i in range(1, n_nao_conformidades + 1):
-            file_key = f'foto_inspecao_{i}[]'
-            fotos = request.files.getlist(file_key)
-            if fotos == []:
-                fotos.append('')
-            for foto in fotos: 
-                if foto != '':
-                    filename = secure_filename(foto.filename)
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    arquivos = file_path + ";"
-                    arquivos = arquivos.replace('\\', '/')
-                    foto.save(file_path)
-                else:
-                    arquivos = None
-
-                query_fotos = """DO $$
-                                BEGIN
-                                    IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                        INSERT INTO pcp.inspecao_foto
-                                            (id, caminho_foto, causa, num_inspecao) 
-                                        VALUES 
-                                            (%s, %s, %s,
-                                                (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
-                                            );
-                                    ELSE
-                                        INSERT INTO pcp.inspecao_foto
-                                            (id, caminho_foto, causa, num_inspecao) 
-                                        VALUES 
-                                            (%s, %s, %s, 0);
-                                    END IF;
-                                END $$;
-                            """
-
-                values_fotos = (
-                    id_inspecao,
-                    id_inspecao,
-                    arquivos,
-                    list_causas[i - 1],
-                    id_inspecao,   
-                    id_inspecao,
-                    arquivos,
-                    list_causas[i - 1]
-                )
-
-                cur.execute(query_fotos, values_fotos)
-        
-        conn.commit()
-        
-        # Outros dados enviados no formulário podem ser acessados da seguinte maneira:
+        classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas)
         
         data_inspecao = request.form.get('data_inspecao')
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
@@ -852,12 +798,22 @@ def modal_historico():
     idinspecao = dados['idinspecao']
     setor = dados['setor']
 
-    query_historico = f"""SELECT i.*, op.peca,op.cor,op.tipo,insp.qt_apontada
-                            FROM pcp.pecas_inspecionadas as i
-                        LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id::varchar
-                        LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
-                        WHERE i.setor = '{setor}' and i.id_inspecao = '{idinspecao}'
-                        ORDER BY num_inspecao ASC"""
+    if setor == 'Pintura':
+
+        query_historico = f"""SELECT i.*, op.peca,op.cor,op.tipo,insp.qt_apontada
+                                FROM pcp.pecas_inspecionadas as i
+                            LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id::varchar
+                            LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
+                            WHERE i.setor = '{setor}' and i.id_inspecao = '{idinspecao}'
+                            ORDER BY num_inspecao ASC"""
+    else: 
+        query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,i.total_conformidades,i.inspetor,
+                            i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.peca,om.codificacao,om.origem,insp.qt_apontada
+                                FROM pcp.pecas_inspecionadas as i
+                            LEFT JOIN pcp.ordens_montagem as om ON i.id_inspecao = om.id::varchar
+                            LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
+                            WHERE i.setor = '{setor}' and i.id_inspecao = '{idinspecao}'
+                            ORDER BY num_inspecao ASC"""
     
     cur.execute(query_historico)
     historico = cur.fetchall()
@@ -878,8 +834,17 @@ def solda():
 
     if request.method == 'POST':
 
-        # Outros dados enviados no formulário podem ser acessados da seguinte maneira:
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
         id_inspecao_solda = request.form.get('id_inspecao')
+
+        n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
+        id_inspecao = request.form.get('id_inspecao')
+        list_causas = json.loads(request.form.get('list_causas'))
+
+        classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas)
 
         data_inspecao = request.form.get('data_inspecao')
         
@@ -891,7 +856,6 @@ def solda():
 
         num_conformidades = request.form.get('inputConformidadesSolda')
         num_nao_conformidades = request.form.get('inputNaoConformidadesSolda')
-        causaSolda = request.form.get('causaSolda') 
         outraCausaSolda = request.form.get('outraCausaSolda')  
 
         observacaoSolda = request.form.get('observacaoSolda')  
@@ -901,26 +865,22 @@ def solda():
         num_pecas = request.form.get('num_pecas')
         reinspecao = request.form.get('reinspecao')
 
-        print(reinspecao)
-
         setor = 'Solda'
 
         if reinspecao == "True":
-            classe_inspecao.alterar_reinspecao(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,causaSolda,inspetoresSolda,setor,
+            classe_inspecao.alterar_reinspecao(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,list_causas,inspetoresSolda,setor,
                                inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
             return jsonify("Success")
         
         else:
             if num_conformidades != num_pecas:
-                classe_inspecao.inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,causaSolda,inspetoresSolda,setor,inputConjunto,
+                classe_inspecao.inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
                                    inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
                 classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetoresSolda,setor,inputConjunto,
                                       origemInspecaoSolda,observacaoSolda)
             else:
                 classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetoresSolda,setor,inputConjunto,
                                       origemInspecaoSolda,observacaoSolda)
-                
-        classe_inspecao.fechar_conexao()
 
         return jsonify("Success")
         
@@ -988,6 +948,23 @@ def solda():
             item[1] = formatar_data(item[1])
     
     return render_template('inspecao-solda.html',a_inspecionar_solda=a_inspecionar_solda,inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda,lista_soldadores=lista_soldadores)
+
+@app.route('/atualizar-conformidade',methods=['POST'])
+def atualizar_conformidade():
+
+    data = request.get_json()
+
+    id_edicao = data['id_edicao']
+
+    qtd_conformidade_antiga = data['qtd_conformidade_antiga']
+
+    conformidade_atualizada = data['conformidade_atualizada']
+
+    valor_reinspecao = qtd_conformidade_antiga - conformidade_atualizada
+
+    num_execucao = data['num_execucao']
+
+    return jsonify(qtd_conformidade_antiga)
 
 @app.route('/conjuntos', methods=['POST'])
 def listar_conjuntos():

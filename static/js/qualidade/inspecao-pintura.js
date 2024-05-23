@@ -64,6 +64,9 @@ function modalTimeline(idinspecao,setor) {
             var historico = response[0]
             var foto_causa = response[1]
 
+            console.log(historico)
+            console.log(foto_causa)
+
             var qt_apontada = historico[0][12]
 
             $("#modalTimeline .modal-header h5").text("Possui " + historico.length + " inspeções")
@@ -85,7 +88,6 @@ function modalTimeline(idinspecao,setor) {
                     class: 'list-group-item list-group-item-action modal-edit',
                     'aria-current': 'true',
                     'data-index': i, // Armazenar o índice do item como um atributo de dados
-                    'data-item': JSON.stringify(item) // Armazenar todo o item como um atributo de dados
                 });
 
                 listItem.css('cursor','pointer');
@@ -93,7 +95,14 @@ function modalTimeline(idinspecao,setor) {
                 var content = `
                     <div class="d-flex w-100 justify-content-between">
                         <h6 class="mb-1">${item[9]}</h6>
-                        <div class="d-flex flex-column align-items-end">
+                        <div class="d-flex flex-column align-items-end text-right">
+                            <div class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Opções</a>
+                                <div class="dropdown-menu drop">
+                                    <a class="dropdown-item option1" data-item='${JSON.stringify(item)}'>Visualizar causas da não conformidade</a>
+                                    <a class="dropdown-item option2" data-item='${JSON.stringify(item)}'>Editar as conformidades</a>
+                                </div>
+                            </div>
                             <small>N° Conformidade : ${item[2]}</small>
                             <small>N° de não Conformidade : ${qtd_disponivel_inspecao - item[2]}</small>
                             <small>Inspetor : ${item[3]}</small>
@@ -112,15 +121,21 @@ function modalTimeline(idinspecao,setor) {
 
             $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Quantidade produzida : " + qt_apontada)
 
-            $(".modal-edit").on('click', function() {
+            $(".option1").on('click', function() {
                 var dataItemString = $(this).data('item');
                 $("#modalTimeline").modal('hide')
                 var concatenatedPhotos = concatPhotosByCriteria(foto_causa, dataItemString[5]);
-                console.log(concatenatedPhotos)
                 if (Object.keys(concatenatedPhotos).length !== 0) {
                     modalVisualizarCausas(concatenatedPhotos);
-                } else{
+                } else {
                     alert("Não possui nenhuma não conformidade")
+                }
+            }); 
+            $(".option2").on('click', function() {
+                var dataItemString = $(this).data('item');
+                $("#modalTimeline").modal('hide')
+                if(dataItemString[2] != 0){
+                    modalEditarConformidade(dataItemString[0],dataItemString[2],dataItemString[5],dataItemString[9])
                 }
             }); 
         },
@@ -191,6 +206,21 @@ function modalVisualizarCausas(concatenatedPhotos) {
 
     // Exibir o modal
     $('#visualizacaoCausasModal').modal('show');
+}
+
+function modalEditarConformidade(id,n_conformidade,num_execução,descricao) {
+
+    $('#qtd_conformidade_edicao').val(n_conformidade)
+    
+    $('#qtd_conformidade_atualizada_edicao').val('')
+
+    $('#id_edicao').val(id)
+
+    $('#num_execucao_edicao').val(num_execução)
+
+    $('#descricao_peca_edicao').val(descricao)
+
+    $('#editarConformidadesModal').modal('show');
 }
 
 function changeTab(tabName) {
@@ -322,10 +352,6 @@ $('#envio_inspecao').on('click', function () {
         }
     }
 
-    for (var pair of formData.entries()) {
-        console.log(pair[0]+ ': ' + pair[1]);
-    }
-
     formData.append('id_inspecao', id_inspecao);
     formData.append('data_inspecao', data_inspecao);
     formData.append('n_conformidades', n_conformidades);
@@ -443,6 +469,37 @@ $('#n_conformidades_reinspecao').on('input',function() {
     } else {
         $("#causa_nova_reinspecao").prop('disabled', false);
     }
+})
+
+$('#atualizarConformidades').on('click', function(){
+
+    let id_edicao = $("#id_edicao").val();
+    let qtd_conformidade_antiga = $("#qtd_conformidade_edicao").val();
+    let conformidade_atualizada = $("#qtd_conformidade_atualizada_edicao");
+    let num_execucao = $("#num_execucao_edicao").val();
+
+    if(conformidade_atualizada.val() >= qtd_conformidade_antiga || conformidade_atualizada.val() < 0){
+        alert("Valor inválido")
+        conformidade_atualizada.val('')
+        return
+    }
+
+    $.ajax({
+        url: '/atualizar-conformidade',
+        type: 'POST',  // Alterado para POST
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ 'id_edicao':id_edicao,'qtd_conformidade_antiga': qtd_conformidade_antiga ,'conformidade_atualizada':conformidade_atualizada.val(),'num_execucao':num_execucao}),  // Enviando um objeto JSON
+        success: function(response) {
+
+        },
+        error: function(error) {
+            $("#loading").hide();
+            alert('Ocorreu um erro ');
+            console.log(error);
+        }
+    });
+    
 })
 
 // Envio das informações para o Backend da Reinspecao

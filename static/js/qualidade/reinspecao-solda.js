@@ -20,7 +20,6 @@ $('#inputReinspecionadasConformidadesSolda').on('input',function() {
     let numConformidadesSolda = $('#inputReinspecionadasConformidadesSolda').val();
     let numNaoConformidadesSolda = $('#inputReinspecionadasNaoConformidadesSolda');
     let selectNaoConformidadesSolda = $("#selectReinspecionadasNaoConformidadesSolda");
-    let causaSolda = $("#causaSoldaReinspecionadas");
     let outraCausaSoldaReinspecionadas = $("#outraCausaSoldaReinspecionadas");
 
     numNaoConformidadesSolda.val(pecasInspecionadasSolda - numConformidadesSolda);
@@ -31,28 +30,15 @@ $('#inputReinspecionadasConformidadesSolda').on('input',function() {
 
     if(numNaoConformidadesSolda.val() === '' || numNaoConformidadesSolda.val() <= 0 || numConformidadesSolda < 0){
         selectNaoConformidadesSolda.prop('disabled',true);
-        causaSolda.prop('disabled',true);
         outraCausaSoldaReinspecionadas.prop('disabled',true);
-        $('#outraCausaSolda').prop('disabled',true)
         selectNaoConformidadesSolda.val('')
-        causaSolda.val('')
-        $('#outraCausaSolda').val('')
+        outraCausaSoldaReinspecionadas.val('')
     } else {
         selectNaoConformidadesSolda.prop('disabled',false);
-        causaSolda.prop('disabled',false);
-        $('#outraCausaSolda').val('')
+        outraCausaSoldaReinspecionadas.prop('disabled',false);
+        outraCausaSoldaReinspecionadas.val('')
     }
 
-})
-
-$("#causaSoldaReinspecionadas").on('change',function(){
-
-    if($("#causaSoldaReinspecionadas").val() === "Outro"){
-        $('#outraCausaSoldaReinspecionadas').prop('disabled',false)
-    } else {
-        $('#outraCausaSoldaReinspecionadas').prop('disabled',true)
-        $('#outraCausaSoldaReinspecionadas').val('')
-    }
 })
 
 
@@ -71,7 +57,7 @@ $('#envio_reinspecao_Solda').on('click',function() {
     let inputNaoConformidadesSolda = parseInt($('#inputReinspecionadasNaoConformidadesSolda').val());
     let inspetoresSolda = $('#inspetoresSoldaReinspecao').val();
     let retrabalhoSolda = [];
-    let causaSolda = $('#causaSoldaReinspecionadas').val();
+    let list_causas = [];
     let outraCausaSolda = $('#outraCausaSoldaReinspecionadas').val();
     let observacaoSolda = $('#observacaoSoldaReinspecionadas').val();
     let origemInspecaoSolda = $('#origemSoldaReinspecionadas').val();
@@ -97,6 +83,25 @@ $('#envio_reinspecao_Solda').on('click',function() {
         } 
     });
 
+    for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
+        let causas = $("#causa_reinspecao_" + i).val();
+        if (causas.trim() === "") {
+            alert('Por favor, preencha todos os campos de causas de não conformidade.');
+            $('#envio_inspecao').prop('disabled',false);
+            $("#loading").hide();
+            return; // Interrompe a execução
+        }
+        list_causas.push(causas);
+    }
+
+    for (let i = 1; i <= inputNaoConformidadesSolda; i++) {
+        let inputId = '#foto_inspecao_' + i;
+        let files = $(inputId)[0].files;
+        for (let file of files) {
+            formData.append('foto_inspecao_' + i + '[]', file);
+        }
+    }
+
     formData.append('id_inspecao', id_inspecao);
     formData.append('data_inspecao', data_inspecao);
     formData.append('inputCategoria', inputCategoria);
@@ -105,7 +110,7 @@ $('#envio_reinspecao_Solda').on('click',function() {
     formData.append('num_pecas', inputPecasInspecionadasSolda);
     formData.append('inputConformidadesSolda', inputConformidadesSolda);
     formData.append('inputNaoConformidadesSolda', inputNaoConformidadesSolda);
-    formData.append('causaSolda', causaSolda);
+    formData.append('list_causas', JSON.stringify(list_causas));
     formData.append('outraCausaSolda', outraCausaSolda);
     formData.append('observacaoSolda', observacaoSolda);
     formData.append('origemInspecaoSolda', origemInspecaoSolda);

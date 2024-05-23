@@ -230,6 +230,7 @@
                                     <label>Categoria</label>
                                     <input type="text" class="form-control desabilitado" id="inputCategoria" autocomplete="off"
                                             aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
+                                            <a class="dropdown-item option1">Opção 1</a>
                                 </div>
                             </div>
                             <div class="row">
@@ -262,6 +263,11 @@
                                         <input type="number" class="form-control desabilitado" id="inputNaoConformidadesSolda"
                                             style="font-size: 12px;" disabled>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="coluna_causa_solda" class="col-sm-12">
+
                                 </div>
                             </div>
                             <div class="row">
@@ -400,33 +406,30 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-sm-6 mb-4">
-                                    <label>Causa</label>
-                                    <div class="input-group">
-                                        <select class="form-control desabilitado" name="causaSoldaReinspecionadas"
-                                            id="causaSoldaReinspecionadas" style="font-size: 12px;">
-                                            <option value="" selected hidden disabled></option>
-                                            <option value="Faltando Solda">Faltando Solda</option>
-                                            <option value="Porosidade">Porosidade</option>
-                                            <option value="Solda não conforme (robô)">Solda não conforme (robô)</option>
-                                            <option value="Solda deslocada">Solda deslocada</option>
-                                            <option value="Medida não conforme">Medida não conforme</option>
-                                            <option value="Solda sem penetração">Solda sem penetração</option>
-                                            <option value="Excesso de respingo">Excesso de respingo</option>
-                                            <option value="Excesso de rebarba">Excesso de rebarba</option>
-                                            <option value="Excesso de solda">Excesso de solda</option>
-                                            <option value="Mordedura">Mordedura</option>
-                                            <option value="Erro de montagem">Erro de montagem</option>
-                                            <option value="Outro">Outro</option>
-                                        </select>
-                                    </div>
+                                <div id="coluna_causa_reinspecao_solda" class="col-sm-12">
+
                                 </div>
+                            </div>
+                            <div class="row" style="align-items: end;">
                                 <div class="col-sm-6 mb-4">
-                                    <label>Outro motivo</label>
+                                    <label>Outro motivo<small><code> *Preencha caso não tenha a causa listada</code></small></label>
                                     <div class="input-group">
                                         <input type="text" class="form-control desabilitado" autocomplete="off"
                                             id="outraCausaSoldaReinspecionadas" style="font-size: 12px;" disabled>
                                     </div>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Inspetores</label>
+                                    <select class="form-control" name="inspetoresSoldaReinspecao" id="inspetoresSoldaReinspecao" style="font-size: 12px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Leônidas">Leônidas</option>
+                                        <option value="Severiano">Severiano</option>
+                                        <option value="Marcelo">Marcelo</option>
+                                        <option value="Henrique">Henrique</option>
+                                        <option value="Guthemberg">Guthemberg</option>
+                                        <option value="Elenilson">Elenilson</option>
+                                        <option value="Estefane">Estefane</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="row">
@@ -468,26 +471,99 @@
                                     <button class="btn btn-danger" id="removeButton" onclick="removeSelect()" style="font-size: 10px;" disabled>Remover insp.</button>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-6 mb-4">
-                                    <label>Inspetores</label>
-                                    <select class="form-control" name="inspetoresSoldaReinspecao" id="inspetoresSoldaReinspecao" style="font-size: 12px;">
-                                        <option value="" selected hidden disabled></option>
-                                        <option value="Leônidas">Leônidas</option>
-                                        <option value="Severiano">Severiano</option>
-                                        <option value="Marcelo">Marcelo</option>
-                                        <option value="Henrique">Henrique</option>
-                                        <option value="Guthemberg">Guthemberg</option>
-                                        <option value="Elenilson">Elenilson</option>
-                                        <option value="Estefane">Estefane</option>
-                                    </select>
-                                </div>
-                            </div>
                         </div>
                         <div class="modal-footer">
                             <button id="envio_reinspecao_Solda" class="btn btn-primary">Enviar</button>
                         </div>
                       </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="visualizacaoCausasModal" tabindex="-1" role="dialog"
+                aria-labelledby="visualizacaoCausasModalLabel" aria-hidden="true" style="overflow-y: auto;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="visualizacaoCausasModalLabel"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
+                            <h6 id="descricao_causas">Descrição das causas</h6>
+                            <ul id="lista_nao_ordenada" style="padding: 0;">
+                            </ul>
+                            
+                            <div id="img_visualizacaoCausas">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="editarConformidadesModal" tabindex="-1" role="dialog"
+                aria-labelledby="editarConformidadesModalLabel" aria-hidden="true" style="overflow-y: auto;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editarConformidadesModalTitle">Editar conformidades</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
+                            <div class="row">
+                                <div class="col-sm-4 mb-4">
+                                    <label>Id</label>
+                                    <input type="number" class="form-control" id="id_edicao" disabled>
+                                </div>
+                                <div class="col-sm-8 mb-4 d-flex flex-column justify-content-end">
+                                    <label>Descrição da Peça</label>
+                                    <input type="text" class="form-control" id="descricao_peca_edicao" disabled>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-4 d-none">
+                                    <label>Número da Execução</label>
+                                    <input type="number" class="form-control" id="num_execucao_edicao" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4 d-flex flex-column justify-content-end">
+                                    <label>Quantidade de conformidades</label>
+                                    <input type="number" class="form-control" id="qtd_conformidade_edicao" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Quantidade de conformidades atualizada</label>
+                                    <input type="number" class="form-control" id="qtd_conformidade_atualizada_edicao">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" id="atualizarConformidades">Atualizar conformidades</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="modalTimeline" tabindex="-1" role="dialog" aria-labelledby="modalTimelineLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="m-0 font-weight-bold text-primary">Histórico</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="height: 60vh; overflow-y: auto;">
+                            <div class="list-group" id="listaHistorico">
+                                
+                            </div>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <p id="modal-footer-quantidade-produzida"></p>
+                            <p id="modal-footer-quantidade-conformidade"></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -513,6 +589,7 @@
         <script src="static/js/qualidade/inspecao-pintura.js"></script>
         <script src="static/js/qualidade/reinspecao-solda.js"></script>
         <script src="static/js/qualidade/select_inspetor_solda.js"></script>
+        <script src="static/js/qualidade/selects_causa_pintura.js"></script>
 
 
         {% endblock %}

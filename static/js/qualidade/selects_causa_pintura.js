@@ -4,8 +4,11 @@ const causas = ["Faltando Solda", "Olho de Peixe", "Arranhão", "Escorrimento", 
     "Marcação de Peça", "Falta de aderência", "Decapante", "Desplacamento", "Água"
 ];
 
+const causas_solda = ["Faltando Solda", "Porosidade", "Solda não conforme (robô)", "Solda deslocada", "Medida não conforme", "Casca de Laranja", "Solda sem penetração",
+    "Excesso de respingo", "Excesso de rebarba", "Excesso de solda", "Mordedura", "Erro de montagem","Outro"];
+
 // Função para adicionar select de causas
-function adicionarSelects(n_nao_conformidades, coluna_causa) {
+function adicionarSelects(n_nao_conformidades, coluna_causa, setor) {
     const nConformidades = document.getElementById(n_nao_conformidades).value;
     const colunaCausa = document.getElementById(coluna_causa);
 
@@ -23,7 +26,11 @@ function adicionarSelects(n_nao_conformidades, coluna_causa) {
             const label = document.createElement("label");
             label.textContent = `Causa ${i}`;
 
-            const select = criarSelectCausa(i);
+            if (setor === 'Pintura') {
+                var select = criarSelectCausa(i,causas);
+            } else {
+                var select = criarSelectCausa(i,causas_solda);
+            }
 
             const campoArquivos = criarCampoArquivos(i);
 
@@ -37,7 +44,6 @@ function adicionarSelects(n_nao_conformidades, coluna_causa) {
             inputElement.addEventListener("change", function () {
                 const files = this.files;
                 const label = this.parentNode.querySelector('.custom-file-label'); // Obter a label correspondente
-                const fileNames = Array.from(files).map(file => file.name);
                 label.textContent = files.length === 1 ? `Possui ${files.length} arquivo` : `Possui ${files.length} arquivos`;
             });
         });
@@ -47,7 +53,7 @@ function adicionarSelects(n_nao_conformidades, coluna_causa) {
 }
 
 // Função para criar select de causa
-function criarSelectCausa(i) {
+function criarSelectCausa(i,causas) {
     const select = document.createElement("select");
     select.name = `causa_reinspecao_${i}`;
     select.id = `causa_reinspecao_${i}`;
@@ -103,11 +109,31 @@ function criarCampoArquivos(i) {
     return campoArquivos;
 }
 
-// Event listeners para chamar a função quando o valor de n_nao_conformidades mudar
-document.getElementById("n_conformidades").addEventListener("input", () => {
-    adicionarSelects("n_nao_conformidades", "coluna_causa");
-});
+const nConformidades = document.getElementById("n_conformidades");
+if (nConformidades) {
+    nConformidades.addEventListener("input", () => {
+        adicionarSelects("n_nao_conformidades", "coluna_causa", "Pintura");
+    });
+}
 
-document.getElementById("n_conformidades_reinspecao").addEventListener("input", () => {
-    adicionarSelects("n_nao_conformidades_reinspecao", "coluna_causa_reinspecao");
-});
+const nConformidadesReinspecao = document.getElementById("n_conformidades_reinspecao");
+if (nConformidadesReinspecao) {
+    nConformidadesReinspecao.addEventListener("input", () => {
+        adicionarSelects("n_nao_conformidades_reinspecao", "coluna_causa_reinspecao", "Pintura");
+    });
+}
+
+const inputConformidadesSolda = document.getElementById("inputConformidadesSolda");
+if (inputConformidadesSolda) {
+    inputConformidadesSolda.addEventListener("input", () => {
+        adicionarSelects("inputNaoConformidadesSolda", "coluna_causa_solda", "Solda");
+    });
+}
+
+const inputReinspecionadasConformidadesSolda = document.getElementById("inputReinspecionadasConformidadesSolda");
+if (inputReinspecionadasConformidadesSolda) {
+    inputReinspecionadasConformidadesSolda.addEventListener("input", () => {
+        adicionarSelects("inputReinspecionadasNaoConformidadesSolda", "coluna_causa_reinspecao_solda", "Solda");
+    });
+}
+
