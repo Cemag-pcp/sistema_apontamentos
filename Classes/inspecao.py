@@ -205,7 +205,8 @@ class Inspecao:
 
         return data_inspecao, data_reinspecao, data_inspecionadas
 
-    def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas):
+    def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= ''):
+
 
         for i in range(1, n_nao_conformidades + 1):
             file_key = f'foto_inspecao_{i}[]'
@@ -222,34 +223,43 @@ class Inspecao:
                 else:
                     arquivos = None
 
-                query_fotos = """DO $$
-                                BEGIN
-                                    IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                        INSERT INTO pcp.inspecao_foto
-                                            (id, caminho_foto, causa, num_inspecao) 
-                                        VALUES 
-                                            (%s, %s, %s,
-                                                (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
-                                            );
-                                    ELSE
-                                        INSERT INTO pcp.inspecao_foto
-                                            (id, caminho_foto, causa, num_inspecao) 
-                                        VALUES 
-                                            (%s, %s, %s, 0);
-                                    END IF;
-                                END $$;
-                            """
+                if num_inspecao == '':
 
-                values_fotos = (
-                    id_inspecao,
-                    id_inspecao,
-                    arquivos,
-                    list_causas[i - 1],
-                    id_inspecao,
-                    id_inspecao,
-                    arquivos,
-                    list_causas[i - 1]
-                )
+                    query_fotos = """DO $$
+                                        BEGIN
+                                            IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                                INSERT INTO pcp.inspecao_foto
+                                                    (id, caminho_foto, causa, num_inspecao) 
+                                                VALUES 
+                                                    (%s, %s, %s,
+                                                        (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                                    );
+                                            ELSE
+                                                INSERT INTO pcp.inspecao_foto
+                                                    (id, caminho_foto, causa, num_inspecao) 
+                                                VALUES 
+                                                    (%s, %s, %s, 0);
+                                            END IF;
+                                        END $$;
+                                    """
+                    values_fotos = (
+                            id_inspecao,
+                            id_inspecao,
+                            arquivos,
+                            list_causas[i - 1],
+                            id_inspecao,
+                            id_inspecao,
+                            arquivos,
+                            list_causas[i - 1]
+                        )
+                else:
+                    query_fotos = """INSERT INTO pcp.inspecao_foto (id, caminho_foto, causa, num_inspecao) VALUES (%s, %s, %s, %s); """
+                    values_fotos = (
+                            id_inspecao,
+                            arquivos,
+                            list_causas[i - 1],
+                            num_inspecao
+                        )
 
                 self.cur.execute(query_fotos, values_fotos)
 

@@ -5,7 +5,8 @@ const causas = ["Faltando Solda", "Olho de Peixe", "Arranhão", "Escorrimento", 
 ];
 
 const causas_solda = ["Faltando Solda", "Porosidade", "Solda não conforme (robô)", "Solda deslocada", "Medida não conforme", "Casca de Laranja", "Solda sem penetração",
-    "Excesso de respingo", "Excesso de rebarba", "Excesso de solda", "Mordedura", "Erro de montagem","Outro"];
+    "Excesso de respingo", "Excesso de rebarba", "Excesso de solda", "Mordedura", "Erro de montagem","Outro"
+];
 
 // Função para adicionar select de causas
 function adicionarSelects(n_nao_conformidades, coluna_causa, setor) {
@@ -134,6 +135,18 @@ const inputReinspecionadasConformidadesSolda = document.getElementById("inputRei
 if (inputReinspecionadasConformidadesSolda) {
     inputReinspecionadasConformidadesSolda.addEventListener("input", () => {
         adicionarSelects("inputReinspecionadasNaoConformidadesSolda", "coluna_causa_reinspecao_solda", "Solda");
+    });
+}
+
+let qtd_conformidade_edicao = document.getElementById("qtd_conformidade_edicao");
+let qtd_conformidade_atualizada_edicao = document.getElementById("qtd_conformidade_atualizada_edicao");
+let num_causas_edicao = document.getElementById("num_causas_edicao").value
+
+if (qtd_conformidade_atualizada_edicao) {
+    qtd_conformidade_atualizada_edicao.addEventListener("input", () => {
+        num_causas_edicao = qtd_conformidade_edicao.value - qtd_conformidade_atualizada_edicao.value
+        $('#num_causas_edicao').val(num_causas_edicao)
+        adicionarSelects('num_causas_edicao', "coluna_causa_edicao_solda", "Solda");
     });
 }
 

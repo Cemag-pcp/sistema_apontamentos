@@ -160,7 +160,6 @@
                                         <th>Inspetor</th>
                                         <th>N° Não Conformidade</th>
                                         <th>Tipo de Não Conformidade</th>
-                                        <th>Causa</th>
                                         <th>Exec</th>
                                     </tr>
                                 </thead>
@@ -173,7 +172,6 @@
                                         <td data-title="Inspetor">{{reinspecao_solda[4]}}</td>
                                         <td data-title="N° Não Conformidade">{{reinspecao_solda[2]}}</td>
                                         <td data-title="Tipo de Não Conformidade">{{reinspecao_solda[7]}}</td>
-                                        <td data-title="Causa">{{reinspecao_solda[3]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -230,7 +228,6 @@
                                     <label>Categoria</label>
                                     <input type="text" class="form-control desabilitado" id="inputCategoria" autocomplete="off"
                                             aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
-                                            <a class="dropdown-item option1">Opção 1</a>
                                 </div>
                             </div>
                             <div class="row">
@@ -412,7 +409,7 @@
                             </div>
                             <div class="row" style="align-items: end;">
                                 <div class="col-sm-6 mb-4">
-                                    <label>Outro motivo<small><code> *Preencha caso não tenha a causa listada</code></small></label>
+                                    <label>Outro motivo<small><code> *Preencha caso tenha "Outro" motivo listado nas causas</code></small></label>
                                     <div class="input-group">
                                         <input type="text" class="form-control desabilitado" autocomplete="off"
                                             id="outraCausaSoldaReinspecionadas" style="font-size: 12px;" disabled>
@@ -517,7 +514,7 @@
                             <div class="row">
                                 <div class="col-sm-4 mb-4">
                                     <label>Id</label>
-                                    <input type="number" class="form-control" id="id_edicao" disabled>
+                                    <input type="text" class="form-control" id="id_edicao" disabled>
                                 </div>
                                 <div class="col-sm-8 mb-4 d-flex flex-column justify-content-end">
                                     <label>Descrição da Peça</label>
@@ -529,6 +526,10 @@
                                     <label>Número da Execução</label>
                                     <input type="number" class="form-control" id="num_execucao_edicao" disabled>
                                 </div>
+                                <div class="col-sm-4 mb-4 d-none">
+                                    <label>Subtração da Execução</label>
+                                    <input type="number" class="form-control" id="num_causas_edicao" disabled>
+                                </div>
                                 <div class="col-sm-6 mb-4 d-flex flex-column justify-content-end">
                                     <label>Quantidade de conformidades</label>
                                     <input type="number" class="form-control" id="qtd_conformidade_edicao" disabled>
@@ -536,6 +537,11 @@
                                 <div class="col-sm-6 mb-4">
                                     <label>Quantidade de conformidades atualizada</label>
                                     <input type="number" class="form-control" id="qtd_conformidade_atualizada_edicao">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="coluna_causa_edicao_solda" class="col-sm-12">
+
                                 </div>
                             </div>
                         </div>
@@ -562,7 +568,7 @@
                         </div>
                         <div class="modal-footer d-flex justify-content-between">
                             <p id="modal-footer-quantidade-produzida"></p>
-                            <p id="modal-footer-quantidade-conformidade"></p>
+                            <p id="modal-footer-quantidade-reinspecao"></p>
                         </div>
                     </div>
                 </div>

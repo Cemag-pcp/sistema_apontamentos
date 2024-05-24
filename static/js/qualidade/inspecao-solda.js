@@ -95,6 +95,8 @@ $("#causaSolda").on('change',function(){
 
 $('#envio_inspecao_solda').on('click',function() {
 
+    $("#loading").show();
+
     var formData = new FormData();
 
     $('#envio_inspecao_solda').prop('disabled',true);
@@ -164,6 +166,7 @@ $('#envio_inspecao_solda').on('click',function() {
             console.log(response);
         },
         error: function (error) {
+            $("#loading").hide();
             console.log(error);
             $('#envio_inspecao_solda').prop('disabled',false);
         }

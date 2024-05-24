@@ -844,6 +844,12 @@ def solda():
         id_inspecao = request.form.get('id_inspecao')
         list_causas = json.loads(request.form.get('list_causas'))
 
+        outraCausaSolda = request.form.get('outraCausaSolda')  
+
+        for i, item in enumerate(list_causas):
+            if item == 'Outro':
+                list_causas[i] = outraCausaSolda
+
         classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas)
 
         data_inspecao = request.form.get('data_inspecao')
@@ -856,7 +862,6 @@ def solda():
 
         num_conformidades = request.form.get('inputConformidadesSolda')
         num_nao_conformidades = request.form.get('inputNaoConformidadesSolda')
-        outraCausaSolda = request.form.get('outraCausaSolda')  
 
         observacaoSolda = request.form.get('observacaoSolda')  
         origemInspecaoSolda = request.form.get('origemInspecaoSolda')  
@@ -952,19 +957,91 @@ def solda():
 @app.route('/atualizar-conformidade',methods=['POST'])
 def atualizar_conformidade():
 
-    data = request.get_json()
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    id_edicao = data['id_edicao']
-
-    qtd_conformidade_antiga = data['qtd_conformidade_antiga']
-
-    conformidade_atualizada = data['conformidade_atualizada']
-
+    id_edicao = request.form.get('id_edicao')
+    qtd_conformidade_antiga = int(request.form.get('qtd_conformidade_antiga'))
+    conformidade_atualizada = int(request.form.get('conformidade_atualizada'))
     valor_reinspecao = qtd_conformidade_antiga - conformidade_atualizada
+    num_execucao = request.form.get('num_execucao')
+    list_causas = json.loads(request.form.get('list_causas'))
 
-    num_execucao = data['num_execucao']
+    classe_inspecao.processar_fotos_inspecao(id_edicao, valor_reinspecao, list_causas,num_execucao)
 
-    return jsonify(qtd_conformidade_antiga)
+    print(f"{qtd_conformidade_antiga} - {conformidade_atualizada} RESULTADO = {valor_reinspecao}")
+
+    atualizar_historico = f"""UPDATE pcp.pecas_inspecionadas
+                             SET total_conformidades = '{conformidade_atualizada}' 
+                            WHERE id_inspecao = '{id_edicao}' AND num_inspecao = {num_execucao}"""
+    
+    cur.execute(atualizar_historico)
+
+    verificacao = f"""SELECT nao_conformidades,excluidas 
+                    FROM pcp.pecas_reinspecao
+                    WHERE id = '{id_edicao}' """
+    
+    cur.execute(verificacao)
+    excluido = cur.fetchall()
+
+    if excluido == []:
+
+        receber_valores_p_reinspecao = f"""SELECT pinspecionadas.data_inspecao,pinspecionadas.inspetor,pinspecao.peca,pinspecao.celula,
+                                        pinspecionadas.origem,pinspecionadas.observacao
+                                            FROM pcp.pecas_inspecionadas pinspecionadas
+                                        LEFT JOIN pcp.pecas_inspecao pinspecao ON pinspecionadas.id_inspecao = pinspecao.id
+                                        WHERE id_inspecao = '{id_edicao}' AND num_inspecao = {num_execucao}"""
+        
+        cur.execute(receber_valores_p_reinspecao)
+        valores_p_reinspecao = cur.fetchall()
+
+        data_inspecao = valores_p_reinspecao[0][0]
+        inspetor = valores_p_reinspecao[0][1]
+        peca = valores_p_reinspecao[0][2]
+        celula = valores_p_reinspecao[0][3]
+        origem = valores_p_reinspecao[0][4]
+        observacao = valores_p_reinspecao[0][5]
+ 
+
+        setor = 'Solda'
+        criar_reinspecao = """INSERT INTO pcp.pecas_reinspecao 
+                        (id, data_reinspecao, nao_conformidades, causa_reinspecao, inspetor, setor, peca, categoria, outra_causa, origem, observacao) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, '', %s, %s)"""
+        values = (
+            id_edicao,
+            data_inspecao,
+            valor_reinspecao,
+            list_causas,
+            inspetor,
+            setor,
+            peca,
+            celula,
+            origem,
+            observacao
+        )
+
+        cur.execute(criar_reinspecao, values)
+
+        excluido_bool = True
+    else:
+        excluido_bool = excluido[0][1]
+        nao_conformidades = int(excluido[0][0])
+
+    if excluido_bool == True:
+    
+        atualizar = f"""UPDATE pcp.pecas_reinspecao
+                    SET nao_conformidades = {valor_reinspecao}, excluidas = 'false'
+                    WHERE id = '{id_edicao}' """
+    else:
+        
+        atualizar = f"""UPDATE pcp.pecas_reinspecao
+                    SET nao_conformidades = {valor_reinspecao + nao_conformidades} 
+                    WHERE id = '{id_edicao}' """
+
+    cur.execute(atualizar)
+    conn.commit()
+
+    return jsonify('success')
 
 @app.route('/conjuntos', methods=['POST'])
 def listar_conjuntos():

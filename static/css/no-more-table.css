@@ -77,3 +77,11 @@
     width: auto;
     height: 300px;
 }
+
+.no-more-hover:hover{
+    background-color: none !important;
+}
+
+.no-more-hover:active{
+    background-color: none !important;
+}
