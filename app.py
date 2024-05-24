@@ -744,6 +744,8 @@ def planejar_pintura():
 
     return render_template('planejar-pintura.html', sheet_data=sheet_data)
 
+# --------- INSPEÇÃO -----------
+
 @app.route('/inspecao', methods=['GET','POST'])
 def inspecao():
 
@@ -755,7 +757,6 @@ def inspecao():
 
         n_nao_conformidades = int(request.form.get('n_nao_conformidades', 0))
         id_inspecao = request.form.get('id_inspecao')
-        # list_causas = request.form.get('list_causas') 
         list_causas = json.loads(request.form.get('list_causas'))
 
         classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas)
@@ -776,7 +777,7 @@ def inspecao():
         
         else:
             if n_conformidades != qtd_produzida:
-                classe_inspecao.inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor)
+                classe_inspecao.inserir_inspecionados(id_inspecao,n_conformidades,n_nao_conformidades,inspetor,setor)
                 classe_inspecao.inserir_reinspecao(id_inspecao,n_nao_conformidades,list_causas,inspetor,setor)
             else:
                 classe_inspecao.inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor)
@@ -808,7 +809,7 @@ def modal_historico():
                             ORDER BY num_inspecao ASC"""
     else: 
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,i.total_conformidades,i.inspetor,
-                            i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.peca,om.codificacao,om.origem,insp.qt_apontada
+                            i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.conjunto,om.codificacao,om.origem,insp.qt_apontada
                                 FROM pcp.pecas_inspecionadas as i
                             LEFT JOIN pcp.ordens_montagem as om ON i.id_inspecao = om.id::varchar
                             LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
@@ -881,10 +882,10 @@ def solda():
             if num_conformidades != num_pecas:
                 classe_inspecao.inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
                                    inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
-                classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetoresSolda,setor,inputConjunto,
+                classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
                                       origemInspecaoSolda,observacaoSolda)
             else:
-                classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,inspetoresSolda,setor,inputConjunto,
+                classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
                                       origemInspecaoSolda,observacaoSolda)
 
         return jsonify("Success")
@@ -1042,6 +1043,8 @@ def atualizar_conformidade():
     conn.commit()
 
     return jsonify('success')
+
+# --------- INSPEÇÃO -----------
 
 @app.route('/conjuntos', methods=['POST'])
 def listar_conjuntos():

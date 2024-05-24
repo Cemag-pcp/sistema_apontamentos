@@ -29,7 +29,7 @@ class Inspecao:
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true' WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
 
-            sql = """INSERT INTO pcp.pecas_reinspecao (id, nao_conformidades, causa_reinspecao, inspetor, setor, peca, categoria, outra_causa, origem, observacao) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            sql = """INSERT INTO pcp.pecas_reinspecao (id, nao_conformidades, causa_reinspecao, inspetor, setor, conjunto, categoria, outra_causa, origem, observacao) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             values = (id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico, categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda)
 
         self.cur.execute(sql, values)
@@ -37,7 +37,7 @@ class Inspecao:
 
         print("inserir_reinspecao")
 
-    def inserir_inspecionados(self, id_inspecao, n_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda=''):
+    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda=''):
 
         id_inspecao = str(id_inspecao)
         if setor == 'Pintura':
@@ -45,16 +45,16 @@ class Inspecao:
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true' WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
 
-            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) VALUES (%s, %s, %s, %s, 0)"""
-            values = (id_inspecao, n_conformidades, inspetor, setor)
+            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao) VALUES (%s, %s, %s, %s, %s, 0)"""
+            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor)
 
         elif setor == 'Solda':
 
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true' WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
 
-            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao, peca, origem, observacao) VALUES (%s, %s, %s, %s, 0, %s, %s, %s)"""
-            values = (id_inspecao, n_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
+            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s)"""
+            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
 
         self.cur.execute(sql, values)
         self.conn.commit()
@@ -73,15 +73,15 @@ class Inspecao:
                 self.cur.execute(sql_update, values_update)
                 sql_insert = """DO $$ BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                    VALUES (%s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s));
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES (%s, %s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s));
                                 ELSE
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                    VALUES (%s, %s, %s, %s, 0);
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES (%s, %s, %s, %s, %s, 0);
                                 END IF;
                             END $$;"""
                 
-                values = (id_inspecao, id_inspecao, n_conformidades, inspetor, setor, id_inspecao, id_inspecao, n_conformidades, inspetor, setor)
+                values = (id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor)
                 self.cur.execute(sql_insert, values)
 
             elif n_conformidades > "0" and n_conformidades < qtd_produzida:
@@ -92,29 +92,29 @@ class Inspecao:
                 self.cur.execute(sql_update, values)
                 sql_insert = """DO $$ BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                    VALUES (%s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s));
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES (%s, %s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s));
                                 ELSE
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                    VALUES (%s, %s, %s, %s, 0);
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES (%s, %s, %s, %s, %s, 0);
                                 END IF;
                             END $$;"""
                 
-                values = (id_inspecao, id_inspecao, n_conformidades, inspetor, setor, id_inspecao, id_inspecao, n_conformidades, inspetor, setor)
+                values = (id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor)
                 self.cur.execute(sql_insert, values)
 
             elif n_conformidades == qtd_produzida:
 
                 sql_insert = """DO $$ BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                    VALUES (%s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s));
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES (%s, %s, %s, %s, %s,(SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s));
                                 ELSE
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao) 
-                                    VALUES (%s, %s, %s, %s, 0);
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao) 
+                                    VALUES (%s, %s, %s, %s, %s, 0);
                                 END IF;
                             END $$;"""
-                values = (id_inspecao, id_inspecao, n_conformidades, inspetor, setor, id_inspecao, id_inspecao, n_conformidades, inspetor, setor)
+                values = (id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor)
                 self.cur.execute(sql_insert, values)
 
                 delete_table_inspecao = f"""UPDATE pcp.pecas_reinspecao SET excluidas = 'true' WHERE id ='{id_inspecao}'"""
@@ -123,55 +123,55 @@ class Inspecao:
         elif setor == 'Solda':
             if n_conformidades == "0":
 
-                sql_update = """UPDATE pcp.pecas_reinspecao SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, peca = %s, categoria = %s, outra_causa = %s, origem = %s, observacao = %s WHERE id = %s """
+                sql_update = """UPDATE pcp.pecas_reinspecao SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, conjunto = %s, categoria = %s, outra_causa = %s, origem = %s, observacao = %s WHERE id = %s """
                 values_update = (n_nao_conformidades, causa_reinspecao, inspetor, conjunto_especifico, categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda, id_inspecao)
 
                 self.cur.execute(sql_update, values_update)
                 sql_insert = """DO $$ BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao, peca, origem, observacao) 
-                                    VALUES (%s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s), %s, %s, %s);
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) 
+                                    VALUES (%s, %s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s), %s, %s, %s);
                                 ELSE
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao, peca, origem, observacao) 
-                                    VALUES (%s, %s, %s, %s, 0, %s, %s, %s);
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) 
+                                    VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s);
                                 END IF;
                             END $$;"""
                 
-                values = (id_inspecao, id_inspecao, n_conformidades, inspetor, setor, id_inspecao, conjunto_especifico, origemInspecaoSolda, observacaoSolda, id_inspecao, n_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
+                values = (id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, id_inspecao, conjunto_especifico, origemInspecaoSolda, observacaoSolda, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
                 self.cur.execute(sql_insert, values)
 
             elif n_conformidades > "0" and n_conformidades < qtd_produzida:
 
-                sql_update = """UPDATE pcp.pecas_reinspecao SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, peca = %s, categoria = %s, outra_causa = %s, origem = %s, observacao = %s WHERE id = %s """
+                sql_update = """UPDATE pcp.pecas_reinspecao SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, conjunto = %s, categoria = %s, outra_causa = %s, origem = %s, observacao = %s WHERE id = %s """
                 values_update = (n_nao_conformidades, causa_reinspecao, inspetor, conjunto_especifico, categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda, id_inspecao)
 
                 self.cur.execute(sql_update, values_update)
                 sql_insert = """DO $$ BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao, peca, origem, observacao) 
-                                    VALUES (%s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s), %s, %s, %s);
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) 
+                                    VALUES (%s, %s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s), %s, %s, %s);
                                 ELSE
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao, peca, origem, observacao) 
-                                    VALUES (%s, %s, %s, %s, 0, %s, %s, %s);
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) 
+                                    VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s);
                                 END IF;
                             END $$;"""
                 
-                values = (id_inspecao, id_inspecao, n_conformidades, inspetor, setor, id_inspecao, conjunto_especifico, origemInspecaoSolda, observacaoSolda, id_inspecao, n_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
+                values = (id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, id_inspecao, conjunto_especifico, origemInspecaoSolda, observacaoSolda, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
                 self.cur.execute(sql_insert, values)
 
             elif n_conformidades == qtd_produzida:
 
                 sql_insert = """DO $$ BEGIN
                                 IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao, peca, origem, observacao) 
-                                    VALUES (%s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s), %s, %s, %s);
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) 
+                                    VALUES (%s, %s, %s, %s, %s, (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s), %s, %s, %s);
                                 ELSE
-                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, inspetor, setor, num_inspecao, peca, origem, observacao) 
-                                    VALUES (%s, %s, %s, %s, 0, %s, %s, %s);
+                                    INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) 
+                                    VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s);
                                 END IF;
                             END $$;"""
                 
-                values = (id_inspecao, id_inspecao, n_conformidades, inspetor, setor, id_inspecao, conjunto_especifico, origemInspecaoSolda, observacaoSolda, id_inspecao, n_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
+                values = (id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, id_inspecao, conjunto_especifico, origemInspecaoSolda, observacaoSolda, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
                 self.cur.execute(sql_insert, values)
 
                 delete_table_inspecao = f"""UPDATE pcp.pecas_reinspecao SET excluidas = 'true' WHERE id ='{id_inspecao}'"""
