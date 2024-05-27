@@ -1,5 +1,5 @@
 // Array com as causas
-const causas = ["Faltando Solda", "Olho de Peixe", "Arranhão", "Escorrimento", "Empoeiramento", "Casca de Laranja", "Manchas",
+const causas_pintura = ["Faltando Solda", "Olho de Peixe", "Arranhão", "Escorrimento", "Empoeiramento", "Casca de Laranja", "Manchas",
     "Contato", "Amassando", "Camada Baixa", "Corrosão", "Marcação por Água", "Marcação por Óleo", "Tonalidade", "Marca texto industrial", "Respingo de Solda",
     "Marcação de Peça", "Falta de aderência", "Decapante", "Desplacamento", "Água"
 ];
@@ -28,7 +28,7 @@ function adicionarSelects(n_nao_conformidades, coluna_causa, setor) {
             label.textContent = `Causa ${i}`;
 
             if (setor === 'Pintura') {
-                var select = criarSelectCausa(i,causas);
+                var select = criarSelectCausa(i,causas_pintura);
             } else {
                 var select = criarSelectCausa(i,causas_solda);
             }
@@ -145,6 +145,10 @@ let num_causas_edicao = document.getElementById("num_causas_edicao").value
 if (qtd_conformidade_atualizada_edicao) {
     qtd_conformidade_atualizada_edicao.addEventListener("input", () => {
         num_causas_edicao = qtd_conformidade_edicao.value - qtd_conformidade_atualizada_edicao.value
+        if(qtd_conformidade_atualizada_edicao.value < 0 || qtd_conformidade_atualizada_edicao === ''){
+            $("#coluna_causa_edicao_solda").empty()
+            return
+        }
         $('#num_causas_edicao').val(num_causas_edicao)
         adicionarSelects('num_causas_edicao', "coluna_causa_edicao_solda", "Solda");
     });

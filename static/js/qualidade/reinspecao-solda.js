@@ -43,12 +43,56 @@ $('#inputReinspecionadasConformidadesSolda').on('input',function() {
 
 
 $('#envio_reinspecao_Solda').on('click',function() {
+    let inputConformidadesSolda = $('#inputReinspecionadasConformidadesSolda').val();
+    let inputNaoConformidadesSolda = $('#inputReinspecionadasNaoConformidadesSolda').val();
+    let inputPecasInspecionadasSolda = parseInt($('#inputPecasReinspecionadasSolda').val());
+    let inputConjunto = $('#inputConjuntoReinspecao').val();
+    let observacaoSolda = $('#observacaoSoldaReinspecionadas').val();
+    let inspetoresSolda = $('#inspetoresSoldaReinspecao').val();
+
+    $("#confirmarConformidades").val(inputConformidadesSolda);
+    $("#confirmarNaoConformidades").val(inputNaoConformidadesSolda);
+
+    $('#modalConfirmacaoSolda #p_confirmar_inspecao_solda').text("Deseja confirmar as informações preenchidas referente a reinspeção do conjunto " + inputConjunto);
+
+    $("#btnEnviarSoldaReinspecao").css("display","block")
+    $("#btnEnviarSolda").css("display","none")
+
+    if (inputConformidadesSolda === "" || inspetoresSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
+        alert('Verifique se o campo de conformidades está com valor correto');
+        $("#loading").hide();
+        return; // Interrompe a execução
+    }
+
+    if (observacaoSolda.trim() === "" ) {
+        alert('Verifique se os campos de causa e observação estão com os valores corretos');
+        $('#btnEnviarSoldaReinspecao').prop('disabled',false);
+        $("#loading").hide();
+        return; // Interrompe a execução
+    }
+
+    for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
+        let causas = $("#causa_reinspecao_" + i).val();
+        if (causas === "") {
+            alert('Por favor, preencha todos os campos de causas de não conformidade.');
+            $('#btnEnviarSoldaReinspecao').prop('disabled',false);
+            $("#loading").hide();
+            return; // Interrompe a execução
+        }
+    }
+
+    $('#reinspecaoModalSolda').modal('hide');
+
+    $('#modalConfirmacaoSolda').modal('show');
+})
+
+$('#btnEnviarSoldaReinspecao').on('click',function() {
 
     $("#loading").show();
 
     var formData = new FormData();
 
-    $('#envio_inspecao_solda').prop('disabled',true);
+    $('#btnEnviarSoldaReinspecao').prop('disabled',true);
 
     let id_inspecao = $('#reinspecionarConjuntoLabel').text();
     let data_inspecao = $('#data_reinspecao_solda').val();
@@ -64,20 +108,6 @@ $('#envio_reinspecao_Solda').on('click',function() {
     let observacaoSolda = $('#observacaoSoldaReinspecionadas').val();
     let origemInspecaoSolda = $('#origemSoldaReinspecionadas').val();
     let reinspecao = "True";
-
-    if (inputConformidadesSolda === "" || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
-        alert('Verifique se o campo de conformidades está com valor correto');
-        $('#envio_inspecao_solda').prop('disabled',false);
-        $("#loading").hide();
-        return; // Interrompe a execução
-    }
-
-    if (observacaoSolda.trim() === "" ) {
-        alert('Verifique se os campos de causa e observação estão com os valores corretos');
-        $('#envio_inspecao_solda').prop('disabled',false);
-        $("#loading").hide();
-        return; // Interrompe a execução
-    }
    
     $('select[id^="retrabalhoSolda"]').each(function() {
         if($(this).val() !== null){
@@ -87,12 +117,6 @@ $('#envio_reinspecao_Solda').on('click',function() {
 
     for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
         let causas = $("#causa_reinspecao_" + i).val();
-        if (causas.trim() === "") {
-            alert('Por favor, preencha todos os campos de causas de não conformidade.');
-            $('#envio_inspecao').prop('disabled',false);
-            $("#loading").hide();
-            return; // Interrompe a execução
-        }
         list_causas.push(causas);
     }
 
@@ -113,6 +137,7 @@ $('#envio_reinspecao_Solda').on('click',function() {
     formData.append('inputConformidadesSolda', inputConformidadesSolda);
     formData.append('inputNaoConformidadesSolda', inputNaoConformidadesSolda);
     formData.append('list_causas', JSON.stringify(list_causas));
+    formData.append('retrabalhoSolda', JSON.stringify(retrabalhoSolda));
     formData.append('outraCausaSolda', outraCausaSolda);
     formData.append('observacaoSolda', observacaoSolda);
     formData.append('origemInspecaoSolda', origemInspecaoSolda);
@@ -125,13 +150,13 @@ $('#envio_reinspecao_Solda').on('click',function() {
         processData: false, // Não processe os dados
         contentType: false, // Não defina o tipo de conteúdo
         success: function (response) {
-            location.reload()
+            location.reload();
             console.log(response);
         },
         error: function (error) {
             $("#loading").hide();
             console.log(error);
-            $('#envio_inspecao_solda').prop('disabled',false);
+            $('#btnEnviarSoldaReinspecao').prop('disabled',false);
         }
     });
 

@@ -132,17 +132,17 @@ function setorCards(response) {
             qtd_disponivel_inspecao = qtd_disponivel_inspecao - item[2]
         }
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Quantidade produzida : " + qt_apontada)
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Quantidade inspecionada : " + qt_apontada)
 
         $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Quantidade p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
 
         $(".modal-edit").on('click', function() {
             var dataItemString = $(this).data('item');
-            $("#modalTimeline").modal('hide')
             var concatenatedPhotos = concatPhotosByCriteria(foto_causa, dataItemString[5]);
             if (Object.keys(concatenatedPhotos).length !== 0) {
+                $("#modalTimeline").modal('hide')
                 modalVisualizarCausas(concatenatedPhotos);
-            } else{
+            } else {
                 alert("Não possui nenhuma não conformidade")
             }
         }); 
@@ -176,7 +176,7 @@ function setorCards(response) {
                             </div>
                         </div>
                         <small>N° Conformidade : ${item[2]}</small>
-                        <small>N° de não Conformidade : ${qtd_disponivel_inspecao - item[2]}</small>
+                        <small>N° de não Conformidade : ${item[10]}</small>
                         <small>Inspetor : ${item[3]}</small>
                         <small>Exec.:  ${item[5]}</small>
                     </div>
@@ -188,10 +188,9 @@ function setorCards(response) {
             
             $('#listaHistorico').append(listItem);
 
-            qtd_disponivel_inspecao = qtd_disponivel_inspecao - item[2]
         }
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Quantidade produzida : " + qt_apontada)
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Quantidade inspecionada : " + qt_apontada)
 
         $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Quantidade p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
 
@@ -209,7 +208,7 @@ function setorCards(response) {
             var dataItemString = $(this).data('item');
             if(dataItemString[2] != 0){
                 $("#modalTimeline").modal('hide')
-                modalEditarConformidade(dataItemString[0],dataItemString[2],dataItemString[5],dataItemString[9])
+                modalEditarConformidade(dataItemString[0],dataItemString[2],dataItemString[5],dataItemString[9],dataItemString[10])
             } else {
                 alert("Número de Conformidade é igual a 0")
             }
@@ -223,9 +222,10 @@ function modalVisualizarCausas(concatenatedPhotos) {
     // Limpar qualquer conteúdo anterior do modal
     $('#visualizacaoCausasModal .modal-body').empty();
 
+    console.log(concatenatedPhotos)
+
     $("#visualizacaoCausasModalLabel").text("Contém " + Object.keys(concatenatedPhotos).length + " não conformidades");
 
-    console.log(concatenatedPhotos)
     // Iterar sobre as chaves e valores do objeto concatenatedPhotos
     for (var key in concatenatedPhotos) {
         if (concatenatedPhotos.hasOwnProperty(key)) {
@@ -280,7 +280,7 @@ function modalVisualizarCausas(concatenatedPhotos) {
     $('#visualizacaoCausasModal').modal('show');
 }
 
-function modalEditarConformidade(id,n_conformidade,num_execução,descricao) {
+function modalEditarConformidade(id,n_conformidade,num_execução,descricao,nao_conformidades) {
 
     $('#qtd_conformidade_edicao').val(n_conformidade)
     
@@ -289,6 +289,8 @@ function modalEditarConformidade(id,n_conformidade,num_execução,descricao) {
     $('#id_edicao').val(id)
 
     $('#num_execucao_edicao').val(num_execução)
+
+    $('#nao_conformidades_edicao').val(nao_conformidades)
 
     $('#descricao_peca_edicao').val(descricao)
 
@@ -376,9 +378,44 @@ $('#n_conformidades').on('input',function() {
 
 $('#envio_inspecao').on('click', function () {
 
+    let inputConformidadesSolda = $('#n_conformidades').val();
+    let inputNaoConformidadesSolda = $('#n_nao_conformidades').val();
+    let inputConjunto = $('#peca_inspecionada').val();
+    let inspetor = $("#inspetor").val();
+    let qtd_produzida_value = parseInt($('#qtd_produzida').val());
+
+    if (inputConformidadesSolda === "" || inspetor === null || inputConformidadesSolda > qtd_produzida_value || inputConformidadesSolda < 0) {
+        alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
+        return; // Interrompe a execução
+    }
+
+    for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
+        let causas = $("#causa_reinspecao_" + i).val();
+        console.log(causas)
+        if (causas === '') {
+            alert('Preencha todos os campos de causas de não conformidade.');
+            return; // Interrompe a execução
+        }
+    }
+
+    $("#confirmarConformidades").val(inputConformidadesSolda);
+    $("#confirmarNaoConformidades").val(inputNaoConformidadesSolda);
+    
+    $('#modalConfirmacaoPintura #p_confirmar_inspecao_pintura').text("Deseja confirmar as informações preenchidas referente a inspeção do conjunto " + inputConjunto);
+
+    $("#btnEnviarPinturaReinspecao").css("display","none")
+    $("#btnEnviarPintura").css("display","block")
+
+    $('#inspecaoModal').modal('hide');
+
+    $('#modalConfirmacaoPintura').modal('show');
+})
+
+$('#btnEnviarPintura').on('click', function () {
+
     $("#loading").show();
 
-    $('#envio_inspecao').prop('disabled',true);
+    $('#btnEnviarPintura').prop('disabled',true);
 
     var formData = new FormData();
 
@@ -391,28 +428,8 @@ $('#envio_inspecao').on('click', function () {
     let qtd_produzida_value = parseInt($('#qtd_produzida').val());
     let reinspecao = 'False';
 
-    console.log(inspetor)
-
-    if (n_conformidades === "" || inspetor === null || n_conformidades > qtd_produzida_value || n_conformidades < 0) {
-        alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
-        console.log('Entrou')
-        console.log(n_conformidades === "")
-        console.log(inspetor === null)
-        console.log(n_conformidades > qtd_produzida_value)
-        console.log(n_conformidades < 0)
-        $('#envio_inspecao').prop('disabled',false);
-        $("#loading").hide();
-        return; // Interrompe a execução
-    }
-
     for (var i = 1; i <= n_nao_conformidades; i++) {
         let causas = $("#causa_reinspecao_" + i).val();
-        if (causas.trim() === "") {
-            alert('Por favor, preencha todos os campos de causas de não conformidade.');
-            $('#envio_inspecao').prop('disabled',false);
-            $("#loading").hide();
-            return; // Interrompe a execução
-        }
         list_causas.push(causas);
     }
 
@@ -446,15 +463,48 @@ $('#envio_inspecao').on('click', function () {
         },
         error: function (error) {
             console.log(error);
-            $('#envio_inspecao').prop('disabled', false);
+            $('#btnEnviarPintura').prop('disabled', false);
             $("#loading").hide();
         }
     });
 });
 
-$('#envio_reinspecao').on('click',function() {
+$('#envio_reinspecao').on('click', function () {
+    let inputConformidadesSolda = $('#n_conformidades_reinspecao').val();
+    let inputNaoConformidadesSolda = $('#n_nao_conformidades_reinspecao').val();
+    let inputConjunto = $('#peca_reinspecionada').val();
+    let inspetor = $("#inspetor_reinspecao").val();
+    let qtd_produzida_value = parseInt($('#qtd_produzida_reinspecao').val());
 
-    $('#envio_reinspecao').prop('disabled',true);
+    if (inputConformidadesSolda === "" || inspetor === null || inputConformidadesSolda > qtd_produzida_value || inputConformidadesSolda < 0) {
+        alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
+        return; // Interrompe a execução
+    }
+
+    for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
+        let causas = $("#causa_reinspecao_" + i).val();
+        if (causas === "") {
+            alert('Preencha todos os campos de causas de não conformidade.');
+            return; // Interrompe a execução
+        }
+    }
+
+    $("#confirmarConformidades").val(inputConformidadesSolda);
+    $("#confirmarNaoConformidades").val(inputNaoConformidadesSolda);
+    
+    $('#modalConfirmacaoPintura #p_confirmar_inspecao_pintura').text("Deseja confirmar as informações preenchidas referente a inspeção do conjunto " + inputConjunto);
+
+    $("#btnEnviarPinturaReinspecao").css("display","block")
+    $("#btnEnviarPintura").css("display","none")
+
+    $('#reinspecaoModal').modal('hide');
+    
+    $('#modalConfirmacaoPintura').modal('show');
+})
+
+$('#btnEnviarPinturaReinspecao').on('click',function() {
+
+    $('#btnEnviarPinturaReinspecao').prop('disabled',true);
 
     $("#loading").show();
 
@@ -471,7 +521,7 @@ $('#envio_reinspecao').on('click',function() {
 
     if (n_conformidades === "" || inspetor === null || n_conformidades > qtd_produzida_value || n_conformidades < 0) {
         alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
-        $('#envio_reinspecao').prop('disabled',false);
+        $('#btnEnviarPinturaReinspecao').prop('disabled',false);
         $("#loading").hide();
         return; // Interrompe a execução
     }
@@ -480,7 +530,7 @@ $('#envio_reinspecao').on('click',function() {
         let causas = $("#causa_reinspecao_" + i).val();
         if (causas.trim() === "") {
             alert('Por favor, preencha todos os campos de causas de não conformidade.');
-            $('#envio_reinspecao').prop('disabled',false);
+            $('#btnEnviarPinturaReinspecao').prop('disabled',false);
             $("#loading").hide();
             return; // Interrompe a execução
         }
@@ -493,10 +543,6 @@ $('#envio_reinspecao').on('click',function() {
         for (let file of files) {
             formData.append('foto_inspecao_' + i + '[]', file);
         }
-    }
-
-    for (var pair of formData.entries()) {
-        console.log(pair[0]+ ': ' + pair[1]);
     }
 
     formData.append('id_inspecao', id_inspecao);
@@ -515,13 +561,11 @@ $('#envio_reinspecao').on('click',function() {
         processData: false, // Não processe os dados
         contentType: false, // Não defina o tipo de conteúdo
         success: function (response) {
-            window.location.reload();
-            console.log(response);
-            $("#loading").hide();
+            location.reload();
         },
         error: function (error) {
             console.log(error);
-            $('#envio_reinspecao').prop('disabled', false);
+            $('#btnEnviarPinturaReinspecao').prop('disabled', false);
             $("#loading").hide();
         }
     });
@@ -554,8 +598,9 @@ $('#atualizarConformidades').on('click', function(){
     let qtd_conformidade_antiga = $("#qtd_conformidade_edicao").val();
     let conformidade_atualizada = $("#qtd_conformidade_atualizada_edicao");
     let num_execucao = $("#num_execucao_edicao").val();
+    let nao_conformidades = $("#nao_conformidades_edicao").val();
 
-    if(conformidade_atualizada.val() >= qtd_conformidade_antiga || conformidade_atualizada.val() < 0){
+    if(conformidade_atualizada.val() >= qtd_conformidade_antiga || conformidade_atualizada.val() < 0 || conformidade_atualizada.val() === ''){
         alert("Valor inválido")
         conformidade_atualizada.val('')
         $("#loading").hide();
@@ -586,6 +631,7 @@ $('#atualizarConformidades').on('click', function(){
     formData.append('id_edicao', id_edicao);
     formData.append('qtd_conformidade_antiga', qtd_conformidade_antiga);
     formData.append('conformidade_atualizada', conformidade_atualizada);
+    formData.append('nao_conformidades', nao_conformidades);
     formData.append('num_execucao', num_execucao);
     formData.append('list_causas', JSON.stringify(list_causas));
 
@@ -600,7 +646,6 @@ $('#atualizarConformidades').on('click', function(){
         contentType: false, 
         success: function(response) {
             location.reload()
-            $("#loading").hide();
         },
         error: function(error) {
             $("#loading").hide();

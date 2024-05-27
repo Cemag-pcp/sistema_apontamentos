@@ -780,7 +780,7 @@ def inspecao():
                 classe_inspecao.inserir_inspecionados(id_inspecao,n_conformidades,n_nao_conformidades,inspetor,setor)
                 classe_inspecao.inserir_reinspecao(id_inspecao,n_nao_conformidades,list_causas,inspetor,setor)
             else:
-                classe_inspecao.inserir_inspecionados(id_inspecao,n_conformidades,inspetor,setor)
+                classe_inspecao.inserir_inspecionados(id_inspecao,n_conformidades,n_nao_conformidades,inspetor,setor)
 
         return jsonify("Success")
 
@@ -801,7 +801,8 @@ def modal_historico():
 
     if setor == 'Pintura':
 
-        query_historico = f"""SELECT i.*, op.peca,op.cor,op.tipo,insp.qt_apontada
+        query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,i.total_conformidades,i.inspetor,
+                            i.setor,i.num_inspecao,i.origem,i.observacao,i.nao_conformidades, op.peca,op.cor,op.tipo,insp.qt_apontada
                                 FROM pcp.pecas_inspecionadas as i
                             LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id::varchar
                             LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
@@ -809,7 +810,7 @@ def modal_historico():
                             ORDER BY num_inspecao ASC"""
     else: 
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,i.total_conformidades,i.inspetor,
-                            i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.conjunto,om.codificacao,om.origem,insp.qt_apontada
+                            i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.conjunto,i.nao_conformidades,om.origem,insp.qt_apontada
                                 FROM pcp.pecas_inspecionadas as i
                             LEFT JOIN pcp.ordens_montagem as om ON i.id_inspecao = om.id::varchar
                             LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
@@ -874,8 +875,16 @@ def solda():
         setor = 'Solda'
 
         if reinspecao == "True":
+
+            retrabalhoSolda = json.loads(request.form.get('retrabalhoSolda'))
+
+            retrabalhoSolda = retrabalhoSolda
+
+            for i, item in enumerate(retrabalhoSolda):
+                retrabalhoSolda[i],operadores = item.split(" - ")
+
             classe_inspecao.alterar_reinspecao(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,list_causas,inspetoresSolda,setor,
-                               inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
+                               inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda,retrabalhoSolda)
             return jsonify("Success")
         
         else:
@@ -932,9 +941,9 @@ def solda():
                         password=DB_PASS, host=DB_HOST_REPRESENTANTE)
     cur = conn.cursor()
 
-    query_soldadores = """SELECT nome
+    query_soldadores = """SELECT CONCAT(matricula,' - ',nome)
                         FROM requisicao.funcionarios
-                        WHERE funcao LIKE '%SOLDADOR%' """
+                        WHERE funcao LIKE '%SOLDADOR%'  """
     
     cur.execute(query_soldadores)
 
@@ -964,16 +973,19 @@ def atualizar_conformidade():
     id_edicao = request.form.get('id_edicao')
     qtd_conformidade_antiga = int(request.form.get('qtd_conformidade_antiga'))
     conformidade_atualizada = int(request.form.get('conformidade_atualizada'))
+    nao_conformidades = int(request.form.get('nao_conformidades'))
     valor_reinspecao = qtd_conformidade_antiga - conformidade_atualizada
+    num_nao_conformidade = (qtd_conformidade_antiga - conformidade_atualizada) + nao_conformidades
     num_execucao = request.form.get('num_execucao')
     list_causas = json.loads(request.form.get('list_causas'))
 
     classe_inspecao.processar_fotos_inspecao(id_edicao, valor_reinspecao, list_causas,num_execucao)
-
+    print(list_causas)
+    print(f"{qtd_conformidade_antiga} - {conformidade_atualizada} + {nao_conformidades} RESULTADO = {num_nao_conformidade}")
     print(f"{qtd_conformidade_antiga} - {conformidade_atualizada} RESULTADO = {valor_reinspecao}")
 
     atualizar_historico = f"""UPDATE pcp.pecas_inspecionadas
-                             SET total_conformidades = '{conformidade_atualizada}' 
+                             SET total_conformidades = '{conformidade_atualizada}', nao_conformidades = '{num_nao_conformidade}' 
                             WHERE id_inspecao = '{id_edicao}' AND num_inspecao = {num_execucao}"""
     
     cur.execute(atualizar_historico)
@@ -3205,7 +3217,7 @@ def consultar_carretas(data_inicial,data_final):
     else:
         nomes_carretas_str = ', '.join("'"+carreta +"'" for carreta in nomes_carretas)
 
-    sql_consulta = f"""select * from pcp.tb_base_carretas_explodidas where carreta in ('{nomes_carretas_str}')"""
+    sql_consulta = f"""select * from pcp.tb_base_carretas_explodidas where carreta in ({nomes_carretas_str})"""
     df_explodido = pd.read_sql_query(sql_consulta,conn)
 
     df_final = df_explodido.merge(agrupado,how='left',right_on='Carreta Trat',left_on='carreta')
