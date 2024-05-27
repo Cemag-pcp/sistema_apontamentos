@@ -66,7 +66,6 @@ $('#envio_reinspecao_Solda').on('click',function() {
 
     if (observacaoSolda.trim() === "" ) {
         alert('Verifique se os campos de causa e observação estão com os valores corretos');
-        $('#btnEnviarSoldaReinspecao').prop('disabled',false);
         $("#loading").hide();
         return; // Interrompe a execução
     }
