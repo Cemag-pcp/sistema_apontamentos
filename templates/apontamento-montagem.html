@@ -166,6 +166,7 @@
                                         <th>Código</th>
                                         <th>Descrição</th>
                                         <th>Qt. planejada</th>
+                                        <th>Qt. restante</th>
                                         <th>Iniciar</th>
                                         <th
                                             style="display: none;">codificacao</th>
@@ -189,6 +190,17 @@
                                             }}</td>
                                         <td data-title="Qt. planejada">{{
                                             data[5] }}</td>
+                                        <td data-title="Qt. restante">{{
+                                            data[7] }}</td>
+                                        {% if data[7] == 0 %}
+                                        <td data-title="Iniciar"><button
+                                                id="btnIniciarProducao"
+                                                type="button"
+                                                class="btn btn-info"
+                                                data-toggle="modal"
+                                                data-target="#modalConfirmarInicioProducao" disabled>Iniciar</button>
+                                        </td>
+                                        {% else %}
                                         <td data-title="Iniciar"><button
                                                 id="btnIniciarProducao"
                                                 type="button"
@@ -196,11 +208,12 @@
                                                 data-toggle="modal"
                                                 data-target="#modalConfirmarInicioProducao">Iniciar</button>
                                         </td>
+                                        {% endif %}
                                         <td data-title="codificacao"
-                                            style="display: none;">{{ data[7]
+                                            style="display: none;">{{ data[8]
                                             }}</td>
                                         <td data-title="id"
-                                            style="display: none;">{{ data[8]
+                                            style="display: none;">{{ data[9]
                                             }}</td>
                                     </tr>
                                     {% endfor %}
@@ -1241,9 +1254,9 @@
                     descricao: rowData[4],
                     dataCarga: rowData[0],
                     celula: rowData[2],
-                    qtPlanejada: rowData[5],
-                    codificacao: rowData[7],
-                    chave: rowData[8],
+                    qtPlanejada: rowData[6],
+                    codificacao: rowData[8],
+                    chave: rowData[9],
                     origem: 'Sequenciamento'
                 };
 
