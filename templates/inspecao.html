@@ -17,6 +17,15 @@
 
 {% block containerFluid %}
 
+{% set color_map = {
+    'LC': '#ff6d01',
+    'AV': '#ffff00',
+    'VM': '#ff0000',
+    'CO': '#a9a9a9',
+    'AN': '#3F00FF',
+    'VJ': '#006400'
+} %}
+
 <div class="container-fluid f-14">
 
     <!-- Page Heading -->
@@ -73,7 +82,12 @@
                                         <td data-title="Data Finalizada">{{inpecao[1]}}</td>
                                         <td data-title="Código">{{inpecao[2]}}</td>
                                         <td data-title="Descrição">{{inpecao[3]}}</td>
-                                        <td data-title="Cor">{{inpecao[4]}}</td>
+                                        <td data-title="Cor">{{inpecao[4]}} 
+                                            {% if inpecao[4] in color_map %}
+                                            <input class="text-truncate" data-toggle="tooltip" data-placement="top"
+                                                title="{{ color_map[inpecao[4]] }}" type="color" value="{{ color_map[inpecao[4]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
+                                            {% endif %}
+                                        </td>
                                         <td data-title="Qt. produzida">{{inpecao[5]}}</td>
                                         <td data-title="Tipo">{{inpecao[6]}}</td>
                                         <td data-title="Exec" style="align-items: center;">
@@ -113,7 +127,7 @@
                                 <thead class="cf">
                                     <tr>
                                         <th>#</th>
-                                        <th>Peca</th>
+                                        <th>Descrição</th>
                                         <th>Cor</th>
                                         <th>Tipo</th>
                                         <th>Histórico</th>
@@ -123,8 +137,13 @@
                                     {% for inspecionada in inspecionadas %}
                                     <tr>
                                         <td data-title="#">{{inspecionada[0]}}</td>
-                                        <td data-title="Peca">{{inspecionada[11]}}</td>
-                                        <td data-title="Cor">{{inspecionada[12]}}</td>
+                                        <td data-title="Descrição">{{inspecionada[11]}}</td>
+                                        <td data-title="Cor">{{inspecionada[12]}} 
+                                            {% if inspecionada[12] in color_map %}
+                                            <input class="text-truncate" data-toggle="tooltip" data-placement="top"
+                                                title="{{ color_map[inspecionada[12]] }}" type="color" value="{{ color_map[inspecionada[12]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
+                                            {% endif %}
+                                        </td>
                                         <td data-title="Tipo">{{inspecionada[13]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
@@ -135,7 +154,7 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a id="btn_exec" class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecionada[0]}}')">
+                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecionada[0]}}','Pintura')">
                                                         Histórico
                                                     </a>
                                                 </div>
@@ -158,9 +177,8 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Data Inspeção</th>
-                                        <th>Peça</th>
-                                        <th class="text-truncate" data-toggle="tooltip" data-placement="top"
-                                            title="N° de Conformidades" style="max-width: 60px;">Não Conformidade</th>
+                                        <th>Descrição</th>
+                                        <th>Não Conformidade</th>
                                         <th>Inspetor</th>
                                         <th>Cor</th>
                                         <th>Exec</th>
@@ -171,10 +189,15 @@
                                     <tr>
                                         <td data-title="#">{{reinspecao[0]}}</td>
                                         <td data-title="Data Inspeção">{{reinspecao[1]}}</td>
-                                        <td data-title="Peça">{{reinspecao[13]}}</td>
+                                        <td data-title="Descrição">{{reinspecao[12]}}</td>
                                         <td data-title="Ñ conformidade">{{reinspecao[2]}}</td>
                                         <td data-title="Inspetor">{{reinspecao[4]}}</td>
-                                        <td data-title="Cor">{{reinspecao[14]}}</td>
+                                        <td data-title="Cor">{{reinspecao[13]}} 
+                                            {% if reinspecao[13] in color_map %}
+                                            <input class="text-truncate" data-toggle="tooltip" data-placement="top"
+                                                title="{{ color_map[reinspecao[13]] }}" type="color" value="{{ color_map[reinspecao[13]] }}" style="background: transparent; border-color: transparent; overflow: unset;" disabled>
+                                            {% endif %}
+                                        </td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -184,18 +207,14 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a id="btn_exec" class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalVisualizarCausas('{{reinspecao[3]}}','{{reinspecao[11]}}')">
-                                                        Visualize as causas
-                                                    </a>
-                                                    <a id="btn_exec" class="dropdown-item dropdown_os"
                                                         style="cursor: pointer;" onclick="modalReinspecao(
-                                                '{{reinspecao[0]}}',
-                                                '{{reinspecao[1]}}',
-                                                '{{reinspecao[13]}}',
-                                                '{{reinspecao[14]}}',
-                                                '{{reinspecao[2]}}',
-                                                '{{reinspecao[4]}}'
-                                            )">
+                                                        '{{reinspecao[0]}}',
+                                                        '{{reinspecao[1]}}',
+                                                        '{{reinspecao[12]}}',
+                                                        '{{reinspecao[13]}}',
+                                                        '{{reinspecao[2]}}',
+                                                        '{{reinspecao[4]}}'
+                                                    )">
                                                         Reinspecionar
                                                     </a>
                                                 </div>
@@ -221,7 +240,7 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body p-4" style="font-size: 14px;">
+                        <div class="modal-body p-4" style="font-size: 14px; height: 500px; overflow-y: auto;">
                             <div class="row">
                                 <input type="date" name="id_peca" id="id_peca" class="form-control" readonly="readonly"
                                     style="display: none;">
@@ -238,7 +257,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-sm-10 mb-4">
-                                    <label for="peca_inspecionada">Peça:</label>
+                                    <label for="peca_inspecionada">Conjunto:</label>
                                     <input type="text" name="peca_inspecionada" id="peca_inspecionada"
                                         class="form-control" readonly="readonly">
                                 </div>
@@ -250,7 +269,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-sm-4 mb-4">
-                                    <label>Quantidade Produzida:</label>
+                                    <label>Quantidade Inspecionada:</label>
                                     <input id="qtd_produzida" type="number" name="qtd_produzida" value=""
                                         class="form-control" readonly="readonly">
                                 </div>
@@ -280,13 +299,6 @@
                                         <option value="Marcelo">Marcelo</option>
                                     </select>
                                 </div>
-                                <div id="campo_arquivos" class="col-sm-6 mb-4" style="display: none;">
-                                    <label>Escolha os arquivos:</label>
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="foto_inspecao" name="foto_inspecao" accept="image/*" multiple>
-                                        <label class="custom-file-label" for="foto_inspecao">Escolha os arquivos</label>
-                                    </div>  
-                                </div>
                             </div>                         
                         </div>
                         <div class="modal-footer">
@@ -306,7 +318,7 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body p-4" style="font-size: 14px;">
+                        <div class="modal-body p-4" style="font-size: 14px; height: 60vh; overflow-y: auto;">
                             <div class="row">
                                 <input type="date" name="id_peca" id="id_peca" class="form-control" readonly="readonly"
                                     style="display: none;">
@@ -323,7 +335,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-sm-10 mb-4">
-                                    <label for="peca_reinspecionada">Peça:</label>
+                                    <label for="peca_reinspecionada">Conjunto:</label>
                                     <input type="text" name="peca_reinspecionada" id="peca_reinspecionada"
                                         class="form-control" readonly="readonly">
                                 </div>
@@ -407,7 +419,7 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="m-0 font-weight-bold text-info">Histórico</h5>
+                            <h5 class="m-0 font-weight-bold text-primary">Histórico</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -417,8 +429,42 @@
                                 
                             </div>
                         </div>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <p id="modal-footer-quantidade-produzida"></p>
+                            <p id="modal-footer-quantidade-reinspecao"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="modalConfirmacaoPintura" tabindex="-1" role="dialog" aria-labelledby="modalConfirmacaoPinturaLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                                Atenção
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="p_confirmar_inspecao_pintura"></p>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total Conformidade</label>
+                                    <input type="text" class="form-control" id="confirmarConformidades" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total de Não Conformidade</label>
+                                    <input type="text" class="form-control" id="confirmarNaoConformidades" disabled>
+                                </div>
+                            </div>
+                        </div>
                         <div class="modal-footer">
-                            
+                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarPintura">Confirmar</button>
+                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarPinturaReinspecao">Confirmar</button>
                         </div>
                     </div>
                 </div>

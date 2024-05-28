@@ -6,8 +6,8 @@ function addSelect() {
     const newSelect = clone.getElementsByTagName('select')[0];
     
     selectCounter++;
-    newSelect.id = `inspetorSolda${selectCounter}`;
-    newSelect.name = `inspetorSolda${selectCounter}`;
+    newSelect.id = `retrabalhoSolda${selectCounter}`;
+    newSelect.name = `retrabalhoSolda${selectCounter}`;
     
     document.getElementById('selectContainer').appendChild(clone);
     updateRemoveButton();
