@@ -43,8 +43,8 @@ $('#inputReinspecionadasConformidadesSolda').on('input',function() {
 
 
 $('#envio_reinspecao_Solda').on('click',function() {
-    let inputConformidadesSolda = $('#inputReinspecionadasConformidadesSolda').val();
-    let inputNaoConformidadesSolda = $('#inputReinspecionadasNaoConformidadesSolda').val();
+    let inputConformidadesSolda = parseInt($('#inputReinspecionadasConformidadesSolda').val());
+    let inputNaoConformidadesSolda = parseInt($('#inputReinspecionadasNaoConformidadesSolda').val());
     let inputPecasInspecionadasSolda = parseInt($('#inputPecasReinspecionadasSolda').val());
     let inputConjunto = $('#inputConjuntoReinspecao').val();
     let observacaoSolda = $('#observacaoSoldaReinspecionadas').val();
@@ -73,7 +73,7 @@ $('#envio_reinspecao_Solda').on('click',function() {
     for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
         let causas = $("#causa_reinspecao_" + i).val();
         if (causas === "") {
-            alert('Por favor, preencha todos os campos de causas de não conformidade.');
+            alert('Preencha todos os campos das causas de não conformidade.');
             $('#btnEnviarSoldaReinspecao').prop('disabled',false);
             $("#loading").hide();
             return; // Interrompe a execução

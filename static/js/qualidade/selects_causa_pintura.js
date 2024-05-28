@@ -113,6 +113,10 @@ function criarCampoArquivos(i) {
 const nConformidades = document.getElementById("n_conformidades");
 if (nConformidades) {
     nConformidades.addEventListener("input", () => {
+        if(nConformidades.value < 0 || nConformidades === ''){
+            $("#coluna_causa").empty()
+            return
+        }
         adicionarSelects("n_nao_conformidades", "coluna_causa", "Pintura");
     });
 }
@@ -120,6 +124,10 @@ if (nConformidades) {
 const nConformidadesReinspecao = document.getElementById("n_conformidades_reinspecao");
 if (nConformidadesReinspecao) {
     nConformidadesReinspecao.addEventListener("input", () => {
+        if(nConformidadesReinspecao.value < 0 || nConformidadesReinspecao === ''){
+            $("#coluna_causa_reinspecao").empty()
+            return
+        }
         adicionarSelects("n_nao_conformidades_reinspecao", "coluna_causa_reinspecao", "Pintura");
     });
 }
@@ -127,13 +135,22 @@ if (nConformidadesReinspecao) {
 const inputConformidadesSolda = document.getElementById("inputConformidadesSolda");
 if (inputConformidadesSolda) {
     inputConformidadesSolda.addEventListener("input", () => {
+        if(inputConformidadesSolda.value < 0 || inputConformidadesSolda === ''){
+            $("#coluna_causa_solda").empty()
+            return
+        }
         adicionarSelects("inputNaoConformidadesSolda", "coluna_causa_solda", "Solda");
     });
 }
 
+
 const inputReinspecionadasConformidadesSolda = document.getElementById("inputReinspecionadasConformidadesSolda");
 if (inputReinspecionadasConformidadesSolda) {
     inputReinspecionadasConformidadesSolda.addEventListener("input", () => {
+        if(inputReinspecionadasConformidadesSolda.value < 0 || inputReinspecionadasConformidadesSolda === ''){
+            $("#coluna_causa_reinspecao_solda").empty()
+            return
+        }
         adicionarSelects("inputReinspecionadasNaoConformidadesSolda", "coluna_causa_reinspecao_solda", "Solda");
     });
 }

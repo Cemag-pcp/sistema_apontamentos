@@ -132,7 +132,7 @@ function setorCards(response) {
             qtd_disponivel_inspecao = qtd_disponivel_inspecao - item[2]
         }
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Quantidade inspecionada : " + qt_apontada)
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total de conj. inspecionados : " + qt_apontada)
 
         $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Quantidade p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
 
@@ -190,7 +190,7 @@ function setorCards(response) {
 
         }
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Quantidade inspecionada : " + qt_apontada)
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conjunto : " + qt_apontada)
 
         $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Quantidade p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
 
@@ -393,7 +393,7 @@ $('#envio_inspecao').on('click', function () {
         let causas = $("#causa_reinspecao_" + i).val();
         console.log(causas)
         if (causas === '') {
-            alert('Preencha todos os campos de causas de não conformidade.');
+            alert('Preencha todos os campos das causas de não conformidade.');
             return; // Interrompe a execução
         }
     }
@@ -457,9 +457,7 @@ $('#btnEnviarPintura').on('click', function () {
         processData: false, // Não processe os dados
         contentType: false, // Não defina o tipo de conteúdo
         success: function (response) {
-            window.location.reload();
-            console.log(response);
-            $("#loading").hide();
+            location.reload();
         },
         error: function (error) {
             console.log(error);
@@ -484,7 +482,7 @@ $('#envio_reinspecao').on('click', function () {
     for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
         let causas = $("#causa_reinspecao_" + i).val();
         if (causas === "") {
-            alert('Preencha todos os campos de causas de não conformidade.');
+            alert('Preencha todos os campos das causas de não conformidade.');
             return; // Interrompe a execução
         }
     }
@@ -529,7 +527,7 @@ $('#btnEnviarPinturaReinspecao').on('click',function() {
     for (var i = 1; i <= n_nao_conformidades; i++) {
         let causas = $("#causa_reinspecao_" + i).val();
         if (causas.trim() === "") {
-            alert('Por favor, preencha todos os campos de causas de não conformidade.');
+            alert('Preencha todos os campos das causas de não conformidade.');
             $('#btnEnviarPinturaReinspecao').prop('disabled',false);
             $("#loading").hide();
             return; // Interrompe a execução
@@ -612,7 +610,7 @@ $('#atualizarConformidades').on('click', function(){
     for (var i = 1; i <= (qtd_conformidade_antiga - conformidade_atualizada); i++) {
         let causas = $("#causa_reinspecao_" + i).val();
         if (causas.trim() === "") {
-            alert('Por favor, preencha todos os campos de causas de não conformidade.');
+            alert('Preencha todos os campos das causas de não conformidade.');
             $('#envio_inspecao').prop('disabled',false);
             $("#loading").hide();
             return; // Interrompe a execução

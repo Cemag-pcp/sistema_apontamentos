@@ -127,7 +127,7 @@
                                 <thead class="cf">
                                     <tr>
                                         <th>#</th>
-                                        <th>Peca</th>
+                                        <th>Descrição</th>
                                         <th>Cor</th>
                                         <th>Tipo</th>
                                         <th>Histórico</th>
@@ -137,7 +137,7 @@
                                     {% for inspecionada in inspecionadas %}
                                     <tr>
                                         <td data-title="#">{{inspecionada[0]}}</td>
-                                        <td data-title="Peca">{{inspecionada[11]}}</td>
+                                        <td data-title="Descrição">{{inspecionada[11]}}</td>
                                         <td data-title="Cor">{{inspecionada[12]}} 
                                             {% if inspecionada[12] in color_map %}
                                             <input class="text-truncate" data-toggle="tooltip" data-placement="top"
@@ -177,7 +177,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Data Inspeção</th>
-                                        <th>Peça</th>
+                                        <th>Descrição</th>
                                         <th>Não Conformidade</th>
                                         <th>Inspetor</th>
                                         <th>Cor</th>
@@ -189,7 +189,7 @@
                                     <tr>
                                         <td data-title="#">{{reinspecao[0]}}</td>
                                         <td data-title="Data Inspeção">{{reinspecao[1]}}</td>
-                                        <td data-title="Peça">{{reinspecao[12]}}</td>
+                                        <td data-title="Descrição">{{reinspecao[12]}}</td>
                                         <td data-title="Ñ conformidade">{{reinspecao[2]}}</td>
                                         <td data-title="Inspetor">{{reinspecao[4]}}</td>
                                         <td data-title="Cor">{{reinspecao[13]}} 
