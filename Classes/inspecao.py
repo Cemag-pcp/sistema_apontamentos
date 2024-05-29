@@ -16,7 +16,7 @@ class Inspecao:
         
         id_inspecao = str(id_inspecao)
 
-        if setor == 'Pintura':
+        if setor == 'Pintura' or setor == 'Estamparia':
             
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true' WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
@@ -40,7 +40,7 @@ class Inspecao:
     def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = ''):
 
         id_inspecao = str(id_inspecao)
-        if setor == 'Pintura':
+        if setor == 'Pintura' or setor == 'Estamparia':
 
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true' WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
@@ -64,7 +64,9 @@ class Inspecao:
     def alterar_reinspecao(self, id_inspecao, n_nao_conformidades, qtd_produzida, n_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico='', categoria='', outraCausaSolda='', origemInspecaoSolda='', observacaoSolda='', operadores=''):
         
         id_inspecao = str(id_inspecao)
-        if setor == 'Pintura':
+
+        if setor == 'Pintura' or setor == 'Estamparia':
+
             if n_conformidades == "0":
                 
                 sql_update = """UPDATE pcp.pecas_reinspecao SET causa_reinspecao = %s, inspetor = %s WHERE id = %s """
@@ -121,6 +123,7 @@ class Inspecao:
                 self.cur.execute(delete_table_inspecao)
                 
         elif setor == 'Solda':
+
             if n_conformidades == "0":
 
                 sql_update = """UPDATE pcp.pecas_reinspecao SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, conjunto = %s, categoria = %s, outra_causa = %s, origem = %s, observacao = %s WHERE id = %s """
@@ -180,7 +183,7 @@ class Inspecao:
         self.conn.commit()
         print("alterar_reinspecao")
 
-    def dados_inspecionar_reinspecionar(self):
+    def dados_inspecionar_reinspecionar_pintura(self):
 
         inspecao = """SELECT * FROM pcp.pecas_inspecao WHERE excluidas = 'false' AND setor = 'Pintura' ORDER BY id desc"""
         self.cur.execute(inspecao)
@@ -204,9 +207,31 @@ class Inspecao:
         data_reinspecao = self.cur.fetchall()
 
         return data_inspecao, data_reinspecao, data_inspecionadas
+    
+    def dados_inspecionar_reinspecionar_estamparia(self):
+
+        inspecao = """SELECT * FROM pcp.pecas_inspecao WHERE excluidas = 'false' AND setor = 'Estamparia' ORDER BY id desc"""
+        self.cur.execute(inspecao)
+
+        data_inspecao = self.cur.fetchall()
+
+        inspecionados = """SELECT *
+                           FROM pcp.pecas_inspecionadas
+                           WHERE setor = 'Estamparia' and num_inspecao = 0"""
+        
+        self.cur.execute(inspecionados)
+        data_inspecionadas = self.cur.fetchall()
+
+        reinspecao = """SELECT *
+                        FROM pcp.pecas_reinspecao
+                        WHERE setor = 'Estamparia' AND excluidas IS NOT true"""
+        
+        self.cur.execute(reinspecao)
+        data_reinspecao = self.cur.fetchall()
+
+        return data_inspecao, data_reinspecao, data_inspecionadas
 
     def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= ''):
-
 
         for i in range(1, n_nao_conformidades + 1):
             file_key = f'foto_inspecao_{i}[]'

@@ -746,7 +746,7 @@ def planejar_pintura():
 # --------- INSPEÇÃO -----------
 
 @app.route('/inspecao', methods=['GET','POST'])
-def inspecao():
+def inspecao_pintura():
 
     """
     Rota para página de inspecao
@@ -783,7 +783,7 @@ def inspecao():
 
         return jsonify("Success")
 
-    inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar()
+    inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar_pintura()
 
     return render_template('inspecao.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
@@ -831,7 +831,7 @@ def modal_historico():
     return jsonify(historico,foto_causa)
 
 @app.route('/inspecao-solda',methods=['GET','POST'])
-def solda():
+def inspecao_solda():
 
     if request.method == 'POST':
 
@@ -962,6 +962,13 @@ def solda():
             item[1] = formatar_data(item[1])
     
     return render_template('inspecao-solda.html',a_inspecionar_solda=a_inspecionar_solda,inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda,lista_soldadores=lista_soldadores)
+
+@app.route('/inspecao-estamparia',methods=['GET','POST'])
+def inspecao_estamparia():
+        
+    inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar_estamparia()
+
+    return render_template('inspecao-estamparia.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
 @app.route('/atualizar-conformidade',methods=['POST'])
 def atualizar_conformidade():
@@ -1896,6 +1903,24 @@ def finalizar_peca_em_processo_estamparia():
 
     cur.execute(query, (celula, codigo, descricao, inputQuantidadeRealizada, dataCarga,
                 data_finalizacao, operadorInputModal_1, textAreaObservacao, chave, origem, dataHoraInicio))
+
+    conn.commit()
+
+    trazendo_id = """SELECT id
+                        FROM pcp.ordens_estamparia
+                    ORDER BY id DESC
+                    LIMIT 1"""
+    
+    cur.execute(trazendo_id)
+
+    last_id_montagem = cur.fetchone()
+    last_id_montagem = last_id_montagem[0]
+
+    query_inspecao = """INSERT INTO pcp.pecas_inspecao (id,data_finalizada,codigo,peca,qt_apontada,setor,celula)
+                    VALUES (%s,%s,%s,%s,%s,'Estamparia',%s)
+                    """
+
+    cur.execute(query_inspecao, (last_id_montagem, data_finalizacao, codigo, descricao, inputQuantidadeRealizada, celula))
 
     conn.commit()
 

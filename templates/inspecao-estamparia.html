@@ -21,9 +21,7 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h4 mb-0 text-gray-800">Inspeção Solda</h1>
-        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+        <h1 class="h4 mb-0 text-gray-800">Inspeção Estamparia</h1>
     </div>
 
     <!-- Content Row -->
@@ -35,24 +33,24 @@
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <ul class="nav nav-tabs">
                         <li class="nav-item">
-                            <a class="nav-link active" onclick="changeTab('AinspecionarSolda')"
+                            <a class="nav-link active" onclick="changeTab('AinspecionarEstamparia')"
                                 style="cursor: pointer;">A inspecionar</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" onclick="changeTab('inspecionadosSolda')"
+                            <a class="nav-link" onclick="changeTab('inspecionadosEstamparia')"
                                 style="cursor: pointer;">Inspecionados</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" onclick="changeTab('reinspecionadosSolda')"
+                            <a class="nav-link" onclick="changeTab('reinspecionadosEstamparia')"
                                 style="cursor: pointer;">Reinspecão</a>
                         </li>
                     </ul>
                 </div>
 
-                <div class="card-body" id="AinspecionarSoldaTable" style="display: block;">
+                <div class="card-body" id="AinspecionarEstampariaTable" style="display: block;">
                     <div id="no-more-tables">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="dataTableAinspecionarSolda" width="100%"
+                            <table class="table table-bordered" id="dataTableAinspecionarEstamparia" width="100%"
                                 cellspacing="0">
                                 <thead class="cf">
                                     <tr>
@@ -61,19 +59,19 @@
                                         <th>Código</th>
                                         <th>Conjunto</th>
                                         <th>Quantidade</th>
-                                        <th>Celula</th>
+                                        <th>Máquina</th>
                                         <th>Executar Inspeção</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for a_inspecionar in a_inspecionar_solda %}
+                                    {% for inspecao in inspecoes %}
                                     <tr>
-                                        <td data-title="#">{{a_inspecionar[0]}}</td>
-                                        <td data-title="Data Finalizada">{{a_inspecionar[1]}}</td>
-                                        <td data-title="Código">{{a_inspecionar[2]}}</td>
-                                        <td data-title="Conjunto">{{a_inspecionar[3]}}</td>
-                                        <td data-title="Quantidade">{{a_inspecionar[5]}}</td>
-                                        <td data-title="Celula">{{a_inspecionar[9]}}</td>
+                                        <td data-title="#">{{inspecao[0]}}</td>
+                                        <td data-title="Data Finalizada">{{inspecao[1]}}</td>
+                                        <td data-title="Código">{{inspecao[2]}}</td>
+                                        <td data-title="Conjunto">{{inspecao[3]}}</td>
+                                        <td data-title="Quantidade">{{inspecao[5]}}</td>
+                                        <td data-title="Máquina">{{inspecao[9]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -82,9 +80,12 @@
                                                     <i class="fa-solid fa-angle-down"></i>
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                                    <a  class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalInspecaoSolda('{{a_inspecionar[0]}}','{{a_inspecionar[9]}}','{{a_inspecionar[3]}}','{{a_inspecionar[5]}}')">
-                                                        Executar inspeção de solda
+                                                    <a class="dropdown-item dropdown_os"
+                                                        style="cursor: pointer;" onclick="modalInspecaoEstamparia(
+                                                        '{{inspecao[0]}}',
+                                                        '{{inspecao[9]}}',
+                                                        '{{inspecao[3]}}',
+                                                        '{{inspecao[5]}}')">Executar inspeção de estamparia
                                                     </a>
                                                 </div>
                                             </div>
@@ -98,10 +99,10 @@
                 </div>
 
                 <!-- Card tabela inspecionados -->
-                <div class="card-body" id="inspecionadosSoldaTable" style="display: none;">
+                <div class="card-body" id="inspecionadosEstampariaTable" style="display: none;">
                     <div id="no-more-tables">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="dataTableInspecionadosSolda" width="100%"
+                            <table class="table table-bordered" id="dataTableinspecionadosEstamparia" width="100%"
                                 cellspacing="0">
                                 <thead class="cf">
                                     <tr>
@@ -131,8 +132,8 @@
                                                     <i class="fa-solid fa-angle-down"></i>
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                                    <a  class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecao_solda[0]}}','Solda')">
+                                                    <a class="dropdown-item dropdown_os"
+                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecao_solda[0]}}','Estamparia')">
                                                         Histórico Inspeção
                                                     </a>
                                                 </div>
@@ -147,10 +148,10 @@
                 </div>
 
                 <!-- Card tabela reinspeção -->
-                <div class="card-body" id="reinspecionadosSoldaTable" style="display: none;">
+                <div class="card-body" id="reinspecionadosEstampariaTable" style="display: none;">
                     <div id="no-more-tables">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="dataTableReinspecaoSolda" width="100%"
+                            <table class="table table-bordered" id="dataTableReinspecaoEstamparia" width="100%"
                                 cellspacing="0">
                                 <thead class="cf">
                                     <tr>
@@ -180,7 +181,7 @@
                                                     <i class="fa-solid fa-angle-down"></i>
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                                    <a  class="dropdown-item dropdown_os"
+                                                    <a class="dropdown-item dropdown_os"
                                                         style="cursor: pointer;" onclick="modalReinspecaoSolda(
                                                         '{{reinspecao_solda[0]}}',
                                                         '{{reinspecao_solda[1]}}',
@@ -207,12 +208,12 @@
             </div>
 
             <!-- Modal Vídeo -->
-            <div class="modal fade" data-backdrop="static" id="inspecionarConjunto" tabindex="-1" role="dialog"
-                aria-labelledby="inspecionarConjuntoLabel" aria-hidden="true">
+            <div class="modal fade" data-backdrop="static" id="inspecionarEstamparia" tabindex="-1" role="dialog"
+                aria-labelledby="inspecionarEstampariaLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="inspecionarConjuntoLabel">Inspeção</h5>
+                            <h5 class="modal-title" id="inspecionarEstampariaLabel">Inspeção</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
                                 <span aria-hidden="true">&times;</span>
                             </button>
@@ -221,12 +222,12 @@
                             <div class="row">
                                 <div class="col-sm-6 mb-4">
                                     <label>Data da inspeção</label>
-                                    <input type="text" class="form-control desabilitado" name="data_inspecao_solda"
-                                        id="data_inspecao_solda" style="font-size: 14px;" disabled>
+                                    <input type="text" class="form-control desabilitado" name="data_inspecao_estamparia"
+                                        id="data_inspecao_estamparia" style="font-size: 14px;" disabled>
                                 </div>
                                 <div class="col-sm-6 mb-4">
-                                    <label>Categoria</label>
-                                    <input type="text" class="form-control desabilitado" id="inputCategoria" autocomplete="off"
+                                    <label>Máquina</label>
+                                    <input type="text" class="form-control desabilitado" id="inputMaquina_estamparia" autocomplete="off"
                                             aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
                                 </div>
                             </div>
@@ -234,21 +235,21 @@
                                 <div class="col-sm-6 mb-4">
                                     <label>Conjunto</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control desabilitado" id="inputConjunto" autocomplete="off"
+                                        <input type="text" class="form-control desabilitado" id="inputConjunto_estamparia" autocomplete="off"
                                             aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
                                     </div>
                                 </div>
                                 <div class="col-sm-3 mb-4">
                                     <label>N° de peças produzidas</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control desabilitado" id="inputPecasProduzidas"
+                                        <input type="number" class="form-control desabilitado" id="inputPecasProduzidas_estamparia"
                                             style="font-size: 12px;" disabled>
                                     </div>
                                 </div>
                                 <div class="col-sm-3 mb-4">
                                     <label>N° peças inspecionadas</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control desabilitado" id="inputPecasInspecionadasSolda"
+                                        <input type="number" class="form-control desabilitado" id="inputPecasInspecionadas_estamparia"
                                             style="font-size: 12px;">
                                     </div>
                                 </div>
@@ -257,27 +258,67 @@
                                 <div class="col-sm-6 mb-4">
                                     <label>Total de conformidades</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control" id="inputConformidadesSolda"
+                                        <input type="number" class="form-control" id="inputConformidades_estamparia"
                                             style="font-size: 12px;">
                                     </div>
                                 </div>
                                 <div class="col-sm-6 mb-4">
                                     <label>Total de <strong>NÃO</strong> conformidades</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control desabilitado" id="inputNaoConformidadesSolda"
+                                        <input type="number" class="form-control desabilitado" id="inputNaoConformidades_estamparia"
                                             style="font-size: 12px;" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_estamparia"
+                                            style="font-size: 12px;">
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div id="coluna_causa_solda" class="col-sm-12">
+                                <div class="col-sm-6 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_estamparia"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="selectContainer">
+                                <div class="col-sm-4 mb-4" id="selectBlock">
+                                    <label>Causas</label>
+                                    <select class="form-control" name="retrabalhoSolda" id="retrabalhoSolda" style="font-size: 12px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value=""></option>
+                                        <option value=""></option>
+                                        <option value=""></option>
+                                        <option value=""></option>
+                                        <option value=""></option>
+                                        <option value=""></option>
+                                        <option value=""></option>
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 mb-4">
+                                    <label>Quantidade</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_estamparia" id="quantidade_causas_estamparia">
+                                </div>
+                                <div class="col-sm-5" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButton" onclick="adicionarCausa()" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButton" onclick="removerCausa()" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="coluna_causa_estamparia" class="col-sm-12">
 
                                 </div>
                             </div>
                             <div class="row" style="align-items: end;">
                                 <div class="col-sm-6 mb-4">
                                     <label>Inspetor</label>
-                                    <select class="form-control" name="inspetorSolda" id="inspetorSolda" style="font-size: 12px;">
+                                    <select class="form-control" name="inspetor_estamparia" id="inspetor_estamparia" style="font-size: 12px;">
                                         <option value="" selected hidden disabled></option>
                                         <option value="Leônidas">Leônidas</option>
                                         <option value="Severiano">Severiano</option>
@@ -292,7 +333,7 @@
                                     <label>Outro motivo<small><code> *Preencha caso tenha "Outro" listado nas causas</code></small></label>
                                     <div class="input-group">
                                         <input type="text" class="form-control desabilitado" autocomplete="off"
-                                            id="outraCausaSolda" style="font-size: 12px;" disabled>
+                                            id="outraCausa_estamparia" style="font-size: 12px;" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -300,15 +341,15 @@
                                 <div class="col-sm-6 mb-4">
                                     <label>Observação</label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control desabilitado" name="observacaoSolda"
-                                            id="observacaoSolda" style="font-size: 12px;">
+                                        <input type="text" class="form-control desabilitado" name="observacao_estamparia"
+                                            id="observacao_estamparia" style="font-size: 12px;">
                                     </div>
                                 </div>
-                                <div class="col-sm-6 mb-4" id="origemInspecaoCol">
+                                <div class="col-sm-6 mb-4" id="origemInspecaoCol_estamparia">
                                     <label>Origem</label>
                                     <div class="input-group">
-                                        <select class="form-control" name="origemInspecaoSoldaReinspecionadas"
-                                            id="origemInspecaoSoldaReinspecionadas" style="font-size: 12px;">
+                                        <select class="form-control" name="origemInspecao_estamparia"
+                                            id="origemInspecao_estamparia" style="font-size: 12px;">
                                             <option value="" selected hidden disabled></option>
                                             <option value="Corte">Corte</option>
                                             <option value="Estamparia">Estamparia</option>
@@ -321,7 +362,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button id="envio_inspecao_solda" class="btn btn-primary">Enviar</button>
+                            <button id="envio_inspecao_estamparia" class="btn btn-primary">Enviar</button>
                         </div>
                     </div>
                 </div>
@@ -445,10 +486,10 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="col-sm-6" style="display: flex; justify-content: space-between; align-items: center;">
+                                <!-- <div class="col-sm-6" style="display: flex; justify-content: space-between; align-items: center;">
                                     <button class="btn btn-primary" id="addButton" onclick="addSelect()" style="font-size: 10px;">Adicionar insp.</button>
                                     <button class="btn btn-danger" id="removeButton" onclick="removeSelect()" style="font-size: 10px;" disabled>Remover insp.</button>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -607,14 +648,15 @@
 
         <!-- Script tabela JQuery -->
 
+        <script src="static/js/qualidade/causas_estamparia.js"></script>
         <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
         <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
         <script src="static/js/demo/datatables-demo.js"></script>
         <script src="static/js/qualidade/inspecao-solda.js"></script>
         <script src="static/js/qualidade/inspecao-pintura.js"></script>
         <script src="static/js/qualidade/reinspecao-solda.js"></script>
-        <script src="static/js/qualidade/select_inspetor_solda.js"></script>
         <script src="static/js/qualidade/selects_causa_pintura.js"></script>
+        <script src="static/js/qualidade/inspecao-estamparia.js"></script>
 
 
         {% endblock %}

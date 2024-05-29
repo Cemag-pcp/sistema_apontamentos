@@ -1,31 +1,30 @@
-function modalInspecaoSolda(id_inspecao,categoria,conjunto,quantidade) {
+function modalInspecaoEstamparia(id_inspecao,maquina,conjunto,quantidade) {
 
     const timeElapsed = Date.now();
     const today = new Date(timeElapsed);
 
-    $('#inspecionarConjuntoLabel').text(id_inspecao)
+    $('#inspecionarEstampariaLabel').text(id_inspecao)
 
-    $("#inputCategoria").val(categoria);
-    $("#inputConjunto").val(conjunto);
-    $('#inputPecasProduzidas').val(quantidade);
+    $("#inputMaquina_estamparia").val(maquina);
+    $("#inputConjunto_estamparia").val(conjunto);
+    $('#inputPecasProduzidas_estamparia').val(quantidade);
 
-    $("#causaSolda").prop('disabled',false);
-    $("#outraCausaSolda").prop('disabled',true);
+    $("#causa_estamparia").prop('disabled',false);
+    $("#outraCausa_estamparia").prop('disabled',true);
 
-    $('#data_inspecao_solda').val(today.toLocaleDateString());
+    $('#data_inspecao_estamparia').val(today.toLocaleDateString());
 
-    $('#inspecionarConjunto').modal('show');
+    $('#inspecionarEstamparia').modal('show');
 
 }
 
-$('#inputConformidadesSolda').on('input', function(){
+$('#inputConformidades_estamparia').on('input', function(){
     
-    let pecasInspecionadasSolda = $('#inputPecasInspecionadasSolda').val();
-    let numConformidadesSolda = $('#inputConformidadesSolda').val();
-    let numNaoConformidadesSolda = $('#inputNaoConformidadesSolda');
-    let selectNaoConformidadesSolda = $("#selectNaoConformidadesSolda");
-    let outroCausaSolda = $("#outraCausaSolda");
-    let origemInspecaoSoldaReinspecionadas = $('#origemInspecaoCol');
+    let pecasInspecionadasSolda = $('#inputPecasInspecionadas_estamparia').val();
+    let numConformidadesSolda = $('#inputConformidades_estamparia').val();
+    let numNaoConformidadesSolda = $('#inputNaoConformidades_estamparia');
+    let outroCausaSolda = $("#outraCausa_estamparia");
+    let origemInspecaoSoldaReinspecionadas = $('#origemInspecaoCol_estamparia');
 
     numNaoConformidadesSolda.val(pecasInspecionadasSolda - numConformidadesSolda);
 
@@ -41,26 +40,23 @@ $('#inputConformidadesSolda').on('input', function(){
     } 
 
     if(numNaoConformidadesSolda.val() === '' || numNaoConformidadesSolda.val() <= 0 || numConformidadesSolda < 0){
-        selectNaoConformidadesSolda.prop('disabled',true);
         outroCausaSolda.prop('disabled',true);
-        selectNaoConformidadesSolda.val('')
         outroCausaSolda.val('')
         origemInspecaoSoldaReinspecionadas.css('display','none')
         origemInspecaoSoldaReinspecionadas.val(null)
     } else {
         outroCausaSolda.prop('disabled',false);
-        selectNaoConformidadesSolda.prop('disabled',false);
         origemInspecaoSoldaReinspecionadas.css('display','block')
     }
 
 })
 
-$('#inputPecasInspecionadasSolda').on('blur', function() {
+$('#inputPecasInspecionadas_estamparia').on('blur', function() {
 
-    let inspecionados = $('#inputPecasInspecionadasSolda');
-    let produzidas = $('#inputPecasProduzidas').val();
-    let inputConformidadesSolda = $('#inputConformidadesSolda');
-    let inputNaoConformidadesSolda = $('#inputNaoConformidadesSolda');
+    let inspecionados = $('#inputPecasInspecionadas_estamparia');
+    let produzidas = parseInt($('#inputPecasProduzidas_estamparia').val());
+    let inputConformidadesSolda = $('#inputConformidades_estamparia');
+    let inputNaoConformidadesSolda = $('#inputNaoConformidades_estamparia');
 
     if(inspecionados.val() > produzidas || inspecionados.val() <= 0){
         alert("Preencha a quantidade correta para o número de peças produzidas")

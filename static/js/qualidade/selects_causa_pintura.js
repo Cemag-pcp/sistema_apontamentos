@@ -8,7 +8,6 @@ const causas_solda = ["Faltando Solda", "Porosidade", "Solda não conforme (rob�
     "Excesso de respingo", "Excesso de rebarba", "Excesso de solda", "Mordedura", "Erro de montagem","Outro"
 ];
 
-// Função para adicionar select de causas
 function adicionarSelects(n_nao_conformidades, coluna_causa, setor) {
     const nConformidades = document.getElementById(n_nao_conformidades).value;
     const colunaCausa = document.getElementById(coluna_causa);
@@ -22,30 +21,55 @@ function adicionarSelects(n_nao_conformidades, coluna_causa, setor) {
         colunaCausa.style.display = 'block';
         for (let i = 1; i <= nConformidades; i++) {
             const div = document.createElement("div");
-            div.className = "col-sm-6 mb-4";
 
             const label = document.createElement("label");
             label.textContent = `Causa ${i}`;
 
+            const campoArquivos = criarCampoArquivos(i);
+            const campoQuantidade = criarCampoQuantidade(i);
+
             if (setor === 'Pintura') {
+                
+                div.className = "col-sm-7 mb-4";
+
+                div.appendChild(label);
+                
                 var select = criarSelectCausa(i,causas_pintura);
+                div.appendChild(select);
+                divRow.appendChild(div);
+
+            } else if(setor === 'Estamparia'){
+
+                div.className = "col-sm-4 mb-4";
+
+                div.appendChild(label);
+
+                var select = criarSelectCausa(i,causas_pintura);
+                div.appendChild(select);
+                divRow.appendChild(div);
+                divRow.appendChild(campoQuantidade);
+                divRow.appendChild(campoArquivos);
+
             } else {
+
+                div.className = "col-sm-7 mb-4";
+
+                div.appendChild(label);
+
                 var select = criarSelectCausa(i,causas_solda);
+                div.appendChild(select);
+                divRow.appendChild(div);
+                divRow.appendChild(campoArquivos);
+
             }
 
-            const campoArquivos = criarCampoArquivos(i);
-
-            div.appendChild(label);
-            div.appendChild(select);
-            divRow.appendChild(div);
-            divRow.appendChild(campoArquivos);
             colunaCausa.appendChild(divRow);
         }
         colunaCausa.querySelectorAll('[id^="foto_inspecao_"]').forEach(inputElement => {
             inputElement.addEventListener("change", function () {
                 const files = this.files;
                 const label = this.parentNode.querySelector('.custom-file-label'); // Obter a label correspondente
-                label.textContent = files.length === 1 ? `Possui ${files.length} arquivo` : `Possui ${files.length} arquivos`;
+                label.textContent = files.length === 1 ? `${files.length} arquivo` : `${files.length} arquivos`;
             });
         });
     } else {
@@ -76,14 +100,36 @@ function criarSelectCausa(i,causas) {
     return select;
 }
 
+function criarCampoQuantidade(i) {
+    const campoQuantidade = document.createElement('div');
+    campoQuantidade.id = `campo_quantidade_${i}`;
+    campoQuantidade.className = 'col-sm-3 mb-4';
+
+    const labelQuantidade = document.createElement('label');
+    labelQuantidade.textContent = `Quantidade:`;
+
+    const inputFile = document.createElement('input');
+    inputFile.type = 'number';
+    inputFile.className = 'form-control';
+    inputFile.id = `quantidade_causas_${i}`;
+    inputFile.name = `quantidade_causas_${i}`;
+
+    campoQuantidade.appendChild(labelQuantidade);
+
+    campoQuantidade.appendChild(inputFile);
+
+    return campoQuantidade;
+}
+
+
 // Função para criar campo de arquivos
 function criarCampoArquivos(i) {
     const campoArquivos = document.createElement('div');
     campoArquivos.id = `campo_arquivos_${i}`;
-    campoArquivos.className = 'col-sm-6 mb-4';
+    campoArquivos.className = 'col-sm-5 mb-4';
 
     const labelArquivos = document.createElement('label');
-    labelArquivos.textContent = `Escolha os arquivos da causa ${i}:`;
+    labelArquivos.textContent = `Arquivos da causa ${i}:`;
 
     const customFileDiv = document.createElement('div');
     customFileDiv.className = 'custom-file';
@@ -99,7 +145,7 @@ function criarCampoArquivos(i) {
     const labelInputFile = document.createElement('label');
     labelInputFile.className = 'custom-file-label';
     labelInputFile.htmlFor = `foto_inspecao_${i}`;
-    labelInputFile.textContent = 'Escolha os arquivos';
+    labelInputFile.textContent = 'Arquivos';
 
     customFileDiv.appendChild(inputFile);
     customFileDiv.appendChild(labelInputFile);
