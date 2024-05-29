@@ -7,7 +7,7 @@ function modalInspecionarConjunto(id_inspecao,categoria,conjunto,quantidade) {
 
     $("#inputCategoria").val(categoria);
     $("#inputConjunto").val(conjunto);
-    $('#inputPecasInspecionadasSolda').val(quantidade);
+    $('#inputPecasProduzidas').val(quantidade);
 
     $("#causaSolda").prop('disabled',false);
     $("#outraCausaSolda").prop('disabled',true);
@@ -18,7 +18,7 @@ function modalInspecionarConjunto(id_inspecao,categoria,conjunto,quantidade) {
 
 }
 
-$('#inputConformidadesSolda').on('input',function(){
+$('#inputConformidadesSolda').on('input', function(){
     let pecasInspecionadasSolda = $('#inputPecasInspecionadasSolda').val();
     let numConformidadesSolda = $('#inputConformidadesSolda').val();
     let numNaoConformidadesSolda = $('#inputNaoConformidadesSolda');
@@ -27,6 +27,13 @@ $('#inputConformidadesSolda').on('input',function(){
     let origemInspecaoSoldaReinspecionadas = $('#origemInspecaoCol');
 
     numNaoConformidadesSolda.val(pecasInspecionadasSolda - numConformidadesSolda);
+
+    if(pecasInspecionadasSolda === ''){
+        alert("Preencha o número de peças inspecionadas")
+        $('#inputConformidadesSolda').val('')
+        numNaoConformidadesSolda.val('')
+        return
+    } 
 
     if(numConformidadesSolda === ''){
         numNaoConformidadesSolda.val('')
@@ -45,6 +52,21 @@ $('#inputConformidadesSolda').on('input',function(){
         origemInspecaoSoldaReinspecionadas.css('display','block')
     }
 
+})
+
+$('#inputPecasInspecionadasSolda').on('blur', function() {
+
+    let inspecionados = $('#inputPecasInspecionadasSolda');
+    let produzidas = $('#inputPecasProduzidas').val();
+    let inputConformidadesSolda = $('#inputConformidadesSolda');
+    let inputNaoConformidadesSolda = $('#inputNaoConformidadesSolda');
+
+    if(inspecionados.val() > produzidas || inspecionados.val() <= 0){
+        alert("Preencha a quantidade correta para o número de peças produzidas")
+        inspecionados.val('')
+    }
+    inputConformidadesSolda.val('')
+    inputNaoConformidadesSolda.val('')
 })
 
 $('#envio_inspecao_solda').on('click',function() {

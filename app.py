@@ -809,7 +809,7 @@ def modal_historico():
                             ORDER BY num_inspecao ASC"""
     else: 
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,i.total_conformidades,i.inspetor,
-                            i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.conjunto,i.nao_conformidades,om.origem,insp.qt_apontada
+                            i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.conjunto,i.nao_conformidades,om.origem,insp.qt_inspecionada
                                 FROM pcp.pecas_inspecionadas as i
                             LEFT JOIN pcp.ordens_montagem as om ON i.id_inspecao = om.id::varchar
                             LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
@@ -891,10 +891,10 @@ def solda():
                 classe_inspecao.inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
                                    inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
                 classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas)
             else:
                 classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas)
 
         return jsonify("Success")
         

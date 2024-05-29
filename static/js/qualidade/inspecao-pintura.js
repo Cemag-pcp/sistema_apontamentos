@@ -132,7 +132,7 @@ function setorCards(response) {
             qtd_disponivel_inspecao = qtd_disponivel_inspecao - item[2]
         }
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total de conj. inspecionados : " + qt_apontada)
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conj. inspecionados : " + qt_apontada)
 
         $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Quantidade p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
 
@@ -190,9 +190,9 @@ function setorCards(response) {
 
         }
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conjunto : " + qt_apontada)
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conj. inspecionados : " + qt_apontada)
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Quantidade p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Qtd. p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
 
         $(".option1").on('click', function() {
             var dataItemString = $(this).data('item');
