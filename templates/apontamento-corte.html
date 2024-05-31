@@ -56,6 +56,7 @@
                                 <option value></option>
                                 <option value="Plasma">Plasma</option>
                                 <option value="Laser">Laser</option>
+                                <option value="Desbobinadeira">Desbobinadeira</option>
                             </select>
                         </div>
                         <div class="col-sm-4 align-self-end">
@@ -1094,16 +1095,26 @@
                         '<td data-title="Data planejada">' + formatarDataSemHora(item[6]) + '</td>' + // data
                         '<td data-title="OP">' + item[0] + '</td>' + // op
                         '<td data-title="Espessura">' + (item[3] === null ? ' - ' : item[3]) + '</td>' +
-                        '<td data-title="Chapa">' + (item[2] === null ? item[7] : item[2]) + '</td>' + // tamanho da chapa
-                        '<td data-title="Quantidade chapas">' + (item[1] === null ? item[8] : item[1]) + '</td>' + // qt chapa
+                        '<td data-title="Chapa">' + (item[2] === null ? item[8] : item[2]) + '</td>' + // tamanho da chapa
+                        '<td data-title="Quantidade chapas">' + (item[1] === null ? item[9] : item[1]) + '</td>' + // qt chapa
                         '<td data-title="Máquina">' + item[5] + '</td>' + // máquina
                         '<td data-title="Iniciar">';
-
+                        
+                    
                     if (!item[7]) {
-                        row += '<div class="d-flex flex-row"><button type="button" class="btn btn-info btn-sm btn-iniciar mr-1">Iniciar</button><button type="button" class="btn btn-dark btn-sm btn-pecas">Peças</button></div>';
+                        row+=`<div class="d-flex flex-row">
+                                <button type="button" class="btn btn-info btn-sm btn-iniciar mr-1">Iniciar</button>`;
                     } else {
-                        row += '<div class="d-flex flex-row"><button type="button" class="btn btn-info btn-sm btn-iniciar mr-1" disabled>Iniciar</button><button type="button" class="btn btn-dark btn-sm btn-pecas">Peças</button></div>';
+                        row+=`<div class="d-flex flex-row">`;
                     }
+
+                    if(item[5] !== 'Desbobinadeira'){
+
+                        row+=`<button type="button" class="btn btn-dark btn-sm btn-pecas">Peças</button></div>`
+
+                    } else{
+                        row+=`</div>`
+                    };
 
                     row += '</td></tr>';
 

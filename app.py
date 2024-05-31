@@ -2259,7 +2259,7 @@ def api_consulta_pecas_em_processo_corte():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """ 
-            select distinct ocp.id, ocp.op,
+            select distinct on (ocp.id) ocp.id, ocp.op,
             ocp.data_inicio,ocp.motivo_interrompido,oc.tamanho_chapa,oc.qt_chapa,oc.maquina,oc.espessura,oc.cod_descricao,oc.quantidade
             from pcp.ordens_corte_processo as ocp
             left join pcp.ordens_corte as oc on ocp.op = oc.op
@@ -2436,7 +2436,7 @@ def api_consulta_pecas_interrompidas_corte():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     query = """ 
-            select distinct ocp.id, ocp.op,
+            select distinct on (ocp.id) ocp.id, ocp.op,
             ocp.data_inicio,ocp.motivo_interrompido,oc.tamanho_chapa,oc.qt_chapa,oc.maquina,oc.espessura,oc.cod_descricao,oc.quantidade
             from pcp.ordens_corte_processo as ocp
             left join pcp.ordens_corte as oc on ocp.op = oc.op
@@ -2640,10 +2640,10 @@ def planejamento_corte_programacao():
 
     # Consulta para obter os dados da página atual
     sql = """
-        SELECT DISTINCT oc.op, oc.qt_chapa, oc.tamanho_chapa, oc.espessura, oc.data_abertura, oc.maquina, oc.data_planejada, ocp.status, oc.cod_descricao, oc.quantidade
+        SELECT DISTINCT ON (oc.op) oc.op, oc.qt_chapa, oc.tamanho_chapa, oc.espessura, oc.data_abertura, oc.maquina, oc.data_planejada, ocp.status, oc.cod_descricao, oc.quantidade
         FROM pcp.ordens_corte oc 
         LEFT JOIN pcp.ordens_corte_processo ocp ON oc.op = ocp.op
-        WHERE oc.data_abertura > '2024-01-01' and oc.status = 'Planejada'
+        WHERE oc.data_abertura > '2024-01-01' and oc.status = 'Planejada' and ocp.data_finalizacao isnull 
         """
 
     if op_filter:
@@ -2653,7 +2653,7 @@ def planejamento_corte_programacao():
         sql += f" AND oc.maquina = '{maquina}'"
 
     sql += """
-        ORDER BY oc.data_abertura desc
+        ORDER BY oc.op, oc.data_abertura DESC
         LIMIT %s OFFSET %s;
         """
 
@@ -3299,7 +3299,7 @@ def consultar_carretas_levantamento():
     end_index = offset + per_page
 
     #agrupando dados
-    df_final = df_final.groupby(['processo', 'conjunto', 'codigo', 'descricao', 'materia_prima',
+    df_final = df_final.groupby(['processo', 'codigo', 'descricao', 'materia_prima',
        'comprimento', 'largura', 'etapa_seguinte']).sum().reset_index()
 
     # Selecionando as linhas do DataFrame com base nos índices calculados
@@ -3308,7 +3308,6 @@ def consultar_carretas_levantamento():
 
     pecas_disponiveis = df_final['codigo'].unique().tolist()
     celulas_disponiveis = df_final['processo'].unique().tolist()
-    conjuntos_disponiveis = df_final['conjunto'].unique().tolist()
     matprima_disponiveis = df_final['materia_prima'].unique().tolist()
 
     return jsonify({
@@ -3316,7 +3315,7 @@ def consultar_carretas_levantamento():
         'total_pages': total_pages,
         'pecas':pecas_disponiveis,
         'celula':celulas_disponiveis,
-        'conjunto':conjuntos_disponiveis,
+        # 'conjunto':conjuntos_disponiveis,
         'matprima':matprima_disponiveis,
         'carretas_na_base':carretas_dentro_da_base
     })
@@ -3398,9 +3397,9 @@ def consultar_historico_levantamento():
         sql += f" and '{data}' >= data_inicio AND '{data}' <= data_fim"
         sql_count += f" and '{data}' >= data_inicio AND '{data}' <= data_fim"
 
-    if conjunto:
-        sql += f" and conjunto = '{conjunto}'"
-        sql_count += f" and conjunto = '{conjunto}'"
+    # if conjunto:
+    #     sql += f" and conjunto = '{conjunto}'"
+    #     sql_count += f" and conjunto = '{conjunto}'"
 
     if celula:
         sql += f" and processo = '{celula}'"
@@ -3429,7 +3428,7 @@ def consultar_historico_levantamento():
 
     celula_unica = set()
     mp_unica = set()
-    conjunto_unico = set()
+    # conjunto_unico = set()
     peca_unica = set()
 
     # Iterar sobre a lista e adicionar os valores da coluna específica ao conjunto
@@ -3437,7 +3436,7 @@ def consultar_historico_levantamento():
 
         celula_unica.update([sublist[10]])
         mp_unica.update([sublist[12]])
-        conjunto_unico.update([sublist[7]])
+        # conjunto_unico.update([sublist[7]])
         peca_unica.update([sublist[3]])
 
     return jsonify({
@@ -3445,7 +3444,7 @@ def consultar_historico_levantamento():
         'total_pages': total_pages,
         'celulas_historico':list(celula_unica),
         'mp_historico':list(mp_unica),
-        'conjunto_historico':list(conjunto_unico),
+        # 'conjunto_historico':list(conjunto_unico),
         'peca_historico':list(peca_unica)
     })
 

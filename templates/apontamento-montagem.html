@@ -123,6 +123,13 @@
                                         class="form-control" data-column="0">
                                 </div>
                             </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="dataPlanejamento">Data de planejamento</label>
+                                    <input type="date" id="dataPlanejamento"
+                                        class="form-control" data-column="1">
+                                </div>
+                            </div>
                             <div class="col-sm" style="display: none;">
                                 <div class="form-group">
                                     <label for="celula">Célula</label>
@@ -138,6 +145,11 @@
                                         </ul>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-2">
+                                <button class="btn btn-primary" onclick="applyDateFilter()">Filtrar</button>
                             </div>
                         </div>
                     </div>
@@ -606,29 +618,6 @@
                 return table.column(columnIndex, { search: 'applied' }).data().unique().sort().toArray();
             }
 
-            // Função para popular as opções de um datalist
-            // function populateDatalistOptions(inputId, datalistId, columnIndex) {
-            //     var ulList = $('#' + datalistId);
-            //     ulList.empty(); // Limpa as opções existentes
-
-            //     var uniqueValues = getUniqueColumnValues(columnIndex);
-
-            //     // Adiciona as opções à lista
-            //     uniqueValues.forEach(function (value) {
-            //         ulList.append('<li value="' + value + '">' + value + '</li>');
-            //     });
-
-            //     // Adiciona manipulador de eventos para os itens da lista
-            //     ulList.on('click', 'li', function () {
-            //         var selectedValue = $(this).attr('value');
-            //         $('#' + inputId).val(selectedValue); // Preenche o input com o valor selecionado
-            //         ulList.hide(); // Oculta a lista após a seleção
-            //         console.log(selectedValue);
-            //         applyCelulaFilter(selectedValue);
-            //     });
-            //     console.log(uniqueValues);
-            // }
-
             // Função para exibir a lista ao clicar no input
             function showListOnInputClick(inputId, datalistId, columnIndex) {
                 $('#' + inputId).on('click', function () {
@@ -649,17 +638,24 @@
                 var columnIndex = $('#dataCarga').data('column');
                 var filterValue = $('#dataCarga').val();
 
-                // Formata a data usando Moment.js
-                if (filterValue === '') {
-                    filterValue = moment().format('DD/MM/YYYY');
-                } else {
+                var columnIndex_2 = $('#dataPlanejamento').data('column');
+                var filterValue_2 = $('#dataPlanejamento').val();
+
+                if (filterValue) {
+                    // Limpa o outro filtro
+                    $('#dataPlanejamento').val('');
                     filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                    // Define o filtro na coluna específica
+                    table.column(columnIndex).search(filterValue).draw();
+                    table.column(columnIndex_2).search('').draw();  // Limpa o outro filtro
+                } else if (filterValue_2) {
+                    // Limpa o outro filtro
+                    $('#dataCarga').val('');
+                    filterValue_2 = moment(filterValue_2, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                    // Define o filtro na coluna específica
+                    table.column(columnIndex_2).search(filterValue_2).draw();
+                    table.column(columnIndex).search('').draw();  // Limpa o outro filtro
                 }
-
-                // Define o filtro na coluna específica
-                table.column(columnIndex).search(filterValue).draw();
-
-                // populateDatalistOptions('celula', 'listaCelulas', 2);
             }
 
             function applyColorFilter() {
@@ -686,12 +682,16 @@
             showListOnInputClick('celula', 'listaCelulas', 2);
 
             // Aplica o filtro ao carregar a página
-            applyDateFilter();
+            // applyDateFilter();
 
             // Adiciona campos de entrada para filtrar por coluna
-            $('#dataCarga').on('input', function () {
-                applyDateFilter();
-            });
+            // $('#dataCarga').on('input', function () {
+            //     applyDateFilter();
+            // });
+            
+            // $('#dataPlanejamento').on('input', function () {
+            //     applyDateFilter();
+            // });
 
             $('#celula').on('input', function () {
                 applyColorFilter();
@@ -708,6 +708,35 @@
             });
 
         });
+    </script>
+
+    <script>
+        function applyDateFilter() {
+            var columnIndex = $('#dataCarga').data('column');
+            var filterValue = $('#dataCarga').val();
+
+            var columnIndex_2 = $('#dataPlanejamento').data('column');
+            var filterValue_2 = $('#dataPlanejamento').val();
+
+            console.log(filterValue,filterValue_2);
+
+            if (filterValue) {
+                // Limpa o outro filtro
+                $('#dataPlanejamento').val('');
+                filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                // Define o filtro na coluna específica
+                table.column(columnIndex).search(filterValue).draw();
+                table.column(columnIndex_2).search('').draw();  // Limpa o outro filtro
+            } else if (filterValue_2) {
+                // Limpa o outro filtro
+                $('#dataCarga').val('');
+                filterValue_2 = moment(filterValue_2, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                // Define o filtro na coluna específica
+                table.column(columnIndex_2).search(filterValue_2).draw();
+                table.column(columnIndex).search('').draw();  // Limpa o outro filtro
+            }
+    }
+
     </script>
 
     <!-- Script botão de enviar -->

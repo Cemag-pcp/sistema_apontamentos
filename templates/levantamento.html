@@ -140,7 +140,7 @@
                                         <thead class="cf">
                                             <tr>
                                                 <th scope="col" class="col-2 d-none d-md-table-cell">Célula</th>
-                                                <th scope="col" class="d-none d-md-table-cell">Conjunto</th>
+                                                <!-- <th scope="col" class="d-none d-md-table-cell">Conjunto</th> -->
                                                 <th scope="col">Código</th>
                                                 <th scope="col" class="col-2">Descrição</th>
                                                 <th scope="col" class="col-1">Qt.Necessária</th>
@@ -256,7 +256,6 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">Célula</th>
-                                            <th scope="col">Conjunto</th>
                                             <th scope="col">Peça</th>
                                             <th scope="col">Descrição</th>
                                             <th scope="col">Quantidade</th>
@@ -680,14 +679,15 @@
                     dados = [];
 
                     // Preenche a tabela com os dados da página atual
+                    console.log(data);
                     data.forEach(function (item) {
                         var row = '<tr>' +
                             '<td data-title="Célula" class="d-none d-md-table-cell">' + item[0] + '</td>' + // celula
-                            '<td data-title="Conjunto" class="d-none d-md-table-cell">' + item[1] + '</td>' + // conjunto
-                            '<td data-title="Código">' + item[2] + '</td>' + // peça
-                            '<td data-title="Descrição">' + item[3] + '</td>' + // descricao
+                            // '<td data-title="Conjunto" class="d-none d-md-table-cell">' + item[1] + '</td>' + // conjunto
+                            '<td data-title="Código">' + item[1] + '</td>' + // peça
+                            '<td data-title="Descrição">' + item[2] + '</td>' + // descricao
                             '<td data-title="Qt.Necessária" class="text-truncate">' + item[6] + '</td>' + // quantidade
-                            '<td data-title="Mat.Prima" class="d-none d-md-table-cell">' + item[4] + '</td>' + // mat prima
+                            '<td data-title="Mat.Prima" class="d-none d-md-table-cell">' + item[3] + '</td>' + // mat prima
                             '<td data-title="Qt.Físico"><input type="number" class="form-control"></td>' + // quantidade fisica
                             '<td data-title="Observação"><textarea row="3" cols="20" type="text" class="form-control"></textarea></td>' + // obs
                             '<td data-title="Solicitar"><button type="button" class="btn btn-dark btn-sm btn-pecas"><i class="fa fa-paper-plane" aria-hidden="true"></i></button></td>' +
@@ -724,12 +724,13 @@
                                         item[3], // descricao
                                         item[6], // quantidade
                                         item[4], // mat prima
-                                        quantidadeInserida, // quantidade inserida
+                                        parseInt(item[6])-parseInt(quantidadeInserida), // quantidade necessária
                                         newRow.find('textarea').val(), // observação
                                         dataInicio,// descrição adicional inserida
                                         dataFinal// descrição adicional inserida
 
                                     ];
+                                    console.log(dados);
                                     solicitarPeca(dados);
                                 }
                             });
@@ -872,16 +873,16 @@
                     dados = [];
 
                     // Preenche a tabela com os dados da página atual
+                    console.log(data);
                     data.forEach(function (item) {
                         var row =
                             '<tr>' +
                             '<td>' + item[10] + '</td>' + // celula
-                            '<td>' + item[7] + '</td>' + // conjunto
-                            '<td>' + item[3] + '</td>' + // peça
-                            '<td>' + item[6] + '</td>' + // descricao
+                            '<td>' + item[7] + '</td>' + // peça
+                            '<td>' + item[3] + '</td>' + // descricao
                             '<td>' + item[4] + '</td>' + // quantidade
-                            '<td>' + item[12] + '</td>' + // mat prima
-                            '<td>' + item[8] + '</td>' + // mat prima
+                            '<td>' + item[6] + '</td>' + // mat prima
+                            '<td>' + item[8] + '</td>' + // obs
                             '</tr>';
                         $(row).appendTo('#bodyTableHistorico');
                     });
