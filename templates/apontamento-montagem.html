@@ -718,24 +718,21 @@
             var columnIndex_2 = $('#dataPlanejamento').data('column');
             var filterValue_2 = $('#dataPlanejamento').val();
 
-            console.log(filterValue,filterValue_2);
-
-            if (filterValue) {
-                // Limpa o outro filtro
-                $('#dataPlanejamento').val('');
+            // Formata a data usando Moment.js
+            if (filterValue !== '') {
                 filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
                 // Define o filtro na coluna específica
                 table.column(columnIndex).search(filterValue).draw();
-                table.column(columnIndex_2).search('').draw();  // Limpa o outro filtro
-            } else if (filterValue_2) {
-                // Limpa o outro filtro
-                $('#dataCarga').val('');
+            } else if (filterValue_2 !== '') {
                 filterValue_2 = moment(filterValue_2, 'YYYY-MM-DD').format('DD/MM/YYYY');
                 // Define o filtro na coluna específica
                 table.column(columnIndex_2).search(filterValue_2).draw();
-                table.column(columnIndex).search('').draw();  // Limpa o outro filtro
+            } else {
+                // Limpa os filtros se ambos os campos estiverem vazios
+                table.column(columnIndex).search('').draw();
+                table.column(columnIndex_2).search('').draw();
             }
-    }
+        }
 
     </script>
 
@@ -743,6 +740,15 @@
 
     <script>
         $(document).ready(function () {
+
+            $('#dataCarga').on('input', function () {
+                $('#dataPlanejamento').val(''); 
+            });
+
+            $('#dataPlanejamento').on('input', function () {
+                $('#dataCarga').val(''); 
+            });
+
             // Adicione um manipulador de clique ao botão de envio
             $('#enviarBtn').on('click', function () {
                 // Obtém as linhas com a coluna 5 diferente de vazio
