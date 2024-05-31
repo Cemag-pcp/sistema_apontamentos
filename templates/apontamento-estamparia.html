@@ -682,16 +682,6 @@
                         data = data.filter(peca => peca[5] === maquinaSelecionada);
                     }
 
-                    // if (codigo_peca_estamparia !== '') {
-                    //     // Filtra os dados com base na máquina selecionada
-                    //     data = data.filter(peca => peca[2] === codigo_peca_estamparia);
-                    // }
-
-                    // Calcula o índice inicial e final dos dados da página atual
-                    // var startIndex = (currentPage - 1) * rowsPerPage;
-                    // var endIndex = startIndex + rowsPerPage;
-                    // var currentPageData = data.slice(startIndex, endIndex);
-
                     // Preenche a tabela com os dados da página atual
                     data.forEach(function (item) {
                         var row = '<tr>' +
@@ -1450,150 +1440,145 @@
 
     <!-- Script para iniciar ou finalizar produção e listar peças em processo -->
 
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"
-    integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ=="
-    crossorigin="anonymous"></script> -->
-
     <script>
 
-            document.addEventListener('DOMContentLoaded', () => {
-                chamarAPI();
-                chamarAPIInterrompidas();
-            });
+        document.addEventListener('DOMContentLoaded', () => {
+            chamarAPI();
+            chamarAPIInterrompidas();
+        });
 
-            function chamarAPI() {
-                fetch("/api/consulta-pecas-em-processo/estamparia")
-                    .then(response => response.json())
-                    .then(data => {
-                        // Limpa o conteúdo atual dos cards
-                        document.getElementById('cardsContainer').innerHTML = "";
+        let intervaloEmAndamento;
+        let intervaloInterrompido;
 
-                        var celulaEscolhida = document.getElementById('maquinaEscolhida').value;
+        function chamarAPI() {
+            fetch("/api/consulta-pecas-em-processo/estamparia")
+                .then(response => response.json())
+                .then(data => {
+                    var celulaEscolhida = document.getElementById('maquinaEscolhida').value;
 
-                        console.log(celulaEscolhida);
+                    if (celulaEscolhida === '') {
+                        // Se a célula escolhida estiver vazia, não há necessidade de filtrar os dados
+                        // Você pode passar os dados diretamente para o forEach
+                        processarDados(data);
+                    } else {
+                        // Filtra os dados com base na célula escolhida
+                        const dadosFiltrados = data.filter(peca => peca[8] === celulaEscolhida);
+                        // Processa os dados filtrados
+                        processarDados(dadosFiltrados);
+                    }
+                })
+                .catch(error => console.error('Erro ao chamar a API:', error));
+        }
 
-                        if (celulaEscolhida === '') {
-                            // Se a célula escolhida estiver vazia, não há necessidade de filtrar os dados
-                            // Você pode passar os dados diretamente para o forEach
-                            processarDados(data);
-                        } else {
-                            // Filtra os dados com base na célula escolhida
-                            const dadosFiltrados = data.filter(peca => peca[8] === celulaEscolhida);
-                            // Processa os dados filtrados
-                            processarDados(dadosFiltrados);
-                        }
-                    })
-                    .catch(error => console.error('Erro ao chamar a API:', error));
-            }
+        function processarDados(data) {
 
-            function processarDados(data) {
-                data.forEach(peca => {
-                    // Aqui você pode continuar com o processamento dos dados e a criação dos cards
-                    var cardHtml = `
-                <div class="col-sm-6 mb-2">
-                    <div class="card shadow mb-4" name="${peca[8]}">
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-                            <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
-                            <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
-                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
-                                </div>
-                                <div class="col-sm-6">
-                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Origem:</strong> ${peca[13]}</small></h6>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <button type="button" class="btn btn-info btn-finalizar-producao"
-                                onclick="finalizarPeca(${peca[0]})">Finalizar
-                            </button>
-                            <button type="button" class="btn btn-warning btn-interromper-producao"
-                                onclick="interromperProcesso(${peca[0]})">Interromper
-                            </button>
-                        </div>
-                    </div>
-                </div>`;
-                    document.getElementById('cardsContainer').innerHTML += cardHtml;
-                });
+            document.getElementById('cardsContainer').innerHTML = ""; // Limpa o conteúdo atual dos cards
 
-                atualizarContador(data);
-
-                setInterval(() => atualizarContador(data), 1000);
-            }
-
-            function chamarAPIInterrompidas() {
-                fetch("/api/consulta-pecas-interrompidas/estamparia")
-                    .then(response => response.json())
-                    .then(data => {
-                        // Limpa o conteúdo atual dos cards
-                        document.getElementById('cardsContainerInterrompida').innerHTML = "";
-
-                        var celulaEscolhida = document.getElementById('maquinaEscolhida').value;
-
-                        if (celulaEscolhida === '') {
-                            // Se a célula escolhida estiver vazia, não há necessidade de filtrar os dados
-                            // Você pode passar os dados diretamente para o forEach
-                            processarDadosInterrompida(data);
-                        } else {
-                            // Filtra os dados com base na célula escolhida
-                            const dadosFiltrados = data.filter(peca => peca[8] === celulaEscolhida);
-                            // Processa os dados filtrados
-                            processarDadosInterrompida(dadosFiltrados);
-                        }
-                    })
-                    .catch(error => console.error('Erro ao chamar a API:', error));
-            }
-
-            function processarDadosInterrompida(data) {
-                data.forEach(peca => {
-                    var cardHtml = `
+            data.forEach(peca => {
+                let cardHtml;
+                cardHtml = `
                     <div class="col-sm-6 mb-2">
                         <div class="card shadow mb-4" name="${peca[8]}">
                             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                 <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-                                <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>  
+                                <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>   
                                 <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
                             </div>
                             <div class="card-body">
-                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
-                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
-                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Motivo:</strong> ${peca[12]}</small></h6>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Origem:</strong> ${peca[13]}</small></h6>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-footer">
-                                <button type="button" class="btn btn-info btn-retornar-producao"
-                                    onclick="retornarPeca(${peca[0]})">Retornar
+                                <button type="button" class="btn btn-info btn-finalizar-producao"
+                                    onclick="finalizarPeca(${peca[0]})">Finalizar
+                                </button>
+                                <button type="button" class="btn btn-warning btn-interromper-producao"
+                                    onclick="interromperProcesso(${peca[0]})">Interromper
                                 </button>
                             </div>
                         </div>
                     </div>`;
+                document.getElementById('cardsContainer').innerHTML += cardHtml;
+            });
 
-                    document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
-
-                });
-
-                atualizarContador(data);
-
-                setInterval(() => atualizarContador(data), 1000);
+            // Limpa o intervalo existente, se houver
+            if (intervaloEmAndamento) {
+                clearInterval(intervaloEmAndamento);
             }
 
-            // var socket = io();
+            // Define um novo intervalo para atualizar os contadores
+            if (data.length > 0) {
+                intervaloEmAndamento = setInterval(() => atualizarContador(data), 1000);
+            }
+        }
 
-            // socket.on('connect', function() {
-            //     console.log('Connected');
-            // });
+        function chamarAPIInterrompidas() {
+            fetch("/api/consulta-pecas-interrompidas/estamparia")
+                .then(response => response.json())
+                .then(data => {
+                    var celulaEscolhida = document.getElementById('maquinaEscolhida').value;
 
-            // socket.on('my_response', function(data) {
-            //     console.log('Server response:', data);
-            // });
+                    if (celulaEscolhida === '') {
+                        // Se a célula escolhida estiver vazia, não há necessidade de filtrar os dados
+                        // Você pode passar os dados diretamente para o forEach
+                        processarDadosInterrompida(data);
+                    } else {
+                        // Filtra os dados com base na célula escolhida
+                        const dadosFiltrados = data.filter(peca => peca[8] === celulaEscolhida);
+                        // Processa os dados filtrados
+                        processarDadosInterrompida(dadosFiltrados);
+                    }
+                })
+                .catch(error => console.error('Erro ao chamar a API:', error));
+        }
 
-            // setInterval(chamarAPI, 1000);
-            // setInterval(chamarAPIInterrompidas, 1000);
+        function processarDadosInterrompida(data) {
 
+            document.getElementById('cardsContainerInterrompida').innerHTML = ""; // Limpa o conteúdo atual dos cards
+
+            data.forEach(peca => {
+                var cardHtml = `
+                <div class="col-sm-6 mb-2">
+                    <div class="card shadow mb-4" name="${peca[8]}">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
+                            <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>  
+                            <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
+                        </div>
+                        <div class="card-body">
+                            <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
+                            <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
+                            <h6 class="m-0 font-weight-bold text-primary"><small><strong>Motivo:</strong> ${peca[12]}</small></h6>
+                        </div>
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-info btn-retornar-producao"
+                                onclick="retornarPeca(${peca[0]})">Retornar
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+
+                document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
+
+            });
+
+            // Limpa o intervalo existente, se houver
+            if (intervaloInterrompido) {
+                clearInterval(intervaloInterrompido);
+            }
+
+            // Define um novo intervalo para atualizar os contadores
+            if (data.length > 0) {
+                intervaloInterrompido = setInterval(() => atualizarContador(data), 1000);
+            }
+        }
 
         function formatarData(dataString) {
             var data = new Date(dataString);
@@ -1669,7 +1654,7 @@
 
                 const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
 
-                document.getElementById(`contador-${peca[0]}`).textContent = formatoTempo;
+                document.getElementById(`contador-${peca[1]}`).textContent = formatoTempo;
 
             })
         }

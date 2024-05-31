@@ -10,7 +10,6 @@ from psycopg2.extras import execute_values
 from datetime import datetime, timedelta, date
 # from oauth2client.service_account import ServiceAccountCredentials
 import cachetools
-import uuid
 import gspread
 import warnings
 from collections import defaultdict
@@ -20,6 +19,7 @@ import json
 import tempfile
 import os
 from werkzeug.utils import secure_filename
+import shortuuid
 
 async_mode = None
 warnings.filterwarnings('ignore')
@@ -2260,7 +2260,7 @@ def api_consulta_pecas_em_processo_corte():
 
     query = """ 
             select distinct ocp.id, ocp.op,
-            ocp.data_inicio,ocp.motivo_interrompido,oc.tamanho_chapa,oc.qt_chapa,oc.maquina,oc.espessura
+            ocp.data_inicio,ocp.motivo_interrompido,oc.tamanho_chapa,oc.qt_chapa,oc.maquina,oc.espessura,oc.cod_descricao,oc.quantidade
             from pcp.ordens_corte_processo as ocp
             left join pcp.ordens_corte as oc on ocp.op = oc.op
             where ocp.status = 'Em processo' 
@@ -2269,6 +2269,8 @@ def api_consulta_pecas_em_processo_corte():
 
     cur.execute(query)
     consulta = cur.fetchall()
+
+    print(consulta)
 
     return jsonify(consulta)
 
@@ -2350,10 +2352,10 @@ def planejamento_corte():
 
     # Consulta para obter os dados da página atual
     sql = """
-        SELECT op, qt_chapa, tamanho_chapa, espessura, data_abertura, maquina, coalesce (status,'Aguardando planejamento') as status
+        SELECT op, qt_chapa, tamanho_chapa, espessura, data_abertura, maquina, coalesce (status,'Aguardando planejamento') as status, cod_descricao, quantidade
         FROM (
             SELECT oc.op, oc.qt_chapa, oc.tamanho_chapa, oc.espessura, oc.data_abertura, oc.maquina, oc.status, ocp.data_finalizacao,
-                ROW_NUMBER() OVER (PARTITION BY oc.op ORDER BY oc.data_abertura DESC) AS row_num
+                ROW_NUMBER() OVER (PARTITION BY oc.op ORDER BY oc.data_abertura DESC) AS row_num, oc.cod_descricao, oc.quantidade
             FROM pcp.ordens_corte oc 
             LEFT JOIN pcp.ordens_corte_processo ocp ON oc.op = ocp.op
             WHERE oc.data_abertura > '2024-01-01'
@@ -2393,19 +2395,18 @@ def api_pecas_interrompida_corte():
 
     data_request = request.json
 
-    print(data_request)
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     agora = datetime.now()
     query_update = """update pcp.ordens_corte_processo set data_finalizacao = %s where id = %s"""
-    cur.execute(query_update, (agora, data_request['id']))
+    cur.execute(query_update, (agora, str(data_request['id'])))
 
     conn.commit()
 
     query_consulta = """select * from pcp.ordens_corte_processo where id = %s"""
-    cur.execute(query_consulta, (data_request['id'],))
+    cur.execute(query_consulta, (str(data_request['id']),))
     data = cur.fetchall()
 
     data = data[0]
@@ -2436,7 +2437,7 @@ def api_consulta_pecas_interrompidas_corte():
 
     query = """ 
             select distinct ocp.id, ocp.op,
-            ocp.data_inicio,ocp.motivo_interrompido,oc.tamanho_chapa,oc.qt_chapa,oc.maquina,oc.espessura
+            ocp.data_inicio,ocp.motivo_interrompido,oc.tamanho_chapa,oc.qt_chapa,oc.maquina,oc.espessura,oc.cod_descricao,oc.quantidade
             from pcp.ordens_corte_processo as ocp
             left join pcp.ordens_corte as oc on ocp.op = oc.op
             where ocp.status = 'Interrompida' 
@@ -2498,11 +2499,13 @@ def buscar_pecas_dentro_op():
 
     op = request.args.get('op')
 
-    query = """select op,cod_descricao,quantidade,espessura,tamanho_chapa,qt_chapa,aproveitamento,status from pcp.ordens_corte where op = %s"""
+    query = """select op,cod_descricao,quantidade,espessura,tamanho_chapa,qt_chapa,aproveitamento,status,maquina from pcp.ordens_corte where op = %s"""
 
     cur.execute(query,(op,))
     data = cur.fetchall()
     status_atual = data[0][7]
+
+    print(data)
 
     # if data_existente:
     #     data_existente = True
@@ -2637,7 +2640,7 @@ def planejamento_corte_programacao():
 
     # Consulta para obter os dados da página atual
     sql = """
-        SELECT DISTINCT oc.op, oc.qt_chapa, oc.tamanho_chapa, oc.espessura, oc.data_abertura, oc.maquina, oc.data_planejada, ocp.status
+        SELECT DISTINCT oc.op, oc.qt_chapa, oc.tamanho_chapa, oc.espessura, oc.data_abertura, oc.maquina, oc.data_planejada, ocp.status, oc.cod_descricao, oc.quantidade
         FROM pcp.ordens_corte oc 
         LEFT JOIN pcp.ordens_corte_processo ocp ON oc.op = ocp.op
         WHERE oc.data_abertura > '2024-01-01' and oc.status = 'Planejada'
@@ -2825,6 +2828,33 @@ def duplicar_op():
     conn.commit()
 
     return jsonify({'nova_op':ultima_op_criada})
+
+# Desbobinadeira #
+
+@app.route("/planejar-op/desbobinadeira", methods=['POST'])
+def planejar_op_desbobinadeira():
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.json
+
+    peca=data['peca']
+    quantidade=int(data['quantidade'])
+    data_planejada=data['dataPlanejada']
+    maquina='Desbobinadeira'
+    op=str(shortuuid.ShortUUID().random(length=20))
+    status='Planejada'
+
+    query_add="""insert into pcp.ordens_corte (op,cod_descricao,quantidade,maquina,status,data_planejada) values (%s,%s,%s,%s,%s,%s)"""
+
+    cur.execute(query_add,(op,peca,quantidade,maquina,status,data_planejada))
+
+    conn.commit()
+
+    return 'success'
+
 
 # Apontamento prod especiais
 
@@ -3270,8 +3300,7 @@ def consultar_carretas_levantamento():
 
     #agrupando dados
     df_final = df_final.groupby(['processo', 'conjunto', 'codigo', 'descricao', 'materia_prima',
-       'comprimento', 'largura', 'quantidade', 'etapa_seguinte', 'carreta',
-       'Carreta Trat']).sum().reset_index()
+       'comprimento', 'largura', 'etapa_seguinte']).sum().reset_index()
 
     # Selecionando as linhas do DataFrame com base nos índices calculados
     df_paginated = df_final.drop(columns={'comprimento','largura'})

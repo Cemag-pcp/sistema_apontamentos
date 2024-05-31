@@ -15,6 +15,29 @@
 <!-- CSS tables responsive -->
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
 
+<style>
+    /* Adicione algum estilo para o ícone "x" dentro do campo */
+    .clear-icon-operador {
+        cursor: pointer;
+        position: absolute;
+        right: 15px;
+        top: 24%;
+        z-index: 999;
+        /* Certifica-se de que está sobre outros elementos */
+        background-color: red;
+        color: white;
+        width: 20px;
+        /* Ajuste o tamanho conforme necessário */
+        height: 20px;
+        /* Ajuste o tamanho conforme necessário */
+        border-radius: 50%;
+        /* Isso tornará o fundo redondo */
+        text-align: center;
+        line-height: 20px;
+        /* Centraliza o texto verticalmente */
+    }
+</style>
+
 {% endblock %}
 
 {% block containerFluid %}
@@ -42,6 +65,8 @@
                             data-target="#modalOpLaser">Criar OP Laser</button>
                         <button id="btnModalOpPlasma" type="button" class="btn btn-sm btn-warning" data-toggle="modal"
                             data-target="#modalOpPlasma">Criar OP Plasma</button>
+                        <button id="btnModalDesbobinadeira" type="button" class="btn btn-sm btn-warning" data-toggle="modal"
+                            data-target="#modalPlanejarDesbobinadeira">Planejar Desbob.</button>
                     </div>
                 </div>
                 <br>
@@ -360,6 +385,62 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Modal planejar ordem para desbobinadeira -->
+        <div class="modal fade" id="modalPlanejarDesbobinadeira" tabindex="-1" role="dialog"
+        aria-labelledby="modalPlanejarDesbobinadeiraLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalPlanejarDesbobinadeiraLabel">Planejamento desbobinadeira</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <label for="userInput">Peça</label>
+                                    <div class="position-relative">
+                                        <input class="form-control" type="text"
+                                            id="userInput"
+                                            oninput="showSuggestionsPecas_()">
+                                        <span id="peca-modal"
+                                            class="clear-icon-operador"
+                                            onclick="clearInput_()">x</span>
+                                        <ul id="suggestionsPecas"
+                                            class="custom-dropdown-menu"
+                                            style="display: none;">
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <div class="form-floating mb-3">
+                                    <label for="inputData_">Data do
+                                        planejamento</label>
+                                    <input class="form-control" type="date"
+                                        id="inputData_">
+                                </div>
+                            </div>
+                            <div class="col-sm">
+                                <div class="form-floating mb-3">
+                                    <label for="inputQuantidade_">Quantidade</label>
+                                    <input class="form-control" type="number"
+                                        id="inputQuantidade_">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnPlanejarDesbobinadeira" type="button" class="btn btn-sm btn-success">Enviar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 
@@ -658,9 +739,9 @@
                     var row = '<tr>' +
                         '<td data-title="Data criada">' + formatarDataSemHora(item[4]) + '</td>' + // data
                         '<td data-title="OP">' + item[0] + '</td>' + // op
-                        '<td data-title="Espessura">' + item[3] + '</td>' + // espessura
-                        '<td data-title="Chapa">' + item[2] + '</td>' + // tamanho da chapa
-                        '<td data-title="Quantidade chapas">' + item[1] + '</td>' + // qt chapa
+                        '<td data-title="Espessura">' + (item[3] === null ? ' - ' : item[3]) + '</td>' +
+                        '<td data-title="Chapa">' + (item[2] === null ? item[7] : item[2]) + '</td>' + // tamanho da chapa
+                        '<td data-title="Quantidade chapas">' + (item[1] === null ? item[8] : item[1]) + '</td>' + // qt chapa
                         '<td data-title="Máquina">' + item[5] + '</td>' + // máquina
                         '<td data-title="Último status">' + item[6] + '</td>' + // status
                         '<td data-title="Iniciar"><button type="button" class="btn btn-dark btn-sm btn-pecas">Peças</button></td>' +
@@ -943,7 +1024,6 @@
             data: JSON.stringify(dadosParaEnviar),
             success: function (response) {
                 // Lógica de sucesso aqui
-                console.log('Tabela enviada com sucesso');
                 $('#modalVisualizarPecas').modal('hide');
                 hideLoading();
                 updateTable(1, '', '');
@@ -1145,6 +1225,145 @@
                 alert('Nova op: ' + response.nova_op);
                 showAndHideSuccessAlert('Nova OP: ' + response.nova_op, 5000);
                 $('#modalVisualizarPecas').modal('hide');
+                updateTable(1, '', '');
+            },
+            error: function (err) {
+                console.error('Erro:', err);
+                // Lógica de erro aqui
+                hideLoading();
+            }
+        });
+    });
+
+</script>
+
+<!-- Script para chamar as peças da estamparia e planejar desbibaneira -->
+
+<script>
+
+    $(document).ready(function () {
+        
+        // Função para mostrar sugestões ao digitar
+        function showSuggestionsPecas_() {
+            var input = $('#userInput').val().toLowerCase();
+            var suggestionsList = $('#suggestionsPecas');
+            suggestionsList.empty(); // Limpa a lista de sugestões
+
+            // Filtra os dados com base no texto de entrada
+            var filteredData = suggestionsDataPecaModal.filter(item => item.toLowerCase().includes(input));
+
+            // Preenche a lista de sugestões com os itens filtrados
+            filteredData.forEach(item => {
+                $('<li>').text(item).appendTo(suggestionsList);
+            });
+
+            // Mostra a lista de sugestões
+            suggestionsList.show();
+        }
+
+        // Função para limpar o campo de entrada e ocultar a lista de sugestões
+        function clearInput_() {
+            $('#userInput').val('');
+            $('#suggestionsPecas').hide();
+        }
+
+        // Evento de clique no input para mostrar a lista de sugestões
+        $('#userInput').click(function (event) {
+            event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+            showSuggestionsPecas_();
+        });
+
+        // Evento de clique no ícone de limpar para limpar o campo de entrada e esconder a lista de sugestões
+        $('#peca-modal').click(function (event) {
+            event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
+            clearInput_();
+        });
+
+        // Evento de clique fora da lista de sugestões para escondê-la
+        $(document).click(function (event) {
+            var suggestionsList = $('#suggestionsPecas');
+            if (!$(event.target).closest('#userInput').length) {
+                suggestionsList.hide();
+            }
+        });
+
+        // Evento de clique em um item da lista de sugestões para preencher o campo de entrada e esconder a lista
+        $('#suggestionsPecas').on('click', 'li', function () {
+            $('#userInput').val($(this).text());
+            $('#suggestionsPecas').hide();
+        });
+
+        // Evento de entrada para filtrar as sugestões enquanto o usuário digita
+        $('#userInput').on('input', function () {
+            showSuggestionsPecas_();
+        });
+
+        // Variável para armazenar os dados brutos do backend
+        var suggestionsDataPecaModal = [];
+
+        // Função para obter os dados brutos do backend
+        function fetchSuggestionsDataTeste() {
+            $.ajax({
+                url: '/sugestao-pecas-estamparia',
+                method: 'GET',
+                success: function (data) {
+                    suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
+                },
+                error: function (err) {
+                    console.error('Erro ao obter dados brutos do backend', err);
+                }
+            });
+        }
+
+        // Chama a função para obter os dados brutos do backend
+        fetchSuggestionsDataTeste();
+    });
+
+
+</script>
+
+<!-- Planejar desbobinadeira -->
+
+<script>
+
+    $('#btnPlanejarDesbobinadeira').click(function () {
+        // Recolha os dados da tabela
+        showLoading();
+
+        var peca = $('#userInput').val();
+        var dataPlanejada = $('#inputData_').val();
+        var quantidade = $('#inputQuantidade_').val();
+        // var espessura = 
+        
+        if (dataPlanejada === '') {
+            alert('Preencha a data de planejamento.')
+            hideLoading();
+            return;
+        }
+
+        if (quantidade === '') {
+            alert('Preencha a quantidade.')
+            hideLoading();
+            return;
+        }
+
+        // Construir o objeto JSON com os dados da tabela e os dados coletados
+        var dadosParaEnviar = {
+            peca: peca,
+            dataPlanejada: dataPlanejada,
+            quantidade: quantidade
+        };
+
+        // Envie os dados para o backend via AJAX
+        $.ajax({
+            url: '/planejar-op/desbobinadeira',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dadosParaEnviar),
+            success: function (response) {
+                // Lógica de sucesso aqui
+                $('#modalVisualizarPecas').modal('hide');
+                hideLoading();
                 updateTable(1, '', '');
             },
             error: function (err) {

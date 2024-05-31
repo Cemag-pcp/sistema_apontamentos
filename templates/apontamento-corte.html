@@ -273,6 +273,28 @@
             </div>
         </div>
 
+        <!-- Modal visualizar peça desbobinadeira -->
+        <div class="modal fade" id="modalVisualizarDesbobinadeira" tabindex="-1"
+            role="dialog" aria-labelledby="modalVisualizarDesbobinadeiraLabel"
+            aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"
+                            id="modalVisualizarDesbobinadeiraLabel">Ordem
+                            desbobinadeira</h5>
+                        <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;"
+                        class="modal-body" id="bodyModalDesbobinadeira">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal finalizar apontamento -->
         <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1"
             role="dialog"
@@ -395,7 +417,7 @@
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="static/js/demo/datatables-demo.js"></script>
 
-<!-- Script para carregar arquiuvo e enviar plasma -->
+<!-- Script para carregar arquivo e enviar plasma -->
 
 <script>
     $(document).ready(function () {
@@ -503,89 +525,165 @@
 </script>
 
 <!-- Script para listar peças em processo e interrompidas -->
-<script
-    src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
 
 <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            chamarAPI();
-            chamarAPIInterrompidas();
+    document.addEventListener('DOMContentLoaded', () => {
+        chamarAPI();
+        chamarAPIInterrompidas();
+    });
+
+    let intervaloEmAndamento;
+    let intervaloInterrompido;
+
+    function chamarAPI() {
+        fetch("/api/consulta-pecas-em-processo/corte")
+            .then(response => response.json())
+            .then(data => {
+                processarDados(data);
+            })
+            .catch(error => console.error('Erro ao chamar a API:', error));
+    }
+
+    function processarDados(data) {
+        document.getElementById('cardsContainer').innerHTML = ""; // Limpa o conteúdo atual dos cards
+
+        data.forEach(peca => {
+            let cardHtml;
+            if (peca[6] === 'Desbobinadeira') {
+                cardHtml = `
+                    <div class="col-sm-6 mb-2">
+                        <div class="card shadow mb-4" name="${peca[6]}"> 
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[8]}</small></h6>
+                                <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>   
+                            </div>
+                            <div class="card-body">
+                                <div class='row'>
+                                    <div class='col-sm-6'>
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Máquina:</strong> ${peca[6]}</small></h6>
+                                    </div>
+                                    <div class='col-sm-6'>
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Peça:</strong> ${peca[8]}</small></h6>
+                                    </div>
+                                </div>
+                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Quantidade:</strong> ${peca[9]}</small></h6>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex flex-row">
+                                    <button type="button" class="btn btn-info btn-sm btn-finalizar-producao mr-1" onclick="finalizarPeca('${peca[1]}')">Finalizar</button>
+                                    <button type="button" class="btn btn-warning btn-sm btn-interromper-producao mr-1" onclick="interromperProcesso(${peca[0]})">Interromper</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else {
+                cardHtml = `
+                    <div class="col-sm-6 mb-2">
+                        <div class="card shadow mb-4" name="${peca[6]}"> 
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1]}</small></h6>
+                                <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>   
+                            </div>
+                            <div class="card-body">
+                                <div class='row'>
+                                    <div class='col-sm-6'>
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Máquina:</strong> ${peca[6]}</small></h6>
+                                    </div>
+                                    <div class='col-sm-6'>
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Espessura:</strong> ${peca[7]}</small></h6>
+                                    </div>
+                                </div>
+                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Tamanho da chapa:</strong> ${peca[4]}</small></h6>
+                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. chapas:</strong> ${peca[5]}</small></h6>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex flex-row">
+                                    <button type="button" class="btn btn-info btn-sm btn-finalizar-producao mr-1" onclick="finalizarPeca('${peca[1]}')">Finalizar</button>
+                                    <button type="button" class="btn btn-warning btn-sm btn-interromper-producao mr-1" onclick="interromperProcesso('${peca[0]}')">Interromper</button>
+                                    <button type="button" class="btn btn-dark btn-sm btn-buscar-pecas" onclick="buscarPecas('${peca[1]}')">Peças</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+
+            document.getElementById('cardsContainer').innerHTML += cardHtml;
         });
 
-        function chamarAPI() {
-            fetch("/api/consulta-pecas-em-processo/corte")
-                .then(response => response.json())
-                .then(data => {
-                    // Limpa o conteúdo atual dos cards
-                    document.getElementById('cardsContainer').innerHTML = "";
-
-                    processarDados(data)
-                })
-                .catch(error => console.error('Erro ao chamar a API:', error));
+        // Limpa o intervalo existente, se houver
+        if (intervaloEmAndamento) {
+            clearInterval(intervaloEmAndamento);
         }
 
-        function processarDados(data) {
-            data.forEach(peca => {
-                // Aqui você pode continuar com o processamento dos dados e a criação dos cards
-                
-                var cardHtml = `
-                <div class="col-sm-6 mb-2">
-                    <div class="card shadow mb-4" name="${peca[6]}"> 
-                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1]}</small></h6>
-                            <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
-                        </div>
-                        <div class="card-body">
-                            <div class='row'>
-                                <div class='col-sm-6'>
-                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Máquina:</strong> ${peca[6]}</small></h6>
-                                </div>
-                                <div class='col-sm-6'>
-                                    <h6 class="m-0 font-weight-bold text-primary"><small><strong>Espessura:</strong> ${peca[7]}</small></h6>
-                                </div>
-                            </div>
-                            <h6 class="m-0 font-weight-bold text-primary"><small><strong>Tamanho da chapa:</strong> ${peca[4]}</small></h6>
-                            <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. chapas:</strong> ${peca[5]}</small></h6>
-                        </div>
-                        <div class="card-footer">
-                            <div class="d-flex flex-row">
-                                <button type="button" class="btn btn-info btn-sm btn-finalizar-producao mr-1" onclick="finalizarPeca(${peca[1]})">Finalizar</button>
-                                <button type="button" class="btn btn-warning btn-sm btn-interromper-producao mr-1" onclick="interromperProcesso(${peca[0]})">Interromper</button>
-                                <button type="button" class="btn btn-dark btn-sm btn-buscar-pecas" onclick="buscarPecas(${peca[1]})">Peças</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-            
-                document.getElementById('cardsContainer').innerHTML += cardHtml;
-            
-            });
-            
-            atualizarContador(data);
-
-            setInterval(() => atualizarContador(data), 1000);
+        // Define um novo intervalo para atualizar os contadores
+        if (data.length > 0) {
+            intervaloEmAndamento = setInterval(() => atualizarContador(data), 1000);
         }
+    }
 
-        function chamarAPIInterrompidas() {
-            fetch("/api/consulta-pecas-interrompidas/corte")
-                .then(response => response.json())
-                .then(data => {
-                    // Limpa o conteúdo atual dos cards
-                    document.getElementById('cardsContainerInterrompida').innerHTML = "";
+    function chamarAPIInterrompidas() {
+        fetch("/api/consulta-pecas-interrompidas/corte")
+            .then(response => response.json())
+            .then(data => {
+                processarDadosInterrompidas(data);
+            })
+            .catch(error => console.error('Erro ao chamar a API:', error));
+    }
 
-                    processarDadosInterrompida(data)
-                })
-                .catch(error => console.error('Erro ao chamar a API:', error));
-        }
+    function processarDadosInterrompidas(data) {
+        document.getElementById('cardsContainerInterrompida').innerHTML = ""; // Limpa o conteúdo atual dos cards interrompidos
 
-        function processarDadosInterrompida(data) {
-            data.forEach(peca => {
-                var cardHtml = `
+        data.forEach(peca => {
+            let cardHtml;
+            
+            if (peca[6] === 'Desbobinadeira') {
+                    
+                cardHtml = `
                     <div class="col-sm-6 mb-2">
                         <div class="card shadow mb-4" name="${peca[6]}">
                             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                 <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1]}</small></h6>
-                                <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
+                                <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>   
+                            </div>
+                            <div class="card-body">
+                                <div class='row mb-3'>
+                                    <div class='col-sm-6'>
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Máquina:</strong> ${peca[6]}</small></h6>
+                                    </div>
+                                </div>
+                                <div class='row mb-3'>
+                                    <div class='col-sm-12'>
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Peça:</strong> ${peca[8]}</small></h6>
+                                    </div>
+                                </div>
+                                <div class='row'>
+                                    <div class='col-sm-6'>
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Quantidade:</strong> ${peca[9]}</small></h6>
+                                    </div>
+                                    <div class='col-sm-6'>
+                                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Motivo:</strong> ${peca[3]}</small></h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="button" class="btn btn-info btn-sm btn-retornar-producao"
+                                    onclick="retornarPeca(${peca[0]})">Retornar
+                                </button>
+                                <button type="button" class="btn btn-dark btn-sm btn-buscar-pecas"
+                                    onclick="buscarPecas('${peca[1]}')">Peças
+                                </button>
+                            </div>
+                        </div>
+                    </div>`;
+
+            } else {
+            
+                cardHtml = `
+                    <div class="col-sm-6 mb-2">
+                        <div class="card shadow mb-4" name="${peca[6]}">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1]}</small></h6>
+                                <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>   
                             </div>
                             <div class="card-body">
                                 <div class='row'>
@@ -611,25 +709,28 @@
                                     onclick="retornarPeca(${peca[0]})">Retornar
                                 </button>
                                 <button type="button" class="btn btn-dark btn-sm btn-buscar-pecas"
-                                    onclick="buscarPecas(${peca[1]})">Peças
+                                    onclick="buscarPecas('${peca[1]}')">Peças
                                 </button>
                             </div>
                         </div>
                     </div>`;
+                
+            };
 
-                document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
+            document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
 
-            });
+        });
 
-            atualizarContador(data);
-
-            setInterval(() => atualizarContador(data), 1000);
+        // Limpa o intervalo existente, se houver
+        if (intervaloInterrompido) {
+            clearInterval(intervaloInterrompido);
         }
 
-        // Chama a API a cada segundo
-        // setInterval(chamarAPI, 1000);
-        // setInterval(chamarAPIInterrompidas, 1000);
-
+        // Define um novo intervalo para atualizar os contadores
+        if (data.length > 0) {
+            intervaloInterrompido = setInterval(() => atualizarContador(data), 1000);
+        }
+    }
 
     function formatarData(dataString) {
         var data = new Date(dataString);
@@ -657,27 +758,60 @@
             data: { 'op': op },
             success: function (data) {
 
-                var content = '<div class="row mb-3"><div class="col-sm-3"><label for="opModal">Op</label><input class="form-control" id="opModal" value="' + data.data[0][0] + '" readonly></div>'
-                content += '<div class="col-sm-6"><label for="espessuraModal">Espessura</label><input class="form-control" id="espessuraModal" value="' + data.data[0][3] + '" readonly></div>'
-                content += '<div class="col-sm-3"><label for="chapaModal">Chapas</label><input class="form-control" id="chapaModal" value="' + data.data[0][5] + '"></div></div>'
-                content += '<div class="row mb-3"><div class="col-sm-8"><label for="qtChapasModal">Descrição da chapa</label><input class="form-control" id="qtChapasModal" value="' + data.data[0][4] + '" readonly=True></div>'
-                content += '<div class="col-sm-4"><label for="aproveitamentoModal">Aprov.</label><input class="form-control" id="aproveitamentoModal" value="' + data.data[0][6] + '" readonly></div></div>'
-                content += '<div class="row mb-3"><div class="col-sm-6"><label for="selectOperadorFinalizar">Operador</label><select class="form-control" id="selectOperadorFinalizar">'
-                content += '<option></option><option>4382 - Assis</option><option>4051 - Jefferson</option><option>4358 - Leano</option><option>4249 - Marcio</option></select></div></div>'
+                if (data.data[0][8] === 'Desbobinadeira'){
 
-                content += '<table class="table table-bordered"><thead><tr><th>Peça</th><th>Qt.Peças</th><th>Mortas</th></tr></thead><tbody>';
+                    var content = '<div class="row mb-4">' +
+                                    '<div class="col-sm-12">' +
+                                        '<label for="opModal">Op</label>' +
+                                        '<input class="form-control" id="opModal" data-op="Desbobinadeira" value="' + data.data[0][0] + '" readonly>' +
+                                    '</div>' +
+                                    '<div class="col-sm-12 mt-2">' + // Adicionando uma nova coluna para o select
+                                        '<label for="selectOperadorFinalizar">Responsável</label>' + // Adicionando um label para o select
+                                        '<select class="form-control" id="selectOperadorFinalizar">' +
+                                            '<option value=""></option>' +
+                                            '<option value="4382">4382 - Assis</option>' +
+                                            '<option value="4051">4051 - Jefferson</option>' +
+                                            '<option value="4358">4358 - Leano</option>' +
+                                            '<option value="4249">4249 - Marcio</option>' +
+                                        '</select>' +
+                                    '</div>' +
+                                '</div>';
 
-                valoresAntigos = [];
+                    content += '<table class="table table-bordered"><thead><tr><th>Peça</th><th>Qt.Peças</th><th>Mortas</th></tr></thead><tbody>';
 
-                data.data.forEach(peca => {
-                    content += '<tr>';
-                    content += '<td>' + peca[1] + '</td>';
-                    content += '<td class="qtPecas">' + peca[2] + '</td>';
-                    content += '<td><input class="form-control" value="0"></td>';
-                    content += '</tr>';
+                    data.data.forEach(peca => {
+                        content += '<tr>';
+                        content += '<td>' + peca[1] + '</td>';
+                        content += '<td><input class="qtPecas form-control" value=' + peca[2] + '></td>';
+                        content += '<td><input class="form-control" value="0"></td>';
+                        content += '</tr>';
 
-                    valoresAntigos.push(peca[2]);
-                });
+                    });
+
+                } else {
+
+                    var content = '<div class="row mb-3"><div class="col-sm-3"><label for="opModal">Op</label><input class="form-control" id="opModal" data-op="" value="' + data.data[0][0] + '" readonly></div>'
+                    content += '<div class="col-sm-6"><label for="espessuraModal">Espessura</label><input class="form-control" id="espessuraModal" value="' + data.data[0][3] + '" readonly></div>'
+                    content += '<div class="col-sm-3"><label for="chapaModal">Chapas</label><input class="form-control" id="chapaModal" value="' + data.data[0][5] + '"></div></div>'
+                    content += '<div class="row mb-3"><div class="col-sm-8"><label for="qtChapasModal">Descrição da chapa</label><input class="form-control" id="qtChapasModal" value="' + data.data[0][4] + '" readonly=True></div>'
+                    content += '<div class="col-sm-4"><label for="aproveitamentoModal">Aprov.</label><input class="form-control" id="aproveitamentoModal" value="' + data.data[0][6] + '" readonly></div></div>'
+                    content += '<div class="row mb-3"><div class="col-sm-6"><label for="selectOperadorFinalizar">Operador</label><select class="form-control" id="selectOperadorFinalizar">'
+                    content += '<option></option><option>4382 - Assis</option><option>4051 - Jefferson</option><option>4358 - Leano</option><option>4249 - Marcio</option></select></div></div>'
+
+                    content += '<table class="table table-bordered"><thead><tr><th>Peça</th><th>Qt.Peças</th><th>Mortas</th></tr></thead><tbody>';
+
+                    valoresAntigos = [];
+
+                    data.data.forEach(peca => {
+                        content += '<tr>';
+                        content += '<td>' + peca[1] + '</td>';
+                        content += '<td class="qtPecas">' + peca[2] + '</td>';
+                        content += '<td><input class="form-control" value="0"></td>';
+                        content += '</tr>';
+
+                        valoresAntigos.push(peca[2]);
+                    });
+                };
 
                 content += '</tbody></table>';
 
@@ -692,7 +826,6 @@
                     var novoValorChapa = $(this).val();
                     $('.qtPecas').each(function (index) {
                         var valorAntigo = valoresAntigos[index];
-                        console.log(valorAntigo);
                         var qtPecas = $(this).text();
                         var valorRecalculado = (valorAntigo * novoValorChapa) / antigoValorChapa;
                         $(this).text(valorRecalculado);
@@ -731,7 +864,7 @@
 
             const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
 
-            document.getElementById(`contador-${peca[0]}`).textContent = formatoTempo;
+            document.getElementById(`contador-${peca[1]}`).textContent = formatoTempo;
 
         })
     }
@@ -752,7 +885,7 @@
 
                 var tableContent = '<div class="row"><div class="col-sm-3"><p>Op: ' + data.data[0][0] + '</p></div>'
                 tableContent += '<div class="col-sm-6"><p>Espessura: ' + data.data[0][3] + '</p></div>'
-                tableContent += '<div class="col-sm-3"><p>Chapas: ' + data.data[0][5] + '</p></div></div>'
+                tableContent += '<div class="col-sm-3"><p>Qt.Chapas: ' + data.data[0][5] + '</p></div></div>'
                 tableContent += '<p>Chapa: ' + data.data[0][4] + '</p>'
 
                 tableContent += '<table class="table table-bordered"><thead><tr><th>Peça</th><th>Qt.Peças</th></tr></thead><tbody>';
@@ -799,6 +932,7 @@
         });
 
         // Recolher outros dados dentro do modal
+        var maquina = $('#opModal').data('op');
         var op = $('#opModal').val();
         var espessura = $('#espessuraModal').val();
         var chapas = $('#chapaModal').val();
@@ -812,16 +946,34 @@
             return;
         };
 
+        if (maquina === 'Desbobinadeira'){
+            
+            var dadosParaEnviar = {
+                tabela: tabelaData,
+                op: op,
+                espessura: '',
+                qt_chapa: 0,
+                descricaoChapa: '',
+                aproveitamento: '',
+                operador: operador
+            };
+
+        } else {
+
+            var dadosParaEnviar = {
+                tabela: tabelaData,
+                op: op,
+                espessura: espessura,
+                qt_chapa: chapas,
+                descricaoChapa: descricaoChapa,
+                aproveitamento: aproveitamento,
+                operador: operador
+            };
+
+        }
+
         // Construir o objeto JSON com os dados da tabela e os dados coletados
-        var dadosParaEnviar = {
-            tabela: tabelaData,
-            op: op,
-            espessura: espessura,
-            qt_chapa: chapas,
-            descricaoChapa: descricaoChapa,
-            aproveitamento: aproveitamento,
-            operador: operador
-        };
+        
 
         // Envie os dados para o backend via AJAX
         $.ajax({
@@ -831,11 +983,11 @@
             data: JSON.stringify(dadosParaEnviar),
             success: function (response) {
                 // Lógica de sucesso aqui
-                console.log('Tabela enviada com sucesso');
                 $('#modalExecucaoApontamento').modal('hide');
                 hideLoading();
                 chamarAPI();
                 chamarAPIInterrompidas();
+                updateTable(1,'','')
             },
             error: function (err) {
                 console.error('Erro:', err);
@@ -884,7 +1036,6 @@
                                 contentType: 'application/json',  // Define o tipo de conteúdo como JSON
                                 data: JSON.stringify({ op: op }),
                                 success: function (data) {
-                                    console.log('Solicitação POST bem-sucedida:', data);
                                     showAndHideSuccessAlert('Salvo.', 2000);
                                     $('#modalConfirmarInicioProducao').modal('hide');
                                     hideLoading();
@@ -942,9 +1093,9 @@
                     var row = '<tr>' +
                         '<td data-title="Data planejada">' + formatarDataSemHora(item[6]) + '</td>' + // data
                         '<td data-title="OP">' + item[0] + '</td>' + // op
-                        '<td data-title="Espessura">' + item[3] + '</td>' + // espessura
-                        '<td data-title="Chapa">' + item[2] + '</td>' + // tamanho da chapa
-                        '<td data-title="Quantidade chapas">' + item[1] + '</td>' + // qt chapa
+                        '<td data-title="Espessura">' + (item[3] === null ? ' - ' : item[3]) + '</td>' +
+                        '<td data-title="Chapa">' + (item[2] === null ? item[7] : item[2]) + '</td>' + // tamanho da chapa
+                        '<td data-title="Quantidade chapas">' + (item[1] === null ? item[8] : item[1]) + '</td>' + // qt chapa
                         '<td data-title="Máquina">' + item[5] + '</td>' + // máquina
                         '<td data-title="Iniciar">';
 
@@ -982,7 +1133,6 @@
 
     $(document).ready(function () {
         // Quando o botão de filtro é clicado
-
 
         $('#btnFilter').click(function () {
             var opFilterValue = $('#opFilter').val(); // Obter o valor do filtro OP
@@ -1116,6 +1266,7 @@
                 contentType: 'application/json',  // Define o tipo de conteúdo como JSON
                 data: JSON.stringify({ id: idPecaInterromper, motivo: motivoInterrompido }),
                 success: function (data) {
+
                     hideLoading();
                     showAndHideSuccessAlert('Salvo.', 2000);
                     $('#modalMotivoInterrompido').modal('hide');
@@ -1161,7 +1312,6 @@
     $(document).ready(function () {
         $('#confimarRetornoProducao').on('click', function () {
             idPecaRetornar = $('#retornarPecaProducao').val();
-            console.log(idPecaRetornar);
 
             showLoading();
 
@@ -1176,6 +1326,7 @@
                     $('#modalConfirmarInicioProducao').modal('hide');
                     chamarAPI();
                     chamarAPIInterrompidas();
+                    
                 },
                 error: function (error) {
                     console.error('Erro na solicitação POST:', error);
@@ -1185,7 +1336,6 @@
             });
         });
     });
-
 
     $(document).ready(function () {
         $('#desistirInicioProducao').on('click', function () {

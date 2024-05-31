@@ -686,7 +686,7 @@
                             '<td data-title="Conjunto" class="d-none d-md-table-cell">' + item[1] + '</td>' + // conjunto
                             '<td data-title="Código">' + item[2] + '</td>' + // peça
                             '<td data-title="Descrição">' + item[3] + '</td>' + // descricao
-                            '<td data-title="Qt.Necessária" class="text-truncate">' + item[5] + '</td>' + // quantidade
+                            '<td data-title="Qt.Necessária" class="text-truncate">' + item[6] + '</td>' + // quantidade
                             '<td data-title="Mat.Prima" class="d-none d-md-table-cell">' + item[4] + '</td>' + // mat prima
                             '<td data-title="Qt.Físico"><input type="number" class="form-control"></td>' + // quantidade fisica
                             '<td data-title="Observação"><textarea row="3" cols="20" type="text" class="form-control"></textarea></td>' + // obs
@@ -696,7 +696,7 @@
                         var newRow = $(row).appendTo('#bodyTableLevantamento');
                         (function (item) {
                             newRow.find('.btn-pecas').click(function () {
-                                var quantidadeEmEstoque = parseFloat(item[5]);
+                                var quantidadeEmEstoque = parseFloat(item[6]);
                                 var quantidadeInseridaStr = parseFloat(newRow.find('input[type="number"]').val());
 
                                 var dataInicio = $('#dataLevantamentoInicial').val()
@@ -722,7 +722,7 @@
                                         item[1], // conjunto
                                         item[2], // peça
                                         item[3], // descricao
-                                        item[5], // quantidade
+                                        item[6], // quantidade
                                         item[4], // mat prima
                                         quantidadeInserida, // quantidade inserida
                                         newRow.find('textarea').val(), // observação

@@ -1300,12 +1300,14 @@
             chamarAPIInterrompidas();
         });
 
+        let intervaloEmAndamento;
+        let intervaloInterrompido;
+
         function chamarAPI() {
                 fetch("/api/consulta-pecas-em-processo/montagem")
                     .then(response => response.json())
                     .then(data => {
                         // Limpa o conteúdo atual dos cards
-                        document.getElementById('cardsContainer').innerHTML = "";
 
                         var celulaEscolhida = document.getElementById('celula').value;
 
@@ -1324,14 +1326,18 @@
             }
 
         function processarDados(data) {
+
+            document.getElementById('cardsContainer').innerHTML = ""; // Limpa o conteúdo atual dos cards
+
             data.forEach(peca => {
+                let cardHtml;
                 // Aqui você pode continuar com o processamento dos dados e a criação dos cards
-                var cardHtml = `
+                cardHtml = `
                             <div class="col-sm-6 mb-2">
                                 <div class="card shadow mb-4" name="${peca[8]}">
                                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                         <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-                                        <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
+                                        <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>   
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
@@ -1360,9 +1366,15 @@
 
             });
 
-            atualizarContador(data);
+            // Limpa o intervalo existente, se houver
+            if (intervaloEmAndamento) {
+                clearInterval(intervaloEmAndamento);
+            }
 
-            setInterval(() => atualizarContador(data), 1000);
+            // Define um novo intervalo para atualizar os contadores
+            if (data.length > 0) {
+                intervaloEmAndamento = setInterval(() => atualizarContador(data), 1000);
+            }
 
         }
         
@@ -1390,13 +1402,16 @@
         }
 
         function processarDadosInterrompida(data) {
+            document.getElementById('cardsContainerInterrompida').innerHTML = ""; // Limpa o conteúdo atual dos cards interrompidos
+
             data.forEach(peca => {
-                var cardHtml = `
+                let cardHtml;
+                cardHtml = `
                 <div class="col-sm-6 mb-2">
                     <div class="card shadow mb-4" name="${peca[8]}">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-                            <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
+                            <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>   
                         </div>
                         <div class="card-body">
                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
@@ -1414,9 +1429,15 @@
                 document.getElementById('cardsContainerInterrompida').innerHTML += cardHtml;
             });
 
-            atualizarContador(data);
+            // Limpa o intervalo existente, se houver
+            if (intervaloInterrompido) {
+                clearInterval(intervaloInterrompido);
+            }
 
-            setInterval(() => atualizarContador(data), 1000);
+            // Define um novo intervalo para atualizar os contadores
+            if (data.length > 0) {
+                intervaloInterrompido = setInterval(() => atualizarContador(data), 1000);
+            }
         }
 
         // Chama a API imediatamente ao carregar a página
@@ -1475,6 +1496,7 @@
 
         function atualizarContador(data) {
 
+
             data.forEach(peca => {
 
                 const agora = new Date();
@@ -1492,7 +1514,8 @@
 
                 const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
 
-                document.getElementById(`contador-${peca[0]}`).textContent = formatoTempo;
+                document.getElementById(`contador-${peca[1]}`).textContent = '';
+                document.getElementById(`contador-${peca[1]}`).textContent = formatoTempo;
 
             })
         }

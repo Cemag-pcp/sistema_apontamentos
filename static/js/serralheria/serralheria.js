@@ -125,6 +125,8 @@ $('#desistirInicioProducao').on('click', function () {
     $('#modalConfirmarInicioProducao').modal('hide');
 })
 
+let intervaloEmAndamento;
+let intervaloInterrompido;
 
 function chamarAPI() {
     fetch("/api/consulta-pecas-em-processo/serralheria")
@@ -138,40 +140,48 @@ function chamarAPI() {
 }
 
 function processarDados(data) {
+    document.getElementById('cardsContainer').innerHTML = ""; // Limpa o conteúdo atual dos cards
 
     data.forEach(peca => {
+        let cardHtml;
         // Aqui você pode continuar com o processamento dos dados e a criação dos cards
-        var cardHtml = `
-    <div class="col-sm-6 mb-2">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[2]}</small></h6>
-                <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
-                <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
+        cardHtml = `
+            <div class="col-sm-6 mb-2">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[2]}</small></h6>
+                        <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>   
+                        <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-info btn-finalizar-producao"
+                            onclick="finalizarPeca(${peca[0]})">Finalizar
+                        </button>
+                        <button type="button" class="btn btn-warning btn-interromper-producao"
+                            onclick="interromperProcesso(${peca[0]})">Interromper
+                        </button>
                     </div>
                 </div>
-            </div>
-            <div class="card-footer">
-                <button type="button" class="btn btn-info btn-finalizar-producao"
-                    onclick="finalizarPeca(${peca[0]})">Finalizar
-                </button>
-                <button type="button" class="btn btn-warning btn-interromper-producao"
-                    onclick="interromperProcesso(${peca[0]})">Interromper
-                </button>
-            </div>
-        </div>
-    </div>`;
+            </div>`;
         document.getElementById('cardsContainer').innerHTML += cardHtml;
     });
 
-    atualizarContador(data);
+    // Limpa o intervalo existente, se houver
+    if (intervaloEmAndamento) {
+        clearInterval(intervaloEmAndamento);
+    }
 
-    setInterval(() => atualizarContador(data), 1000);
+    // Define um novo intervalo para atualizar os contadores
+    if (data.length > 0) {
+        intervaloEmAndamento = setInterval(() => atualizarContador(data), 1000);
+    }
 }
 
 function chamarAPIInterrompidas() {
@@ -188,13 +198,17 @@ function chamarAPIInterrompidas() {
 }
 
 function processarDadosInterrompida(data) {
+    document.getElementById('cardsContainerInterrompida').innerHTML = ""; // Limpa o conteúdo atual dos cards interrompidos
+
     data.forEach(peca => {
-        var cardHtml = `
+        let cardHtml;
+
+        cardHtml = `
         <div class="col-sm-6 mb-2">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[2]}</small></h6>
-                    <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>  
+                    <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>  
                     <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
                 </div>
                 <div class="card-body">
@@ -213,9 +227,15 @@ function processarDadosInterrompida(data) {
 
     });
 
-    atualizarContador(data);
+    // Limpa o intervalo existente, se houver
+    if (intervaloInterrompido) {
+        clearInterval(intervaloInterrompido);
+    }
 
-    setInterval(() => atualizarContador(data), 1000);
+    // Define um novo intervalo para atualizar os contadores
+    if (data.length > 0) {
+        intervaloInterrompido = setInterval(() => atualizarContador(data), 1000);
+    }
 }
 
 function formatarData(dataString) {
@@ -282,7 +302,7 @@ function atualizarContador(data) {
 
         const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
 
-        document.getElementById(`contador-${peca[0]}`).textContent = formatoTempo;
+        document.getElementById(`contador-${peca[1]}`).textContent = formatoTempo;
 
     })
 }
