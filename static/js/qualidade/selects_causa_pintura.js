@@ -30,13 +30,14 @@ function adicionarSelects(n_nao_conformidades, coluna_causa, setor) {
 
             if (setor === 'Pintura') {
                 
-                div.className = "col-sm-7 mb-4";
+                div.className = "col-sm-6 mb-4";
 
                 div.appendChild(label);
                 
                 var select = criarSelectCausa(i,causas_pintura);
                 div.appendChild(select);
                 divRow.appendChild(div);
+                divRow.appendChild(campoArquivos);
 
             } else if(setor === 'Estamparia'){
 

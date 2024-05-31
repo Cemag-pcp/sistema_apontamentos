@@ -1,7 +1,7 @@
 {% extends 'sidebar.html' %}
 
 {% block title %}
-<title>Apontamento Pintura</title>
+<title>Apontamento Estamparia</title>
 {% endblock %}
 
 {% block links %}
@@ -277,39 +277,33 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-6 mb-4" style="display: none;">
-                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control desabilitado" id="tipos_causas_estamparia"
-                                            style="font-size: 12px;">
-                                    </div>
-                                </div>
-                            </div>
                             <div class="row" id="selectContainer">
-                                <div class="col-sm-4 mb-4" id="selectBlock">
+                                <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
                                     <label>Causas</label>
-                                    <select class="form-control" name="retrabalhoSolda" id="retrabalhoSolda" style="font-size: 12px;">
+                                    <select id="causasEstamparia-0" name="causasEstamparia-0" class="form-control" style="font-size: 14px;">
                                         <option value="" selected hidden disabled></option>
-                                        <option value=""></option>
-                                        <option value=""></option>
-                                        <option value=""></option>
-                                        <option value=""></option>
-                                        <option value=""></option>
-                                        <option value=""></option>
-                                        <option value=""></option>
-                                        <option value=""></option>
+                                        <option value="Virada irregular">Virada irregular</option>
+                                        <option value="Oxidação">Oxidação</option>
+                                        <option value="Marcações">Marcações</option>
+                                        <option value="Marcações Rebarba">Marcações Rebarba</option>
+                                        <option value="Medidas irregulares">Medidas irregulares</option>
+                                        <option value="Outro">Outro</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-3 mb-4">
+                                <div class="col-sm-3 mb-4 quantidadeBlock" id="quantidadeBlock-0">
                                     <label>Quantidade</label>
-                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_estamparia" id="quantidade_causas_estamparia">
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_estamparia-0" id="quantidade_causas_estamparia-0">
                                 </div>
-                                <div class="col-sm-5" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <button class="btn btn-primary" id="addButton" onclick="adicionarCausa()" style="font-size: 10px;">Adicionar causa</button>
-                                    <button class="btn btn-danger" id="removeButton" onclick="removerCausa()" style="font-size: 10px;" disabled>Remover causa</button>
+                                <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
+                                    <input type="file" class="custom-file-input" id="inputGroupFile_estamparia-0" accept="image/*" multiple="true">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
                                 </div>
-                            </div>
+                                <div class="col-sm-12" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButton" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButton" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div>                            
                             <div class="row">
                                 <div id="coluna_causa_estamparia" class="col-sm-12">
 
@@ -476,7 +470,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" id="selectContainer">
+                            <div class="row">
                                 <div class="col-sm-6 mb-4" id="selectBlock">
                                     <label>Retrabalho</label>
                                     <select class="form-control" name="retrabalhoSolda" id="retrabalhoSolda" style="font-size: 12px;">

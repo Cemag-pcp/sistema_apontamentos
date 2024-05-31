@@ -24,13 +24,14 @@ $('#inputConformidades_estamparia').on('input', function(){
     let numConformidadesSolda = $('#inputConformidades_estamparia').val();
     let numNaoConformidadesSolda = $('#inputNaoConformidades_estamparia');
     let outroCausaSolda = $("#outraCausa_estamparia");
+    let containerCausas = $("#selectContainer");
     let origemInspecaoSoldaReinspecionadas = $('#origemInspecaoCol_estamparia');
 
     numNaoConformidadesSolda.val(pecasInspecionadasSolda - numConformidadesSolda);
 
     if(pecasInspecionadasSolda === ''){
         alert("Preencha o número de peças inspecionadas")
-        $('#inputConformidadesSolda').val('')
+        $('#inputConformidades_estamparia').val('')
         numNaoConformidadesSolda.val('')
         return
     } 
@@ -41,11 +42,13 @@ $('#inputConformidades_estamparia').on('input', function(){
 
     if(numNaoConformidadesSolda.val() === '' || numNaoConformidadesSolda.val() <= 0 || numConformidadesSolda < 0){
         outroCausaSolda.prop('disabled',true);
+        containerCausas.css('display','none')
         outroCausaSolda.val('')
         origemInspecaoSoldaReinspecionadas.css('display','none')
         origemInspecaoSoldaReinspecionadas.val(null)
     } else {
         outroCausaSolda.prop('disabled',false);
+        containerCausas.css('display','flex')
         origemInspecaoSoldaReinspecionadas.css('display','block')
     }
 
@@ -68,12 +71,12 @@ $('#inputPecasInspecionadas_estamparia').on('blur', function() {
 
 $('#envio_inspecao_solda').on('click',function() {
 
-    let inputConformidadesSolda = parseInt($('#inputConformidadesSolda').val());
-    let inputNaoConformidadesSolda = parseInt($('#inputNaoConformidadesSolda').val());
-    let inputConjunto = $('#inputConjunto').val();
-    let inputPecasInspecionadasSolda = parseInt($('#inputPecasInspecionadasSolda').val());
-    let observacaoSolda = $('#observacaoSolda').val();
-    let inspetoresSolda = $('#inspetorSolda').val();
+    let inputConformidadesSolda = parseInt($('#inputConformidades_estamparia').val());
+    let inputNaoConformidadesSolda = parseInt($('#inputNaoConformidades_estamparia').val());
+    let inputConjunto = $('#inputConjunto_estamparia').val();
+    let inputPecasInspecionadasSolda = parseInt($('#inputPecasProduzidas_estamparia').val());
+    let observacaoSolda = $('#observacao_estamparia').val();
+    let inspetoresSolda = $('#inspetor_estamparia').val();
 
     if (inputConformidadesSolda === "" || inspetoresSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
         alert('Verifique se o campo de conformidades está com valor correto');
