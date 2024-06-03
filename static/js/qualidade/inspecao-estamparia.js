@@ -69,7 +69,7 @@ $('#inputPecasInspecionadas_estamparia').on('blur', function() {
     inputNaoConformidadesSolda.val('')
 })
 
-$('#envio_inspecao_solda').on('click',function() {
+$('#envio_inspecao_estamparia').on('click',function() {
 
     let inputConformidadesSolda = parseInt($('#inputConformidades_estamparia').val());
     let inputNaoConformidadesSolda = parseInt($('#inputNaoConformidades_estamparia').val());
@@ -84,98 +84,92 @@ $('#envio_inspecao_solda').on('click',function() {
         return; // Interrompe a execução
     }
 
-    for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
-        let causas = $("#causa_reinspecao_" + i).val();
-        if (causas === "") {
-            alert('Preencha todos os campos das causas de não conformidade.');
-            $("#loading").hide();
-            return; // Interrompe a execução
-        }
-    }
-
     if (observacaoSolda.trim() === "" ) {
         alert('Verifique se os campos de causa e observação estão com os valores corretos');
         $("#loading").hide();
         return; // Interrompe a execução
     }
 
-    $("#confirmarConformidades").val(inputConformidadesSolda);
-    $("#confirmarNaoConformidades").val(inputNaoConformidadesSolda);
+    $("#confirmarConformidades_estamparia").val(inputConformidadesSolda);
+    $("#confirmarNaoConformidades_estamparia").val(inputNaoConformidadesSolda);
     
-    $('#modalConfirmacaoSolda #p_confirmar_inspecao_solda').text("Deseja confirmar as informações preenchidas referente a inspeção do conjunto " + inputConjunto);
+    $('#modalConfirmacaoEstamparia #p_confirmar_inspecao_estamparia').text("Deseja confirmar as informações preenchidas referente a inspeção do conjunto " + inputConjunto);
 
-    $("#btnEnviarSoldaReinspecao").css("display","none")
-    $("#btnEnviarSolda").css("display","block")
+    $("#btnEnviarEstampariaReinspecao").css("display","none")
+    $("#btnEnviarEstamparia").css("display","block")
 
-    $('#inspecionarConjunto').modal('hide');
+    $('#inspecionarEstamparia').modal('hide');
 
-    $('#modalConfirmacaoSolda').modal('show');
+    $('#modalConfirmacaoEstamparia').modal('show');
 })
 
-$('#btnEnviarSolda').on('click',function() {
+$('#btnEnviarEstamparia').on('click',function() {
 
     $("#loading").show();
 
     var formData = new FormData();
 
-    $('#btnEnviarSolda').prop('disabled',true);
+    $('#btnEnviarEstamparia').prop('disabled',true);
 
-    let id_inspecao = $('#inspecionarConjuntoLabel').text();
-    let data_inspecao = $('#data_inspecao_solda').val();
-    let inputCategoria = $('#inputCategoria').val();
-    let inputConjunto = $('#inputConjunto').val();
-    let inputPecasInspecionadasSolda = $('#inputPecasInspecionadasSolda').val();
-    let inputConformidadesSolda = $('#inputConformidadesSolda').val();
-    let inputNaoConformidadesSolda = $('#inputNaoConformidadesSolda').val();
-    let inspetorSolda = $('#inspetorSolda').val();
+    let id_inspecao = $('#inspecionarEstampariaLabel').text();
+    let data_inspecao = $('#data_inspecao_estamparia').val();
+    let inputCategoria = $('#inputMaquina_estamparia').val();
+    let inputConjunto = $('#inputConjunto_estamparia').val();
+    let inputPecasInspecionadasSolda = parseInt($('#inputPecasInspecionadas_estamparia').val());
+    let inputConformidadesSolda = parseInt($('#inputConformidades_estamparia').val());
+    let inputNaoConformidadesSolda = $('#inputNaoConformidades_estamparia').val();
+    let inspetorSolda = $('#inspetor_estamparia').val();
     let list_causas = [];
-    let outraCausaSolda = $('#outraCausaSolda').val();
-    let observacaoSolda = $('#observacaoSolda').val();
-    let origemInspecaoSolda = $('#origemInspecaoSoldaReinspecionadas').val();
+    let list_quantidade = [];
+    let outraCausaSolda = $('#outraCausa_estamparia').val();
+    let observacaoSolda = $('#observacao_estamparia').val();
+    let origemInspecaoSolda = $('#origemInspecao_estamparia').val();
+    let tipos_causas_estamparia = $("#tipos_causas_estamparia").val()
     let reinspecao = 'False';
 
-    if (inputConformidadesSolda.trim() === "" || inputConformidadesSolda.trim() > inputPecasInspecionadasSolda || inputConformidadesSolda.trim() < 0) {
+    if (inputConformidadesSolda === "" || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
         alert('Verifique se o campo de conformidades está com valor correto');
-        $('#btnEnviarSolda').prop('disabled',false);
+        $('#btnEnviarEstamparia').prop('disabled',false);
         $("#loading").hide();
         return; // Interrompe a execução
     }
 
-    for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
-        let causas = $("#causa_reinspecao_" + i).val();
-        if (causas.trim() === "") {
+    for (let i = 0; i < tipos_causas_estamparia; i++) {
+        let causas = $("#causasEstamparia-" + i).val();
+        let quantidade = $("#quantidade_causas_estamparia-" + i).val();
+        let inputId = '#inputGroupFile_estamparia-' + i;
+        let files = $(inputId)[0].files;
+
+        if (causas === "" || quantidade === "") {
             alert('Preencha todos os campos das causas de não conformidade.');
-            $('#btnEnviarSolda').prop('disabled',false);
             $("#loading").hide();
             return; // Interrompe a execução
         }
-        list_causas.push(causas);
-    }
-
-    for (let i = 1; i <= inputNaoConformidadesSolda; i++) {
-        let inputId = '#foto_inspecao_' + i;
-        let files = $(inputId)[0].files;
         for (let file of files) {
             formData.append('foto_inspecao_' + i + '[]', file);
         }
+        list_causas.push(causas)
+        list_quantidade.push(quantidade)
     }
 
     formData.append('id_inspecao', id_inspecao);
     formData.append('data_inspecao', data_inspecao);
     formData.append('inputCategoria', inputCategoria);
     formData.append('inputConjunto', inputConjunto);
-    formData.append('inspetorSolda', inspetorSolda);
+    formData.append('inspetorEstamparia', inspetorSolda);
     formData.append('num_pecas', inputPecasInspecionadasSolda);
-    formData.append('inputConformidadesSolda', inputConformidadesSolda);
-    formData.append('inputNaoConformidadesSolda', inputNaoConformidadesSolda);
+    formData.append('inputConformidadesEstamparia', inputConformidadesSolda);
+    formData.append('inputNaoConformidadesEstamparia', inputNaoConformidadesSolda);
     formData.append('list_causas', JSON.stringify(list_causas));
-    formData.append('outraCausaSolda', outraCausaSolda);
-    formData.append('observacaoSolda', observacaoSolda);
-    formData.append('origemInspecaoSolda', origemInspecaoSolda);
+    formData.append('list_quantidade', JSON.stringify(list_quantidade));
+    formData.append('outraCausaEstamparia', outraCausaSolda);
+    formData.append('observacaoEstamparia', observacaoSolda);
+    formData.append('origemInspecaoEstamparia', origemInspecaoSolda);
+    formData.append('tipos_causas_estamparia',tipos_causas_estamparia);
     formData.append('reinspecao', reinspecao);
 
     $.ajax({
-        url: '/inspecao-solda',
+        url: '/inspecao-estamparia',
         type: 'POST',
         data: formData,
         processData: false, // Não processe os dados

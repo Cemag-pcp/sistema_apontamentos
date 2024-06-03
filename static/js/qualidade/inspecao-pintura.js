@@ -147,7 +147,7 @@ function setorCards(response) {
             }
         }); 
         
-    } else {
+    } else if (setor === 'Solda') {
         for (var i = 0; i < historico.length; i++) {
 
             var item = historico[i];
@@ -214,6 +214,72 @@ function setorCards(response) {
             }
         }); 
             
+    } else {
+        for (var i = 0; i < historico.length; i++) {
+
+            var item = historico[i];
+
+            qtd_na_reinspecao += item[2]
+
+            // Criar elemento da lista e definir atributos de dados
+            var listItem = $('<a>', {
+                class: 'list-group-item modal-edit no-more-hover',
+                'aria-current': 'true',
+                'data-index': i, // Armazenar o índice do item como um atributo de dados
+            });
+
+            listItem.css('text-decoration','none');
+            listItem.css('color','#6e707e');
+            
+            var content = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${item[9]}</h6>
+                    <div class="d-flex flex-column align-items-end text-right">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Opções</a>
+                            <div class="dropdown-menu drop">
+                                <a class="dropdown-item option1" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Visualizar causas da não conformidade</a>
+                                <a class="dropdown-item option2" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Editar as conformidades</a>
+                            </div>
+                        </div>
+                        <small>N° Conformidade : ${item[2]}</small>
+                        <small>N° de não Conformidade : ${item[10]}</small>
+                        <small>Inspetor : ${item[3]}</small>
+                        <small>Exec.:  ${item[5]}</small>
+                    </div>
+                </div>
+                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1])}</p>
+            `;
+            
+            listItem.html(content);
+            
+            $('#listaHistorico').append(listItem);
+
+        }
+
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conj. inspecionados : " + qt_apontada)
+
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Qtd. p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
+
+        $(".option1").on('click', function() {
+            var dataItemString = $(this).data('item');
+            var concatenatedPhotos = concatPhotosByCriteria(foto_causa, dataItemString[5]);
+            if (Object.keys(concatenatedPhotos).length !== 0) {
+                $("#modalTimeline").modal('hide')
+                modalVisualizarCausas(concatenatedPhotos);
+            } else {
+                alert("Não possui nenhuma não conformidade")
+            }
+        }); 
+        $(".option2").on('click', function() {
+            var dataItemString = $(this).data('item');
+            if(dataItemString[2] != 0){
+                $("#modalTimeline").modal('hide')
+                modalEditarConformidade(dataItemString[0],dataItemString[2],dataItemString[5],dataItemString[9],dataItemString[10])
+            } else {
+                alert("Número de Conformidade é igual a 0")
+            }
+        }); 
     }
 
 }

@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     const addButton = document.getElementById('addButton');
+    const addButtonReinspecao = document.getElementById('addButtonReinspecao');
     const removeButton = document.getElementById('removeButton');
-    const selectContainer = document.getElementById('selectContainer');
+    const removeButtonReinspecao = document.getElementById('removeButtonReinspecao');
     let counter = 1;
 
     // Função para adicionar causa
-    function adicionarCausa() {
+    function adicionarCausa(inputNaoConformidades_estamparia,selectContainer,addcause,reinspecao) {
+
+        console.log("Entrou")
         const selectBlock = document.querySelector('.selectBlock').cloneNode(true);
         const quantidadeBlock = document.querySelector('.quantidadeBlock').cloneNode(true);
         const customFileBlock = document.querySelector('.customFileBlock').cloneNode(true);
@@ -26,36 +29,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fileLabelElement.textContent = '0 arquivos';
 
-        selectElement.id = `causasEstamparia-${counter}`;
-        selectElement.name = `causasEstamparia-${counter}`;
-        inputElement.id = `quantidade_causas_estamparia-${counter}`;
-        inputElement.name = `quantidade_causas_estamparia-${counter}`;
-        fileInputElement.id = `inputGroupFile_estamparia-${counter}`;
+        selectElement.id = `causasEstamparia${reinspecao}-${counter}`;
+        selectElement.name = `causasEstamparia${reinspecao}-${counter}`;
+        inputElement.id = `quantidade_causas_estamparia${reinspecao}-${counter}`;
+        inputElement.name = `quantidade_causas_estamparia${reinspecao}-${counter}`;
+        fileInputElement.id = `inputGroupFile_estamparia${reinspecao}-${counter}`;
 
         // Calculate the value for the new input element
-        const inputNaoConformidades = document.getElementById('inputNaoConformidades_estamparia');
+        const inputNaoConformidades = document.getElementById(inputNaoConformidades_estamparia);
         const valorNaoConformidades = inputNaoConformidades ? parseFloat(inputNaoConformidades.value) || 0 : 0;
 
         let totalCausas = 0;
         for (let i = 0; i < counter; i++) {
-            const causaAnterior = document.getElementById(`quantidade_causas_estamparia-${i}`);
+            const causaAnterior = document.getElementById(`quantidade_causas_estamparia${reinspecao}-${i}`);
+            console.log(causaAnterior)
             totalCausas += causaAnterior ? parseFloat(causaAnterior.value) || 0 : 0;
         }
 
         const novoValor = valorNaoConformidades - totalCausas;
 
+        console.log(totalCausas)
+
+        console.log(novoValor)
+
         // Set the calculated value
         inputElement.value = novoValor;
 
         // Insert cloned elements into the DOM
-        selectContainer.insertBefore(selectBlock, addButton.parentNode);
-        selectContainer.insertBefore(quantidadeBlock, addButton.parentNode);
-        selectContainer.insertBefore(customFileBlock, addButton.parentNode);
+        selectContainer.insertBefore(selectBlock, addcause.parentNode);
+        selectContainer.insertBefore(quantidadeBlock, addcause.parentNode);
+        selectContainer.insertBefore(customFileBlock, addcause.parentNode);
 
         counter++;
-        removeButton.disabled = false;  // Enable the remove button
-        
-        // Attach change event listener to file input
+
         fileInputElement.addEventListener('change', function() {
             const files = this.files;
             if (files.length > 0) {
@@ -67,31 +73,44 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Função para remover causa
-    function removerCausa() {
+    function removerCausa(tipos_causas_estamparia,remove, qtd) {
         const selectBlocks = document.querySelectorAll('.selectBlock');
         const quantidadeBlocks = document.querySelectorAll('.quantidadeBlock');
         const customFileBlocks = document.querySelectorAll('.customFileBlock');
-        const tipos_causas_estamparia = document.getElementById('tipos_causas_estamparia')
+        const tipos_causas = document.getElementById(tipos_causas_estamparia)
 
-        tipos_causas_estamparia.value = counter - 1;
-
-        console.log(selectBlocks.length,quantidadeBlocks.length,customFileBlocks.length)
+        tipos_causas.value = counter - 1;
 
         if (selectBlocks.length > 1 && quantidadeBlocks.length > 1 && customFileBlocks.length > 1) {
             selectBlocks[selectBlocks.length - 1].remove();
-            quantidadeBlocks[quantidadeBlocks.length - 1].remove();
-            customFileBlocks[customFileBlocks.length - 1].remove();
+            quantidadeBlocks[quantidadeBlocks.length - qtd].remove();
+            customFileBlocks[customFileBlocks.length - qtd].remove();
             counter--;
         }
 
-        if (selectBlocks.length <= 2 && quantidadeBlocks.length <= 2 && customFileBlocks.length <= 2) {
-            removeButton.disabled = true;  // Disable the remove button if there's only one block left
+        if (selectBlocks.length <= 3 && quantidadeBlocks.length <= 3 && customFileBlocks.length <= 3) {
+            remove.disabled = true;  // Disable the remove button if there's only one block left
         }
     }
 
+    
     // Adicionando eventos de clique aos botões
-    addButton.addEventListener('click', adicionarCausa);
-    removeButton.addEventListener('click', removerCausa);
+    addButton.addEventListener('click', function () {
+        let selectContainer = document.getElementById('selectContainer');
+        adicionarCausa('inputNaoConformidades_estamparia',selectContainer,addButton,'');
+        removeButton.disabled = false;
+    });
+    removeButton.addEventListener('click', function () {
+        removerCausa('tipos_causas_estamparia',removeButton,2)
+    });
+    addButtonReinspecao.addEventListener('click', function () {
+        let selectContainerReinspecao = document.getElementById('selectContainerReinspecao');
+        adicionarCausa('inputReinspecionadasNaoConformidades_estamparia',selectContainerReinspecao,addButtonReinspecao,'R');
+        removeButtonReinspecao.disabled = false;
+    });
+    removeButtonReinspecao.addEventListener('click', function () {
+        removerCausa('tipos_causas_estamparia_reinspecao',removeButtonReinspecao,1)
+    });
 
     // Adicionando evento de mudança aos campos de arquivo existentes
     const fileInputs = document.querySelectorAll('.customFile');
@@ -99,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const fileLabel = fileInput.querySelector('.custom-file-label');
         fileInput.querySelector('.custom-file-input').addEventListener('change', function() {
             const files = this.files;
-            console.log(files)
             if (files.length > 0) {
                 fileLabel.textContent = `${files.length} arquivo(s) selecionado(s)`;
             } else {

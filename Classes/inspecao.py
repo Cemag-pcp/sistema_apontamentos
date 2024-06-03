@@ -16,7 +16,7 @@ class Inspecao:
         
         id_inspecao = str(id_inspecao)
 
-        if setor == 'Pintura' or setor == 'Estamparia':
+        if setor == 'Pintura':
             
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true' WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
@@ -24,7 +24,7 @@ class Inspecao:
             sql = """INSERT INTO pcp.pecas_reinspecao (id, nao_conformidades, causa_reinspecao, inspetor, setor) VALUES (%s, %s, %s, %s, %s)"""
             values = (id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor)
 
-        elif setor == 'Solda':
+        elif setor == 'Solda' or setor == 'Estamparia':
 
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true' WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
@@ -40,7 +40,7 @@ class Inspecao:
     def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = ''):
 
         id_inspecao = str(id_inspecao)
-        if setor == 'Pintura' or setor == 'Estamparia':
+        if setor == 'Pintura':
 
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true' WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
@@ -48,7 +48,7 @@ class Inspecao:
             sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao) VALUES (%s, %s, %s, %s, %s, 0)"""
             values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor)
 
-        elif setor == 'Solda':
+        elif setor == 'Solda' or setor == 'Estamparia':
 
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true', qt_inspecionada = {qtd_inspecionada} WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
@@ -65,7 +65,7 @@ class Inspecao:
         
         id_inspecao = str(id_inspecao)
 
-        if setor == 'Pintura' or setor == 'Estamparia':
+        if setor == 'Pintura':
 
             if n_conformidades == "0":
                 
@@ -122,7 +122,7 @@ class Inspecao:
                 delete_table_inspecao = f"""UPDATE pcp.pecas_reinspecao SET excluidas = 'true' WHERE id ='{id_inspecao}'"""
                 self.cur.execute(delete_table_inspecao)
                 
-        elif setor == 'Solda':
+        elif setor == 'Solda' or setor == 'Estamparia':
 
             if n_conformidades == "0":
 
@@ -231,62 +231,124 @@ class Inspecao:
 
         return data_inspecao, data_reinspecao, data_inspecionadas
 
-    def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= ''):
+    def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= '',tipos_causas_estamparia='',list_quantidade=''):
 
-        for i in range(1, n_nao_conformidades + 1):
-            file_key = f'foto_inspecao_{i}[]'
-            fotos = request.files.getlist(file_key)
-            if fotos == []:
-                fotos.append('')
-            for foto in fotos:
-                if foto != '':
-                    filename = secure_filename(foto.filename)
-                    file_path = os.path.join(self.upload_folder, filename)
-                    arquivos = file_path + ";"
-                    arquivos = arquivos.replace('\\', '/')
-                    foto.save(file_path)
-                else:
-                    arquivos = None
+        print(tipos_causas_estamparia)
 
-                if num_inspecao == '':
+        if tipos_causas_estamparia == '':
+            for i in range(1, n_nao_conformidades + 1):
+                file_key = f'foto_inspecao_{i}[]'
+                fotos = request.files.getlist(file_key)
+                if fotos == []:
+                    fotos.append('')
+                for foto in fotos:
+                    if foto != '':
+                        filename = secure_filename(foto.filename)
+                        file_path = os.path.join(self.upload_folder, filename)
+                        arquivos = file_path + ";"
+                        arquivos = arquivos.replace('\\', '/')
+                        foto.save(file_path)
+                    else:
+                        arquivos = None
 
-                    query_fotos = """DO $$
-                                        BEGIN
-                                            IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                                INSERT INTO pcp.inspecao_foto
-                                                    (id, caminho_foto, causa, num_inspecao) 
-                                                VALUES 
-                                                    (%s, %s, %s,
-                                                        (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
-                                                    );
-                                            ELSE
-                                                INSERT INTO pcp.inspecao_foto
-                                                    (id, caminho_foto, causa, num_inspecao) 
-                                                VALUES 
-                                                    (%s, %s, %s, 0);
-                                            END IF;
-                                        END $$;
-                                    """
-                    values_fotos = (
-                            id_inspecao,
-                            id_inspecao,
-                            arquivos,
-                            list_causas[i - 1],
-                            id_inspecao,
-                            id_inspecao,
-                            arquivos,
-                            list_causas[i - 1]
-                        )
-                else:
-                    query_fotos = """INSERT INTO pcp.inspecao_foto (id, caminho_foto, causa, num_inspecao) VALUES (%s, %s, %s, %s); """
-                    values_fotos = (
-                            id_inspecao,
-                            arquivos,
-                            list_causas[i - 1],
-                            num_inspecao
-                        )
+                    if num_inspecao == '':
 
-                self.cur.execute(query_fotos, values_fotos)
+                        query_fotos = """DO $$
+                                            BEGIN
+                                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                                    INSERT INTO pcp.inspecao_foto
+                                                        (id, caminho_foto, causa, num_inspecao) 
+                                                    VALUES 
+                                                        (%s, %s, %s,
+                                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                                        );
+                                                ELSE
+                                                    INSERT INTO pcp.inspecao_foto
+                                                        (id, caminho_foto, causa, num_inspecao) 
+                                                    VALUES 
+                                                        (%s, %s, %s, 0);
+                                                END IF;
+                                            END $$;
+                                        """
+                        values_fotos = (
+                                id_inspecao,
+                                id_inspecao,
+                                arquivos,
+                                list_causas[i - 1],
+                                id_inspecao,
+                                id_inspecao,
+                                arquivos,
+                                list_causas[i - 1]
+                            )
+                    else:
+                        query_fotos = """INSERT INTO pcp.inspecao_foto (id, caminho_foto, causa, num_inspecao) VALUES (%s, %s, %s, %s); """
+                        values_fotos = (
+                                id_inspecao,
+                                arquivos,
+                                list_causas[i - 1],
+                                num_inspecao
+                            )
+
+                    self.cur.execute(query_fotos, values_fotos)
+        else:
+            for i in range(tipos_causas_estamparia):
+                file_key = f'foto_inspecao_{i}[]'
+                fotos = request.files.getlist(file_key)
+                print(fotos)
+                if fotos == []:
+                    fotos.append('')
+                for foto in fotos:
+                    if foto != '':
+                        filename = secure_filename(foto.filename)
+                        file_path = os.path.join(self.upload_folder, filename)
+                        arquivos = file_path + ";"
+                        arquivos = arquivos.replace('\\', '/')
+                        foto.save(file_path)
+                    else:
+                        arquivos = None
+
+                    if num_inspecao == '':
+
+                        query_fotos = """DO $$
+                                            BEGIN
+                                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                                    INSERT INTO pcp.inspecao_foto
+                                                        (id, caminho_foto, causa, quantidade,num_inspecao) 
+                                                    VALUES 
+                                                        (%s, %s, %s, %s,
+                                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                                        );
+                                                ELSE
+                                                    INSERT INTO pcp.inspecao_foto
+                                                        (id, caminho_foto, causa, quantidade, num_inspecao) 
+                                                    VALUES 
+                                                        (%s, %s, %s, %s, 0);
+                                                END IF;
+                                            END $$;
+                                        """
+                        values_fotos = (
+                                id_inspecao,
+                                id_inspecao,
+                                arquivos,
+                                list_causas[i],
+                                list_quantidade[i],
+                                id_inspecao,
+                                id_inspecao,
+                                arquivos,
+                                list_causas[i],
+                                list_quantidade[i]
+                            )
+                    else:
+                        query_fotos = """INSERT INTO pcp.inspecao_foto (id, caminho_foto, causa, num_inspecao, quantidade) VALUES (%s, %s, %s, %s, %s); """
+                        values_fotos = (
+                                id_inspecao,
+                                arquivos,
+                                list_causas[i],
+                                num_inspecao,
+                                list_quantidade[i]
+                            )
+
+                    self.cur.execute(query_fotos, values_fotos)
 
         self.conn.commit()
 

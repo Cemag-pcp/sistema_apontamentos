@@ -965,6 +965,69 @@ def inspecao_solda():
 
 @app.route('/inspecao-estamparia',methods=['GET','POST'])
 def inspecao_estamparia():
+
+    if request.method == 'POST':
+
+        n_nao_conformidades = int(request.form.get('inputNaoConformidadesEstamparia', 0))
+        id_inspecao = request.form.get('id_inspecao')
+        list_causas = json.loads(request.form.get('list_causas'))
+        list_quantidade = json.loads(request.form.get('list_quantidade'))
+
+        outraCausaSolda = request.form.get('outraCausaEstamparia')  
+
+        tipos_causas_estamparia = int(request.form.get('tipos_causas_estamparia'))
+
+        for i, item in enumerate(list_causas):
+            if item == 'Outro':
+                list_causas[i] = outraCausaSolda
+
+        classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_estamparia,list_quantidade)
+
+        data_inspecao = request.form.get('data_inspecao')
+        
+        data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
+        data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
+
+        inputCategoria = request.form.get('inputCategoria')
+        inputConjunto = request.form.get('inputConjunto')
+
+        num_conformidades = request.form.get('inputConformidadesEstamparia')
+        num_nao_conformidades = request.form.get('inputNaoConformidadesEstamparia')
+
+        observacaoSolda = request.form.get('observacaoEstamparia')  
+        origemInspecaoSolda = request.form.get('origemInspecaoEstamparia')  
+
+        inspetoresSolda = request.form.get('inspetorEstamparia')
+        num_pecas = request.form.get('num_pecas')
+        reinspecao = request.form.get('reinspecao')
+
+        setor = 'Estamparia'
+
+        print(id_inspecao,n_nao_conformidades,list_causas,list_quantidade,data_inspecao,inputCategoria,inputConjunto,num_conformidades,
+              num_nao_conformidades,inspetoresSolda,observacaoSolda,num_pecas,origemInspecaoSolda,reinspecao,setor)
+
+        if reinspecao == "True":
+
+            retrabalhoSolda = request.form.get('retrabalhoSolda')
+
+            retrabalhoSolda,operadores = retrabalhoSolda.split(" - ")
+
+            classe_inspecao.alterar_reinspecao(id_inspecao,num_nao_conformidades,num_pecas,num_conformidades,list_causas,inspetoresSolda,setor,
+                               inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda,retrabalhoSolda)
+            return jsonify("Success")
+        
+        else:
+            if num_conformidades != num_pecas:
+                classe_inspecao.inserir_reinspecao(id_inspecao,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
+                                   inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
+                classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
+                                      origemInspecaoSolda,observacaoSolda,num_pecas)
+            else:
+                classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
+                                      origemInspecaoSolda,observacaoSolda,num_pecas)
+
+
+        return jsonify("Success")
         
     inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar_estamparia()
 
