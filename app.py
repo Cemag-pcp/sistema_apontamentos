@@ -3233,13 +3233,18 @@ def consultar_carretas(data_inicial,data_final):
         nomes_carretas_str = nomes_carretas[0]
     else:
         nomes_carretas_str = ', '.join("'"+carreta +"'" for carreta in nomes_carretas)
-
+    
     sql_consulta = f"""select * from pcp.tb_base_carretas_explodidas where carreta in ({nomes_carretas_str})"""
     df_explodido = pd.read_sql_query(sql_consulta,conn)
 
     df_final = df_explodido.merge(agrupado,how='left',right_on='Carreta Trat',left_on='carreta')
 
+    # print(df_explodido[df_explodido['etapa_seguinte']=='S Usinagem'])
+    # print(agrupado)
+    # print(df_final[(df_final['etapa_seguinte']=='S Usinagem') & (df_final['processo']=='Fueiro')])
+
     carretas_dentro_da_base=df_explodido.merge(dados_carga_data_filtrada,how='right',left_on='carreta',right_on='Carreta Trat')
+
     carretas_dentro_da_base = carretas_dentro_da_base[['Carreta Trat','carreta']].drop_duplicates().fillna('').values.tolist()
 
     return df_final,carretas_dentro_da_base
@@ -3273,6 +3278,7 @@ def consultar_carretas_levantamento():
 
     df_final['quantidade'] = df_final['quantidade'] * df_final['PED_QUANTIDADE']
     
+
     if conjunto:
         df_final = df_final[df_final['conjunto'] == conjunto]
 
@@ -3284,6 +3290,12 @@ def consultar_carretas_levantamento():
     
     if mp:
         df_final = df_final[df_final['materia_prima'] == mp]
+
+    print(df_final[df_final['processo'] == 'Fueiro'])
+
+    #agrupando dados
+    df_final = df_final.groupby(['processo', 'codigo', 'descricao','materia_prima','etapa_seguinte']).sum().reset_index()
+
 
     total_rows = len(df_final)
 
@@ -3298,17 +3310,13 @@ def consultar_carretas_levantamento():
     # Calculando o índice final
     end_index = offset + per_page
 
-    #agrupando dados
-    df_final = df_final.groupby(['processo', 'codigo', 'descricao', 'materia_prima',
-       'comprimento', 'largura', 'etapa_seguinte']).sum().reset_index()
-
     # Selecionando as linhas do DataFrame com base nos índices calculados
-    df_paginated = df_final.drop(columns={'comprimento','largura'})
-    df_paginated = df_paginated.iloc[offset:end_index].values.tolist()
+    df_paginated = df_final.iloc[offset:end_index].values.tolist()
 
     pecas_disponiveis = df_final['codigo'].unique().tolist()
     celulas_disponiveis = df_final['processo'].unique().tolist()
     matprima_disponiveis = df_final['materia_prima'].unique().tolist()
+
 
     return jsonify({
         'data': df_paginated,
