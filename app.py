@@ -516,7 +516,7 @@ def apontar_montagem():
                    'peca', 'qt_planejada', 'qt_produzida','restante', 'codificacao', 'id']]
 
     sheet_data = table.values.tolist()
-
+    
     return render_template('apontamento-montagem.html', sheet_data=sheet_data)
 
 
