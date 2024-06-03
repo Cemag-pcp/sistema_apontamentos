@@ -3316,6 +3316,7 @@ def consultar_carretas_levantamento():
     celulas_disponiveis = df_final['processo'].unique().tolist()
     matprima_disponiveis = df_final['materia_prima'].unique().tolist()
 
+    print(df_final)
 
     return jsonify({
         'data': df_paginated,
