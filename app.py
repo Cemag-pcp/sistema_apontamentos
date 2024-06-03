@@ -3296,7 +3296,6 @@ def consultar_carretas_levantamento():
     #agrupando dados
     df_final = df_final.groupby(['processo', 'codigo', 'descricao','materia_prima','etapa_seguinte']).sum().reset_index()
 
-
     total_rows = len(df_final)
 
     # Definir o número de itens por página
