@@ -3294,8 +3294,8 @@ def consultar_carretas_levantamento():
     print(df_final[df_final['processo'] == 'Fueiro'])
 
     #agrupando dados
-    df_final = df_final.groupby(['processo', 'codigo', 'descricao','materia_prima','etapa_seguinte']).sum().reset_index()
-
+    df_final = df_final.groupby(['processo', 'codigo', 'descricao','materia_prima','etapa_seguinte']).sum().reset_index()[['processo', 'codigo', 'descricao','materia_prima','quantidade']]
+    print(df_final)
     total_rows = len(df_final)
 
     # Definir o número de itens por página
@@ -3312,11 +3312,13 @@ def consultar_carretas_levantamento():
     # Selecionando as linhas do DataFrame com base nos índices calculados
     df_paginated = df_final.iloc[offset:end_index].values.tolist()
 
+    df_paginated = df_final.iloc[offset:end_index].values.tolist()
+
+    print(df_final.iloc[offset:end_index].columns)
+
     pecas_disponiveis = df_final['codigo'].unique().tolist()
     celulas_disponiveis = df_final['processo'].unique().tolist()
     matprima_disponiveis = df_final['materia_prima'].unique().tolist()
-
-    print(df_final)
 
     return jsonify({
         'data': df_paginated,
