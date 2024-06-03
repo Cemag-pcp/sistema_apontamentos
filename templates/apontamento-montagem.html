@@ -646,6 +646,8 @@
                 var columnIndex_2 = $('#dataPlanejamento').data('column');
                 var filterValue_2 = $('#dataPlanejamento').val();
 
+
+
                 if (filterValue) {
                     // Limpa o outro filtro
                     $('#dataPlanejamento').val('');
@@ -718,6 +720,7 @@
     </script>
 
     <script>
+        
         function applyDateFilter() {
             var columnIndex = $('#dataCarga').data('column');
             var filterValue = $('#dataCarga').val();
@@ -725,13 +728,22 @@
             var columnIndex_2 = $('#dataPlanejamento').data('column');
             var filterValue_2 = $('#dataPlanejamento').val();
 
+            console.log('1: ', filterValue);
+            console.log('2: ', filterValue_2);
+
             // Formata a data usando Moment.js
             if (filterValue !== '') {
                 filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                // Limpa o filtro do segundo campo
+                $('#dataPlanejamento').val('');
+                table.column(columnIndex_2).search('').draw();
                 // Define o filtro na coluna específica
                 table.column(columnIndex).search(filterValue).draw();
             } else if (filterValue_2 !== '') {
                 filterValue_2 = moment(filterValue_2, 'YYYY-MM-DD').format('DD/MM/YYYY');
+                // Limpa o filtro do primeiro campo
+                $('#dataCarga').val('');
+                table.column(columnIndex).search('').draw();
                 // Define o filtro na coluna específica
                 table.column(columnIndex_2).search(filterValue_2).draw();
             } else {

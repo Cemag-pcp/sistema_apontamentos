@@ -50,9 +50,6 @@ $(document).ready(function () {
         var columnIndex = $('#dataCarga').data('column');
         var filterValue = $('#dataCarga').val();
 
-        console.log('Column Index:', columnIndex);
-        console.log('Filter Value:', filterValue);
-
         // Formata a data usando Moment.js
         if (filterValue === '') {
             filterValue = moment().format('DD/MM/YYYY');
