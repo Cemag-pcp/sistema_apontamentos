@@ -85,6 +85,11 @@
                                     class="btn btn-outline-secondary"
                                     style="width: 149px; height: 62px;"
                                     onclick="applyCelulaFilter(this, 'ESTAMPARIA')">ESTAMPARIA</button></div>
+                            <div class="col mb-2"><button id="filterCilindro2"
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                style="width: 149px; height: 62px;"
+                                onclick="applyCelulaFilter(this, 'CILINDRO 2')">CILINDRO 2</button></div>
                             <div class="col mb-2"><button id="filterCilindro"
                                     type="button"
                                     class="btn btn-outline-secondary"
@@ -670,6 +675,8 @@
             }
 
             function applyCelulaFilter(selectedValue) {
+
+                console.log(selectedValue);
 
                 var columnIndex = $('#celula').data('column');
 
@@ -1789,7 +1796,9 @@
             } else {
                 // Defina o filtro na coluna específica
                 $('.btn').removeClass('active');
-                table.column(columnIndex).search(selectedValue).draw();
+
+                var regex = '^' + selectedValue + '$'; // Criar regex para correspondência exata
+                table.column(columnIndex).search(regex, true, false).draw();
                 $(button).addClass('active'); // Adicione a classe active ao botão
                 filterActive = true; // Marque o filtro como ativo
                 $('#celula').val(selectedValue);
