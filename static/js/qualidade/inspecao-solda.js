@@ -58,7 +58,7 @@ $('#inputConformidadesSolda').on('input', function(){
 $('#inputPecasInspecionadasSolda').on('blur', function() {
 
     let inspecionados = $('#inputPecasInspecionadasSolda');
-    let produzidas = $('#inputPecasProduzidas').val();
+    let produzidas = parseInt($('#inputPecasProduzidas').val());
     let inputConformidadesSolda = $('#inputConformidadesSolda');
     let inputNaoConformidadesSolda = $('#inputNaoConformidadesSolda');
 

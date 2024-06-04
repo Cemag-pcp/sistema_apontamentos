@@ -1,21 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const addButton = document.getElementById('addButton');
+    const addButton = document.getElementById('addButtonSolda');
     const addButtonReinspecao = document.getElementById('addButtonReinspecao');
-    const removeButton = document.getElementById('removeButton');
+    const removeButton = document.getElementById('removeButtonSolda');
     const removeButtonReinspecao = document.getElementById('removeButtonReinspecao');
     let counter = 1;
 
     // Função para adicionar causa
-    function adicionarCausa(inputNaoConformidades_estamparia,selectContainer,addcause,reinspecao) {
+    function adicionarCausa(inputNaoConformidades_estamparia,selectContainer,addcause,reinspecao,tipos_causas_estamparia) {
 
-        console.log("Entrou")
         const selectBlock = document.querySelector('.selectBlock').cloneNode(true);
         const quantidadeBlock = document.querySelector('.quantidadeBlock').cloneNode(true);
         const customFileBlock = document.querySelector('.customFileBlock').cloneNode(true);
 
-        const tipos_causas_estamparia = document.getElementById('tipos_causas_estamparia')
+        const tipos_causas = document.getElementById(tipos_causas_estamparia)
 
-        tipos_causas_estamparia.value = counter + 1;
+        tipos_causas.value = counter + 1;
 
         // Update IDs and names for the cloned elements
         selectBlock.id = `selectBlock-${counter}`;
@@ -48,10 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const novoValor = valorNaoConformidades - totalCausas;
 
-        console.log(totalCausas)
-
-        console.log(novoValor)
-
         // Set the calculated value
         inputElement.value = novoValor;
 
@@ -82,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tipos_causas.value = counter - 1;
 
         if (selectBlocks.length > 1 && quantidadeBlocks.length > 1 && customFileBlocks.length > 1) {
-            selectBlocks[selectBlocks.length - 1].remove();
+            selectBlocks[selectBlocks.length - qtd].remove();
             quantidadeBlocks[quantidadeBlocks.length - qtd].remove();
             customFileBlocks[customFileBlocks.length - qtd].remove();
             counter--;
@@ -93,11 +88,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    
     // Adicionando eventos de clique aos botões
     addButton.addEventListener('click', function () {
         let selectContainer = document.getElementById('selectContainer');
-        adicionarCausa('inputNaoConformidades_estamparia',selectContainer,addButton,'');
+        adicionarCausa('inputNaoConformidades_estamparia',selectContainer,addButton,'','tipos_causas_estamparia');
         removeButton.disabled = false;
     });
     removeButton.addEventListener('click', function () {
@@ -105,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     addButtonReinspecao.addEventListener('click', function () {
         let selectContainerReinspecao = document.getElementById('selectContainerReinspecao');
-        adicionarCausa('inputReinspecionadasNaoConformidades_estamparia',selectContainerReinspecao,addButtonReinspecao,'R');
+        adicionarCausa('inputReinspecionadasNaoConformidades_estamparia',selectContainerReinspecao,addButtonReinspecao,'R','tipos_causas_estamparia_reinspecao');
         removeButtonReinspecao.disabled = false;
     });
     removeButtonReinspecao.addEventListener('click', function () {

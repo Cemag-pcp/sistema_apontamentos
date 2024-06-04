@@ -94,7 +94,7 @@ function setorCards(response) {
 
     var qtd_na_reinspecao = 0
 
-    if(setor === 'Pintura') {
+    if(setor === 'Pintura' || setor === 'Estamparia') {
 
         for (var i = 0; i < historico.length; i++) {
 
@@ -117,7 +117,7 @@ function setorCards(response) {
                     <h6 class="mb-1">${item[9]}</h6>
                     <div class="d-flex flex-column align-items-end">
                         <small>N° Conformidade : ${item[2]}</small>
-                        <small>N° de não Conformidade : ${qtd_disponivel_inspecao - item[2]}</small>
+                        <small>N° Não Conformidade: ${qtd_disponivel_inspecao - item[2]}</small>
                         <small>Inspetor : ${item[3]}</small>
                         <small>Exec.:  ${item[5]}</small>
                     </div>
@@ -176,7 +176,7 @@ function setorCards(response) {
                             </div>
                         </div>
                         <small>N° Conformidade : ${item[2]}</small>
-                        <small>N° de não Conformidade : ${item[10]}</small>
+                        <small>N° Não Conformidade : ${item[10]}</small>
                         <small>Inspetor : ${item[3]}</small>
                         <small>Exec.:  ${item[5]}</small>
                     </div>
@@ -243,7 +243,7 @@ function setorCards(response) {
                             </div>
                         </div>
                         <small>N° Conformidade : ${item[2]}</small>
-                        <small>N° de não Conformidade : ${item[10]}</small>
+                        <small>N° Não Conformidade : ${item[10]}</small>
                         <small>Inspetor : ${item[3]}</small>
                         <small>Exec.:  ${item[5]}</small>
                     </div>

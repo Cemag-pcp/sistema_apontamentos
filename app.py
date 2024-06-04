@@ -743,7 +743,7 @@ def planejar_pintura():
 
     return render_template('planejar-pintura.html', sheet_data=sheet_data)
 
-# --------- INSPEÇÃO -----------
+# --------- INICIO INSPEÇÃO -----------
 
 @app.route('/inspecao', methods=['GET','POST'])
 def inspecao_pintura():
@@ -973,6 +973,9 @@ def inspecao_estamparia():
         list_causas = json.loads(request.form.get('list_causas'))
         list_quantidade = json.loads(request.form.get('list_quantidade'))
 
+        if list_quantidade == ['']:
+            list_quantidade = [None]
+
         outraCausaSolda = request.form.get('outraCausaEstamparia')  
 
         tipos_causas_estamparia = int(request.form.get('tipos_causas_estamparia'))
@@ -981,7 +984,10 @@ def inspecao_estamparia():
             if item == 'Outro':
                 list_causas[i] = outraCausaSolda
 
-        classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_estamparia,list_quantidade)
+        print("listcausas",list_causas,list_quantidade)
+
+        if list_causas != [None]:
+            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_estamparia,list_quantidade)
 
         data_inspecao = request.form.get('data_inspecao')
         
@@ -1002,9 +1008,6 @@ def inspecao_estamparia():
         reinspecao = request.form.get('reinspecao')
 
         setor = 'Estamparia'
-
-        print(id_inspecao,n_nao_conformidades,list_causas,list_quantidade,data_inspecao,inputCategoria,inputConjunto,num_conformidades,
-              num_nao_conformidades,inspetoresSolda,observacaoSolda,num_pecas,origemInspecaoSolda,reinspecao,setor)
 
         if reinspecao == "True":
 
@@ -1125,7 +1128,7 @@ def atualizar_conformidade():
 
     return jsonify('success')
 
-# --------- INSPEÇÃO -----------
+# --------- FIM INSPEÇÃO -----------
 
 @app.route('/conjuntos', methods=['POST'])
 def listar_conjuntos():

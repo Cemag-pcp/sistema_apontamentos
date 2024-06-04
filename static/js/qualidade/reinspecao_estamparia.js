@@ -29,25 +29,42 @@ function formatarDataBrSemHoraEs(dataString) {
     return formatoDesejado;
 }
 
+$('#inputReinspecionadasConformidades_estamparia').on('blur',function() {
+    let pecasInspecionadasSolda = parseInt($('#inputPecasReinspecionadas_estamparia').val());
+    let numConformidadesSolda = parseInt($('#inputReinspecionadasConformidades_estamparia').val());
+    let numNaoConformidadesSolda = $('#inputReinspecionadasNaoConformidades_estamparia');
+
+    if(numConformidadesSolda > pecasInspecionadasSolda || numNaoConformidadesSolda.val() > pecasInspecionadasSolda || numConformidadesSolda < 0){
+        alert("Preencha o número de peças inspecionadas")
+        $('#inputReinspecionadasConformidades_estamparia').val('')
+        numNaoConformidadesSolda.val('')
+        return
+    } 
+})
+
 $('#inputReinspecionadasConformidades_estamparia').on('input',function() {
 
     let pecasInspecionadasSolda = $('#inputPecasReinspecionadas_estamparia').val();
     let numConformidadesSolda = $('#inputReinspecionadasConformidades_estamparia').val();
     let numNaoConformidadesSolda = $('#inputReinspecionadasNaoConformidades_estamparia');
     let outraCausaSoldaReinspecionadas = $("#outraCausaReinspecionadas_estamparia");
+    let causasEstamparia = $("#selectContainerReinspecao");
 
     numNaoConformidadesSolda.val(pecasInspecionadasSolda - numConformidadesSolda);
 
     if(numConformidadesSolda === ''){
         numNaoConformidadesSolda.val('')
+        causasEstamparia.css("display","none")
     }
 
     if(numNaoConformidadesSolda.val() === '' || numNaoConformidadesSolda.val() <= 0 || numConformidadesSolda < 0){
         outraCausaSoldaReinspecionadas.prop('disabled',true);
         outraCausaSoldaReinspecionadas.val('')
+        causasEstamparia.css("display","none")
     } else {
         outraCausaSoldaReinspecionadas.prop('disabled',false);
         outraCausaSoldaReinspecionadas.val('')
+        causasEstamparia.css("display","flex")
     }
 
 })
@@ -58,8 +75,27 @@ $('#envio_reinspecao_estamparia').on('click',function() {
     let inputPecasInspecionadasSolda = parseInt($('#inputPecasReinspecionadas_estamparia').val());
     let inputConjunto = $('#inputConjuntoReinspecao_estamparia').val();
     let observacaoSolda = $('#observacaoReinspecionadas_estamparia').val();
+    let origemReinspecionadas_estamparia = $("#origemReinspecionadas_estamparia").val()
+    let tipos_causas_estamparia = $("#tipos_causas_estamparia_reinspecao").val();
     let inspetoresSolda = $('#inspetoresReinspecao_estamparia').val();
     let retrabalhoSolda = $('#retrabalho_estamparia').val();
+    let qtd_causas = 0
+
+    for (let i = 0; i < tipos_causas_estamparia; i++) {
+        qtd_causas += parseInt($("#quantidade_causas_estampariaR-" + i).val())
+        let causas = $("#causasEstampariaR-" + i).val();
+        if (causas === null && inputNaoConformidadesSolda != 0) {
+            alert('Preencha todas as causas de não conformidade.');
+            $("#loading").hide();
+            return; // Interrompe a execução
+        }
+    }
+
+    if((qtd_causas != inputNaoConformidadesSolda) && inputNaoConformidadesSolda != 0){
+        alert('Verifique se a soma dos campos de "Quantidade" está igual ao valor de "Total de NÃO conformidades"');
+        $("#loading").hide();
+        return; // Interrompe a execução
+    }
 
     $("#confirmarConformidades_estamparia").val(inputConformidadesSolda);
     $("#confirmarNaoConformidades_estamparia").val(inputNaoConformidadesSolda);
@@ -70,7 +106,7 @@ $('#envio_reinspecao_estamparia').on('click',function() {
     $("#btnEnviarEstamparia").css("display","none")
 
     if (inputConformidadesSolda === "" || inspetoresSolda === null || retrabalhoSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
-        alert('Verifique se o campo de conformidades está com valor correto');
+        alert('Verifique se os campos estão corretos');
         $("#loading").hide();
         return; // Interrompe a execução
     }
@@ -79,16 +115,6 @@ $('#envio_reinspecao_estamparia').on('click',function() {
         alert('Verifique se os campos de causa e observação estão com os valores corretos');
         $("#loading").hide();
         return; // Interrompe a execução
-    }
-
-    for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
-        let causas = $("#causa_reinspecao_" + i).val();
-        if (causas === "") {
-            alert('Preencha todos os campos das causas de não conformidade.');
-            $('#btnEnviarEstampariaReinspecao').prop('disabled',false);
-            $("#loading").hide();
-            return; // Interrompe a execução
-        }
     }
 
     $('#reinspecaoModalEstamparia').modal('hide');
@@ -126,12 +152,6 @@ $('#btnEnviarEstampariaReinspecao').on('click',function() {
         let quantidade = $("#quantidade_causas_estampariaR-" + i).val();
         let inputId = '#inputGroupFile_estampariaR-' + i;
         let files = $(inputId)[0].files;
-
-        if (causas === "" || quantidade === "") {
-            alert('Preencha todos os campos das causas de não conformidade.');
-            $("#loading").hide();
-            return; // Interrompe a execução
-        }
         for (let file of files) {
             formData.append('foto_inspecao_' + i + '[]', file);
         }

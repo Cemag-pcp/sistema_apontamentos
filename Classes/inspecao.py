@@ -65,9 +65,13 @@ class Inspecao:
         
         id_inspecao = str(id_inspecao)
 
+        n_conformidades = int(n_conformidades)
+
+        qtd_produzida = int(qtd_produzida)
+
         if setor == 'Pintura':
 
-            if n_conformidades == "0":
+            if n_conformidades == 0:
                 
                 sql_update = """UPDATE pcp.pecas_reinspecao SET causa_reinspecao = %s, inspetor = %s WHERE id = %s """
                 values_update = (causa_reinspecao, inspetor, id_inspecao)
@@ -86,7 +90,7 @@ class Inspecao:
                 values = (id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor)
                 self.cur.execute(sql_insert, values)
 
-            elif n_conformidades > "0" and n_conformidades < qtd_produzida:
+            elif n_conformidades > 0 and n_conformidades < qtd_produzida:
 
                 sql_update = """UPDATE pcp.pecas_reinspecao SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s WHERE id = %s """
                 values = (n_nao_conformidades, causa_reinspecao, inspetor, id_inspecao)
@@ -124,7 +128,7 @@ class Inspecao:
                 
         elif setor == 'Solda' or setor == 'Estamparia':
 
-            if n_conformidades == "0":
+            if n_conformidades == 0:
 
                 sql_update = """UPDATE pcp.pecas_reinspecao SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, conjunto = %s, categoria = %s, outra_causa = %s, origem = %s, observacao = %s WHERE id = %s """
                 values_update = (n_nao_conformidades, causa_reinspecao, inspetor, conjunto_especifico, categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda, id_inspecao)
@@ -143,7 +147,9 @@ class Inspecao:
                 values = (id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, id_inspecao, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operadores, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operadores)
                 self.cur.execute(sql_insert, values)
 
-            elif n_conformidades > "0" and n_conformidades < qtd_produzida:
+                print("Entrou")
+
+            elif n_conformidades > 0 and n_conformidades < qtd_produzida:
 
                 sql_update = """UPDATE pcp.pecas_reinspecao SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, conjunto = %s, categoria = %s, outra_causa = %s, origem = %s, observacao = %s WHERE id = %s """
                 values_update = (n_nao_conformidades, causa_reinspecao, inspetor, conjunto_especifico, categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda, id_inspecao)
@@ -161,6 +167,8 @@ class Inspecao:
                 
                 values = (id_inspecao, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, id_inspecao, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operadores, id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operadores)
                 self.cur.execute(sql_insert, values)
+
+                print("Entrou")
 
             elif n_conformidades == qtd_produzida:
 
@@ -180,6 +188,8 @@ class Inspecao:
                 delete_table_inspecao = f"""UPDATE pcp.pecas_reinspecao SET excluidas = 'true' WHERE id ='{id_inspecao}'"""
                 self.cur.execute(delete_table_inspecao)
 
+                print("Entrou")
+    
         self.conn.commit()
         print("alterar_reinspecao")
 
@@ -231,9 +241,7 @@ class Inspecao:
 
         return data_inspecao, data_reinspecao, data_inspecionadas
 
-    def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= '',tipos_causas_estamparia='',list_quantidade=''):
-
-        print(tipos_causas_estamparia)
+    def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= '',tipos_causas_estamparia='',list_quantidade=[]):
 
         if tipos_causas_estamparia == '':
             for i in range(1, n_nao_conformidades + 1):
@@ -250,8 +258,11 @@ class Inspecao:
                         foto.save(file_path)
                     else:
                         arquivos = None
+                        print("Arquivos",arquivos)
 
                     if num_inspecao == '':
+
+                        print("query_fotos")
 
                         query_fotos = """DO $$
                                             BEGIN
@@ -339,6 +350,8 @@ class Inspecao:
                                 list_quantidade[i]
                             )
                     else:
+
+                        print("Entrou no Else")
                         query_fotos = """INSERT INTO pcp.inspecao_foto (id, caminho_foto, causa, num_inspecao, quantidade) VALUES (%s, %s, %s, %s, %s); """
                         values_fotos = (
                                 id_inspecao,
