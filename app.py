@@ -3403,7 +3403,6 @@ def consultar_historico_levantamento():
 
     if data:
         data = pd.to_datetime(data,format="%d/%m/%Y").date()
-        print(data)
         sql += f" and '{data}' >= data_inicio AND '{data}' <= data_fim"
         sql_count += f" and '{data}' >= data_inicio AND '{data}' <= data_fim"
 
@@ -3424,6 +3423,8 @@ def consultar_historico_levantamento():
         sql_count += f" and materia_prima = '{mp}'"
 
     sql += " LIMIT %s OFFSET %s;"
+
+    print(sql)
 
     cur.execute(sql,(per_page,offset))
     data = cur.fetchall()

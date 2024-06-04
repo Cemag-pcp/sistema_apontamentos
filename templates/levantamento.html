@@ -105,11 +105,11 @@
                         </div>
                     </div>
                     <div class="row mb-3" style="display: none;" id="row2-filters">
-                        <div class="col-md-3 col-sm-6 mb-3">
+                        <!-- <div class="col-md-3 col-sm-6 mb-3">
                             <label for="conjuntoLevantamento">Conjunto</label>
                             <input class="form-control" type="text" id="conjuntoLevantamento">
                             <ul class="lista-conjunto" style="display: none;"></ul>
-                        </div>
+                        </div> -->
                         <div class="col-md-3 col-sm-6 mb-3">
                             <label for="celulaLevantamento">Célula</label>
                             <input class="form-control" type="text" id="celulaLevantamento">
@@ -252,7 +252,7 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <table class="table table-bordered">
+                                <table id="tableHistorico" class="table table-bordered">
                                     <thead>
                                         <tr>
                                             <th scope="col">Célula</th>
@@ -282,6 +282,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
+                            <button class="btn btn-primary" id="downloadCsv">Baixar CSV</button>
                         </div>
                     </div>
                 </div>
@@ -572,30 +573,31 @@
     <script>
 
         function listaMp(id, classe, matPrimaDisponivel) {
-
+    
             // Manipulador de evento para exibir a lista ao clicar dentro do input
             $('#' + id).on('click', function () {
-                var valorInput = $(this).val().toLowerCase();
-                var listaFiltrada = matPrimaDisponivel.filter(function (material) {
-                    return material.toLowerCase().includes(valorInput);
-                });
-                exibirLista(listaFiltrada);
+                atualizarLista($(this).val().toLowerCase());
             });
-
+    
             // Manipulador de evento para os itens da lista
             $(document).on('click', '.' + classe + ' li', function () {
                 var valorSelecionado = $(this).text();
                 $('#' + id).val(valorSelecionado);
                 $('.' + classe).hide();
             });
-
+    
             // Manipulador de evento para fechar a lista ao clicar fora do campo de entrada
             $(document).on('click', function (event) {
                 if (!$(event.target).closest('.' + classe).length && !$(event.target).closest('#' + id).length) {
                     $('.' + classe).hide();
                 }
             });
-
+    
+            // Manipulador de evento para atualizar a lista enquanto digita
+            $('#' + id).on('input', function () {
+                atualizarLista($(this).val().toLowerCase());
+            });
+    
             // Função para exibir a lista filtrada
             function exibirLista(lista) {
                 var listaHtml = lista.map(function (item) {
@@ -603,8 +605,16 @@
                 }).join('');
                 $('.' + classe).html(listaHtml).show();
             }
+    
+            // Função para atualizar a lista com base no valor do input
+            function atualizarLista(valorInput) {
+                var listaFiltrada = matPrimaDisponivel.filter(function (material) {
+                    return material.toLowerCase().includes(valorInput);
+                });
+                exibirLista(listaFiltrada);
+            }
         }
-
+    
     </script>
 
     <!-- Tabela inicial de levantamento -->
@@ -987,6 +997,33 @@
             }
 
             baixar_resumo(dataLevantamentoInicialStr,dataLevantamentoFinalStr);
+        });
+    </script>
+
+    <!-- Baixar tabela csv -->
+    <script>
+        document.getElementById('downloadCsv').addEventListener('click', function () {
+            var table = document.getElementById('tableHistorico');
+            var rows = Array.from(table.querySelectorAll('tr'));
+            var csvContent = '';
+
+            rows.forEach(function (row) {
+                var cells = Array.from(row.querySelectorAll('th, td'));
+                var rowContent = cells.map(function (cell) {
+                    return '"' + cell.textContent.trim() + '"';
+                }).join(',');
+                csvContent += rowContent + '\r\n';
+            });
+
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            var url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'tabela.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         });
     </script>
 
