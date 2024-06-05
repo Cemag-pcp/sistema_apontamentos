@@ -1,8 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     const addButton = document.getElementById('addButtonSolda');
-    const addButtonReinspecao = document.getElementById('addButtonReinspecao');
+    const addButtonReinspecao = document.getElementById('addButtonReinspecaoSolda');
     const removeButton = document.getElementById('removeButtonSolda');
-    const removeButtonReinspecao = document.getElementById('removeButtonReinspecao');
+    const removeButtonReinspecao = document.getElementById('removeButtonReinspecaoSolda');
+
+    const addButtonSoldaEdicao = document.getElementById('addButtonSoldaEdicao');
+    const removeButtonSoldaEdicao = document.getElementById('removeButtonSoldaEdicao');
     let counter = 1;
 
     // Função para adicionar causa
@@ -28,11 +31,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fileLabelElement.textContent = '0 arquivos';
 
-        selectElement.id = `causasEstamparia${reinspecao}-${counter}`;
-        selectElement.name = `causasEstamparia${reinspecao}-${counter}`;
-        inputElement.id = `quantidade_causas_estamparia${reinspecao}-${counter}`;
-        inputElement.name = `quantidade_causas_estamparia${reinspecao}-${counter}`;
-        fileInputElement.id = `inputGroupFile_estamparia${reinspecao}-${counter}`;
+        selectElement.id = `causasSolda${reinspecao}-${counter}`;
+        selectElement.name = `causasSolda${reinspecao}-${counter}`;
+        inputElement.id = `quantidade_causas_solda${reinspecao}-${counter}`;
+        inputElement.name = `quantidade_causas_solda${reinspecao}-${counter}`;
+        fileInputElement.id = `inputGroupFile_solda${reinspecao}-${counter}`;
 
         // Calculate the value for the new input element
         const inputNaoConformidades = document.getElementById(inputNaoConformidades_estamparia);
@@ -40,8 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let totalCausas = 0;
         for (let i = 0; i < counter; i++) {
-            const causaAnterior = document.getElementById(`quantidade_causas_estamparia${reinspecao}-${i}`);
-            console.log(causaAnterior)
+            const causaAnterior = document.getElementById(`quantidade_causas_solda${reinspecao}-${i}`);
             totalCausas += causaAnterior ? parseFloat(causaAnterior.value) || 0 : 0;
         }
 
@@ -62,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (files.length > 0) {
                 fileLabelElement.textContent = `${files.length} arquivo(s)`;
             } else {
-                fileLabelElement.textContent = '0 arquivo';
+                fileLabelElement.textContent = '0 arquivos';
             }
         });
     }
@@ -76,6 +78,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         tipos_causas.value = counter - 1;
 
+        console.log(selectBlocks.length)
+
         if (selectBlocks.length > 1 && quantidadeBlocks.length > 1 && customFileBlocks.length > 1) {
             selectBlocks[selectBlocks.length - qtd].remove();
             quantidadeBlocks[quantidadeBlocks.length - qtd].remove();
@@ -83,28 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
             counter--;
         }
 
-        if (selectBlocks.length <= 3 && quantidadeBlocks.length <= 3 && customFileBlocks.length <= 3) {
+        if (selectBlocks.length <= 4 && quantidadeBlocks.length <= 4 && customFileBlocks.length <= 4) {
             remove.disabled = true;  // Disable the remove button if there's only one block left
         }
     }
-
-    // Adicionando eventos de clique aos botões
-    addButton.addEventListener('click', function () {
-        let selectContainer = document.getElementById('selectContainer');
-        adicionarCausa('inputNaoConformidades_estamparia',selectContainer,addButton,'','tipos_causas_estamparia');
-        removeButton.disabled = false;
-    });
-    removeButton.addEventListener('click', function () {
-        removerCausa('tipos_causas_estamparia',removeButton,2)
-    });
-    addButtonReinspecao.addEventListener('click', function () {
-        let selectContainerReinspecao = document.getElementById('selectContainerReinspecao');
-        adicionarCausa('inputReinspecionadasNaoConformidades_estamparia',selectContainerReinspecao,addButtonReinspecao,'R','tipos_causas_estamparia_reinspecao');
-        removeButtonReinspecao.disabled = false;
-    });
-    removeButtonReinspecao.addEventListener('click', function () {
-        removerCausa('tipos_causas_estamparia_reinspecao',removeButtonReinspecao,1)
-    });
 
     // Adicionando evento de mudança aos campos de arquivo existentes
     const fileInputs = document.querySelectorAll('.customFile');
@@ -119,4 +105,45 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Adicionando eventos de clique aos botões
+    addButton.addEventListener('click', function () {
+        let selectContainer = document.getElementById('selectContainerInspecao');
+        adicionarCausa('inputNaoConformidadesSolda',selectContainer,addButton,'','tipos_causas_solda');
+        removeButton.disabled = false;
+    });
+    removeButton.addEventListener('click', function () {
+        removerCausa('tipos_causas_solda',removeButton,3)
+    });
+    addButtonReinspecao.addEventListener('click', function () {
+        let selectContainerReinspecao = document.getElementById('selectContainerReinspecao');
+        adicionarCausa('inputReinspecionadasNaoConformidadesSolda',selectContainerReinspecao,addButtonReinspecao,'R','tipos_causas_solda_reinspecao');
+        removeButtonReinspecao.disabled = false;
+    });
+    removeButtonReinspecao.addEventListener('click', function () {
+        removerCausa('tipos_causas_solda_reinspecao',removeButtonReinspecao,2)
+    });
+    addButtonSoldaEdicao.addEventListener('click', function () {
+        let selectContainerReinspecao = document.getElementById('selectContainerEdicao');
+        adicionarCausa('num_causas_edicao',selectContainerReinspecao,addButtonSoldaEdicao,'E','tipos_causas_solda_edicao');
+        removeButtonSoldaEdicao.disabled = false;
+    });
+    removeButtonSoldaEdicao.addEventListener('click', function () {
+        removerCausa('tipos_causas_solda_edicao',removeButtonSoldaEdicao,1)
+    });
+
+    let qtd_conformidade_edicao = document.getElementById("qtd_conformidade_edicao");
+    let qtd_conformidade_atualizada_edicao = document.getElementById("qtd_conformidade_atualizada_edicao");
+    let num_causas_edicao = document.getElementById("num_causas_edicao").value
+
+    if (qtd_conformidade_atualizada_edicao) {
+        qtd_conformidade_atualizada_edicao.addEventListener("input", () => {
+            num_causas_edicao = parseInt(qtd_conformidade_edicao.value) - parseInt(qtd_conformidade_atualizada_edicao.value)
+            if(parseInt(qtd_conformidade_atualizada_edicao.value) < 0 || parseInt(qtd_conformidade_atualizada_edicao) === ''){
+                $("#coluna_causa_edicao_solda").empty()
+                return
+            }
+            $('#num_causas_edicao').val(num_causas_edicao)
+        });
+    }
 });

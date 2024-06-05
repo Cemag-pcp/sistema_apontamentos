@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalCausas = 0;
         for (let i = 0; i < counter; i++) {
             const causaAnterior = document.getElementById(`quantidade_causas_estamparia${reinspecao}-${i}`);
-            console.log(causaAnterior)
             totalCausas += causaAnterior ? parseFloat(causaAnterior.value) || 0 : 0;
         }
 
@@ -62,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (files.length > 0) {
                 fileLabelElement.textContent = `${files.length} arquivo(s)`;
             } else {
-                fileLabelElement.textContent = '0 arquivo';
+                fileLabelElement.textContent = '0 arquivos';
             }
         });
     }

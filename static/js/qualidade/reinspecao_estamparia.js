@@ -48,6 +48,7 @@ $('#inputReinspecionadasConformidades_estamparia').on('input',function() {
     let numConformidadesSolda = $('#inputReinspecionadasConformidades_estamparia').val();
     let numNaoConformidadesSolda = $('#inputReinspecionadasNaoConformidades_estamparia');
     let outraCausaSoldaReinspecionadas = $("#outraCausaReinspecionadas_estamparia");
+    let origemInspecaoSoldaReinspecionadas = $('#origemReinspecaoCol_estamparia');
     let causasEstamparia = $("#selectContainerReinspecao");
 
     numNaoConformidadesSolda.val(pecasInspecionadasSolda - numConformidadesSolda);
@@ -61,10 +62,13 @@ $('#inputReinspecionadasConformidades_estamparia').on('input',function() {
         outraCausaSoldaReinspecionadas.prop('disabled',true);
         outraCausaSoldaReinspecionadas.val('')
         causasEstamparia.css("display","none")
+        origemInspecaoSoldaReinspecionadas.css('display','none')
+        origemInspecaoSoldaReinspecionadas.val('')
     } else {
         outraCausaSoldaReinspecionadas.prop('disabled',false);
         outraCausaSoldaReinspecionadas.val('')
         causasEstamparia.css("display","flex")
+        origemInspecaoSoldaReinspecionadas.css('display','block')
     }
 
 })

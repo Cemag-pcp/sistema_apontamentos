@@ -76,7 +76,7 @@ $('#inputPecasInspecionadas_estamparia').on('blur', function() {
     let inputConformidadesSolda = $('#inputConformidades_estamparia');
     let inputNaoConformidadesSolda = $('#inputNaoConformidades_estamparia');
 
-    if(inspecionados.val() > produzidas || inspecionados.val() <= 0){
+    if((inspecionados.val() > produzidas || inspecionados.val() <= 0) && inspecionados.val() != ''){
         alert("Preencha a quantidade correta para o número de peças produzidas")
         inspecionados.val('')
     }

@@ -127,7 +127,7 @@ function criarCampoQuantidade(i) {
 function criarCampoArquivos(i) {
     const campoArquivos = document.createElement('div');
     campoArquivos.id = `campo_arquivos_${i}`;
-    campoArquivos.className = 'col-sm-5 mb-4';
+    campoArquivos.className = 'col-sm-6 mb-4';
 
     const labelArquivos = document.createElement('label');
     labelArquivos.textContent = `Arquivos da causa ${i}:`;

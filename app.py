@@ -835,26 +835,30 @@ def inspecao_solda():
 
     if request.method == 'POST':
 
-        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                        password=DB_PASS, host=DB_HOST)
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
         id_inspecao_solda = request.form.get('id_inspecao')
 
         n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
         id_inspecao = request.form.get('id_inspecao')
         list_causas = json.loads(request.form.get('list_causas'))
+        list_quantidade = json.loads(request.form.get('list_quantidade'))
+
+        if list_quantidade == ['']:
+            list_quantidade = [None]
 
         outraCausaSolda = request.form.get('outraCausaSolda')  
+        tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
 
         for i, item in enumerate(list_causas):
             if item == 'Outro':
                 list_causas[i] = outraCausaSolda
 
-        classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas)
+        print(list_causas)
+
+        if list_causas != [None]:
+            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_solda,list_quantidade)
 
         data_inspecao = request.form.get('data_inspecao')
-        
+
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
         data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
 
@@ -977,14 +981,11 @@ def inspecao_estamparia():
             list_quantidade = [None]
 
         outraCausaSolda = request.form.get('outraCausaEstamparia')  
-
         tipos_causas_estamparia = int(request.form.get('tipos_causas_estamparia'))
 
         for i, item in enumerate(list_causas):
             if item == 'Outro':
                 list_causas[i] = outraCausaSolda
-
-        print("listcausas",list_causas,list_quantidade)
 
         if list_causas != [None]:
             classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_estamparia,list_quantidade)
@@ -1048,13 +1049,17 @@ def atualizar_conformidade():
     nao_conformidades = int(request.form.get('nao_conformidades'))
     valor_reinspecao = qtd_conformidade_antiga - conformidade_atualizada
     num_nao_conformidade = (qtd_conformidade_antiga - conformidade_atualizada) + nao_conformidades
+
     num_execucao = request.form.get('num_execucao')
     list_causas = json.loads(request.form.get('list_causas'))
+    list_quantidade = json.loads(request.form.get('list_quantidade'))
+    tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
 
-    classe_inspecao.processar_fotos_inspecao(id_edicao, valor_reinspecao, list_causas,num_execucao)
-    print(list_causas)
-    print(f"{qtd_conformidade_antiga} - {conformidade_atualizada} + {nao_conformidades} RESULTADO = {num_nao_conformidade}")
-    print(f"{qtd_conformidade_antiga} - {conformidade_atualizada} RESULTADO = {valor_reinspecao}")
+    if list_quantidade == ['']:
+        list_quantidade = [None]
+
+    if list_causas != [None]:
+        classe_inspecao.processar_fotos_inspecao(id_edicao, nao_conformidades, list_causas,num_execucao,tipos_causas_solda,list_quantidade)
 
     atualizar_historico = f"""UPDATE pcp.pecas_inspecionadas
                              SET total_conformidades = '{conformidade_atualizada}', nao_conformidades = '{num_nao_conformidade}' 
@@ -1090,7 +1095,7 @@ def atualizar_conformidade():
 
         setor = 'Solda'
         criar_reinspecao = """INSERT INTO pcp.pecas_reinspecao 
-                        (id, data_reinspecao, nao_conformidades, causa_reinspecao, inspetor, setor, peca, categoria, outra_causa, origem, observacao) 
+                        (id, data_reinspecao, nao_conformidades, causa_reinspecao, inspetor, setor, conjunto, categoria, outra_causa, origem, observacao) 
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, '', %s, %s)"""
         values = (
             id_edicao,

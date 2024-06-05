@@ -1,7 +1,7 @@
 {% extends 'sidebar.html' %}
 
 {% block title %}
-<title>Apontamento Pintura</title>
+<title>Inspeção Solda</title>
 {% endblock %}
 
 {% block links %}
@@ -268,7 +268,47 @@
                                             style="font-size: 12px;" disabled>
                                     </div>
                                 </div>
+                                <div class="col-sm-4 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_solda" value="1"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
                             </div>
+                            <div class="row" id="selectContainerInspecao">
+                                <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
+                                    <label>Causas</label>
+                                    <select id="causasSolda-0" name="causasSolda-0" class="form-control" style="font-size: 14px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Faltando Solda">Faltando Solda</option>
+                                        <option value="Porosidade">Porosidade</option>
+                                        <option value="Solda não conforme (robô)">Solda não conforme (robô)</option>
+                                        <option value="Solda deslocada">Solda deslocada</option>
+                                        <option value="Medida não conforme">Medida não conforme</option>
+                                        <option value="Solda sem penetração">Solda sem penetração</option>
+                                        <option value="Excesso de respingo">Excesso de respingo</option>
+                                        <option value="Excesso de rebarba">Excesso de rebarba</option>
+                                        <option value="Excesso de solda">Excesso de solda</option>
+                                        <option value="Mordedura">Mordedura</option>
+                                        <option value="Erro de montagem">Erro de montagem</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 mb-4 quantidadeBlock" id="quantidadeBlock-0">
+                                    <label>Quantidade</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_solda-0" id="quantidade_causas_solda-0">
+                                </div>
+                                <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
+                                    <input type="file" class="custom-file-input" id="inputGroupFile_solda-0" accept="image/*" multiple="true">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
+                                </div>
+                                <div class="col-sm-12" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButtonSolda" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButtonSolda" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div> 
                             <div class="row">
                                 <div id="coluna_causa_solda" class="col-sm-12">
 
@@ -383,6 +423,46 @@
                                             disabled>
                                     </div>
                                 </div>
+                                <div class="col-sm-4 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_solda_reinspecao" value="1"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="selectContainerReinspecao">
+                                <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
+                                    <label>Causas</label>
+                                    <select id="causasSoldaR-0" name="causasSoldaR-0" class="form-control" style="font-size: 14px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Faltando Solda">Faltando Solda</option>
+                                        <option value="Porosidade">Porosidade</option>
+                                        <option value="Solda não conforme (robô)">Solda não conforme (robô)</option>
+                                        <option value="Solda deslocada">Solda deslocada</option>
+                                        <option value="Medida não conforme">Medida não conforme</option>
+                                        <option value="Solda sem penetração">Solda sem penetração</option>
+                                        <option value="Excesso de respingo">Excesso de respingo</option>
+                                        <option value="Excesso de rebarba">Excesso de rebarba</option>
+                                        <option value="Excesso de solda">Excesso de solda</option>
+                                        <option value="Mordedura">Mordedura</option>
+                                        <option value="Erro de montagem">Erro de montagem</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 mb-4 quantidadeBlock" id="quantidadeBlock-0">
+                                    <label>Quantidade</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_soldaR-0" id="quantidade_causas_soldaR-0">
+                                </div>
+                                <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
+                                    <input type="file" class="custom-file-input" id="inputGroupFile_soldaR-0" accept="image/*" multiple="true">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
+                                </div>
+                                <div class="col-sm-12" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButtonReinspecaoSolda" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButtonReinspecaoSolda" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
                             </div>
                             <div class="row">
                                 <div id="coluna_causa_reinspecao_solda" class="col-sm-12">
@@ -446,8 +526,8 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-6" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <button class="btn btn-primary" id="addButton" onclick="addSelect()" style="font-size: 10px;">Adicionar insp.</button>
-                                    <button class="btn btn-danger" id="removeButton" onclick="removeSelect()" style="font-size: 10px;" disabled>Remover insp.</button>
+                                    <button class="btn btn-primary" id="addButton" onclick="addSelect()" style="font-size: 10px;">Adicionar retr.</button>
+                                    <button class="btn btn-danger" id="removeButton" onclick="removeSelect()" style="font-size: 10px;" disabled>Remover retr.</button>
                                 </div>
                             </div>
                         </div>
@@ -513,18 +593,54 @@
                                     <input type="number" class="form-control" id="nao_conformidades_edicao" disabled>
                                 </div>
                                 <div class="col-sm-4 mb-4 d-none">
-                                    <label>Subtração da Execução</label>
-                                    <input type="number" class="form-control" id="num_causas_edicao" disabled>
+                                    <label>Tipos causas solda Edicao</label>
+                                    <input type="number" class="form-control" id="tipos_causas_solda_edicao" value="1" disabled>
                                 </div>
-                                <div class="col-sm-6 mb-4 d-flex flex-column justify-content-end">
+                                <div class="col-sm-4 mb-4 d-flex flex-column justify-content-end">
                                     <label>Quantidade de conformidades</label>
                                     <input type="number" class="form-control" id="qtd_conformidade_edicao" disabled>
                                 </div>
-                                <div class="col-sm-6 mb-4">
+                                <div class="col-sm-4 mb-4">
+                                    <label>Não conformidades adicionada a reinspeção</label>
+                                    <input type="number" class="form-control" id="num_causas_edicao" disabled>
+                                </div>
+                                <div class="col-sm-4 mb-4">
                                     <label>Quantidade de conformidades atualizada</label>
                                     <input type="number" class="form-control" id="qtd_conformidade_atualizada_edicao">
                                 </div>
                             </div>
+                            <div class="row" id="selectContainerEdicao">
+                                <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
+                                    <label>Causas</label>
+                                    <select id="causasSoldaE-0" name="causasSoldaE-0" class="form-control" style="font-size: 14px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Faltando Solda">Faltando Solda</option>
+                                        <option value="Porosidade">Porosidade</option>
+                                        <option value="Solda não conforme (robô)">Solda não conforme (robô)</option>
+                                        <option value="Solda deslocada">Solda deslocada</option>
+                                        <option value="Medida não conforme">Medida não conforme</option>
+                                        <option value="Solda sem penetração">Solda sem penetração</option>
+                                        <option value="Excesso de respingo">Excesso de respingo</option>
+                                        <option value="Excesso de rebarba">Excesso de rebarba</option>
+                                        <option value="Excesso de solda">Excesso de solda</option>
+                                        <option value="Mordedura">Mordedura</option>
+                                        <option value="Erro de montagem">Erro de montagem</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 mb-4 quantidadeBlock" id="quantidadeBlock-0">
+                                    <label>Quantidade</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_soldaE-0" id="quantidade_causas_soldaE-0">
+                                </div>
+                                <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
+                                    <input type="file" class="custom-file-input" id="inputGroupFile_soldaE-0" accept="image/*" multiple="true">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
+                                </div>
+                                <div class="col-sm-12" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButtonSoldaEdicao" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButtonSoldaEdicao" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div>  
                             <div class="row">
                                 <div id="coluna_causa_edicao_solda" class="col-sm-12">
 
@@ -614,7 +730,6 @@
         <script src="static/js/qualidade/inspecao-pintura.js"></script>
         <script src="static/js/qualidade/reinspecao-solda.js"></script>
         <script src="static/js/qualidade/select_inspetor_solda.js"></script>
-        <script src="static/js/qualidade/selects_causa_pintura_solda.js"></script>
-
+        <script src="static/js/qualidade/causas/causas_solda.js"></script>
 
         {% endblock %}
