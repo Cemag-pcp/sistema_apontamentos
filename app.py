@@ -757,8 +757,16 @@ def inspecao_pintura():
         n_nao_conformidades = int(request.form.get('n_nao_conformidades', 0))
         id_inspecao = request.form.get('id_inspecao')
         list_causas = json.loads(request.form.get('list_causas'))
+        list_quantidade = json.loads(request.form.get('list_quantidade'))
+        tipos_causas_pintura = int(request.form.get('tipos_causas_pintura'))
 
-        classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas)
+        print(list_causas)
+
+        if list_quantidade == ['']:
+            list_quantidade = [None]
+
+        if list_causas != [None]:
+            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_pintura,list_quantidade)
         
         data_inspecao = request.form.get('data_inspecao')
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
