@@ -43,7 +43,7 @@ $('#inputReinspecionadasConformidadesSolda').on('input',function() {
         selectNaoConformidadesSolda.val('')
         outraCausaSoldaReinspecionadas.val('')
         $("#causasSoldaR-0").val('')
-    $("#quantidade_causas_soldaR-0").val('')
+        $("#quantidade_causas_soldaR-0").val('')
     } else {
         selectNaoConformidadesSolda.prop('disabled',false);
         outraCausaSoldaReinspecionadas.prop('disabled',false);

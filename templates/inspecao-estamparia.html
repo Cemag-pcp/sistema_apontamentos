@@ -283,7 +283,7 @@
                                     <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_estamparia-0" id="quantidade_causas_estamparia-0">
                                 </div>
                                 <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
-                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Foto das Causas</p></div>
                                     <input type="file" class="custom-file-input" id="inputGroupFile_estamparia-0" accept="image/*" multiple="true">
                                     <label class="custom-file-label" style="top: auto;">0 arquivos</label>
                                 </div>
@@ -312,7 +312,7 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-6 mb-4">
-                                    <label>Outro motivo<small><code> *Preencha caso tenha "Outro" listado nas causas</code></small></label>
+                                    <label>Outro motivo<small><code> *Preencha caso tenha "Outro" selecionado nas causas</code></small></label>
                                     <div class="input-group">
                                         <input type="text" class="form-control desabilitado" autocomplete="off"
                                             id="outraCausa_estamparia" style="font-size: 12px;" disabled>
@@ -335,16 +335,26 @@
                                             <option value="" selected hidden disabled></option>
                                             <option value="Corte">Corte</option>
                                             <option value="Estamparia">Estamparia</option>
-                                            <option value="Usinagem">Usinagem</option>
                                             <option value="Fornecedor">Fornecedor</option>
-                                            <option value="Solda">Solda</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
+                            <div class="row" style="display: flex; justify-content: space-around;" id="campo_fichas">
+                                <div class="col-sm-6 mb-4 customFile" id="col_ficha_producao">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Ficha Inspeção de Produção</p></div>
+                                    <input type="file" class="custom-file-input" id="ficha_producao" accept="image/*">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
+                                </div>
+                                <div class="col-sm-5 mb-4 customFile" id="col_ficha_completa">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Ficha de Inspeção 100%</p></div>
+                                    <input type="file" class="custom-file-input" id="ficha_completa" accept="image/*">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="modal-footer">
-                            <button id="envio_inspecao_estamparia" class="btn btn-primary">Enviar</button>
+                        <div class="modal-footer"> 
+                           <button class="btn btn-primary" id="envio_inspecao_estamparia">Enviar</button>
                         </div>
                     </div>
                 </div>
@@ -447,7 +457,7 @@
                             </div>
                             <div class="row" style="align-items: end;">
                                 <div class="col-sm-6 mb-4">
-                                    <label>Outro motivo<small><code> *Preencha caso tenha "Outro" listado nas causas</code></small></label>
+                                    <label>Outro motivo<small><code> *Preencha caso tenha "Outro" selecionado nas causas</code></small></label>
                                     <div class="input-group">
                                         <input type="text" class="form-control desabilitado" autocomplete="off"
                                             id="outraCausaReinspecionadas_estamparia" style="font-size: 12px;" disabled>
@@ -497,9 +507,7 @@
                                             <option value="" selected hidden disabled></option>
                                             <option value="Corte">Corte</option>
                                             <option value="Estamparia">Estamparia</option>
-                                            <option value="Usinagem">Usinagem</option>
                                             <option value="Fornecedor">Fornecedor</option>
-                                            <option value="Solda">Solda</option>
                                         </select>
                                     </div>
                                 </div>

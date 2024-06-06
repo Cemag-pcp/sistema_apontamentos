@@ -40,6 +40,7 @@ $('#inputConformidades_estamparia').on('input', function() {
     let numNaoConformidadesSolda = $('#inputNaoConformidades_estamparia');
     let outroCausaSolda = $("#outraCausa_estamparia");
     let containerCausas = $("#selectContainer");
+    
     let origemInspecaoSoldaReinspecionadas = $('#origemInspecaoCol_estamparia');
 
     numNaoConformidadesSolda.val(pecasInspecionadasSolda - numConformidadesSolda);
@@ -68,6 +69,7 @@ $('#inputConformidades_estamparia').on('input', function() {
         containerCausas.css('display','flex')
         origemInspecaoSoldaReinspecionadas.css('display','block')
     }
+    
 
 })
 
@@ -77,10 +79,20 @@ $('#inputPecasInspecionadas_estamparia').on('blur', function() {
     let produzidas = parseInt($('#inputPecasProduzidas_estamparia').val());
     let inputConformidadesSolda = $('#inputConformidades_estamparia');
     let inputNaoConformidadesSolda = $('#inputNaoConformidades_estamparia');
+    let fichaCompleta = $("#col_ficha_completa");
+    let fichaCompletaInput = $('#ficha_completa');
+    let fichaCompletaLabel = fichaCompleta.find('label');
 
     if((inspecionados.val() > produzidas || inspecionados.val() <= 0) && inspecionados.val() != ''){
         alert("Preencha a quantidade correta para o número de peças produzidas")
         inspecionados.val('')
+    }
+    if(parseInt(inspecionados.val()) === produzidas){
+        fichaCompleta.css("visibility","visible")
+    } else {
+        fichaCompleta.css("visibility","hidden");
+        fichaCompletaInput.val('');
+        fichaCompletaLabel.text('0 arquivos');
     }
     inputConformidadesSolda.val('')
     inputNaoConformidadesSolda.val('')
@@ -154,7 +166,7 @@ $('#btnEnviarEstamparia').on('click',function() {
     let outraCausaSolda = $('#outraCausa_estamparia').val();
     let observacaoSolda = $('#observacao_estamparia').val();
     let origemInspecaoSolda = $('#origemInspecao_estamparia').val();
-    let tipos_causas_estamparia = $("#tipos_causas_estamparia").val()
+    let tipos_causas_estamparia = $("#tipos_causas_estamparia").val();
     let reinspecao = 'False';
 
     if (inputConformidadesSolda === "" || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
