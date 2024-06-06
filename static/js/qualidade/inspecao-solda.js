@@ -56,6 +56,8 @@ $('#inputConformidadesSolda').on('input', function(){
         outroCausaSolda.prop('disabled',true);
         selectNaoConformidadesSolda.val('')
         outroCausaSolda.val('')
+        $("#causasSolda-0").val('')
+        $("#quantidade_causas_solda-0").val('')
         origemInspecaoSoldaReinspecionadas.css('display','none')
         origemInspecaoSoldaReinspecionadas.val(null)
     } else {
@@ -101,12 +103,6 @@ $('#envio_inspecao_solda').on('click',function() {
 
     for (var i = 0; i < tipos_causas_solda; i++) {
         qtd_causas += parseInt($("#quantidade_causas_solda-" + i).val())
-        let causas = $("#causasSolda-" + i).val();
-        if (causas === null && inputNaoConformidadesSolda != 0) {
-            alert('Preencha todos os campos das causas de não conformidade.');
-            $("#loading").hide();
-            return; // Interrompe a execução
-        }
     }
 
     if((qtd_causas != inputNaoConformidadesSolda) && inputNaoConformidadesSolda != 0){

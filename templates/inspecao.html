@@ -6,12 +6,15 @@
 
 {% block links %}
 <!-- Custom styles for this page -->
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
 <link rel="stylesheet" type="text/css"
     href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
 
 <!-- CSS tables responsive -->
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/file.css') }}">
+    
+    <!-- CSS tables responsive -->
 
 {% endblock %}
 
@@ -283,7 +286,56 @@
                                     <input type="number" id="n_nao_conformidades" name="n_nao_conformidades" value=""
                                         class="form-control" readonly="readonly">
                                 </div>
+                                <div class="col-sm-4 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_pintura" value="1"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
                             </div>
+                            <div class="row" id="selectContainerInspecao">
+                                <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
+                                    <label>Causas</label>
+                                    <select id="causasPintura-0" name="causasPintura-0" class="form-control" style="font-size: 14px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Faltando Solda">Faltando Solda</option>
+                                        <option value="Olho de Peixe">Olho de Peixe</option>
+                                        <option value="Arranhão">Arranhão</option>
+                                        <option value="Escorrimento">Escorrimento</option>
+                                        <option value="Empoeiramento">Empoeiramento</option>
+                                        <option value="Casca de Laranja">Casca de Laranja</option>
+                                        <option value="Manchas">Manchas</option>
+                                        <option value="Contato">Contato</option>
+                                        <option value="Amassando">Amassando</option>
+                                        <option value="Camada Baixa">Camada Baixa</option>
+                                        <option value="Corrosão">Corrosão</option>
+                                        <option value="Marcação por Água">Marcação por Água</option>
+                                        <option value="Marcação por Óleo">Marcação por Óleo</option>
+                                        <option value="Tonalidade">Tonalidade</option>
+                                        <option value="Marca texto industrial">Marca texto industrial</option>
+                                        <option value="Respingo de Solda">Respingo de Solda</option>
+                                        <option value="Marcação de Peça">Marcação de Peça</option>
+                                        <option value="Falta de aderência">Falta de aderência</option>
+                                        <option value="Decapante">Decapante</option>
+                                        <option value="Desplacamento">Desplacamento</option>
+                                        <option value="Água">Água</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 mb-4 quantidadeBlock" id="quantidadeBlock-0">
+                                    <label>Quantidade</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_pintura-0" id="quantidade_causas_pintura-0">
+                                </div>
+                                <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
+                                    <input type="file" class="custom-file-input" id="inputGroupFile_pintura-0" accept="image/*" multiple="true">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
+                                </div>
+                                <div class="col-sm-12" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButtonPintura" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButtonPintura" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div> 
                             <div class="row">
                                 <div id="coluna_causa" class="col-sm-12">
 
@@ -361,7 +413,56 @@
                                     <input type="number" id="n_nao_conformidades_reinspecao" name="n_nao_conformidades"
                                         value="" class="form-control" readonly="readonly">
                                 </div>
+                                <div class="col-sm-4 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_pintura_reinspecao" value="1"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
                             </div>
+                            <div class="row" id="selectContainerReinspecao">
+                                <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
+                                    <label>Causas</label>
+                                    <select id="causasPinturaR-0" name="causasPinturaR-0" class="form-control" style="font-size: 14px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Faltando Solda">Faltando Solda</option>
+                                        <option value="Olho de Peixe">Olho de Peixe</option>
+                                        <option value="Arranhão">Arranhão</option>
+                                        <option value="Escorrimento">Escorrimento</option>
+                                        <option value="Empoeiramento">Empoeiramento</option>
+                                        <option value="Casca de Laranja">Casca de Laranja</option>
+                                        <option value="Manchas">Manchas</option>
+                                        <option value="Contato">Contato</option>
+                                        <option value="Amassando">Amassando</option>
+                                        <option value="Camada Baixa">Camada Baixa</option>
+                                        <option value="Corrosão">Corrosão</option>
+                                        <option value="Marcação por Água">Marcação por Água</option>
+                                        <option value="Marcação por Óleo">Marcação por Óleo</option>
+                                        <option value="Tonalidade">Tonalidade</option>
+                                        <option value="Marca texto industrial">Marca texto industrial</option>
+                                        <option value="Respingo de Solda">Respingo de Solda</option>
+                                        <option value="Marcação de Peça">Marcação de Peça</option>
+                                        <option value="Falta de aderência">Falta de aderência</option>
+                                        <option value="Decapante">Decapante</option>
+                                        <option value="Desplacamento">Desplacamento</option>
+                                        <option value="Água">Água</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 mb-4 quantidadeBlock" id="quantidadeBlock-0">
+                                    <label>Quantidade</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_pinturaR-0" id="quantidade_causas_pinturaR-0">
+                                </div>
+                                <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
+                                    <input type="file" class="custom-file-input" id="inputGroupFile_pinturaR-0" accept="image/*" multiple="true">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
+                                </div>
+                                <div class="col-sm-12 mb-4" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButtonReinspecaoPintura" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButtonReinspecaoPintura" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div> 
                             <div class="row">
                                 <div id="coluna_causa_reinspecao" class="col-sm-12">
 
@@ -376,14 +477,7 @@
                                         <option value="Marcelo">Marcelo</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-6 mb-4" id="campo_arquivos_reinspecao" style="display: none;">
-                                    <label>Escolha os arquivos:</label>
-                                    <div class="custom-file">
-                                        <input type="file" class="custom-file-input" id="foto_reinspecao" name="foto_reinspecao" accept="image/*" multiple>
-                                        <label class="custom-file-label label-reinspecao" for="foto_reinspecao">Escolha os arquivos</label>
-                                    </div>  
-                                </div>
-                            </div>
+                            </div>  
                         </div>
                         <div class="modal-footer">
                             <button id="envio_reinspecao" class="btn btn-primary">Enviar</button>
@@ -489,7 +583,7 @@
         <script src="static/js/demo/datatables-demo.js"></script>
         <script src="/static/js/qualidade/inspecao-pintura.js"></script>
         <script src="/static/js/qualidade/inspecao-solda.js"></script>
-        <script src="/static/js/qualidade/selects_causa_pintura_solda.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+        <script src="static/js/qualidade/causas/causa_pintura.js"></script>
 
         {% endblock %}

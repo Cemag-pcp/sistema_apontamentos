@@ -14,6 +14,8 @@ function modalInspecao(id, data, peca, cor,qtd_produzida) {
     $('#inspetor').val('');
     $("#causa_reinspecao").val('');
     $('#n_nao_conformidades').val('');
+    $('#causasPintura-0').val('');
+    $('#quantidade_causas_pintura-0').val('');
     
     // Exibir o modal
     $('#inspecaoModal').modal('show');
@@ -41,6 +43,8 @@ function modalReinspecao(id,data,peca,cor,n_nao_conformidades,inspetor) {
     $("#causa_nova_reinspecao").val('');
     $("#n_nao_conformidades_reinspecao").val('');
     $('#qtd_produzida_reinspecao').val(n_nao_conformidades);
+    $('#causasPinturaR-0').val('');
+    $('#quantidade_causas_pinturaR-0').val('');
 
     // Exibir o modal
     $('#reinspecaoModal').modal('show');
@@ -435,38 +439,47 @@ $('#n_conformidades').on('input',function() {
 
     let n_conformidades_value = parseInt($('#n_conformidades').val(), 10);
     let qtd_produzida_value = parseInt($('#qtd_produzida').val(), 10);
+    let containerCausas = $("#selectContainerInspecao");
     
     $('#n_nao_conformidades').val(qtd_produzida_value - n_conformidades_value);
 
     if(n_conformidades_value >= qtd_produzida_value || n_conformidades_value < 0 || n_conformidades_value === '') {
         $("#causa_reinspecao").prop('disabled', true);
         $("#causa_reinspecao").val('');
+        containerCausas.css('display','none')
         $('#n_nao_conformidades').val(0);
+        $('#causasPintura-0').val('');
+        $('#quantidade_causas_pintura-0').val('');
     } else {
         $("#causa_reinspecao").prop('disabled', false);
+        containerCausas.css('display','flex')
     }
 })
 
 $('#envio_inspecao').on('click', function () {
 
-    let inputConformidadesSolda = $('#n_conformidades').val();
-    let inputNaoConformidadesSolda = $('#n_nao_conformidades').val();
+    let inputConformidadesSolda = parseInt($('#n_conformidades').val());
+    let inputNaoConformidadesSolda = parseInt($('#n_nao_conformidades').val());
     let inputConjunto = $('#peca_inspecionada').val();
     let inspetor = $("#inspetor").val();
-    let qtd_produzida_value = parseInt($('#qtd_produzida').val());
+    let qtd_produzida_value = parseInt($("#qtd_produzida").val());
+    let tipos_causas_estamparia = $("#tipos_causas_pintura").val();
+    let qtd_causas = 0
 
+    
     if (inputConformidadesSolda === "" || inspetor === null || inputConformidadesSolda > qtd_produzida_value || inputConformidadesSolda < 0) {
         alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
         return; // Interrompe a execução
     }
 
-    for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
-        let causas = $("#causa_reinspecao_" + i).val();
-        console.log(causas)
-        if (causas === '') {
-            alert('Preencha todos os campos das causas de não conformidade.');
-            return; // Interrompe a execução
-        }
+    for (let i = 0; i < tipos_causas_estamparia; i++) {
+        qtd_causas += parseInt($("#quantidade_causas_pintura-" + i).val())
+    }
+
+    if((qtd_causas != inputNaoConformidadesSolda) && inputNaoConformidadesSolda != 0){
+        alert('Verifique se a soma dos campos de "Quantidade" está igual ao valor de "Total de NÃO conformidades"');
+        $("#loading").hide();
+        return; // Interrompe a execução
     }
 
     $("#confirmarConformidades").val(inputConformidadesSolda);
@@ -495,21 +508,22 @@ $('#btnEnviarPintura').on('click', function () {
     let n_conformidades = parseInt($('#n_conformidades').val());
     let n_nao_conformidades = parseInt($('#n_nao_conformidades').val());
     let list_causas = [];
+    let list_quantidade = [];
     let inspetor = $("#inspetor").val();
     let qtd_produzida_value = parseInt($('#qtd_produzida').val());
+    let tipos_causas_estamparia = $("#tipos_causas_pintura").val()
     let reinspecao = 'False';
 
-    for (var i = 1; i <= n_nao_conformidades; i++) {
-        let causas = $("#causa_reinspecao_" + i).val();
-        list_causas.push(causas);
-    }
-
-    for (let i = 1; i <= n_nao_conformidades; i++) {
-        let inputId = '#foto_inspecao_' + i;
+    for (let i = 0; i < tipos_causas_estamparia; i++) {
+        let causas = $("#causasPintura-" + i).val();
+        let quantidade = $("#quantidade_causas_pintura-" + i).val();
+        let inputId = '#inputGroupFile_pintura-' + i;
         let files = $(inputId)[0].files;
         for (let file of files) {
             formData.append('foto_inspecao_' + i + '[]', file);
         }
+        list_causas.push(causas)
+        list_quantidade.push(quantidade)
     }
 
     formData.append('id_inspecao', id_inspecao);
@@ -517,7 +531,9 @@ $('#btnEnviarPintura').on('click', function () {
     formData.append('n_conformidades', n_conformidades);
     formData.append('n_nao_conformidades', n_nao_conformidades);
     formData.append('list_causas', JSON.stringify(list_causas));
+    formData.append('list_quantidade', JSON.stringify(list_quantidade));
     formData.append('inspetor', inspetor);
+    formData.append('tipos_causas_pintura', tipos_causas_estamparia);
     formData.append('qtd_produzida', qtd_produzida_value);
     formData.append('reinspecao', reinspecao);
 
@@ -539,23 +555,27 @@ $('#btnEnviarPintura').on('click', function () {
 });
 
 $('#envio_reinspecao').on('click', function () {
-    let inputConformidadesSolda = $('#n_conformidades_reinspecao').val();
-    let inputNaoConformidadesSolda = $('#n_nao_conformidades_reinspecao').val();
+    let inputConformidadesSolda = parseInt($('#n_conformidades_reinspecao').val());
+    let inputNaoConformidadesSolda = parseInt($('#n_nao_conformidades_reinspecao').val());
     let inputConjunto = $('#peca_reinspecionada').val();
     let inspetor = $("#inspetor_reinspecao").val();
     let qtd_produzida_value = parseInt($('#qtd_produzida_reinspecao').val());
+    let tipos_causas_estamparia = $("#tipos_causas_pintura_reinspecao").val();
+    let qtd_causas = 0
 
     if (inputConformidadesSolda === "" || inspetor === null || inputConformidadesSolda > qtd_produzida_value || inputConformidadesSolda < 0) {
         alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
         return; // Interrompe a execução
     }
 
-    for (var i = 1; i <= inputNaoConformidadesSolda; i++) {
-        let causas = $("#causa_reinspecao_" + i).val();
-        if (causas === "") {
-            alert('Preencha todos os campos das causas de não conformidade.');
-            return; // Interrompe a execução
-        }
+    for (let i = 0; i < tipos_causas_estamparia; i++) {
+        qtd_causas += parseInt($("#quantidade_causas_pinturaR-" + i).val())
+    }
+
+    if((qtd_causas != inputNaoConformidadesSolda) && inputNaoConformidadesSolda != 0){
+        alert('Verifique se a soma dos campos de "Quantidade" está igual ao valor de "Total de NÃO conformidades"');
+        $("#loading").hide();
+        return; // Interrompe a execução
     }
 
     $("#confirmarConformidades").val(inputConformidadesSolda);
@@ -584,9 +604,23 @@ $('#btnEnviarPinturaReinspecao').on('click',function() {
     let n_conformidades = parseInt($('#n_conformidades_reinspecao').val());
     let n_nao_conformidades = parseInt($('#n_nao_conformidades_reinspecao').val());
     let list_causas = [];
+    let list_quantidade = [];
     let inspetor = $("#inspetor_reinspecao").val();
     let qtd_produzida_value = parseInt($('#qtd_produzida_reinspecao').val());
+    let tipos_causas_estamparia = $("#tipos_causas_pintura_reinspecao").val()
     let reinspecao = true;
+
+    for (let i = 0; i < tipos_causas_estamparia; i++) {
+        let causas = $("#causasPinturaR-" + i).val();
+        let quantidade = $("#quantidade_causas_pinturaR-" + i).val();
+        let inputId = '#inputGroupFile_pinturaR-' + i;
+        let files = $(inputId)[0].files;
+        for (let file of files) {
+            formData.append('foto_inspecao_' + i + '[]', file);
+        }
+        list_causas.push(causas)
+        list_quantidade.push(quantidade)
+    }
 
     if (n_conformidades === "" || inspetor === null || n_conformidades > qtd_produzida_value || n_conformidades < 0) {
         alert('Verifique se o campo de conformidades ou inspetor estão com valores corretos');
@@ -595,31 +629,14 @@ $('#btnEnviarPinturaReinspecao').on('click',function() {
         return; // Interrompe a execução
     }
 
-    for (var i = 1; i <= n_nao_conformidades; i++) {
-        let causas = $("#causa_reinspecao_" + i).val();
-        if (causas.trim() === "") {
-            alert('Preencha todos os campos das causas de não conformidade.');
-            $('#btnEnviarPinturaReinspecao').prop('disabled',false);
-            $("#loading").hide();
-            return; // Interrompe a execução
-        }
-        list_causas.push(causas);
-    }
-
-    for (let i = 1; i <= n_nao_conformidades; i++) {
-        let inputId = '#foto_inspecao_' + i;
-        let files = $(inputId)[0].files;
-        for (let file of files) {
-            formData.append('foto_inspecao_' + i + '[]', file);
-        }
-    }
-
     formData.append('id_inspecao', id_inspecao);
     formData.append('data_inspecao', data_inspecao);
     formData.append('n_conformidades', n_conformidades);
     formData.append('n_nao_conformidades', n_nao_conformidades);
     formData.append('list_causas', JSON.stringify(list_causas));
+    formData.append('list_quantidade', JSON.stringify(list_quantidade));
     formData.append('inspetor', inspetor);
+    formData.append('tipos_causas_pintura', tipos_causas_estamparia);
     formData.append('qtd_produzida', qtd_produzida_value);
     formData.append('reinspecao', reinspecao);
 
@@ -644,15 +661,20 @@ $('#n_conformidades_reinspecao').on('input',function() {
 
     let n_conformidades_value = parseInt($('#n_conformidades_reinspecao').val(), 10);
     let qtd_produzida_value = parseInt($('#qtd_produzida_reinspecao').val(), 10);
+    let containerCausas = $("#selectContainerReinspecao");
 
     $('#n_nao_conformidades_reinspecao').val(qtd_produzida_value - n_conformidades_value);
 
     if(n_conformidades_value >= qtd_produzida_value || n_conformidades_value < 0 || n_conformidades_value === '') {
         $("#causa_nova_reinspecao").prop('disabled', true);
         $("#causa_nova_reinspecao").val('');
+        containerCausas.css('display','none')
         $('#n_nao_conformidades_reinspecao').val(0);
+        $('#causasPinturaR-0').val('');
+        $('#quantidade_causas_pinturaR-0').val('');
     } else {
         $("#causa_nova_reinspecao").prop('disabled', false);
+        containerCausas.css('display','flex')
     }
 })
 

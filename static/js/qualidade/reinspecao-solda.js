@@ -42,6 +42,8 @@ $('#inputReinspecionadasConformidadesSolda').on('input',function() {
         outraCausaSoldaReinspecionadas.prop('disabled',true);
         selectNaoConformidadesSolda.val('')
         outraCausaSoldaReinspecionadas.val('')
+        $("#causasSoldaR-0").val('')
+    $("#quantidade_causas_soldaR-0").val('')
     } else {
         selectNaoConformidadesSolda.prop('disabled',false);
         outraCausaSoldaReinspecionadas.prop('disabled',false);
@@ -78,12 +80,6 @@ $('#envio_reinspecao_Solda').on('click',function() {
 
     for (var i = 0; i < tipos_causas_solda; i++) {
         qtd_causas += parseInt($("#quantidade_causas_soldaR-" + i).val())
-        let causas = $("#causasSoldaR-" + i).val();
-        if (causas === null && inputNaoConformidadesSolda != 0) {
-            alert('Preencha todos os campos das causas de não conformidade.');
-            $("#loading").hide();
-            return; // Interrompe a execução
-        }
     }
 
     if((qtd_causas != inputNaoConformidadesSolda) && inputNaoConformidadesSolda != 0){
