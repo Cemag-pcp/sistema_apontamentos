@@ -94,7 +94,7 @@ function setorCards(response) {
 
     var qtd_na_reinspecao = 0
 
-    if(setor === 'Pintura') {
+    if(setor === 'Pintura' || setor === 'Estamparia') {
 
         for (var i = 0; i < historico.length; i++) {
 
@@ -116,8 +116,8 @@ function setorCards(response) {
                 <div class="d-flex w-100 justify-content-between">
                     <h6 class="mb-1">${item[9]}</h6>
                     <div class="d-flex flex-column align-items-end">
-                        <small>N° Conformidade : ${item[2]}</small>
-                        <small>N° de não Conformidade : ${qtd_disponivel_inspecao - item[2]}</small>
+                        <small>Conformidade : ${item[2]}</small>
+                        <small>Não Conformidade: ${qtd_disponivel_inspecao - item[2]}</small>
                         <small>Inspetor : ${item[3]}</small>
                         <small>Exec.:  ${item[5]}</small>
                     </div>
@@ -132,7 +132,7 @@ function setorCards(response) {
             qtd_disponivel_inspecao = qtd_disponivel_inspecao - item[2]
         }
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total de conj. inspecionados : " + qt_apontada)
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conj. inspecionados : " + qt_apontada)
 
         $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Quantidade p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
 
@@ -147,6 +147,73 @@ function setorCards(response) {
             }
         }); 
         
+    } else if (setor === 'Solda') {
+        for (var i = 0; i < historico.length; i++) {
+
+            var item = historico[i];
+
+            qtd_na_reinspecao += item[2]
+
+            // Criar elemento da lista e definir atributos de dados
+            var listItem = $('<a>', {
+                class: 'list-group-item modal-edit no-more-hover',
+                'aria-current': 'true',
+                'data-index': i, // Armazenar o índice do item como um atributo de dados
+            });
+
+            listItem.css('text-decoration','none');
+            listItem.css('color','#6e707e');
+            
+            var content = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${item[9]}</h6>
+                    <div class="d-flex flex-column align-items-end text-right">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Opções</a>
+                            <div class="dropdown-menu drop">
+                                <a class="dropdown-item option1" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Visualizar causas da não conformidade</a>
+                                <a class="dropdown-item option2" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Editar as conformidades</a>
+                            </div>
+                        </div>
+                        <small>Conformidade : ${item[2]}</small>
+                        <small>Não Conformidade : ${item[10]}</small>
+                        <small>Inspetor : ${item[3]}</small>
+                        <small>Exec.:  ${item[5]}</small>
+                    </div>
+                </div>
+                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1])}</p>
+            `;
+            
+            listItem.html(content);
+            
+            $('#listaHistorico').append(listItem);
+
+        }
+
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conj. inspecionados : " + qt_apontada)
+
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Qtd. p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
+
+        $(".option1").on('click', function() {
+            var dataItemString = $(this).data('item');
+            var concatenatedPhotos = concatPhotosByCriteria(foto_causa, dataItemString[5]);
+            if (Object.keys(concatenatedPhotos).length !== 0) {
+                $("#modalTimeline").modal('hide')
+                modalVisualizarCausas(concatenatedPhotos);
+            } else {
+                alert("Não possui nenhuma não conformidade")
+            }
+        }); 
+        $(".option2").on('click', function() {
+            var dataItemString = $(this).data('item');
+            if(dataItemString[2] != 0){
+                $("#modalTimeline").modal('hide')
+                modalEditarConformidade(dataItemString[0],dataItemString[2],dataItemString[5],dataItemString[9],dataItemString[10])
+            } else {
+                alert("Número de Conformidade é igual a 0")
+            }
+        }); 
+            
     } else {
         for (var i = 0; i < historico.length; i++) {
 
@@ -175,8 +242,8 @@ function setorCards(response) {
                                 <a class="dropdown-item option2" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Editar as conformidades</a>
                             </div>
                         </div>
-                        <small>N° Conformidade : ${item[2]}</small>
-                        <small>N° de não Conformidade : ${item[10]}</small>
+                        <small>Conformidade : ${item[2]}</small>
+                        <small>Não Conformidade : ${item[10]}</small>
                         <small>Inspetor : ${item[3]}</small>
                         <small>Exec.:  ${item[5]}</small>
                     </div>
@@ -190,9 +257,9 @@ function setorCards(response) {
 
         }
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conjunto : " + qt_apontada)
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conj. inspecionados : " + qt_apontada)
 
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Quantidade p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
+        $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Qtd. p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
 
         $(".option1").on('click', function() {
             var dataItemString = $(this).data('item');
@@ -213,7 +280,6 @@ function setorCards(response) {
                 alert("Número de Conformidade é igual a 0")
             }
         }); 
-            
     }
 
 }
@@ -293,6 +359,11 @@ function modalEditarConformidade(id,n_conformidade,num_execução,descricao,nao_
     $('#nao_conformidades_edicao').val(nao_conformidades)
 
     $('#descricao_peca_edicao').val(descricao)
+    
+    $("#num_causas_edicao").val("")
+    $("#qtd_conformidade_atualizada_edicao").val("")
+    $("#causasSoldaE-0").val("")
+    $("#quantidade_causas_soldaE-0").val("")
 
     $('#editarConformidadesModal').modal('show');
 }
@@ -593,12 +664,16 @@ $('#atualizarConformidades').on('click', function(){
 
     let id_edicao = $("#id_edicao").val();
     let list_causas = [];
-    let qtd_conformidade_antiga = $("#qtd_conformidade_edicao").val();
+    let list_quantidade = [];
+    let qtd_conformidade_antiga = parseInt($("#qtd_conformidade_edicao").val());
     let conformidade_atualizada = $("#qtd_conformidade_atualizada_edicao");
     let num_execucao = $("#num_execucao_edicao").val();
     let nao_conformidades = $("#nao_conformidades_edicao").val();
+    let num_causas_edicao = $("#num_causas_edicao").val();
+    let tipos_causas_solda = $('#tipos_causas_solda_edicao').val();
+    let qtd_causas = 0
 
-    if(conformidade_atualizada.val() >= qtd_conformidade_antiga || conformidade_atualizada.val() < 0 || conformidade_atualizada.val() === ''){
+    if(parseInt(conformidade_atualizada.val()) >= qtd_conformidade_antiga || parseInt(conformidade_atualizada.val()) < 0 || parseInt(conformidade_atualizada.val()) === ''){
         alert("Valor inválido")
         conformidade_atualizada.val('')
         $("#loading").hide();
@@ -607,34 +682,34 @@ $('#atualizarConformidades').on('click', function(){
 
     conformidade_atualizada = $("#qtd_conformidade_atualizada_edicao").val();
 
-    for (var i = 1; i <= (qtd_conformidade_antiga - conformidade_atualizada); i++) {
-        let causas = $("#causa_reinspecao_" + i).val();
-        if (causas.trim() === "") {
-            alert('Preencha todos os campos das causas de não conformidade.');
-            $('#envio_inspecao').prop('disabled',false);
-            $("#loading").hide();
-            return; // Interrompe a execução
-        }
-        list_causas.push(causas);
-    }
-
-    for (let i = 1; i <= (qtd_conformidade_antiga - conformidade_atualizada); i++) {
-        let inputId = '#foto_inspecao_' + i;
+    for (var i = 0; i < tipos_causas_solda; i++) {
+        qtd_causas += parseInt($("#quantidade_causas_soldaE-" + i).val())
+        let causas = $("#causasSoldaE-" + i).val();
+        let quantidade = $("#quantidade_causas_soldaE-" + i).val();
+        let inputId = '#inputGroupFile_soldaE-' + i;
         let files = $(inputId)[0].files;
         for (let file of files) {
             formData.append('foto_inspecao_' + i + '[]', file);
         }
+        list_causas.push(causas)
+        list_quantidade.push(quantidade)
+    }
+
+    if((qtd_causas != num_causas_edicao) && num_causas_edicao != 0){
+        alert('Verifique se a soma dos campos de "Quantidade" está igual ao valor de "Total de NÃO conformidades"');
+        $("#loading").hide();
+        return; // Interrompe a execução
     }
 
     formData.append('id_edicao', id_edicao);
     formData.append('qtd_conformidade_antiga', qtd_conformidade_antiga);
     formData.append('conformidade_atualizada', conformidade_atualizada);
     formData.append('nao_conformidades', nao_conformidades);
+    formData.append('nao_conformidades', nao_conformidades);
     formData.append('num_execucao', num_execucao);
     formData.append('list_causas', JSON.stringify(list_causas));
-
-    console.log(qtd_conformidade_antiga)
-    console.log(conformidade_atualizada)
+    formData.append('list_quantidade', JSON.stringify(list_quantidade));
+    formData.append('tipos_causas_solda', tipos_causas_solda);
 
     $.ajax({
         url: '/atualizar-conformidade',

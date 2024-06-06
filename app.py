@@ -743,10 +743,10 @@ def planejar_pintura():
 
     return render_template('planejar-pintura.html', sheet_data=sheet_data)
 
-# --------- INSPEÇÃO -----------
+# --------- INICIO INSPEÇÃO -----------
 
 @app.route('/inspecao', methods=['GET','POST'])
-def inspecao():
+def inspecao_pintura():
 
     """
     Rota para página de inspecao
@@ -783,7 +783,7 @@ def inspecao():
 
         return jsonify("Success")
 
-    inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar()
+    inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar_pintura()
 
     return render_template('inspecao.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
@@ -809,7 +809,7 @@ def modal_historico():
                             ORDER BY num_inspecao ASC"""
     else: 
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,i.total_conformidades,i.inspetor,
-                            i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.conjunto,i.nao_conformidades,om.origem,insp.qt_apontada
+                            i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.conjunto,i.nao_conformidades,om.origem,insp.qt_inspecionada
                                 FROM pcp.pecas_inspecionadas as i
                             LEFT JOIN pcp.ordens_montagem as om ON i.id_inspecao = om.id::varchar
                             LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
@@ -831,30 +831,34 @@ def modal_historico():
     return jsonify(historico,foto_causa)
 
 @app.route('/inspecao-solda',methods=['GET','POST'])
-def solda():
+def inspecao_solda():
 
     if request.method == 'POST':
-
-        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                        password=DB_PASS, host=DB_HOST)
-        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         id_inspecao_solda = request.form.get('id_inspecao')
 
         n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
         id_inspecao = request.form.get('id_inspecao')
         list_causas = json.loads(request.form.get('list_causas'))
+        list_quantidade = json.loads(request.form.get('list_quantidade'))
+
+        if list_quantidade == ['']:
+            list_quantidade = [None]
 
         outraCausaSolda = request.form.get('outraCausaSolda')  
+        tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
 
         for i, item in enumerate(list_causas):
             if item == 'Outro':
                 list_causas[i] = outraCausaSolda
 
-        classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas)
+        print(list_causas)
+
+        if list_causas != [None]:
+            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_solda,list_quantidade)
 
         data_inspecao = request.form.get('data_inspecao')
-        
+
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
         data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
 
@@ -891,10 +895,10 @@ def solda():
                 classe_inspecao.inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
                                    inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
                 classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas)
             else:
                 classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas)
 
         return jsonify("Success")
         
@@ -963,6 +967,76 @@ def solda():
     
     return render_template('inspecao-solda.html',a_inspecionar_solda=a_inspecionar_solda,inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda,lista_soldadores=lista_soldadores)
 
+@app.route('/inspecao-estamparia',methods=['GET','POST'])
+def inspecao_estamparia():
+
+    if request.method == 'POST':
+
+        n_nao_conformidades = int(request.form.get('inputNaoConformidadesEstamparia', 0))
+        id_inspecao = request.form.get('id_inspecao')
+        list_causas = json.loads(request.form.get('list_causas'))
+        list_quantidade = json.loads(request.form.get('list_quantidade'))
+
+        if list_quantidade == ['']:
+            list_quantidade = [None]
+
+        outraCausaSolda = request.form.get('outraCausaEstamparia')  
+        tipos_causas_estamparia = int(request.form.get('tipos_causas_estamparia'))
+
+        for i, item in enumerate(list_causas):
+            if item == 'Outro':
+                list_causas[i] = outraCausaSolda
+
+        if list_causas != [None]:
+            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_estamparia,list_quantidade)
+
+        data_inspecao = request.form.get('data_inspecao')
+        
+        data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
+        data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
+
+        inputCategoria = request.form.get('inputCategoria')
+        inputConjunto = request.form.get('inputConjunto')
+
+        num_conformidades = request.form.get('inputConformidadesEstamparia')
+        num_nao_conformidades = request.form.get('inputNaoConformidadesEstamparia')
+
+        observacaoSolda = request.form.get('observacaoEstamparia')  
+        origemInspecaoSolda = request.form.get('origemInspecaoEstamparia')  
+
+        inspetoresSolda = request.form.get('inspetorEstamparia')
+        num_pecas = request.form.get('num_pecas')
+        reinspecao = request.form.get('reinspecao')
+
+        setor = 'Estamparia'
+
+        if reinspecao == "True":
+
+            retrabalhoSolda = request.form.get('retrabalhoSolda')
+
+            retrabalhoSolda,operadores = retrabalhoSolda.split(" - ")
+
+            classe_inspecao.alterar_reinspecao(id_inspecao,num_nao_conformidades,num_pecas,num_conformidades,list_causas,inspetoresSolda,setor,
+                               inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda,retrabalhoSolda)
+            return jsonify("Success")
+        
+        else:
+            if num_conformidades != num_pecas:
+                classe_inspecao.inserir_reinspecao(id_inspecao,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
+                                   inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
+                classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
+                                      origemInspecaoSolda,observacaoSolda,num_pecas)
+            else:
+                classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
+                                      origemInspecaoSolda,observacaoSolda,num_pecas)
+
+
+        return jsonify("Success")
+        
+    inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar_estamparia()
+
+    return render_template('inspecao-estamparia.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
+
 @app.route('/atualizar-conformidade',methods=['POST'])
 def atualizar_conformidade():
 
@@ -975,13 +1049,17 @@ def atualizar_conformidade():
     nao_conformidades = int(request.form.get('nao_conformidades'))
     valor_reinspecao = qtd_conformidade_antiga - conformidade_atualizada
     num_nao_conformidade = (qtd_conformidade_antiga - conformidade_atualizada) + nao_conformidades
+
     num_execucao = request.form.get('num_execucao')
     list_causas = json.loads(request.form.get('list_causas'))
+    list_quantidade = json.loads(request.form.get('list_quantidade'))
+    tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
 
-    classe_inspecao.processar_fotos_inspecao(id_edicao, valor_reinspecao, list_causas,num_execucao)
-    print(list_causas)
-    print(f"{qtd_conformidade_antiga} - {conformidade_atualizada} + {nao_conformidades} RESULTADO = {num_nao_conformidade}")
-    print(f"{qtd_conformidade_antiga} - {conformidade_atualizada} RESULTADO = {valor_reinspecao}")
+    if list_quantidade == ['']:
+        list_quantidade = [None]
+
+    if list_causas != [None]:
+        classe_inspecao.processar_fotos_inspecao(id_edicao, nao_conformidades, list_causas,num_execucao,tipos_causas_solda,list_quantidade)
 
     atualizar_historico = f"""UPDATE pcp.pecas_inspecionadas
                              SET total_conformidades = '{conformidade_atualizada}', nao_conformidades = '{num_nao_conformidade}' 
@@ -1017,7 +1095,7 @@ def atualizar_conformidade():
 
         setor = 'Solda'
         criar_reinspecao = """INSERT INTO pcp.pecas_reinspecao 
-                        (id, data_reinspecao, nao_conformidades, causa_reinspecao, inspetor, setor, peca, categoria, outra_causa, origem, observacao) 
+                        (id, data_reinspecao, nao_conformidades, causa_reinspecao, inspetor, setor, conjunto, categoria, outra_causa, origem, observacao) 
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, '', %s, %s)"""
         values = (
             id_edicao,
@@ -1055,7 +1133,7 @@ def atualizar_conformidade():
 
     return jsonify('success')
 
-# --------- INSPEÇÃO -----------
+# --------- FIM INSPEÇÃO -----------
 
 @app.route('/conjuntos', methods=['POST'])
 def listar_conjuntos():
@@ -1896,6 +1974,24 @@ def finalizar_peca_em_processo_estamparia():
 
     cur.execute(query, (celula, codigo, descricao, inputQuantidadeRealizada, dataCarga,
                 data_finalizacao, operadorInputModal_1, textAreaObservacao, chave, origem, dataHoraInicio))
+
+    conn.commit()
+
+    trazendo_id = """SELECT id
+                        FROM pcp.ordens_estamparia
+                    ORDER BY id DESC
+                    LIMIT 1"""
+    
+    cur.execute(trazendo_id)
+
+    last_id_montagem = cur.fetchone()
+    last_id_montagem = last_id_montagem[0]
+
+    query_inspecao = """INSERT INTO pcp.pecas_inspecao (id,data_finalizada,codigo,peca,qt_apontada,setor,celula)
+                    VALUES (%s,%s,%s,%s,%s,'Estamparia',%s)
+                    """
+
+    cur.execute(query_inspecao, (last_id_montagem, data_finalizacao, codigo, descricao, inputQuantidadeRealizada, celula))
 
     conn.commit()
 

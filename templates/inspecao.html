@@ -1,7 +1,7 @@
 {% extends 'sidebar.html' %}
 
 {% block title %}
-<title>Apontamento Pintura</title>
+<title>Inspeção Pintura</title>
 {% endblock %}
 
 {% block links %}
@@ -98,7 +98,7 @@
                                                     <i class="fa-solid fa-angle-down"></i>
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                                    <a id="btn_exec" class="dropdown-item dropdown_os"
+                                                    <a  class="dropdown-item dropdown_os"
                                                         style="cursor: pointer;" onclick="modalInspecao(
                                                     '{{inpecao[0]}}',
                                                     '{{inpecao[1]}}',
@@ -153,7 +153,7 @@
                                                     <i class="fa-solid fa-angle-down"></i>
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                                    <a id="btn_exec" class="dropdown-item dropdown_os"
+                                                    <a  class="dropdown-item dropdown_os"
                                                         style="cursor: pointer;" onclick="modalTimeline('{{inspecionada[0]}}','Pintura')">
                                                         Histórico
                                                     </a>
@@ -206,7 +206,7 @@
                                                     <i class="fa-solid fa-angle-down"></i>
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                                    <a id="btn_exec" class="dropdown-item dropdown_os"
+                                                    <a class="dropdown-item dropdown_os"
                                                         style="cursor: pointer;" onclick="modalReinspecao(
                                                         '{{reinspecao[0]}}',
                                                         '{{reinspecao[1]}}',
@@ -489,7 +489,7 @@
         <script src="static/js/demo/datatables-demo.js"></script>
         <script src="/static/js/qualidade/inspecao-pintura.js"></script>
         <script src="/static/js/qualidade/inspecao-solda.js"></script>
-        <script src="/static/js/qualidade/selects_causa_pintura.js"></script>
+        <script src="/static/js/qualidade/selects_causa_pintura_solda.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 
         {% endblock %}

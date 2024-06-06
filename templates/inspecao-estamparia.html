@@ -1,0 +1,673 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Inspeção Estamparia</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid f-14">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h4 mb-0 text-gray-800">Inspeção Estamparia</h1>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- tabela gerar cambão -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" onclick="changeTab('AinspecionarEstamparia')"
+                                style="cursor: pointer;">A inspecionar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="changeTab('inspecionadosEstamparia')"
+                                style="cursor: pointer;">Inspecionados</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="changeTab('reinspecionadosEstamparia')"
+                                style="cursor: pointer;">Reinspecão</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body" id="AinspecionarEstampariaTable" style="display: block;">
+                    <div id="no-more-tables">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTableAinspecionarEstamparia" width="100%"
+                                cellspacing="0">
+                                <thead class="cf">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Data Finalizada</th>
+                                        <th>Código</th>
+                                        <th>Conjunto</th>
+                                        <th>Quantidade</th>
+                                        <th>Máquina</th>
+                                        <th>Executar Inspeção</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for inspecao in inspecoes %}
+                                    <tr>
+                                        <td data-title="#">{{inspecao[0]}}</td>
+                                        <td data-title="Data Finalizada">{{inspecao[1]}}</td>
+                                        <td data-title="Código">{{inspecao[2]}}</td>
+                                        <td data-title="Conjunto">{{inspecao[3]}}</td>
+                                        <td data-title="Quantidade">{{inspecao[5]}}</td>
+                                        <td data-title="Máquina">{{inspecao[9]}}</td>
+                                        <td data-title="Exec">
+                                            <div class="col-sm-4 d-flex justify-content-center align-items-center"
+                                                style="padding-left: 0.35rem;">
+                                                <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                                    style="cursor: pointer;">
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </a>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                    <a class="dropdown-item dropdown_os"
+                                                        style="cursor: pointer;" onclick="modalInspecaoEstamparia('{{inspecao[0]}}','{{inspecao[9]}}','{{inspecao[3]}}','{{inspecao[5]}}')">
+                                                        Executar inspeção de estamparia
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card tabela inspecionados -->
+                <div class="card-body" id="inspecionadosEstampariaTable" style="display: none;">
+                    <div id="no-more-tables">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTableinspecionadosEstamparia" width="100%"
+                                cellspacing="0">
+                                <thead class="cf">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Data Inspeção</th>
+                                        <th>Conjunto</th>
+                                        <th>Inspetor</th>
+                                        <th>Execução</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for inspecionada in inspecionadas %}
+                                    <tr>
+                                        <td data-title="#">{{inspecionada[0]}}</td>
+                                        <td data-title="Data Inspeção">{{inspecionada[1]}}</td>
+                                        <td data-title="Peca">{{inspecionada[6]}}</td>
+                                        <td data-title="Inspetor">{{inspecionada[3]}}</td>
+                                        <td data-title="Exec">
+                                            <div class="col-sm-4 d-flex justify-content-center align-items-center"
+                                                style="padding-left: 0.35rem;">
+                                                <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                                    style="cursor: pointer;">
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </a>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                    <a class="dropdown-item dropdown_os"
+                                                        style="cursor: pointer;" onclick="modalTimeline('{{inspecionada[0]}}','Estamparia')">
+                                                        Histórico Inspeção
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card tabela reinspeção -->
+                <div class="card-body" id="reinspecionadosEstampariaTable" style="display: none;">
+                    <div id="no-more-tables">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTableReinspecaoEstamparia" width="100%"
+                                cellspacing="0">
+                                <thead class="cf">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Data Inspeção</th>
+                                        <th>Conjunto</th>
+                                        <th>Inspetor</th>
+                                        <th>N° Não Conformidade</th>
+                                        <th>Tipo de Não Conformidade</th>
+                                        <th>Exec</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reinspecao in reinspecoes %}
+                                    <tr>
+                                        <td data-title="#">{{reinspecao[0]}}</td>
+                                        <td data-title="Data Reinspeção">{{reinspecao[1]}}</td>
+                                        <td data-title="Conjunto">{{reinspecao[6]}}</td>
+                                        <td data-title="Inspetor">{{reinspecao[4]}}</td>
+                                        <td data-title="N° Não Conformidade">{{reinspecao[2]}}</td>
+                                        <td data-title="Tipo de Não Conformidade">{{reinspecao[7]}}</td>
+                                        <td data-title="Exec">
+                                            <div class="col-sm-4 d-flex justify-content-center align-items-center"
+                                                style="padding-left: 0.35rem;">
+                                                <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                                    style="cursor: pointer;">
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </a>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                    <a class="dropdown-item dropdown_os"
+                                                        style="cursor: pointer;" onclick="modalReinspecaoEstamparia(
+                                                        '{{reinspecao[0]}}',
+                                                        '{{reinspecao[1]}}',
+                                                        '{{reinspecao[2]}}',
+                                                        '{{reinspecao[6]}}',
+                                                        '{{reinspecao[7]}}'
+                                                    )">Reinspeção
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Vídeo -->
+            <div class="modal fade" data-backdrop="static" id="inspecionarEstamparia" tabindex="-1" role="dialog"
+                aria-labelledby="inspecionarEstampariaLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="inspecionarEstampariaLabel">Inspeção</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px; height: 60vh; overflow-y: auto;">
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Data da inspeção</label>
+                                    <input type="text" class="form-control desabilitado" name="data_inspecao_estamparia"
+                                        id="data_inspecao_estamparia" style="font-size: 14px;" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Máquina</label>
+                                    <input type="text" class="form-control desabilitado" id="inputMaquina_estamparia" autocomplete="off"
+                                            aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
+                                </div>
+                            </div>
+                            <div class="row" style="align-items: end;">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Conjunto</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control desabilitado" id="inputConjunto_estamparia" autocomplete="off"
+                                            aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3 mb-4">
+                                    <label>N° de peças produzidas</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="inputPecasProduzidas_estamparia"
+                                            style="font-size: 12px;" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3 mb-4">
+                                    <label>N° peças inspecionadas</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="inputPecasInspecionadas_estamparia"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total de conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="inputConformidades_estamparia"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total de <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="inputNaoConformidades_estamparia"
+                                            style="font-size: 12px;" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_estamparia" value="1"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="selectContainer">
+                                <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
+                                    <label>Causas</label>
+                                    <select id="causasEstamparia-0" name="causasEstamparia-0" class="form-control" style="font-size: 14px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Virada irregular">Virada irregular</option>
+                                        <option value="Oxidação">Oxidação</option>
+                                        <option value="Marcações">Marcações</option>
+                                        <option value="Marcações Rebarba">Marcações Rebarba</option>
+                                        <option value="Medidas irregulares">Medidas irregulares</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 mb-4 quantidadeBlock" id="quantidadeBlock-0">
+                                    <label>Quantidade</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_estamparia-0" id="quantidade_causas_estamparia-0">
+                                </div>
+                                <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
+                                    <input type="file" class="custom-file-input" id="inputGroupFile_estamparia-0" accept="image/*" multiple="true">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
+                                </div>
+                                <div class="col-sm-12" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButton" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButton" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div>                            
+                            <div class="row">
+                                <div id="coluna_causa_estamparia" class="col-sm-12">
+
+                                </div>
+                            </div>
+                            <div class="row" style="align-items: end;">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Inspetor</label>
+                                    <select class="form-control" name="inspetor_estamparia" id="inspetor_estamparia" style="font-size: 12px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Leônidas">Leônidas</option>
+                                        <option value="Severiano">Severiano</option>
+                                        <option value="Marcelo">Marcelo</option>
+                                        <option value="Henrique">Henrique</option>
+                                        <option value="Guthemberg">Guthemberg</option>
+                                        <option value="Elenilson">Elenilson</option>
+                                        <option value="Estefane">Estefane</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Outro motivo<small><code> *Preencha caso tenha "Outro" listado nas causas</code></small></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control desabilitado" autocomplete="off"
+                                            id="outraCausa_estamparia" style="font-size: 12px;" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Observação</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control desabilitado" name="observacao_estamparia"
+                                            id="observacao_estamparia" style="font-size: 12px;">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4" id="origemInspecaoCol_estamparia">
+                                    <label>Origem</label>
+                                    <div class="input-group">
+                                        <select class="form-control" name="origemInspecao_estamparia"
+                                            id="origemInspecao_estamparia" style="font-size: 12px;">
+                                            <option value="" selected hidden disabled></option>
+                                            <option value="Corte">Corte</option>
+                                            <option value="Estamparia">Estamparia</option>
+                                            <option value="Usinagem">Usinagem</option>
+                                            <option value="Fornecedor">Fornecedor</option>
+                                            <option value="Solda">Solda</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="envio_inspecao_estamparia" class="btn btn-primary">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="reinspecaoModalEstamparia" tabindex="-1" role="dialog"
+                aria-labelledby="reinspecaoModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reinspecionarConjuntoLabel">Reinspeção</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px; height: 60vh; overflow-y: auto;">
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Data da reinspeção</label>
+                                    <input type="text" class="form-control" name="data_reinspecao_estamparia"
+                                        id="data_reinspecao_estamparia" style="font-size: 12px;" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Máquina</label>
+                                    <input type="text" class="form-control" style="font-size: 12px;" id="maquina_reinspecao_estamparia" 
+                                        name="maquina_reinspecao_estamparia" disabled>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Conjunto</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="inputConjuntoReinspecao_estamparia"
+                                            autocomplete="off" aria-describedby="basic-addon2"
+                                            style="font-size: 12px; cursor: default;" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>N° peças inspecionadas</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="inputPecasReinspecionadas_estamparia"
+                                            style="font-size: 12px;" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total de conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="inputReinspecionadasConformidades_estamparia"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total de <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="inputReinspecionadasNaoConformidades_estamparia"
+                                            style="font-size: 12px;" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_estamparia_reinspecao" value="1"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="selectContainerReinspecao">
+                                <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
+                                    <label>Causas</label>
+                                    <select id="causasEstampariaR-0" name="causasEstampariaR-0" class="form-control" style="font-size: 14px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Virada irregular">Virada irregular</option>
+                                        <option value="Oxidação">Oxidação</option>
+                                        <option value="Marcações">Marcações</option>
+                                        <option value="Marcações Rebarba">Marcações Rebarba</option>
+                                        <option value="Medidas irregulares">Medidas irregulares</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-3 mb-4 quantidadeBlock" id="quantidadeBlock-0">
+                                    <label>Quantidade</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_estampariaR-0" id="quantidade_causas_estampariaR-0">
+                                </div>
+                                <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
+                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
+                                    <input type="file" class="custom-file-input" id="inputGroupFile_estampariaR-0" accept="image/*" multiple="true">
+                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
+                                </div>
+                                <div class="col-sm-12 mb-4" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButtonReinspecao" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButtonReinspecao" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="coluna_causa_reinspecao_estamparia" class="col-sm-12">
+
+                                </div>
+                            </div>
+                            <div class="row" style="align-items: end;">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Outro motivo<small><code> *Preencha caso tenha "Outro" listado nas causas</code></small></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control desabilitado" autocomplete="off"
+                                            id="outraCausaReinspecionadas_estamparia" style="font-size: 12px;" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Inspetores</label>
+                                    <select class="form-control" name="inspetoresReinspecao_estamparia" id="inspetoresReinspecao_estamparia" style="font-size: 12px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Leônidas">Leônidas</option>
+                                        <option value="Severiano">Severiano</option>
+                                        <option value="Marcelo">Marcelo</option>
+                                        <option value="Henrique">Henrique</option>
+                                        <option value="Guthemberg">Guthemberg</option>
+                                        <option value="Elenilson">Elenilson</option>
+                                        <option value="Estefane">Estefane</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Observação</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control desabilitado"
+                                            name="observacaoReinspecionadas_estamparia" id="observacaoReinspecionadas_estamparia"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Retrabalho</label>
+                                    <div class="input-group">
+                                        <select class="form-control desabilitado" name="retrabalho_estamparia" id="retrabalho_estamparia"style="font-size: 12px;">
+                                            <option value="" selected hidden disabled></option>
+                                            <option value="4217 - Ronaldo">4217 - Ronaldo</option>
+                                            <option value="4348 - Leano">4348 - Leano</option>
+                                            <option value="4322 - Alex">4322 - Alex</option>
+                                            <option value="3654 - Airton">3654 - Airton</option>
+                                            <option value="4200 - Paiva">4200 - Paiva</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6 mb-4" id="origemReinspecaoCol_estamparia">
+                                    <label>Origem</label>
+                                    <div class="input-group">
+                                        <select class="form-control" name="origemReinspecionadas_estamparia"
+                                            id="origemReinspecionadas_estamparia" style="font-size: 12px;">
+                                            <option value="" selected hidden disabled></option>
+                                            <option value="Corte">Corte</option>
+                                            <option value="Estamparia">Estamparia</option>
+                                            <option value="Usinagem">Usinagem</option>
+                                            <option value="Fornecedor">Fornecedor</option>
+                                            <option value="Solda">Solda</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="envio_reinspecao_estamparia" class="btn btn-primary">Enviar</button>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="visualizacaoCausasModal" tabindex="-1" role="dialog"
+                aria-labelledby="visualizacaoCausasModalLabel" aria-hidden="true" style="overflow-y: auto;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="visualizacaoCausasModalLabel"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
+                            <h6 id="descricao_causas">Descrição das causas</h6>
+                            <ul id="lista_nao_ordenada" style="padding: 0;">
+                            </ul>
+                            
+                            <div id="img_visualizacaoCausas">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="editarConformidadesModal" tabindex="-1" role="dialog"
+                aria-labelledby="editarConformidadesModalLabel" aria-hidden="true" style="overflow-y: auto;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editarConformidadesModalTitle">Editar conformidades</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
+                            <div class="row">
+                                <div class="col-sm-4 mb-4">
+                                    <label>Id</label>
+                                    <input type="text" class="form-control" id="id_edicao" disabled>
+                                </div>
+                                <div class="col-sm-8 mb-4 d-flex flex-column justify-content-end">
+                                    <label>Descrição da Peça</label>
+                                    <input type="text" class="form-control" id="descricao_peca_edicao" disabled>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-4 d-none">
+                                    <label>Número da Execução</label>
+                                    <input type="number" class="form-control" id="num_execucao_edicao" disabled>
+                                </div>
+                                <div class="col-sm-4 mb-4 d-none">
+                                    <label>Não Conformidades</label>
+                                    <input type="number" class="form-control" id="nao_conformidades_edicao" disabled>
+                                </div>
+                                <div class="col-sm-4 mb-4 d-none">
+                                    <label>Subtração da Execução</label>
+                                    <input type="number" class="form-control" id="num_causas_edicao" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4 d-flex flex-column justify-content-end">
+                                    <label>Quantidade de conformidades</label>
+                                    <input type="number" class="form-control" id="qtd_conformidade_edicao" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Quantidade de conformidades atualizada</label>
+                                    <input type="number" class="form-control" id="qtd_conformidade_atualizada_edicao">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="coluna_causa_edicao_solda" class="col-sm-12">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" id="atualizarConformidades">Atualizar conformidades</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="modalTimeline" tabindex="-1" role="dialog" aria-labelledby="modalTimelineLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="m-0 font-weight-bold text-primary">Histórico</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="height: 60vh; overflow-y: auto;">
+                            <div class="list-group" id="listaHistorico">
+                                
+                            </div>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <p id="modal-footer-quantidade-produzida"></p>
+                            <p id="modal-footer-quantidade-reinspecao"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="modalConfirmacaoEstamparia" tabindex="-1" role="dialog" aria-labelledby="modalConfirmacaoSoldaLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                                Atenção
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="p_confirmar_inspecao_estamparia"></p>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total Conformidade</label>
+                                    <input type="text" class="form-control" id="confirmarConformidades_estamparia" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total Não Conformidade</label>
+                                    <input type="text" class="form-control" id="confirmarNaoConformidades_estamparia" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarEstamparia">Confirmar</button>
+                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarEstampariaReinspecao">Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+
+        </div>
+
+        {% endblock %}
+
+        {% block scripts %}
+
+        <!-- Script tabela JQuery -->
+
+        <script src="static/js/qualidade/causas/causas_estamparia.js"></script>
+        <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+        <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+        <script src="static/js/demo/datatables-demo.js"></script>
+        <script src="static/js/qualidade/inspecao-pintura.js"></script>
+        <script src="static/js/qualidade/inspecao-estamparia.js"></script>
+        <script src="static/js/qualidade/reinspecao_estamparia.js"></script>
+
+
+        {% endblock %}
