@@ -1169,6 +1169,50 @@ def atualizar_conformidade():
 
     return jsonify('success')
 
+# --------- DASHBOARD -----------
+
+@app.route('/dashboard-pintura',methods=['GET','POST'])
+def dashboard_pintura():
+
+    # SELECT 
+    # (SELECT SUM(qt_apontada) 
+    #  FROM pcp.pecas_inspecao 
+    #  WHERE setor = 'Pintura' 
+    #    AND EXTRACT(MONTH FROM data_finalizada) = 6
+    #    AND EXTRACT(YEAR FROM data_finalizada) = 2024) AS num_pecas_produzidas,
+     
+    # (SELECT SUM(qt_apontada) 
+    #  FROM pcp.pecas_inspecao 
+    #  WHERE setor = 'Pintura' 
+    #    AND excluidas = 'true'
+    #    AND EXTRACT(MONTH FROM data_finalizada) = 6
+    #    AND EXTRACT(YEAR FROM data_finalizada) = 2024) AS num_inspecoes,
+     
+    # (SELECT SUM(nao_conformidades) 
+    #  FROM pcp.pecas_inspecionadas 
+    #  WHERE setor = 'Pintura'
+    #    AND EXTRACT(MONTH FROM data_inspecao) = 6
+    #    AND EXTRACT(YEAR FROM data_inspecao) = 2024) AS total_nao_conformidades,
+     
+    # ROUND(
+    #     (SELECT 100.0 * SUM(qt_apontada) 
+    #      FROM pcp.pecas_inspecao 
+    #      WHERE setor = 'Pintura' 
+    #        AND excluidas = 'true'
+    #        AND EXTRACT(MONTH FROM data_finalizada) = 6
+    #        AND EXTRACT(YEAR FROM data_finalizada) = 2024) / 
+    #     (SELECT SUM(qt_apontada) 
+    #      FROM pcp.pecas_inspecao 
+    #      WHERE setor = 'Pintura'
+    #        AND EXTRACT(MONTH FROM data_finalizada) = 6
+    #        AND EXTRACT(YEAR FROM data_finalizada) = 2024), 
+    #     2
+    # ) AS porcentagem_inspecao
+
+    return render_template("dashboard-pintura.html")
+
+# --------- FIM DASHBOARD -----------
+
 # --------- FIM INSPEÇÃO -----------
 
 @app.route('/conjuntos', methods=['POST'])
