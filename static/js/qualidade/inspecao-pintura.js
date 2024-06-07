@@ -98,7 +98,7 @@ function setorCards(response) {
 
     var qtd_na_reinspecao = 0
 
-    if(setor === 'Pintura' || setor === 'Estamparia') {
+    if(setor === 'Pintura') {
 
         for (var i = 0; i < historico.length; i++) {
 
@@ -219,6 +219,8 @@ function setorCards(response) {
         }); 
             
     } else {
+        var foto_ficha = response[2]
+
         for (var i = 0; i < historico.length; i++) {
 
             var item = historico[i];
@@ -243,7 +245,7 @@ function setorCards(response) {
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Opções</a>
                             <div class="dropdown-menu drop">
                                 <a class="dropdown-item option1" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Visualizar causas da não conformidade</a>
-                                <a class="dropdown-item option2" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Editar as conformidades</a>
+                                <a class="dropdown-item option2" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Visualizar fichas da Inspeção</a>
                             </div>
                         </div>
                         <small>Conformidade : ${item[2]}</small>
@@ -277,15 +279,15 @@ function setorCards(response) {
         }); 
         $(".option2").on('click', function() {
             var dataItemString = $(this).data('item');
-            if(dataItemString[2] != 0){
+            var concatenatedPhotos = concatTokensByCriteria(foto_ficha, dataItemString[5]);
+            if (Object.keys(concatenatedPhotos).length !== 0) {
                 $("#modalTimeline").modal('hide')
-                modalEditarConformidade(dataItemString[0],dataItemString[2],dataItemString[5],dataItemString[9],dataItemString[10])
+                modalVisualizarCausas(concatenatedPhotos);
             } else {
-                alert("Número de Conformidade é igual a 0")
+                alert("Não possui nenhuma não conformidade")
             }
         }); 
     }
-
 }
 
 function modalVisualizarCausas(concatenatedPhotos) {
@@ -417,7 +419,7 @@ function concatPhotosByCriteria(foto_causa, execucaoDesejada) {
 
     // Itera sobre o array foto_causa
     for (var i = 0; i < foto_causa.length; i++) {
-        var key = foto_causa[i][2]; // A chave é o valor da terceira posição do subarray
+        var key = foto_causa[i][2] + " - " + foto_causa[i][4];  // A chave é o valor da terceira posição do subarray
         var execucao = foto_causa[i][3]; // Número da execução
 
         // Verifica se a execução corresponde à execução desejada
@@ -429,6 +431,34 @@ function concatPhotosByCriteria(foto_causa, execucaoDesejada) {
 
             // Concatena o valor da primeira posição do subarray à string correspondente à chave
             concatenatedPhotos[key] += foto_causa[i][1];
+        }
+    }
+
+    return concatenatedPhotos;
+}
+
+function concatTokensByCriteria(ficha, execucaoDesejada) {
+    var concatenatedPhotos = {};
+
+    // Itera sobre o array foto_causa
+    for (var i = 0; i < ficha.length; i++) {
+        if(ficha[i][2] == true){
+            var key = "Ficha de Inspeção 100%";  // A chave é o valor da terceira posição do subarray
+        } else {
+            var key = "Ficha de Inspeção de Produção";  // A chave é o valor da terceira posição do subarray
+        }
+        
+        var execucao = ficha[i][3]; // Número da execução
+
+        // Verifica se a execução corresponde à execução desejada
+        if (execucao === execucaoDesejada) {
+            // Se a chave ainda não existir no objeto concatenatedPhotos, inicializa como uma string vazia
+            if (!concatenatedPhotos[key]) {
+                concatenatedPhotos[key] = '';
+            }
+
+            // Concatena o valor da primeira posição do subarray à string correspondente à chave
+            concatenatedPhotos[key] += ficha[i][1];
         }
     }
 

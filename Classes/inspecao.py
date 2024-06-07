@@ -6,11 +6,12 @@ from flask import request
 
 class Inspecao:
 
-    def __init__(self, db_name, db_user, db_pass, db_host, upload_folder):
+    def __init__(self, db_name, db_user, db_pass, db_host, upload_folder,upload_folder_token):
 
         self.conn = psycopg2.connect(dbname=db_name, user=db_user, password=db_pass, host=db_host)
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         self.upload_folder = upload_folder
+        self.upload_folder_token = upload_folder_token
 
     def inserir_reinspecao(self, id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico='', categoria='', outraCausaSolda='', origemInspecaoSolda='', observacaoSolda=''):
         
@@ -247,6 +248,7 @@ class Inspecao:
             for i in range(1, n_nao_conformidades + 1):
                 file_key = f'foto_inspecao_{i}[]'
                 fotos = request.files.getlist(file_key)
+                print(fotos)
                 if fotos == []:
                     fotos.append('')
                 for foto in fotos:
@@ -258,11 +260,8 @@ class Inspecao:
                         foto.save(file_path)
                     else:
                         arquivos = None
-                        print("Arquivos",arquivos)
 
                     if num_inspecao == '':
-
-                        print("query_fotos")
 
                         query_fotos = """DO $$
                                             BEGIN
@@ -364,6 +363,82 @@ class Inspecao:
                     self.cur.execute(query_fotos, values_fotos)
 
         self.conn.commit()
+
+    def processar_ficha_inspecao(self,id_inspecao,ficha_producao='',ficha_completa=''):
+
+        if ficha_producao != '':
+
+            filename = secure_filename(ficha_producao.filename)
+            file_path = os.path.join(self.upload_folder_token, filename)
+            arquivos = file_path + ";"
+            arquivos = arquivos.replace('\\', '/')
+            ficha_producao.save(file_path)
+
+            query_ficha = """DO $$
+                            BEGIN
+                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                    INSERT INTO pcp.ficha_inspecao
+                                        (id, caminho_ficha, ficha_completa, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, 'false',
+                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                        );
+                                ELSE
+                                    INSERT INTO pcp.ficha_inspecao
+                                        (id, caminho_ficha, ficha_completa, num_inspecao) 
+                                    VALUES 
+                                        (%s, %s, 'false', 0);
+                                END IF;
+                            END $$;"""
+
+            values_ficha = (
+                    id_inspecao,
+                    id_inspecao,
+                    arquivos,
+                    id_inspecao,
+                    id_inspecao,
+                    arquivos
+                )
+            
+            self.cur.execute(query_ficha, values_ficha)
+
+        if ficha_completa != '':
+            filename = secure_filename(ficha_completa.filename)
+            file_path = os.path.join(self.upload_folder_token, filename)
+            arquivos = file_path + ";"
+            arquivos = arquivos.replace('\\', '/')
+            ficha_completa.save(file_path)
+
+            query_ficha_completa = """DO $$
+                        BEGIN
+                            IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
+                                INSERT INTO pcp.ficha_inspecao
+                                    (id, caminho_ficha, ficha_completa, num_inspecao) 
+                                VALUES 
+                                    (%s, %s, 'true',
+                                        (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
+                                    );
+                            ELSE
+                                INSERT INTO pcp.ficha_inspecao
+                                    (id, caminho_ficha, ficha_completa, num_inspecao) 
+                                VALUES 
+                                    (%s, %s, 'true', 0);
+                            END IF;
+                        END $$;"""
+
+            values_ficha_completa = (
+                    id_inspecao,
+                    id_inspecao,
+                    arquivos,
+                    id_inspecao,
+                    id_inspecao,
+                    arquivos
+                )
+            
+            self.cur.execute(query_ficha_completa, values_ficha_completa)
+        
+        self.conn.commit()
+        print("processar_ficha_inspecao")
 
     def fechar_conexao(self):
         self.cur.close()

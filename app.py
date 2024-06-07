@@ -27,6 +27,7 @@ warnings.filterwarnings('ignore')
 app = Flask(__name__)
 app.secret_key = "apontamentopintura"
 UPLOAD_FOLDER = 'static/fotos_causas'
+UPLOAD_FOLDER_TOKEN = 'static/fotos_ficha'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # socketio = SocketIO(app, async_mode=async_mode)
 # thread = None
@@ -39,7 +40,7 @@ DB_USER = "postgres"
 DB_PASS = "15512332"
 filename = "service_account.json"
 
-classe_inspecao = Inspecao(DB_NAME, DB_USER, DB_PASS, DB_HOST, UPLOAD_FOLDER)
+classe_inspecao = Inspecao(DB_NAME, DB_USER, DB_PASS, DB_HOST, UPLOAD_FOLDER, UPLOAD_FOLDER_TOKEN)
 
 cache_historico_pintura = cachetools.LRUCache(maxsize=128)
 cache_carretas = cachetools.LRUCache(maxsize=128)
@@ -827,16 +828,31 @@ def modal_historico():
     cur.execute(query_historico)
     historico = cur.fetchall()
 
+    
     query_caminho_foto = f"""SELECT *
                         FROM pcp.inspecao_foto
                         WHERE id = '{idinspecao}'
                         ORDER BY num_inspecao ASC
                         """
+    
+    if setor == 'Estamparia': 
 
+        query_caminho_ficha = f"""SELECT *
+                            FROM pcp.ficha_inspecao
+                            WHERE id = '{idinspecao}'
+                            ORDER BY num_inspecao ASC
+                            """
+        
+        cur.execute(query_caminho_ficha)
+        foto_ficha = cur.fetchall()
+
+    else: 
+        foto_ficha = ''
+        
     cur.execute(query_caminho_foto)
     foto_causa = cur.fetchall()
 
-    return jsonify(historico,foto_causa)
+    return jsonify(historico,foto_causa,foto_ficha)
 
 @app.route('/inspecao-solda',methods=['GET','POST'])
 def inspecao_solda():
@@ -990,6 +1006,18 @@ def inspecao_estamparia():
 
         outraCausaSolda = request.form.get('outraCausaEstamparia')  
         tipos_causas_estamparia = int(request.form.get('tipos_causas_estamparia'))
+        ficha_producao =  request.files.get("ficha_producao")
+        ficha_completa =  request.files.get("ficha_completa")
+
+        print(ficha_producao)
+        print(ficha_completa)
+
+        if ficha_producao == None:
+            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_completa=ficha_completa) 
+        elif ficha_completa == None: 
+            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_producao=ficha_producao)
+        else:
+            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_producao,ficha_completa)
 
         for i, item in enumerate(list_causas):
             if item == 'Outro':

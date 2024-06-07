@@ -167,6 +167,15 @@ $('#btnEnviarEstamparia').on('click',function() {
     let observacaoSolda = $('#observacao_estamparia').val();
     let origemInspecaoSolda = $('#origemInspecao_estamparia').val();
     let tipos_causas_estamparia = $("#tipos_causas_estamparia").val();
+    let ficha_producao = $("#ficha_producao")[0].files;
+    for (let file of ficha_producao) {
+        formData.append('ficha_producao', file);
+    }
+    let ficha_completa = $("#ficha_completa")[0].files;
+    for (let complet of ficha_completa) {
+        formData.append('ficha_completa', complet);
+    }
+    
     let reinspecao = 'False';
 
     if (inputConformidadesSolda === "" || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {

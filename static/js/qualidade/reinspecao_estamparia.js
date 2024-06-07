@@ -64,7 +64,7 @@ $('#inputReinspecionadasConformidades_estamparia').on('input',function() {
         outraCausaSoldaReinspecionadas.prop('disabled',true);
         outraCausaSoldaReinspecionadas.val('')
         causasEstamparia.css("display","none")
-        origemInspecaoSoldaReinspecionadas.css('display','none')
+        origemInspecaoSoldaReinspecionadas.css('visibility','hidden')
         origemInspecaoSoldaReinspecionadas.val('')
         $("#causasEstampariaR-0").val('')
         $("#quantidade_causas_estampariaR-0").val('')
@@ -72,7 +72,7 @@ $('#inputReinspecionadasConformidades_estamparia').on('input',function() {
         outraCausaSoldaReinspecionadas.prop('disabled',false);
         outraCausaSoldaReinspecionadas.val('')
         causasEstamparia.css("display","flex")
-        origemInspecaoSoldaReinspecionadas.css('display','block')
+        origemInspecaoSoldaReinspecionadas.css('visibility','visible')
     }
 
 })
@@ -88,6 +88,7 @@ $('#envio_reinspecao_estamparia').on('click',function() {
     let inspetoresSolda = $('#inspetoresReinspecao_estamparia').val();
     let retrabalhoSolda = $('#retrabalho_estamparia').val();
     let qtd_causas = 0
+    let ficha_completa_reinspecao = $("#ficha_completa_reinspecao").val()
 
     for (let i = 0; i < tipos_causas_estamparia; i++) {
         qtd_causas += parseInt($("#quantidade_causas_estampariaR-" + i).val())
@@ -107,7 +108,7 @@ $('#envio_reinspecao_estamparia').on('click',function() {
     $("#btnEnviarEstampariaReinspecao").css("display","block")
     $("#btnEnviarEstamparia").css("display","none")
 
-    if (inputConformidadesSolda === "" || inspetoresSolda === null || retrabalhoSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
+    if (inputConformidadesSolda === "" || inspetoresSolda === null || retrabalhoSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0 || ficha_completa_reinspecao === "" ) {
         alert('Verifique se os campos estão corretos');
         $("#loading").hide();
         return; // Interrompe a execução
@@ -147,6 +148,10 @@ $('#btnEnviarEstampariaReinspecao').on('click',function() {
     let observacaoSolda = $('#observacaoReinspecionadas_estamparia').val();
     let origemInspecaoSolda = $('#origemReinspecionadas_estamparia').val();
     let tipos_causas_estamparia = $("#tipos_causas_estamparia_reinspecao").val()
+    let ficha_completa_reinspecao = $("#ficha_completa_reinspecao")[0].files;
+    for (let file of ficha_completa_reinspecao) {
+        formData.append('ficha_completa', file);
+    }
     let reinspecao = "True";
 
     for (var i = 0; i < tipos_causas_estamparia; i++) {
