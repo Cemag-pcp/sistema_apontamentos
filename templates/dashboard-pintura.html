@@ -7,14 +7,18 @@
 {% block links %}
 <!-- Custom styles for this page -->
 <!-- Custom styles for this page -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
 <link rel="stylesheet" type="text/css"
     href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
 
 <!-- CSS tables responsive -->
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     
-    <!-- CSS tables responsive -->
+<!-- CSS tables responsive -->
 
 {% endblock %}
 
@@ -31,23 +35,282 @@
 
 <div class="container-fluid f-14">
 
-    <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h4 mb-0 text-gray-800">Dashboard Pintura</h1>
-        <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
+        <h1 class="h4 mb-2 text-gray-800">Controle de Qualidade Pintura</h1>
+        <form id="dateForm" class="d-sm-flex align-items-end justify-content-between">
+            <div>
+                <label for="data_filtro">Intervalo de data:</label>
+                <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off" style="width: 240px;">
+            </div>
+            <button type="submit" class="btn btn-primary mt-4">Filtrar Data</button>
+        </form>
     </div>
-
+    
+    <div class="row">
+        <div class="col-xl-12 mb-2">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3" style="display: flex; justify-content: space-between;">
+              <h6 class="m-0 font-weight-bold text-primary">Análise Temporal</h6>
+              <small><code>Índice Qualidade</code> - <span id="indiceQualidade">{{ ultimo_total_nao_conformidades }}</span></small>
+            </div>
+            <div class="card-body">
+              <div class="chart-bar">
+                <canvas id="mixedChart" style="width: 100%;height: 100%;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-12 mb-2">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Tabelas</h6>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable5" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>N° de peças produzidas</th>
+                      <th>N° de inspeções</th>
+                      <th>N° de não conformidades</th>
+                      <th>% de inspeção</th>
+                    </tr>
+                  </thead>
+                    <tbody id="dataTableBody">
+                        {% for dado in dados_dash_pintura %}
+                        <tr>
+                            <th scope="row">{{dado[0]}}</th>
+                            <td>{{dado[1]}}</td>
+                            <td>{{dado[2]}}</td>
+                            <td>{{dado[3]}}</td>
+                            <td>{{dado[4]}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 </div>
+
+<script>
+    // Função para criar o gráfico
+    function createChart(dado) {
+        const mixedCtx = document.getElementById('mixedChart').getContext('2d');
+        return new Chart(mixedCtx, {
+            type: 'bar',
+            data: {
+                labels: dado.ano_mes,
+                datasets: [
+                    {
+                        label: 'Quantidade de Peças Produzidas',
+                        data: dado.num_pecas_produzidas,
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64)',
+                        borderWidth: 1,
+                        yAxisID: 'y',
+                        datalabels: {
+                            display: true,
+                            align: 'top',
+                            formatter: function(value) {
+                                return value;
+                            }
+                        }
+                    },
+                    {
+                        label: 'Número de Inspeções',
+                        data: dado.num_inspecoes,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235)',
+                        borderWidth: 1,
+                        yAxisID: 'y',
+                        datalabels: {
+                            display: true,
+                            align: 'top',
+                            formatter: function(value) {
+                                return value;
+                            }
+                        }
+                    },
+                    {
+                        label: 'Porcentagem de Não Conformidades',
+                        data: dado.porcentagem_nao_conformidades,
+                        type: 'line',
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        borderColor: 'rgba(0, 0, 0, 1)',
+                        borderWidth: 1,
+                        fill: false,
+                        yAxisID: 'percentageAxis',
+                        datalabels: {
+                            display: true,
+                            align: 'top',
+                            formatter: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    },
+                    percentageAxis: {
+                        type: 'linear',
+                        position: 'right',
+                        grid: {
+                            display: false
+                        },
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    datalabels: {
+                        display: false
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+
+    // Inicializar o gráfico com os dados passados do backend
+    const initialData = JSON.parse('{{ dado | safe }}');
+    let mixedChart = createChart(initialData);
+
+    document.getElementById('dateForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const dateRange = document.getElementById('inputDate1').value;
+        const dates = dateRange.split(' - ');
+        const startDate = dates[0].split('/').reverse().join('-'); // Converte para o formato YYYY-MM-DD
+        const endDate = dates[1].split('/').reverse().join('-'); // Converte para o formato YYYY-MM-DD
+
+        fetch('/dashboard-pintura', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ startDate: startDate, endDate: endDate })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Atualizar os dados do gráfico
+            mixedChart.data.labels = data.dado.ano_mes;
+            mixedChart.data.datasets[0].data = data.dado.num_pecas_produzidas;
+            mixedChart.data.datasets[1].data = data.dado.num_inspecoes;
+            mixedChart.data.datasets[2].data = data.dado.porcentagem_nao_conformidades;
+
+            // Atualizar o gráfico
+            mixedChart.update();
+
+            // Atualizar o valor do índice de qualidade
+            document.getElementById('indiceQualidade').innerText = data.ultimo_total_nao_conformidades;
+
+            // Atualizar a tabela
+            const tableBody = document.getElementById('dataTableBody');
+            tableBody.innerHTML = ''; // Limpar tabela existente
+
+            data.dados_dash_pintura.forEach(dado => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <th scope="row">${dado[0]}</th>
+                    <td>${dado[1]}</td>
+                    <td>${dado[2]}</td>
+                    <td>${dado[3]}</td>
+                    <td>${dado[4]}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
 
 {% endblock %}
 
 {% block scripts %}
 
 <!-- Script tabela JQuery -->
-
+<script src="static/js/qualidade/dashboard/post_dashboard_pintura.js"></script>
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src = ></script>
 <script src="static/js/demo/datatables-demo.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+<script>
+    function validateForm() {
+        var inputDate = document.getElementById('inputDate1').value;
+    
+        // Verifica se a data está no formato correto
+        if (!isValidDateRange(inputDate) && inputDate !== '') {
+          alert('Formato de data inválido. Use o formato DD/MM/YYYY - DD/MM/YYYY.');
+          return false; // Impede o envio do formulário
+        }
+    
+        var dateRange = inputDate.split(' - '); // ['02/01/2024', '19/01/2024']
+        var startDateComponents = dateRange[0].split('/');
+        var endDateComponents = dateRange[1].split('/');
+    
+        // Cria as datas invertendo os componentes
+        var startDate = new Date(startDateComponents[2], startDateComponents[1] - 1, startDateComponents[0]);
+        var endDate = new Date(endDateComponents[2], endDateComponents[1] - 1, endDateComponents[0]);
+    
+        var maxDate = new Date();
+    
+        // Verifica se as datas estão dentro do intervalo permitido
+        if (endDate > maxDate) {
+          alert('A segunda data não pode ser posterior a hoje.');
+          return false; // Impede o envio do formulário
+        }
+    
+        return true; // Permite o envio do formulário
+    }
+    
+    function isValidDateRange(dateRange) {
+        var dateRangePattern = /^\d{2}\/\d{2}\/\d{4} - \d{2}\/\d{2}\/\d{4}$/;
+        return dateRangePattern.test(dateRange);
+    }
+    
+    $(function() {
+        var today = moment();
+
+        // Obter o primeiro dia do mês atual
+        var startOfMonth = moment().startOf('month');
+
+        // Obter o último dia do mês atual
+        var endOfMonth = moment().endOf('month');
+
+        $('input[name="datetimes"]').daterangepicker({
+            startDate: startOfMonth,
+            endDate: endOfMonth,
+            locale: {
+                format: 'DD/MM/YYYY'
+            }
+        });
+    
+        $('input[name="datetimes"]').on('apply.daterangepicker', function(ev, picker) {
+        var startDate = picker.startDate;
+        var endDate = picker.endDate;
+    
+        if (endDate.isBefore(startDate)) {
+            alert("A data final não pode ser menor que a data inicial");
+            picker.setEndDate(startDate);
+        }
+        });
+    });
+    </script>
 
 {% endblock %}

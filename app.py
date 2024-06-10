@@ -1,6 +1,7 @@
 from flask import Flask,session,render_template, request, jsonify, redirect, url_for, flash, Blueprint, send_file
 import pandas as pd
 from Classes.inspecao import Inspecao
+from Classes.DashboardInspecao import DashboardInspecao
 import time
 import uuid
 import datetime
@@ -8,6 +9,7 @@ import psycopg2  # pip install psycopg2
 import psycopg2.extras
 from psycopg2.extras import execute_values
 from datetime import datetime, timedelta, date
+import calendar
 # from oauth2client.service_account import ServiceAccountCredentials
 import cachetools
 import gspread
@@ -1171,45 +1173,73 @@ def atualizar_conformidade():
 
 # --------- DASHBOARD -----------
 
-@app.route('/dashboard-pintura',methods=['GET','POST'])
+@app.route('/dashboard-pintura', methods=['GET','POST'])
 def dashboard_pintura():
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        start_date = data.get('startDate')
+        end_date = data.get('endDate')
 
-    # SELECT 
-    # (SELECT SUM(qt_apontada) 
-    #  FROM pcp.pecas_inspecao 
-    #  WHERE setor = 'Pintura' 
-    #    AND EXTRACT(MONTH FROM data_finalizada) = 6
-    #    AND EXTRACT(YEAR FROM data_finalizada) = 2024) AS num_pecas_produzidas,
-     
-    # (SELECT SUM(qt_apontada) 
-    #  FROM pcp.pecas_inspecao 
-    #  WHERE setor = 'Pintura' 
-    #    AND excluidas = 'true'
-    #    AND EXTRACT(MONTH FROM data_finalizada) = 6
-    #    AND EXTRACT(YEAR FROM data_finalizada) = 2024) AS num_inspecoes,
-     
-    # (SELECT SUM(nao_conformidades) 
-    #  FROM pcp.pecas_inspecionadas 
-    #  WHERE setor = 'Pintura'
-    #    AND EXTRACT(MONTH FROM data_inspecao) = 6
-    #    AND EXTRACT(YEAR FROM data_inspecao) = 2024) AS total_nao_conformidades,
-     
-    # ROUND(
-    #     (SELECT 100.0 * SUM(qt_apontada) 
-    #      FROM pcp.pecas_inspecao 
-    #      WHERE setor = 'Pintura' 
-    #        AND excluidas = 'true'
-    #        AND EXTRACT(MONTH FROM data_finalizada) = 6
-    #        AND EXTRACT(YEAR FROM data_finalizada) = 2024) / 
-    #     (SELECT SUM(qt_apontada) 
-    #      FROM pcp.pecas_inspecao 
-    #      WHERE setor = 'Pintura'
-    #        AND EXTRACT(MONTH FROM data_finalizada) = 6
-    #        AND EXTRACT(YEAR FROM data_finalizada) = 2024), 
-    #     2
-    # ) AS porcentagem_inspecao
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    return render_template("dashboard-pintura.html")
+        # Convert the dates to datetime objects
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Fetch data based on the provided dates
+        dados_dash_pintura = DashboardInspecao.dados_pintura(cur, start_date, end_date)
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "dado": dado,
+            "ultimo_total_nao_conformidades": ultimo_total_nao_conformidades,
+            "dados_dash_pintura": dados_dash_pintura
+        })
+    
+    elif request.method == 'GET':
+        
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        hoje = datetime.today()
+        inicio_mes = hoje.replace(day=1)
+        ultimo_dia_mes = calendar.monthrange(hoje.year, hoje.month)[1]
+        fim_mes = hoje.replace(day=ultimo_dia_mes)
+
+        print(inicio_mes,fim_mes)
+
+        dados_dash_pintura = DashboardInspecao.dados_pintura(cur, inicio_mes, fim_mes)
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return render_template("dashboard-pintura.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, ultimo_total_nao_conformidades=ultimo_total_nao_conformidades)
 
 # --------- FIM DASHBOARD -----------
 
