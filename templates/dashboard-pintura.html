@@ -195,7 +195,7 @@
             </div>
           </div>
       </div>
-      <div id="fotoCarrossel" class="carousel slide" data-ride="carousel">
+      <div id="fotoCarrossel" class="carousel" style="max-width: 600px;max-height: 400px;margin: auto;" data-ride="carousel">
         <div class="carousel-inner" id="carousel-inner">
             
         </div>
@@ -361,11 +361,12 @@
             fotos.forEach((foto, index) => {
                 let item = document.createElement('div');
                 item.className = 'carousel-item' + (index === 0 ? ' active' : '');
+                let imgPath = foto[1].replace(';', '');
                 item.innerHTML = `
-                    <img src="${foto[1]}" class="d-block w-100" alt="${foto[2]}">
+                    <img src="${imgPath}" class="d-block w-100" style="max-width: 100%;max-height: 100%;object-fit: cover;" alt="${foto[2]}">
                     <div class="carousel-caption d-none d-md-block">
-                        <h5>${foto[0]}</h5>
-                        <p>${foto[2]}</p>
+                        <h5 style:"color:black">${foto[0]}</h5>
+                        <p style:"color:black">${foto[2]}</p>
                     </div>
                 `;
                 carouselInner.appendChild(item);
