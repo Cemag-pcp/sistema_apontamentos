@@ -3408,8 +3408,8 @@ def consultar_carretas_levantamento():
 
     df_final,carretas_dentro_da_base = consultar_carretas(data_inicial,data_final)
 
-    df_final['quantidade'] = df_final['quantidade'] * df_final['PED_QUANTIDADE']
-    
+    df_final['qt_conjunto'] = df_final['qt_conjunto'] * df_final['PED_QUANTIDADE'] #quantidade de conjunto * quantidade de carreta
+    df_final['quantidade'] = df_final['qt_conjunto'] * df_final['quantidade'] #quantidade de peça * quantidade de conjunto
 
     if conjunto:
         df_final = df_final[df_final['conjunto'] == conjunto]
@@ -3423,11 +3423,9 @@ def consultar_carretas_levantamento():
     if mp:
         df_final = df_final[df_final['materia_prima'] == mp]
 
-    print(df_final[df_final['processo'] == 'Fueiro'])
-
     #agrupando dados
     df_final = df_final.groupby(['processo', 'codigo', 'descricao','materia_prima','etapa_seguinte']).sum().reset_index()[['processo', 'codigo', 'descricao','materia_prima','quantidade']]
-    print(df_final)
+
     total_rows = len(df_final)
 
     # Definir o número de itens por página
