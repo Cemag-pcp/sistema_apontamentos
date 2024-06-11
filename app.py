@@ -1190,6 +1190,8 @@ def dashboard_pintura():
 
         # Fetch data based on the provided dates
         dados_dash_pintura = DashboardInspecao.dados_pintura(cur, start_date, end_date)
+        total_causas,soma_total,total_liquida,soma_total_liquida,total_po,soma_total_po  = DashboardInspecao.dados_causas_pintura(cur, start_date, end_date)
+        foto = DashboardInspecao.fotos_pintura(cur, start_date, end_date)
 
         dado = {
             "ano_mes": [item[0] for item in dados_dash_pintura],
@@ -1208,7 +1210,14 @@ def dashboard_pintura():
         return jsonify({
             "dado": dado,
             "ultimo_total_nao_conformidades": ultimo_total_nao_conformidades,
-            "dados_dash_pintura": dados_dash_pintura
+            "dados_dash_pintura": dados_dash_pintura,
+            "total_causas":total_causas,
+            "soma_total":soma_total,
+            "total_liquida":total_liquida,
+            "soma_total_liquida":soma_total_liquida,
+            "total_po":total_po,
+            "soma_total_po":soma_total_po,
+            "foto":foto
         })
     
     elif request.method == 'GET':
@@ -1224,6 +1233,8 @@ def dashboard_pintura():
         print(inicio_mes,fim_mes)
 
         dados_dash_pintura = DashboardInspecao.dados_pintura(cur, inicio_mes, fim_mes)
+        total_causas,soma_total,total_liquida,soma_total_liquida,total_po,soma_total_po = DashboardInspecao.dados_causas_pintura(cur, inicio_mes, fim_mes)
+        foto = DashboardInspecao.fotos_pintura(cur, inicio_mes, fim_mes)
 
         dado = {
             "ano_mes": [item[0] for item in dados_dash_pintura],
@@ -1239,7 +1250,10 @@ def dashboard_pintura():
         cur.close()
         conn.close()
 
-        return render_template("dashboard-pintura.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, ultimo_total_nao_conformidades=ultimo_total_nao_conformidades)
+        return render_template("dashboard-pintura.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, 
+                               ultimo_total_nao_conformidades=ultimo_total_nao_conformidades,total_causas=total_causas,soma_total=soma_total,
+                               total_liquida=total_liquida,soma_total_liquida=soma_total_liquida,total_po=total_po,soma_total_po=soma_total_po,
+                               foto=foto)
 
 # --------- FIM DASHBOARD -----------
 

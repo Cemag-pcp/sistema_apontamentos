@@ -419,7 +419,7 @@ function concatPhotosByCriteria(foto_causa, execucaoDesejada) {
 
     // Itera sobre o array foto_causa
     for (var i = 0; i < foto_causa.length; i++) {
-        var key = foto_causa[i][2] + " - " + foto_causa[i][4];  // A chave é o valor da terceira posição do subarray
+        var key = foto_causa[i][2]
         var execucao = foto_causa[i][3]; // Número da execução
 
         // Verifica se a execução corresponde à execução desejada

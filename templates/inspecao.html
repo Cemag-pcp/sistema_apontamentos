@@ -130,6 +130,7 @@
                                 <thead class="cf">
                                     <tr>
                                         <th>#</th>
+                                        <th>Data da Inspeção</th>
                                         <th>Descrição</th>
                                         <th>Cor</th>
                                         <th>Tipo</th>
@@ -140,6 +141,7 @@
                                     {% for inspecionada in inspecionadas %}
                                     <tr>
                                         <td data-title="#">{{inspecionada[0]}}</td>
+                                        <td data-title="Data da Inspeção">{{inspecionada[1]}}</td>
                                         <td data-title="Descrição">{{inspecionada[11]}}</td>
                                         <td data-title="Cor">{{inspecionada[12]}} 
                                             {% if inspecionada[12] in color_map %}

@@ -34,10 +34,9 @@
 } %}
 
 <div class="container-fluid f-14">
-
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h4 mb-2 text-gray-800">Controle de Qualidade Pintura</h1>
-        <form id="dateForm" class="d-sm-flex align-items-end justify-content-between">
+        <form id="dateFormm" class="d-sm-flex align-items-end justify-content-between">
             <div>
                 <label for="data_filtro">Intervalo de data:</label>
                 <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off" style="width: 240px;">
@@ -51,7 +50,7 @@
           <div class="card shadow mb-4">
             <div class="card-header py-3" style="display: flex; justify-content: space-between;">
               <h6 class="m-0 font-weight-bold text-primary">Análise Temporal</h6>
-              <small><code>Índice Qualidade</code> - <span id="indiceQualidade">{{ ultimo_total_nao_conformidades }}</span></small>
+              <small><code>Índice Qualidade</code> - <span id="indiceQualidade">{{ ultimo_total_nao_conformidades }} %</span></small>
             </div>
             <div class="card-body">
               <div class="chart-bar">
@@ -66,7 +65,7 @@
               <h6 class="m-0 font-weight-bold text-primary">Tabelas</h6>
             </div>
             <div class="card-body">
-              <div class="table-responsive">
+              <div class="table-responsive" style="overflow-y: auto;height: 200px;">
                 <table class="table table-bordered" id="dataTable5" width="100%" cellspacing="0">
                   <thead>
                     <tr>
@@ -84,7 +83,7 @@
                             <td>{{dado[1]}}</td>
                             <td>{{dado[2]}}</td>
                             <td>{{dado[3]}}</td>
-                            <td>{{dado[4]}}</td>
+                            <td>{{dado[4]}} %</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -94,6 +93,127 @@
           </div>
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-xl-4 mb-2">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Total Causas</h6>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive" style="overflow-y: auto;height: 400px;">
+                <table class="table table-bordered table-sticky" id="dataTableCausas" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Causa</th>
+                      <th style="width: 50px;">Soma do N° Total de não conformidades</th>
+                    </tr>
+                  </thead>
+                    <tbody id="dataTableBodyCausas">
+                        {% for causa in total_causas %}
+                        <tr>
+                            <th scope="row">{{causa[0]}}</th>
+                            <td>{{causa[1]}}</td>
+                            <td>{{causa[2]}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <strong><p>Total</p></strong>
+                <strong><p id="total_causas">{{soma_total[0]}}</p></strong>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-4 mb-2">
+            <div class="card shadow mb-4">
+              <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Líquida</h6>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive" style="overflow-y: auto;height: 400px;">
+                  <table class="table table-bordered" id="dataTableCausasLiquida" width="100%" cellspacing="0">
+                    <thead>
+                      <tr>
+                        <th>Data</th>
+                        <th>Causa</th>
+                        <th style="width: 50px;">N° Total de não conformidades</th>
+                      </tr>
+                    </thead>
+                      <tbody id="dataTableBodyCausasLiquida">
+                          {% for liquida in total_liquida %}
+                          <tr>
+                              <th>{{liquida[0]}}</th>
+                              <td>{{liquida[1]}}</td>
+                              <td>{{liquida[2]}}</td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="card-footer d-flex justify-content-between">
+                <strong><p>Total</p></strong>
+                <strong><p id="soma_total_liquida">{{soma_total_liquida[0]}}</p></strong>
+            </div>
+            </div>
+          </div>
+          <div class="col-xl-4 mb-2">
+            <div class="card shadow mb-4">
+              <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">PÓ</h6>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive" style="overflow-y: auto;height: 400px;">
+                  <table class="table table-bordered" id="dataTableCausasPo" width="100%" cellspacing="0">
+                    <thead>
+                      <tr>
+                        <th>Data</th>
+                        <th>Causa</th>
+                        <th style="width: 50px;">N° Total de não conformidades</th>
+                      </tr>
+                    </thead>
+                      <tbody id="dataTableBodyCausasPo">
+                          {% for poo in total_po %}
+                          <tr>
+                              <th>{{poo[0]}}</th>
+                              <td>{{poo[1]}}</td>
+                              <td>{{poo[2]}}</td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="card-footer d-flex justify-content-between">
+                <strong><p>Total</p></strong>
+                <strong><p id="soma_total_po">{{soma_total_po[0]}}</p></strong>
+            </div>
+            </div>
+          </div>
+      </div>
+      <div id="fotoCarrossel" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner" id="carousel-inner">
+            
+        </div>
+        <a class="carousel-control-prev" href="#fotoCarrossel" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#fotoCarrossel" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+        </a>
+    </div>
+</div>
+
+<div class="loading" id="loading" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
+    </div>
 </div>
 
 <script>
@@ -187,7 +307,7 @@
     const initialData = JSON.parse('{{ dado | safe }}');
     let mixedChart = createChart(initialData);
 
-    document.getElementById('dateForm').addEventListener('submit', function(event) {
+    document.getElementById('dateFormm').addEventListener('submit', function(event) {
         event.preventDefault();
 
         const dateRange = document.getElementById('inputDate1').value;
@@ -214,11 +334,42 @@
             mixedChart.update();
 
             // Atualizar o valor do índice de qualidade
-            document.getElementById('indiceQualidade').innerText = data.ultimo_total_nao_conformidades;
+            document.getElementById('indiceQualidade').innerText = data.ultimo_total_nao_conformidades + " %";
+
+            document.getElementById('total_causas').innerText = data.soma_total
+
+            document.getElementById('soma_total_liquida').innerText = data.soma_total_liquida
+
+            document.getElementById('soma_total_po').innerText = data.soma_total_po
+
+            
 
             // Atualizar a tabela
             const tableBody = document.getElementById('dataTableBody');
             tableBody.innerHTML = ''; // Limpar tabela existente
+            const tableBodyCausas = document.getElementById('dataTableBodyCausas');
+            tableBodyCausas.innerHTML = ''; // Limpar tabela existente
+            const tableBodyCausasLiquida = document.getElementById('dataTableBodyCausasLiquida');
+            tableBodyCausasLiquida.innerHTML = ''; // Limpar tabela existente
+            const tableBodyCausasPo = document.getElementById('dataTableBodyCausasPo');
+            tableBodyCausasPo.innerHTML = ''; // Limpar tabela existente
+            const fotos = data.foto
+            console.log(fotos)
+            let carouselInner = document.getElementById('carousel-inner');
+            carouselInner.innerHTML = '';
+
+            fotos.forEach((foto, index) => {
+                let item = document.createElement('div');
+                item.className = 'carousel-item' + (index === 0 ? ' active' : '');
+                item.innerHTML = `
+                    <img src="${foto[1]}" class="d-block w-100" alt="${foto[2]}">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>${foto[0]}</h5>
+                        <p>${foto[2]}</p>
+                    </div>
+                `;
+                carouselInner.appendChild(item);
+            });
 
             data.dados_dash_pintura.forEach(dado => {
                 const row = document.createElement('tr');
@@ -227,9 +378,39 @@
                     <td>${dado[1]}</td>
                     <td>${dado[2]}</td>
                     <td>${dado[3]}</td>
-                    <td>${dado[4]}</td>
+                    <td>${dado[4]} %</td>
                 `;
                 tableBody.appendChild(row);
+            });
+
+            data.total_causas.forEach(dado => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <th scope="row">${dado[0]}</th>
+                    <td>${dado[1]}</td>
+                    <td>${dado[2]}</td>
+                `;
+                tableBodyCausas.appendChild(row);
+            });
+
+            data.total_liquida.forEach(dado => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <th scope="row">${dado[0]}</th>
+                    <td>${dado[1]}</td>
+                    <td>${dado[2]}</td>
+                `;
+                tableBodyCausasLiquida.appendChild(row);
+            });
+
+            data.total_po.forEach(dado => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <th scope="row">${dado[0]}</th>
+                    <td>${dado[1]}</td>
+                    <td>${dado[2]}</td>
+                `;
+                tableBodyCausasPo.appendChild(row);
             });
         })
         .catch(error => console.error('Error:', error));
