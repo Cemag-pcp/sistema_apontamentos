@@ -16,7 +16,8 @@ class DashboardInspecao:
                 TO_CHAR(data_inspecao, 'YYYY-Month') AS ano_mes,
                 EXTRACT(MONTH FROM data_inspecao) AS mes,
                 EXTRACT(YEAR FROM data_inspecao) AS ano,
-                SUM(CASE WHEN num_inspecao = 0 THEN nao_conformidades ELSE 0 END) AS total_nao_conformidades
+                SUM(CASE WHEN num_inspecao = 0 THEN nao_conformidades ELSE 0 END) AS total_nao_conformidades,
+                SUM(CASE WHEN num_inspecao = 0 THEN total_conformidades + nao_conformidades ELSE 0 END) AS num_inspecoes
             FROM pcp.pecas_inspecionadas
             WHERE setor = 'Pintura'
             AND data_inspecao BETWEEN '{data_inicial}' AND '{data_final}'
@@ -26,8 +27,7 @@ class DashboardInspecao:
             SELECT 
                 EXTRACT(MONTH FROM data_finalizada) AS mes,
                 EXTRACT(YEAR FROM data_finalizada) AS ano,
-                SUM(qt_apontada) FILTER (WHERE setor = 'Pintura') AS num_pecas_produzidas,
-                SUM(qt_apontada) FILTER (WHERE setor = 'Pintura' AND excluidas = 'true') AS num_inspecoes
+                SUM(qt_apontada) FILTER (WHERE setor = 'Pintura') AS num_pecas_produzidas
             FROM pcp.pecas_inspecao
             WHERE setor = 'Pintura' 
             AND data_finalizada BETWEEN '{data_inicial}' AND '{data_final}'
@@ -36,16 +36,16 @@ class DashboardInspecao:
         SELECT 
             COALESCE(pi2.ano_mes, TO_CHAR(TO_DATE(pi.ano || '-' || pi.mes, 'YYYY-MM'), 'YYYY-Month'||'❌')) AS ano_mes,
             COALESCE(pi.num_pecas_produzidas, 0) AS num_pecas_produzidas,
-            COALESCE(pi.num_inspecoes, 0) AS num_inspecoes,
+            COALESCE(pi2.num_inspecoes, 0) AS num_inspecoes,
             COALESCE(pi2.total_nao_conformidades, 0) AS total_nao_conformidades,
             COALESCE(
                 ROUND(
-                    100.0 * COALESCE(pi.num_inspecoes, 0) / NULLIF(COALESCE(pi.num_pecas_produzidas, 0), 0), 2
+                    100.0 * COALESCE(pi2.num_inspecoes, 0) / NULLIF(COALESCE(pi.num_pecas_produzidas, 0), 0), 2
                 ), 0
             ) AS porcentagem_inspecao,
             COALESCE(
                 ROUND(
-                    100.0 * COALESCE(pi2.total_nao_conformidades, 0) / NULLIF(COALESCE(pi.num_inspecoes, 0), 0), 2
+                    100.0 * COALESCE(pi2.total_nao_conformidades, 0) / NULLIF(COALESCE(pi2.num_inspecoes, 0), 0), 2
                 ), 0
             ) AS porcentagem_nao_conformidades
         FROM pecas_inspecionadas pi2
@@ -148,7 +148,7 @@ class DashboardInspecao:
                 SELECT TO_CHAR(pi2.data_inspecao, 'YYYY-Month') as ano_mes,caminho_foto,foto.causa
                     FROM pcp.inspecao_foto foto
                 LEFT JOIN pcp.pecas_inspecionadas pi2 ON foto.id = pi2.id_inspecao
-                WHERE pi2.data_inspecao BETWEEN '{data_inicial}' AND '{data_final}'
+                WHERE pi2.data_inspecao BETWEEN '{data_inicial}' AND '{data_final}' AND caminho_foto NOTNULL 
                 ORDER BY ano_mes DESC
             """
         cur.execute(query_fotos)

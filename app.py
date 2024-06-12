@@ -1236,6 +1236,9 @@ def dashboard_pintura():
         total_causas,soma_total,total_liquida,soma_total_liquida,total_po,soma_total_po = DashboardInspecao.dados_causas_pintura(cur, inicio_mes, fim_mes)
         foto = DashboardInspecao.fotos_pintura(cur, inicio_mes, fim_mes)
 
+        for item in foto:
+            item[1] = item[1].replace(';', '')
+
         dado = {
             "ano_mes": [item[0] for item in dados_dash_pintura],
             "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],

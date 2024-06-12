@@ -66,7 +66,7 @@
             </div>
             <div class="card-body">
               <div class="table-responsive" style="overflow-y: auto;height: 200px;">
-                <table class="table table-bordered" id="dataTable5" width="100%" cellspacing="0">
+                <table class="table table-bordered table-sticky" id="dataTable5" width="100%" cellspacing="0">
                   <thead>
                     <tr>
                       <th>Data</th>
@@ -95,7 +95,7 @@
       </div>
 
       <div class="row">
-        <div class="col-xl-4 mb-2">
+        <div class="col-xl-6 mb-2">
           <div class="card shadow mb-4">
             <div class="card-header py-3">
               <h6 class="m-0 font-weight-bold text-primary">Total Causas</h6>
@@ -128,14 +128,46 @@
             </div>
           </div>
         </div>
-        <div class="col-xl-4 mb-2">
+        <div class="col-xl-6 mb-2">
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Fotos</h6>
+            </div>
+            <div class="card-body" style="height: 500px; padding: 0;">
+              <div id="fotoCarrossel" class="carousel slide custom-carousel" data-ride="carousel">
+                <div class="carousel-inner" id="carousel-inner">
+                  {% for ft in foto %}
+                      {% if ft[1] %}
+                          <div class="carousel-item {% if loop.first %}active{% endif %}">
+                              <img src="{{ft[1]}}" class="d-block w-100" alt="{{ ft[2] }}">
+                              <div class="carousel-caption d-none d-md-block">
+                                  <h5>{{ ft[2] }}</h5>
+                                  <p>{{ ft[0] }}</p>
+                              </div>
+                          </div>
+                      {% endif %}
+                  {% endfor %}
+                </div>
+                <a class="carousel-control-prev" href="#fotoCarrossel" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#fotoCarrossel" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-6 mb-2">
             <div class="card shadow mb-4">
               <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Líquida</h6>
               </div>
               <div class="card-body">
                 <div class="table-responsive" style="overflow-y: auto;height: 400px;">
-                  <table class="table table-bordered" id="dataTableCausasLiquida" width="100%" cellspacing="0">
+                  <table class="table table-bordered table-sticky" id="dataTableCausasLiquida" width="100%" cellspacing="0">
                     <thead>
                       <tr>
                         <th>Data</th>
@@ -161,14 +193,14 @@
             </div>
             </div>
           </div>
-          <div class="col-xl-4 mb-2">
+          <div class="col-xl-6 mb-2">
             <div class="card shadow mb-4">
               <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">PÓ</h6>
               </div>
               <div class="card-body">
                 <div class="table-responsive" style="overflow-y: auto;height: 400px;">
-                  <table class="table table-bordered" id="dataTableCausasPo" width="100%" cellspacing="0">
+                  <table class="table table-bordered table-sticky" id="dataTableCausasPo" width="100%" cellspacing="0">
                     <thead>
                       <tr>
                         <th>Data</th>
@@ -195,24 +227,11 @@
             </div>
           </div>
       </div>
-      <div id="fotoCarrossel" class="carousel" style="max-width: 600px;max-height: 400px;margin: auto;" data-ride="carousel">
-        <div class="carousel-inner" id="carousel-inner">
-            
-        </div>
-        <a class="carousel-control-prev" href="#fotoCarrossel" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#fotoCarrossel" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-        </a>
-    </div>
-</div>
 
-<div class="loading" id="loading" style="display: none;">
-    <div class="spinner-border text-primary" role="status">
-        <span class="sr-only">Loading...</span>
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
     </div>
 </div>
 
@@ -275,6 +294,8 @@
                 ]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true
@@ -359,14 +380,18 @@
             carouselInner.innerHTML = '';
 
             fotos.forEach((foto, index) => {
+                if (!foto[1]) {
+                    return;
+                }
+
                 let item = document.createElement('div');
                 item.className = 'carousel-item' + (index === 0 ? ' active' : '');
                 let imgPath = foto[1].replace(';', '');
                 item.innerHTML = `
-                    <img src="${imgPath}" class="d-block w-100" style="max-width: 100%;max-height: 100%;object-fit: cover;" alt="${foto[2]}">
+                    <img src="${imgPath}" class="d-block w-100" alt="${foto[2]}">
                     <div class="carousel-caption d-none d-md-block">
-                        <h5 style:"color:black">${foto[0]}</h5>
-                        <p style:"color:black">${foto[2]}</p>
+                        <h5>${foto[2]}</h5>
+                        <p>${foto[0]}</p>
                     </div>
                 `;
                 carouselInner.appendChild(item);

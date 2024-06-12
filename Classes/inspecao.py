@@ -255,7 +255,7 @@ class Inspecao:
                     if foto != '':
                         filename = secure_filename(foto.filename)
                         file_path = os.path.join(self.upload_folder, filename)
-                        arquivos = file_path + ";"
+                        arquivos = file_path
                         arquivos = arquivos.replace('\\', '/')
                         foto.save(file_path)
                     else:
