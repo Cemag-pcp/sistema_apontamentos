@@ -3599,20 +3599,21 @@ def baixar_resumo_levantamento():
     # # resumo_pintura = tabela_resumo_pintura(data_inicial, data_final)
     resumo_estamparia = tabela_resumo_estamparia(data_inicial, data_final)
 
+    temp_file_path = tempfile.NamedTemporaryFile(suffix='.xlsx').name
 
     # Crie um objeto ExcelWriter para escrever em um arquivo Excel temporário
-    with pd.ExcelWriter('planilha.xlsx') as writer:
+    with pd.ExcelWriter(temp_file_path) as writer:  # Use temp_file_path aqui
+    # with pd.ExcelWriter('planilha.xlsx') as writer:
         # Escreva cada DataFrame em uma aba separada
         # # resumo_montagem.to_excel(writer, sheet_name='Resumo Montagem', index=False)
         # # resumo_pintura.to_excel(writer, sheet_name='Resumo Pintura', index=False)
         resumo_estamparia.to_excel(writer, sheet_name='Resumo Estamparia', index=False)
 
     # Salva a planilha em um arquivo temporário
-    temp_file_path = tempfile.NamedTemporaryFile(suffix='.xlsx').name
 
     # Renomeia o arquivo temporário para "planilha.xlsx"
-    import os
-    os.rename('planilha.xlsx', temp_file_path)
+    # import os
+    # os.rename('planilha.xlsx', temp_file_path)
 
     # Retorna o arquivo Excel como resposta para o cliente
     return send_file(temp_file_path, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', as_attachment=True, download_name='resumos.xlsx')
