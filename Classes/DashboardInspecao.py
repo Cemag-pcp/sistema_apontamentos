@@ -329,6 +329,130 @@ class DashboardInspecao:
 
         return fotos
 
+    def dadosEstamparia(self,cur):
+        
+        query_dash_solda = f"""
+        WITH pecas_inspecionadas AS (
+            SELECT 
+                TO_CHAR(inspecao.data_finalizada, 'YYYY-Month') AS ano_mes,
+                EXTRACT(MONTH FROM inspecao.data_finalizada) AS mes,
+                EXTRACT(YEAR FROM inspecao.data_finalizada) AS ano,
+                SUM(CASE WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.nao_conformidades ELSE 0 END) AS total_nao_conformidades,
+                SUM(CASE WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.total_conformidades + inspecionadas.nao_conformidades ELSE 0 END) AS num_inspecoes
+            FROM pcp.pecas_inspecionadas AS inspecionadas
+            LEFT JOIN pcp.pecas_inspecao AS inspecao ON inspecao.id = inspecionadas.id_inspecao
+            WHERE inspecionadas.setor = 'Estamparia' AND inspecao.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+            GROUP BY TO_CHAR(inspecao.data_finalizada, 'YYYY-Month'), EXTRACT(MONTH FROM inspecao.data_finalizada), EXTRACT(YEAR FROM inspecao.data_finalizada)
+        ),
+        pecas_inspecao AS (
+            SELECT 
+                EXTRACT(MONTH FROM data_finalizada) AS mes,
+                EXTRACT(YEAR FROM data_finalizada) AS ano,
+                SUM(qt_apontada) FILTER (WHERE setor = 'Estamparia') AS num_pecas_produzidas
+            FROM pcp.pecas_inspecao
+            WHERE setor = 'Estamparia' 
+            AND data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+            GROUP BY EXTRACT(MONTH FROM data_finalizada), EXTRACT(YEAR FROM data_finalizada)
+        )
+        SELECT 
+            COALESCE(pi2.ano_mes, TO_CHAR(TO_DATE(pi.ano || '-' || pi.mes, 'YYYY-MM'), 'YYYY-Month'||'❌')) AS ano_mes,
+            COALESCE(pi.num_pecas_produzidas, 0) AS num_pecas_produzidas,
+            COALESCE(pi2.num_inspecoes, 0) AS num_inspecoes,
+            COALESCE(pi2.total_nao_conformidades, 0) AS total_nao_conformidades,
+            COALESCE(
+                ROUND(
+                    100.0 * COALESCE(pi2.num_inspecoes, 0) / NULLIF(COALESCE(pi.num_pecas_produzidas, 0), 0), 2
+                ), 0
+            ) AS porcentagem_inspecao,
+            COALESCE(
+                ROUND(
+                    100.0 * COALESCE(pi2.total_nao_conformidades, 0) / NULLIF(COALESCE(pi2.num_inspecoes, 0), 0), 2
+                ), 0
+            ) AS porcentagem_nao_conformidades
+        FROM pecas_inspecionadas pi2
+        FULL OUTER JOIN pecas_inspecao pi
+        ON pi2.mes = pi.mes AND pi2.ano = pi.ano
+        ORDER BY COALESCE(pi2.ano, pi.ano), COALESCE(pi2.mes, pi.mes);
+        """
+        cur.execute(query_dash_solda)
+        return cur.fetchall()
+
+    def dadosCausasEstamparia(self,cur):
+
+        query_total_causas = f"""
+                SELECT ano_mes,
+                    conjunto,
+                    causa,
+                    SUM(total_quantidade) as total_quantidade
+                FROM (
+                    SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                                    pi.codigo || '-' ||pi.peca as conjunto,
+                                    foto.causa,
+                                    foto.quantidade::INTEGER as total_quantidade
+                    FROM pcp.inspecao_foto foto
+                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                    WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Estamparia'
+                ) AS subquery
+                GROUP BY ano_mes, conjunto, causa
+                ORDER BY ano_mes desc;
+            """
+        cur.execute(query_total_causas)
+        total_causas = cur.fetchall()
+
+        # Para obter a soma de todos os total_quantidade
+        query_soma_total = f"""
+            SELECT SUM(total_quantidade) as soma_total
+            FROM (
+                SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                                foto.causa,
+                                foto.quantidade::INTEGER as total_quantidade
+                FROM pcp.inspecao_foto foto
+                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Estamparia'
+            ) AS subquery;
+        """
+
+        cur.execute(query_soma_total)
+        soma_total = cur.fetchone()
+
+        return total_causas, soma_total
+
+    def fotosFichaEstamparia(self,cur):
+
+        query_fotos = f"""
+                SELECT TO_CHAR(pi2.data_finalizada, 'YYYY-Month') as ano_mes,caminho_foto,foto.causa
+                    FROM pcp.inspecao_foto foto
+                LEFT JOIN pcp.pecas_inspecao pi2 ON foto.id = pi2.id
+                WHERE pi2.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND caminho_foto NOTNULL AND pi2.setor = 'Estamparia' AND foto.causa NOTNULL
+                ORDER BY ano_mes DESC
+            """
+        cur.execute(query_fotos)
+        fotos = cur.fetchall()
+
+        query_fichas = f"""
+                SELECT 
+                    TO_CHAR(pi2.data_finalizada, 'YYYY-Month') as ano_mes,
+                    caminho_ficha,
+                    CASE 
+                        WHEN ficha.ficha_completa = true THEN 'Ficha 100%'
+                        ELSE 'Ficha Produção'
+                    END as tipo_ficha
+                FROM 
+                    pcp.ficha_inspecao ficha
+                LEFT JOIN 
+                    pcp.pecas_inspecao pi2 ON ficha.id = pi2.id
+                WHERE 
+                    pi2.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                    AND caminho_ficha IS NOT NULL 
+                    AND pi2.setor = 'Estamparia'
+                ORDER BY 
+                    ano_mes DESC;
+            """
+        cur.execute(query_fichas)
+        fichas = cur.fetchall()
+
+        return fotos,fichas
+
     def fechar_conexao(self):
         self.cur.close()
         self.conn.close()

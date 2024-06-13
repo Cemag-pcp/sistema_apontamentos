@@ -1318,12 +1318,9 @@ def dashboard_solda():
         ultimo_dia_mes = calendar.monthrange(hoje.year, hoje.month)[1]
         fim_mes = hoje.replace(day=ultimo_dia_mes)
 
-        print(inicio_mes,fim_mes)
-
         dash = DashboardInspecao(cur, inicio_mes, fim_mes)
         dados_dash_pintura = dash.dadosSolda(cur)
         total_causas, soma_total, tubos, tubos_soma, cilindro, cilindro_soma = dash.dadosCausasSolda(cur)
-        print(tubos, tubos_soma, cilindro, cilindro_soma)
         foto = dash.fotosSolda(cur)
 
         for item in foto:
@@ -1346,6 +1343,90 @@ def dashboard_solda():
         return render_template("dashboard-solda.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, 
                                ultimo_total_nao_conformidades=ultimo_total_nao_conformidades,total_causas=total_causas,soma_total=soma_total,
                                tubos=tubos,tubos_soma=tubos_soma,cilindro=cilindro,cilindro_soma=cilindro_soma,foto=foto)
+
+@app.route('/dashboard-estamparia', methods=['GET','POST'])
+def dashboard_estamparia():
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        start_date = data.get('startDate')
+        end_date = data.get('endDate')
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Convert the dates to datetime objects
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Fetch data based on the provided dates
+        dash = DashboardInspecao(cur, start_date, end_date)
+        dados_dash_pintura = dash.dadosEstamparia(cur)
+        total_causas, soma_total = dash.dadosCausasEstamparia(cur)
+        foto,ficha = dash.fotosFichaEstamparia(cur)
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "dado": dado,
+            "ultimo_total_nao_conformidades": ultimo_total_nao_conformidades,
+            "dados_dash_pintura": dados_dash_pintura,
+            "total_causas":total_causas,
+            "soma_total":soma_total,
+            "ficha":ficha,
+            "foto":foto
+        })
+    
+    elif request.method == 'GET':
+        
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        hoje = datetime.today()
+        inicio_mes = hoje.replace(day=1)
+        ultimo_dia_mes = calendar.monthrange(hoje.year, hoje.month)[1]
+        fim_mes = hoje.replace(day=ultimo_dia_mes)
+
+        dash = DashboardInspecao(cur, inicio_mes, fim_mes)
+        dados_dash_pintura = dash.dadosEstamparia(cur)
+        total_causas, soma_total = dash.dadosCausasEstamparia(cur)
+        foto,fichas = dash.fotosFichaEstamparia(cur)
+
+        for item in foto:
+            item[1] = item[1].replace(';', '')
+
+        for ficha in fichas:
+            ficha[1] = ficha[1].replace(';', '')
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return render_template("dashboard-estamparia.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, 
+                               ultimo_total_nao_conformidades=ultimo_total_nao_conformidades,total_causas=total_causas,soma_total=soma_total,foto=foto,fichas=fichas)
+
 
 # --------- FIM DASHBOARD -----------
 
