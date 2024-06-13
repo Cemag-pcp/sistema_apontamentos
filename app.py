@@ -1190,8 +1190,8 @@ def dashboard_pintura():
 
         # Fetch data based on the provided dates
         dash = DashboardInspecao(cur, start_date, end_date)
-        dados_dash_pintura = dash.dadosSolda(cur)
-        total_causas,soma_total,total_liquida,soma_total_liquida,total_po,soma_total_po = dash.dadosCausasSolda(cur)
+        dados_dash_pintura = dash.dadosPintura(cur)
+        total_causas,soma_total,total_liquida,soma_total_liquida,total_po,soma_total_po = dash.dadosCausasPinturas(cur)
         foto = dash.fotosPintura(cur)
 
         dado = {
@@ -1236,7 +1236,7 @@ def dashboard_pintura():
         dash = DashboardInspecao(cur, inicio_mes, fim_mes)
         dados_dash_pintura = dash.dadosPintura(cur)
         total_causas,soma_total,total_liquida,soma_total_liquida,total_po,soma_total_po = dash.dadosCausasPinturas(cur)
-        foto = dash.fotosSolda(cur)
+        foto = dash.fotosPintura(cur)
 
         for item in foto:
             item[1] = item[1].replace(';', '')
@@ -1278,7 +1278,7 @@ def dashboard_solda():
         # Fetch data based on the provided dates
         dash = DashboardInspecao(cur, start_date, end_date)
         dados_dash_pintura = dash.dadosSolda(cur)
-        total_causas,soma_total = dash.dadosCausasSolda(cur)
+        total_causas, soma_total, tubos, tubos_soma, cilindro, cilindro_soma = dash.dadosCausasSolda(cur)
         foto = dash.fotosSolda(cur)
 
         dado = {
@@ -1301,6 +1301,10 @@ def dashboard_solda():
             "dados_dash_pintura": dados_dash_pintura,
             "total_causas":total_causas,
             "soma_total":soma_total,
+            "tubos":tubos,
+            "tubos_soma":tubos_soma,
+            "cilindro":cilindro,
+            "cilindro_soma":cilindro_soma,
             "foto":foto
         })
     
@@ -1318,7 +1322,8 @@ def dashboard_solda():
 
         dash = DashboardInspecao(cur, inicio_mes, fim_mes)
         dados_dash_pintura = dash.dadosSolda(cur)
-        total_causas,soma_total = dash.dadosCausasSolda(cur)
+        total_causas, soma_total, tubos, tubos_soma, cilindro, cilindro_soma = dash.dadosCausasSolda(cur)
+        print(tubos, tubos_soma, cilindro, cilindro_soma)
         foto = dash.fotosSolda(cur)
 
         for item in foto:
@@ -1340,7 +1345,7 @@ def dashboard_solda():
 
         return render_template("dashboard-solda.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, 
                                ultimo_total_nao_conformidades=ultimo_total_nao_conformidades,total_causas=total_causas,soma_total=soma_total,
-                               foto=foto)
+                               tubos=tubos,tubos_soma=tubos_soma,cilindro=cilindro,cilindro_soma=cilindro_soma,foto=foto)
 
 # --------- FIM DASHBOARD -----------
 

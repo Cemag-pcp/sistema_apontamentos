@@ -97,8 +97,9 @@
       <div class="row">
         <div class="col-xl-6 mb-2">
           <div class="card shadow mb-4">
-            <div class="card-header py-3">
+            <div class="card-header py-3" style="display: flex; justify-content: space-between; align-items: center;">
               <h6 class="m-0 font-weight-bold text-primary">Total Causas</h6>
+              <input type="text" id="filtro_total_causas" class="form-control" style="width: 150px;" placeholder="Filtro das Causas">
             </div>
             <div class="card-body">
               <div class="table-responsive" style="overflow-y: auto;height: 400px;">
@@ -125,7 +126,7 @@
               </div>
             </div>
             <div class="card-footer d-flex justify-content-between">
-                <strong><p>Total</p></strong>
+                <strong><p>Total Geral</p></strong>
                 <strong><p id="total_causas">{{soma_total[0]}}</p></strong>
             </div>
           </div>
@@ -162,6 +163,78 @@
             </div>
           </div>
         </div>
+        <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+              <div class="card-header py-3" style="display: flex; justify-content: space-between; align-items: center;">
+                <h6 class="m-0 font-weight-bold text-primary">Tubos</h6>
+                <input type="text" id="filtro_liquida" class="form-control" style="width: 150px;" placeholder="Filtro das Causas">
+              </div>
+              <div class="card-body">
+                <div class="table-responsive" style="overflow-y: auto;height: 400px;">
+                  <table class="table table-bordered table-sticky" id="dataTableCausasLiquida" width="100%" cellspacing="0">
+                    <thead>
+                      <tr>
+                        <th>Data</th>
+                        <th>Conjunto</th>
+                        <th>Causa</th>
+                        <th style="width: 50px;">Quantidade</th>
+                      </tr>
+                    </thead>
+                      <tbody id="dataTableBodyCausasLiquida">
+                          {% for tubo in tubos %}
+                          <tr>
+                              <th scope="row">{{tubo[0]}}</th>
+                              <td>{{tubo[1]}}</td>
+                              <td>{{tubo[2]}}</td>
+                              <td>{{tubo[3]}}</td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="card-footer d-flex justify-content-between">
+                <strong><p>Total</p></strong>
+                <strong><p id="soma_total_liquida">{{tubos_soma[0]}}</p></strong>
+            </div>
+            </div>
+          </div>
+          <div class="col-xl-6 mb-2">
+            <div class="card shadow mb-4">
+              <div class="card-header py-3" style="display: flex; justify-content: space-between; align-items: center;">
+                <h6 class="m-0 font-weight-bold text-primary">Cilindros</h6>
+                <input type="text" id="filtro_po" class="form-control" style="width: 150px;" placeholder="Filtro das Causas">
+              </div>
+              <div class="card-body">
+                <div class="table-responsive" style="overflow-y: auto;height: 400px;">
+                  <table class="table table-bordered table-sticky" id="dataTableCausasPo" width="100%" cellspacing="0">
+                    <thead>
+                      <tr>
+                        <th>Data</th>
+                        <th>Conjunto</th>
+                        <th>Causa</th>
+                        <th style="width: 50px;">Quantidade</th>
+                      </tr>
+                    </thead>
+                      <tbody id="dataTableBodyCausasPo">
+                          {% for cil in cilindro %}
+                          <tr>
+                              <th scope="row">{{cil[0]}}</th>
+                              <td>{{cil[1]}}</td>
+                              <td>{{cil[2]}}</td>
+                              <td>{{cil[3]}}</td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="card-footer d-flex justify-content-between">
+                <strong><p>Total</p></strong>
+                <strong><p id="soma_total_po">{{cilindro_soma[0]}}</p></strong>
+            </div>
+            </div>
+          </div>
     </div>
 
     <div class="loading" id="loading" style="display: none;">
@@ -189,7 +262,7 @@
                         yAxisID: 'y',
                         datalabels: {
                             display: true,
-                            align: 'top',
+                            align: 'bottom',
                             formatter: function(value) {
                                 return value;
                             }
@@ -204,7 +277,7 @@
                         yAxisID: 'y',
                         datalabels: {
                             display: true,
-                            align: 'top',
+                            align: 'bottom',
                             formatter: function(value) {
                                 return value;
                             }
@@ -238,7 +311,7 @@
                         yAxisID: 'percentageAxis',
                         datalabels: {
                             display: true,
-                            align: 'top',
+                            align: 'bottom',
                             formatter: function(value) {
                                 return value + '%';
                             }
@@ -251,7 +324,7 @@
                 maintainAspectRatio: false,
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
                     },
                     percentageAxis: {
                         type: 'linear',
@@ -270,6 +343,9 @@
                 plugins: {
                     datalabels: {
                         display: false
+                    },
+                    legend: {
+                        position: 'bottom'  // Move legend to the bottom
                     }
                 }
             },
@@ -303,6 +379,7 @@
             mixedChart.data.datasets[0].data = data.dado.num_pecas_produzidas;
             mixedChart.data.datasets[1].data = data.dado.num_inspecoes;
             mixedChart.data.datasets[2].data = data.dado.porcentagem_nao_conformidades;
+            mixedChart.data.datasets[3].data = data.dado.porcentagem_inspecao;
 
             // Atualizar o gráfico
             mixedChart.update();
@@ -391,8 +468,7 @@
 
 {% block scripts %}
 
-<!-- Script tabela JQuery -->
-<script src="static/js/qualidade/dashboard/post_dashboard_pintura.js"></script>
+<script src="static/js/qualidade/dashboard/filtros_dashboard_solda.js"></script>
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src = ></script>
