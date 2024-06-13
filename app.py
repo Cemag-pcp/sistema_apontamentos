@@ -3598,7 +3598,23 @@ def baixar_resumo_levantamento():
     # # resumo_montagem = tabela_resumo_montagem(data_inicial, data_final)
     # # resumo_pintura = tabela_resumo_pintura(data_inicial, data_final)
     resumo_estamparia = tabela_resumo_estamparia(data_inicial, data_final)
-
+    resumo_estamparia = resumo_estamparia.drop(columns=['codigo_peca'])
+    resumo_estamparia = resumo_estamparia.rename(columns={'processo':'subcelula',
+                                      'peca':'descricao_conjunto',
+                                      'quantidade':'quantidade_conjunto',
+                                      'codigo_tratado':'codigo_conjunto_pintura',
+                                      'descricao_tratada':'descricao_conjunto_pintura',
+                                      'qt_atualizada':'saldo_abatendo',
+                                      'descricao':'descricao_peca',
+                                      'codigo':'codigo_peca',
+                                      })
+    
+    
+    resumo_estamparia = resumo_estamparia[['data_carga','celula','subcelula','codigo_conjunto',
+                        'descricao_conjunto','codigo_conjunto_pintura','descricao_conjunto_pintura',
+                        'codigo_peca','descricao_peca','quantidade_conjunto',
+                        'qt_planejada','qt_faltante','saldo_abatendo']]
+    
     temp_file_path = tempfile.NamedTemporaryFile(suffix='.xlsx').name
 
     # Crie um objeto ExcelWriter para escrever em um arquivo Excel temporário
