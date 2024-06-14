@@ -99,7 +99,11 @@
           <div class="card shadow mb-4">
             <div class="card-header py-3" style="display: flex; justify-content: space-between; align-items: center;">
               <h6 class="m-0 font-weight-bold text-primary">Total Causas</h6>
-              <input type="text" id="filtro_total_causas" class="form-control" style="width: 150px;" placeholder="Filtro das Causas">
+              <select id="filtro_total_causas" class="form-control" multiple style="width: 300px;">
+                {% for causa in total_causas %}
+                  <option value="{{causa[2]}}">{{causa[2]}}</option>
+                {% endfor %}
+              </select>
             </div>
             <div class="card-body">
               <div class="table-responsive" style="overflow-y: auto;height: 400px;">
@@ -167,7 +171,11 @@
             <div class="card shadow mb-4">
               <div class="card-header py-3" style="display: flex; justify-content: space-between; align-items: center;">
                 <h6 class="m-0 font-weight-bold text-primary">Tubos</h6>
-                <input type="text" id="filtro_liquida" class="form-control" style="width: 150px;" placeholder="Filtro das Causas">
+                <select id="filtro_liquida" class="form-control" multiple style="width: 300px;">
+                  {% for tubo in tubos %}
+                      <option value="{{tubo[1]}}">{{tubo[1]}}</option>
+                  {% endfor %}
+                </select>
               </div>
               <div class="card-body">
                 <div class="table-responsive" style="overflow-y: auto;height: 400px;">
@@ -203,7 +211,11 @@
             <div class="card shadow mb-4">
               <div class="card-header py-3" style="display: flex; justify-content: space-between; align-items: center;">
                 <h6 class="m-0 font-weight-bold text-primary">Cilindros</h6>
-                <input type="text" id="filtro_po" class="form-control" style="width: 150px;" placeholder="Filtro das Causas">
+                <select id="filtro_po" class="form-control" multiple style="width: 300px;">
+                    {% for cil in cilindro %}
+                        <option value="{{tubo[2]}}">{{tubo[2]}}</option>
+                    {% endfor %}
+                </select>
               </div>
               <div class="card-body">
                 <div class="table-responsive" style="overflow-y: auto;height: 400px;">
@@ -333,6 +345,7 @@
                             display: false
                         },
                         beginAtZero: true,
+                        max: 100,
                         ticks: {
                             callback: function(value) {
                                 return value + '%';
@@ -361,114 +374,164 @@
         event.preventDefault();
 
         const dateRange = document.getElementById('inputDate1').value;
-        const dates = dateRange.split(' - ');
-        const startDate = dates[0].split('/').reverse().join('-'); // Converte para o formato YYYY-MM-DD
-        const endDate = dates[1].split('/').reverse().join('-'); // Converte para o formato YYYY-MM-DD
+        const [startDate, endDate] = dateRange.split(' - ').map(date => date.split('/').reverse().join('-'));
 
         fetch('/dashboard-solda', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ startDate: startDate, endDate: endDate })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ startDate, endDate })
         })
         .then(response => response.json())
-        .then(data => {
-            // Atualizar os dados do gráfico
-            mixedChart.data.labels = data.dado.ano_mes;
-            mixedChart.data.datasets[0].data = data.dado.num_pecas_produzidas;
-            mixedChart.data.datasets[1].data = data.dado.num_inspecoes;
-            mixedChart.data.datasets[2].data = data.dado.porcentagem_nao_conformidades;
-            mixedChart.data.datasets[3].data = data.dado.porcentagem_inspecao;
-
-            // Atualizar o gráfico
-            mixedChart.update();
-
-            // Atualizar o valor do índice de qualidade
-            document.getElementById('indiceQualidade').innerText = data.ultimo_total_nao_conformidades + " %";
-
-            document.getElementById('total_causas').innerText = data.soma_total
-
-            // Atualizar a tabela
-            const tableBody = document.getElementById('dataTableBody');
-            tableBody.innerHTML = ''; // Limpar tabela existente
-            const tableBodyCausas = document.getElementById('dataTableBodyCausas');
-            tableBodyCausas.innerHTML = ''; // Limpar tabela existente
-            const fotos = data.foto
-            console.log(fotos)
-            let carouselInner = document.getElementById('carousel-inner');
-            carouselInner.innerHTML = '';
-
-            fotos.forEach((foto, index) => {
-                if (!foto[1]) {
-                    return;
-                }
-
-                let item = document.createElement('div');
-                item.className = 'carousel-item' + (index === 0 ? ' active' : '');
-                let imgPath = foto[1].replace(';', '');
-                item.innerHTML = `
-                    <img src="${imgPath}" class="d-block w-100" alt="${foto[2]}">
-                    <div class="carousel-caption d-none d-md-block">
-                        <h5>${foto[2]}</h5>
-                        <p>${foto[0]}</p>
-                    </div>
-                `;
-                carouselInner.appendChild(item);
-            });
-
-            data.dados_dash_pintura.forEach(dado => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <th scope="row">${dado[0]}</th>
-                    <td>${dado[1]}</td>
-                    <td>${dado[2]}</td>
-                    <td>${dado[3]}</td>
-                    <td>${dado[4]} %</td>
-                `;
-                tableBody.appendChild(row);
-            });
-
-            data.total_causas.forEach(dado => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <th scope="row">${dado[0]}</th>
-                    <td>${dado[1]}</td>
-                    <td>${dado[2]}</td>
-                    <td>${dado[3]}</td>
-                `;
-                tableBodyCausas.appendChild(row);
-            });
-
-            data.total_liquida.forEach(dado => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <th scope="row">${dado[0]}</th>
-                    <td>${dado[1]}</td>
-                    <td>${dado[2]}</td>
-                `;
-                tableBodyCausasLiquida.appendChild(row);
-            });
-
-            data.total_po.forEach(dado => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <th scope="row">${dado[0]}</th>
-                    <td>${dado[1]}</td>
-                    <td>${dado[2]}</td>
-                `;
-                tableBodyCausasPo.appendChild(row);
-            });
-        })
+        .then(updateDashboard)
         .catch(error => console.error('Error:', error));
     });
+
+function updateDashboard(data) {
+    updateChart(data);
+    updateQualityIndex(data);
+    updateTables(data);
+    updateCarousel(data.foto);
+    updateFilterOptions(data);
+}
+
+function updateChart(data) {
+    if (data.dado) {
+        mixedChart.data.labels = data.dado.ano_mes || [];
+        mixedChart.data.datasets[0].data = data.dado.num_pecas_produzidas || [];
+        mixedChart.data.datasets[1].data = data.dado.num_inspecoes || [];
+        mixedChart.data.datasets[2].data = data.dado.porcentagem_nao_conformidades || [];
+        mixedChart.data.datasets[3].data = data.dado.porcentagem_inspecao || [];
+        mixedChart.update();
+    }
+}
+
+function updateQualityIndex(data) {
+    document.getElementById('indiceQualidade').innerText = `${data.ultimo_total_nao_conformidades || 0} %`;
+    document.getElementById('total_causas').innerText = data.soma_total || 0;
+}
+
+function updateTables(data) {
+    clearTable('dataTableBody');
+    clearTable('dataTableBodyCausas');
+    clearTable('dataTableBodyCausasLiquida');
+    clearTable('dataTableBodyCausasPo');
+
+    if (data.dados_dash_pintura) {
+        populateTable('dataTableBody', data.dados_dash_pintura, (row, dado) => `
+            <th scope="row">${dado[0]}</th>
+            <td>${dado[1]}</td>
+            <td>${dado[2]}</td>
+            <td>${dado[3]}</td>
+            <td>${dado[4]} %</td>
+        `);
+    }
+
+    if (data.total_causas) {
+        populateTable('dataTableBodyCausas', data.total_causas, (row, dado) => `
+            <th scope="row">${dado[0]}</th>
+            <td>${dado[1]}</td>
+            <td>${dado[2]}</td>
+            <td>${dado[3]}</td>
+        `);
+    }
+
+    if (data.tubos) {
+        populateTable('dataTableBodyCausasLiquida', data.tubos, (row, dado) => `
+            <th scope="row">${dado[0]}</th>
+            <td>${dado[1]}</td>
+            <td>${dado[2]}</td>
+        `);
+    }
+
+    if (data.cilindro) {
+        populateTable('dataTableBodyCausasPo', data.cilindro, (row, dado) => `
+            <th scope="row">${dado[0]}</th>
+            <td>${dado[1]}</td>
+            <td>${dado[2]}</td>
+        `);
+    }
+}
+
+function clearTable(tableId) {
+    const table = document.getElementById(tableId);
+    if (table) {
+        table.innerHTML = '';
+    }
+}
+
+function populateTable(tableId, data, rowTemplate) {
+    const tableBody = document.getElementById(tableId);
+    if (tableBody && Array.isArray(data)) {
+        data.forEach(dado => {
+            const row = document.createElement('tr');
+            row.innerHTML = rowTemplate(row, dado);
+            tableBody.appendChild(row);
+        });
+    }
+}
+
+function updateCarousel(fotos) {
+    const carouselInner = document.getElementById('carousel-inner');
+    if (carouselInner && Array.isArray(fotos)) {
+        carouselInner.innerHTML = '';
+        fotos.forEach((foto, index) => {
+            if (!foto[1]) return;
+            let item = document.createElement('div');
+            item.className = 'carousel-item' + (index === 0 ? ' active' : '');
+            let imgPath = foto[1].replace(';', '');
+            item.innerHTML = `
+                <img src="${imgPath}" class="d-block w-100" alt="${foto[2]}">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>${foto[2]}</h5>
+                    <p>${foto[0]}</p>
+                </div>
+            `;
+            carouselInner.appendChild(item);
+        });
+    }
+}
+
+function updateFilterOptions(data) {
+    const causasSet = new Set();
+    const liquidaSet = new Set();
+    const poSet = new Set();
+
+    if (data.total_causas) {
+        data.total_causas.forEach(dado => causasSet.add(dado[2]));
+    }
+
+    if (data.tubos) {
+        data.tubos.forEach(dado => liquidaSet.add(dado[2]));
+    }
+
+    if (data.cilindro) {
+        data.cilindro.forEach(dado => poSet.add(dado[2]));
+    }
+
+    populateFilterOptions('filtro_total_causas', causasSet);
+    populateFilterOptions('filtro_liquida', liquidaSet);
+    populateFilterOptions('filtro_po', poSet);
+}
+
+function populateFilterOptions(filterId, optionsSet) {
+    const filterElement = document.getElementById(filterId);
+    if (filterElement) {
+        filterElement.innerHTML = '';
+        optionsSet.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.text = option;
+            filterElement.appendChild(optionElement);
+        });
+    }
+}
+
 </script>
 
 {% endblock %}
 
 {% block scripts %}
 
-<script src="static/js/qualidade/dashboard/filtros_dashboard_solda.js"></script>
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src = ></script>
@@ -476,6 +539,9 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="static/js/qualidade/dashboard/filtros_dashboard_solda.js"></script>
 
 <script>
     function validateForm() {
