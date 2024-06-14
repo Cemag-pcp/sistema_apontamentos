@@ -3609,11 +3609,13 @@ def baixar_resumo_levantamento():
                                       'codigo':'codigo_peca',
                                       })
     
-    
     resumo_estamparia = resumo_estamparia[['data_carga','celula','subcelula','codigo_conjunto',
                         'descricao_conjunto','codigo_conjunto_pintura','descricao_conjunto_pintura',
                         'codigo_peca','descricao_peca','quantidade_conjunto',
                         'qt_planejada','qt_faltante','saldo_abatendo']]
+    
+    resumo_estamparia_agrupada = resumo_estamparia[['data_carga','celula',
+                                                    'codigo_peca','descricao_peca','saldo_abatendo']].drop_duplicates(subset=['data_carga','codigo_peca'],keep='last')
     
     temp_file_path = tempfile.NamedTemporaryFile(suffix='.xlsx').name
 
@@ -3623,6 +3625,7 @@ def baixar_resumo_levantamento():
         # Escreva cada DataFrame em uma aba separada
         # # resumo_montagem.to_excel(writer, sheet_name='Resumo Montagem', index=False)
         # # resumo_pintura.to_excel(writer, sheet_name='Resumo Pintura', index=False)
+        resumo_estamparia_agrupada.to_excel(writer, sheet_name='Resumo Estamparia agrupada', index=False)
         resumo_estamparia.to_excel(writer, sheet_name='Resumo Estamparia', index=False)
 
     # Salva a planilha em um arquivo temporário
@@ -3788,7 +3791,6 @@ def tabela_resumo_estamparia(data_inicial, data_final):
     base_recurso = base_recurso[base_recurso['1o. Agrupamento'] == 'Almox Mont Carretas']
 
     join = pd.merge(resumo_estamparia,base_recurso, how='left', right_on='codigo_peca',left_on='codigo')
-
 
     join = join.drop(columns={'carreta'})
 
