@@ -43,13 +43,13 @@ $('#filtro_total_causas').select2({
 });
 
 $('#filtro_liquida').select2({
-    placeholder: "Selecione as causas do tipo PU",
+    placeholder: "Selecione as causas dos tubos",
     allowClear: true,
     width: 'resolve'
 });
 
 $('#filtro_po').select2({
-    placeholder: "Selecione as causas do tipo PÓ",
+    placeholder: "Selecione as causas dos cilindros",
     allowClear: true,
     width: 'resolve'
 });
