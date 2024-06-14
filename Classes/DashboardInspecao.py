@@ -332,47 +332,47 @@ class DashboardInspecao:
     def dadosEstamparia(self,cur):
         
         query_dash_solda = f"""
-        WITH pecas_inspecionadas AS (
+            WITH pecas_inspecionadas AS (
+                SELECT 
+                    TO_CHAR(inspecao.data_finalizada, 'YYYY-Month') AS ano_mes,
+                    EXTRACT(MONTH FROM inspecao.data_finalizada) AS mes,
+                    EXTRACT(YEAR FROM inspecao.data_finalizada) AS ano,
+                    SUM(CASE WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.nao_conformidades ELSE 0 END) AS total_nao_conformidades,
+                    COUNT(inspecionadas.setor) FILTER (WHERE inspecionadas.setor = 'Estamparia') AS num_inspecoes
+                FROM pcp.pecas_inspecionadas AS inspecionadas
+                LEFT JOIN pcp.pecas_inspecao AS inspecao ON inspecao.id = inspecionadas.id_inspecao
+                WHERE inspecionadas.setor = 'Estamparia' AND inspecao.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                GROUP BY TO_CHAR(inspecao.data_finalizada, 'YYYY-Month'), EXTRACT(MONTH FROM inspecao.data_finalizada), EXTRACT(YEAR FROM inspecao.data_finalizada)
+            ),
+            pecas_inspecao AS (
+                SELECT 
+                    EXTRACT(MONTH FROM data_finalizada) AS mes,
+                    EXTRACT(YEAR FROM data_finalizada) AS ano,
+                    COUNT(data_finalizada) FILTER (WHERE setor = 'Estamparia') AS tipo_pecas_produzidas
+                FROM pcp.pecas_inspecao
+                WHERE setor = 'Estamparia' 
+                AND data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                GROUP BY EXTRACT(MONTH FROM data_finalizada), EXTRACT(YEAR FROM data_finalizada)
+            )
             SELECT 
-                TO_CHAR(inspecao.data_finalizada, 'YYYY-Month') AS ano_mes,
-                EXTRACT(MONTH FROM inspecao.data_finalizada) AS mes,
-                EXTRACT(YEAR FROM inspecao.data_finalizada) AS ano,
-                SUM(CASE WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.nao_conformidades ELSE 0 END) AS total_nao_conformidades,
-                SUM(CASE WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.total_conformidades + inspecionadas.nao_conformidades ELSE 0 END) AS num_inspecoes
-            FROM pcp.pecas_inspecionadas AS inspecionadas
-            LEFT JOIN pcp.pecas_inspecao AS inspecao ON inspecao.id = inspecionadas.id_inspecao
-            WHERE inspecionadas.setor = 'Estamparia' AND inspecao.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-            GROUP BY TO_CHAR(inspecao.data_finalizada, 'YYYY-Month'), EXTRACT(MONTH FROM inspecao.data_finalizada), EXTRACT(YEAR FROM inspecao.data_finalizada)
-        ),
-        pecas_inspecao AS (
-            SELECT 
-                EXTRACT(MONTH FROM data_finalizada) AS mes,
-                EXTRACT(YEAR FROM data_finalizada) AS ano,
-                SUM(qt_apontada) FILTER (WHERE setor = 'Estamparia') AS num_pecas_produzidas
-            FROM pcp.pecas_inspecao
-            WHERE setor = 'Estamparia' 
-            AND data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-            GROUP BY EXTRACT(MONTH FROM data_finalizada), EXTRACT(YEAR FROM data_finalizada)
-        )
-        SELECT 
-            COALESCE(pi2.ano_mes, TO_CHAR(TO_DATE(pi.ano || '-' || pi.mes, 'YYYY-MM'), 'YYYY-Month'||'❌')) AS ano_mes,
-            COALESCE(pi.num_pecas_produzidas, 0) AS num_pecas_produzidas,
-            COALESCE(pi2.num_inspecoes, 0) AS num_inspecoes,
-            COALESCE(pi2.total_nao_conformidades, 0) AS total_nao_conformidades,
-            COALESCE(
-                ROUND(
-                    100.0 * COALESCE(pi2.num_inspecoes, 0) / NULLIF(COALESCE(pi.num_pecas_produzidas, 0), 0), 2
-                ), 0
-            ) AS porcentagem_inspecao,
-            COALESCE(
-                ROUND(
-                    100.0 * COALESCE(pi2.total_nao_conformidades, 0) / NULLIF(COALESCE(pi2.num_inspecoes, 0), 0), 2
-                ), 0
-            ) AS porcentagem_nao_conformidades
-        FROM pecas_inspecionadas pi2
-        FULL OUTER JOIN pecas_inspecao pi
-        ON pi2.mes = pi.mes AND pi2.ano = pi.ano
-        ORDER BY COALESCE(pi2.ano, pi.ano), COALESCE(pi2.mes, pi.mes);
+                COALESCE(pi2.ano_mes, TO_CHAR(TO_DATE(pi.ano || '-' || pi.mes, 'YYYY-MM'), 'YYYY-Month'||'❌')) AS ano_mes,
+                COALESCE(pi.tipo_pecas_produzidas, 0) AS tipo_pecas_produzidas,
+                COALESCE(pi2.num_inspecoes, 0) AS num_inspecoes,
+                COALESCE(pi2.total_nao_conformidades, 0) AS total_nao_conformidades,
+                COALESCE(
+                    ROUND(
+                        100.0 * COALESCE(pi2.num_inspecoes, 0) / NULLIF(COALESCE(pi.tipo_pecas_produzidas, 0), 0), 2
+                    ), 0
+                ) AS porcentagem_inspecao,
+                COALESCE(
+                    ROUND(
+                        100.0 * COALESCE(pi2.total_nao_conformidades, 0) / NULLIF(COALESCE(pi2.num_inspecoes, 0), 0), 2
+                    ), 0
+                ) AS porcentagem_nao_conformidades
+            FROM pecas_inspecionadas pi2
+            FULL OUTER JOIN pecas_inspecao pi
+            ON pi2.mes = pi.mes AND pi2.ano = pi.ano
+            ORDER BY COALESCE(pi2.ano, pi.ano), COALESCE(pi2.mes, pi.mes);
         """
         cur.execute(query_dash_solda)
         return cur.fetchall()

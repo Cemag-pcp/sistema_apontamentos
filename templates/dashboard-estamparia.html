@@ -70,7 +70,7 @@
                   <thead>
                     <tr>
                       <th>Data</th>
-                      <th>N° de peças produzidas</th>
+                      <th>Tipos de peças produzidas</th>
                       <th>N° de inspeções</th>
                       <th>N° de não conformidades</th>
                       <th>% de inspeção</th>
@@ -112,7 +112,7 @@
                         <th>Data</th>
                         <th>Conjunto</th>
                         <th>Causa</th>
-                        <th style="width: 50px;">Soma do N° Total de não conformidades</th>
+                        <th style="width: 50px;">N° Peças não conformes</th>
                       </tr>
                     </thead>
                       <tbody id="dataTableBodyCausas">
@@ -299,7 +299,6 @@
                             display: false
                         },
                         beginAtZero: true,
-                        max: 100,
                         ticks: {
                             callback: function(value) {
                                 return value + '%';
