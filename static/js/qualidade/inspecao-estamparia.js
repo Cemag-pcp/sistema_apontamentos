@@ -227,7 +227,7 @@ $('#btnEnviarEstamparia').on('click',function() {
         error: function (error) {
             $("#loading").hide();
             console.log(error);
-            $('#btnEnviarSolda').prop('disabled',false);
+            $('#btnEnviarEstamparia').prop('disabled',false);
         }
     });
 
