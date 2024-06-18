@@ -1,0 +1,316 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Inspeção Solda</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid f-14">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h4 mb-0 text-gray-800">Inspeção Tubos e Cilindros</h1>
+        <div class="d-sm-flex flex-column justify-content-between mb-4" style="width: 200px;">
+            <button class="btn btn-primary mb-2" onclick="modalCilindros()">Inspecionar Cilindros <i class="fa-solid fa-plus"></i></button>
+            <button class="btn btn-primary" onclick="modalTubos()">Inspecionar Tubos <i class="fa-solid fa-plus"></i></button>
+        </div>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+        <!-- tabela gerar cambão -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Reteste</h6>
+                </div>
+
+                <div class="card-body" id="retesteTable" style="display: block;">
+                    <div id="no-more-tables">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTableRetesteSolda" width="100%"
+                                cellspacing="0">
+                                <thead class="cf">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Data Finalizada</th>
+                                        <th>Código</th>
+                                        <th>Conjunto</th>
+                                        <th>Quantidade</th>
+                                        <th>Celula</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td data-title="#">#</td>
+                                        <td data-title="Data Finalizada">Data Finalizada</td>
+                                        <td data-title="Código">Código</td>
+                                        <td data-title="Conjunto">Conjunto</td>
+                                        <td data-title="Quantidade">Quantidade</td>
+                                        <td data-title="Celula">Celula</td>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="cilindrosModal" tabindex="-1" role="dialog"
+                aria-labelledby="cilindrosModalLabel" aria-hidden="true" style="overflow-y: auto;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="cilindrosModalTitle">Cilindros</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
+                            <div class="row">
+                                <div class="col-sm-4 mb-4">
+                                    <label>Data da Inspeção</label>
+                                    <input type="text" class="form-control" id="data_cilindro" disabled>
+                                </div>
+                                <div class="col-sm-4 mb-4 d-flex flex-column justify-content-end">
+                                    <label>Inspetor</label>
+                                    <select class="form-control" name="inspetores_cilindro" id="inspetores_cilindro">
+                                        <option value="" hidden selected disabled></option>
+                                        <option value="Matheus">Matheus</option>
+                                        <option value="Cauã">Cauã</option>
+                                        <option value="Paulo">Paulo</option>
+                                        <option value="Gabriel">Gabriel</option>
+                                        <option value="Leonidas">Leonidas</option>
+                                        <option value="Marcelo">Marcelo</option>
+                                        <option value="Severiano">Severiano</option>
+                                        <option value="Guthemberg">Guthemberg</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-4 mb-4">
+                                    <label>Montador</label>
+                                    <input type="text" class="form-control" id="montador_cilindro">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3 mb-4">
+                                    <label>Código</label>
+                                    <input type="text" class="form-control" id="codigo_cilindro">
+                                </div>
+                                <div class="col-sm-9 mb-4 d-flex flex-column justify-content-end">
+                                    <label>Descrição</label>
+                                    <input type="text" class="form-control" id="descricao_cilindro" disabled> 
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Quantidade inspecionada</label>
+                                    <input type="number" class="form-control" id="qtd_inspecionada_cilindro"> 
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Não conformidade</label>
+                                    <input type="number" class="form-control" id="nao_conformidade_cilindro"> 
+                                </div>
+                                <div class="col-sm-4 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_cilindro" value="1"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="selectContainer">
+                                <div class="col-sm-6 mb-4 selectBlock" id="selectBlock-0">
+                                    <label>Causas</label>
+                                    <select id="causasCilindroC-0" name="causasCilindroC-0" class="form-control">
+                                        <option value="" hidden selected disabled></option>
+                                        <option value="Amassado">Amassado</option>
+                                        <option value="Oxidação">Oxidação</option>
+                                        <option value="Solda">Solda</option>
+                                        <option value="Dimensional (625 mm)">Dimensional (625 mm)</option>
+                                        <option value="Pressão">Pressão</option>
+                                        <option value="Vazamento">Vazamento</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6 mb-4 quantidadeBlock" id="quantidadeBlock-0">
+                                    <label id="qtd_causa_cilindro">Quantidade de causas</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_cilindroC-0" id="quantidade_causas_cilindroC-0">
+                                </div>
+                                <div class="col-sm-12 mb-4" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButton" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButton" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div> 
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Observação</label>
+                                    <input type="text" class="form-control" id="observacao_cilindro"> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" id="atualizarConformidades">Inspecionar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="tubosModal" tabindex="-1" role="dialog"
+                aria-labelledby="tubosModalLabel" aria-hidden="true" style="overflow-y: auto;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="tubosModalTitle">Tubos</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
+                            <div class="row">
+                                <div class="col-sm-4 mb-4">
+                                    <label>Data da Inspeção</label>
+                                    <input type="text" class="form-control" id="data_tubo" disabled>
+                                </div>
+                                <div class="col-sm-8 mb-4 d-flex flex-column justify-content-end">
+                                    <label>Inspetor</label>
+                                    <select class="form-control" name="inspetores_tubo" id="inspetores_tubo">
+                                        <option value="" hidden selected disabled></option>
+                                        <option value="Matheus">Matheus</option>
+                                        <option value="Cauã">Cauã</option>
+                                        <option value="Paulo">Paulo</option>
+                                        <option value="Gabriel">Gabriel</option>
+                                        <option value="Leonidas">Leonidas</option>
+                                        <option value="Marcelo">Marcelo</option>
+                                        <option value="Severiano">Severiano</option>
+                                        <option value="Guthemberg">Guthemberg</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3 mb-4">
+                                    <label>Código</label>
+                                    <input type="text" class="form-control" id="codigo_tubo">
+                                </div>
+                                <div class="col-sm-9 mb-4 d-flex flex-column justify-content-end">
+                                    <label>Descrição</label>
+                                    <input type="text" class="form-control" id="descricao_tubo" disabled> 
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Quantidade inspecionada</label>
+                                    <input type="number" class="form-control" id="qtd_inspecionada_tubo"> 
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Não conformidade</label>
+                                    <input type="number" class="form-control" id="nao_conformidade_tubo"> 
+                                </div>
+                                <div class="col-sm-4 mb-4" style="display: none;">
+                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control desabilitado" id="tipos_causas_tubo" value="1"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="selectContainerTubos">
+                                <div class="col-sm-6 mb-4 selectBlock" id="selectBlock-0">
+                                    <label>Causas</label>
+                                    <select id="causasCilindroT-0" name="causasCilindroT-0" class="form-control">
+                                        <option value="" hidden selected disabled></option>
+                                        <option value="Amassado">Amassado</option>
+                                        <option value="Oxidação">Oxidação</option>
+                                        <option value="Solda">Solda</option>
+                                        <option value="Dimensional (625 mm)">Dimensional (625 mm)</option>
+                                        <option value="Pressão">Pressão</option>
+                                        <option value="Vazamento">Vazamento</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-6 mb-4 quantidadeBlock" id="quantidadeBlock-0">
+                                    <label id="qtd_causa_cilindro">Quantidade de causas</label>
+                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_cilindroT-0" id="quantidade_causas_cilindroT-0">
+                                </div>
+                                <div class="col-sm-12 mb-4" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-primary" id="addButtonTubos" style="font-size: 10px;">Adicionar causa</button>
+                                    <button class="btn btn-danger" id="removeButtonTubos" style="font-size: 10px;" disabled>Remover causa</button>
+                                </div>
+                            </div> 
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Observação</label>
+                                    <input type="text" class="form-control" id="observacao_cilindro"> 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary" id="atualizarConformidades">Inspecionar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="modalConfirmacaoSolda" tabindex="-1" role="dialog" aria-labelledby="modalConfirmacaoSoldaLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                                Atenção
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="p_confirmar_inspecao_solda"></p>
+                            <div class="row">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total Conformidade</label>
+                                    <input type="text" class="form-control" id="confirmarConformidades" disabled>
+                                </div>
+                                <div class="col-sm-6 mb-4">
+                                    <label>Total Não Conformidade</label>
+                                    <input type="text" class="form-control" id="confirmarNaoConformidades" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarSolda">Confirmar</button>
+                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarSoldaReinspecao">Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+
+        </div>
+
+        {% endblock %}
+
+        {% block scripts %}
+
+        <!-- Script tabela JQuery -->
+
+        <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+        <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+        <script src="static/js/demo/datatables-demo.js"></script>
+        <script src="static/js/qualidade/inspecao-tubos-cilindros.js"></script>
+        <script src="static/js/qualidade/causas/causa_tubos_cilindros.js"></script>
+
+        {% endblock %}

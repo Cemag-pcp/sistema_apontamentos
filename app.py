@@ -1075,6 +1075,15 @@ def inspecao_estamparia():
 
     return render_template('inspecao-estamparia.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
+@app.route('/inspecao-tubos-cilindros',methods=['GET','POST'])
+def inspecao_tubos_cilindros():
+
+    if request.method == 'POST':
+
+        return jsonify("Success")
+    
+    return render_template('inspecao-tubos-cilindros.html')
+
 @app.route('/atualizar-conformidade',methods=['POST'])
 def atualizar_conformidade():
 
@@ -1426,7 +1435,6 @@ def dashboard_estamparia():
 
         return render_template("dashboard-estamparia.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, 
                                ultimo_total_nao_conformidades=ultimo_total_nao_conformidades,total_causas=total_causas,soma_total=soma_total,foto=foto,fichas=fichas)
-
 
 # --------- FIM DASHBOARD -----------
 
