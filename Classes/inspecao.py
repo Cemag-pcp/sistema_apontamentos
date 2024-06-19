@@ -33,6 +33,10 @@ class Inspecao:
             sql = """INSERT INTO pcp.pecas_reinspecao (id, nao_conformidades, causa_reinspecao, inspetor, setor, conjunto, categoria, outra_causa, origem, observacao) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             values = (id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico, categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda)
 
+        elif setor == 'Solda - Cilindro' or setor == 'Solda - Tubo':
+            sql = """INSERT INTO pcp.pecas_reinspecao (id, nao_conformidades, causa_reinspecao, inspetor, setor, conjunto, categoria, outra_causa, origem, observacao) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            values = (id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico,categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda)
+
         self.cur.execute(sql, values)
         self.conn.commit()
 
@@ -55,6 +59,11 @@ class Inspecao:
             self.cur.execute(delete_table_inspecao)
 
             sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s)"""
+            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
+
+        elif setor == 'Solda - Cilindro' or setor == 'Solda - Tubo':
+
+            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, operadores, observacao) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s)"""
             values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
 
         self.cur.execute(sql, values)
@@ -241,6 +250,34 @@ class Inspecao:
         data_reinspecao = self.cur.fetchall()
 
         return data_inspecao, data_reinspecao, data_inspecionadas
+
+    def dados_reteste_tubos_cilindros(self):
+
+        inspecao = """SELECT * FROM pcp.pecas_reinspecao WHERE excluidas = 'false' AND (setor = 'Solda - Cilindro' or setor = 'Solda - Tubo') ORDER BY id desc"""
+        self.cur.execute(inspecao)
+
+        dado_reteste_cilindros_tubos = self.cur.fetchall()
+
+        inspecao = """SELECT 
+                    pi.id_inspecao,
+                    pi.data_inspecao,
+                    pi.conjunto
+                FROM 
+                    pcp.pecas_inspecionadas pi
+                LEFT JOIN 
+                    pcp.pecas_reinspecao pr
+                ON 
+                    pi.id_inspecao = pr.id
+                WHERE 
+                    (pi.setor = 'Solda - Cilindro' OR pi.setor = 'Solda - Tubo')
+                ORDER BY 
+                    pi.id_inspecao DESC;
+                """
+        self.cur.execute(inspecao)
+
+        dado_inspecao_cilindros_tubos = self.cur.fetchall()
+
+        return dado_reteste_cilindros_tubos, dado_inspecao_cilindros_tubos
 
     def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= '',tipos_causas_estamparia='',list_quantidade=[]):
 

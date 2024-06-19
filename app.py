@@ -1080,9 +1080,84 @@ def inspecao_tubos_cilindros():
 
     if request.method == 'POST':
 
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        uuid_value = uuid.uuid4().int
+
+        # Extrai os primeiros 6 dígitos do UUID
+        id_inspecao_solda = str(uuid_value)[:6]
+
+        n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
+        list_causas = json.loads(request.form.get('list_causas'))
+        list_quantidade = json.loads(request.form.get('list_quantidade'))
+
+        if list_quantidade == ['']:
+            list_quantidade = [None]
+
+        retrabalhoSolda = request.form.get('retrabalhoSolda')
+
+        tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
+
+        if list_causas != [None]:
+            classe_inspecao.processar_fotos_inspecao(id_inspecao_solda, n_nao_conformidades, list_causas,'',tipos_causas_solda,list_quantidade)
+
+        data_inspecao = request.form.get('data_inspecao')
+
+        data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
+        data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
+
+        descricao_cilindro = request.form.get('descricao_cilindro')
+        codigo = request.form.get('inputConjunto')
+        if codigo != '':
+            codigo_descricao = f"{codigo} - {descricao_cilindro}"
+        else:
+            codigo_descricao = f"{descricao_cilindro}"
+
+        num_conformidades = request.form.get('inputConformidadesSolda')
+        num_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda'))
+
+        observacaoSolda = request.form.get('observacao_cilindro')  
+
+        inspetoresSolda = request.form.get('inspetorSolda')
+        num_pecas = request.form.get('num_pecas')
+        reinspecao = request.form.get('reinspecao')
+        operador = request.form.get('operador')
+
+        setor = request.form.get('setor')
+        setor_final = f"Solda - {setor}"
+
+        if reinspecao == "True":
+
+            classe_inspecao.alterar_reinspecao(id_inspecao_solda,num_nao_conformidades,num_pecas,num_conformidades,list_causas,inspetoresSolda,setor_final,
+                               codigo_descricao,setor,'','',observacaoSolda,retrabalhoSolda)
+            return jsonify("Success")
+        
+        else:
+
+            query_inspecao = """INSERT INTO pcp.pecas_inspecao (id,data_finalizada,codigo,peca,qt_apontada,setor)
+            VALUES (%s,%s,%s,%s,%s,%s,%s)
+            """
+
+            cur.execute(query_inspecao, (id_inspecao_solda, data_inspecao, codigo, descricao_cilindro, num_pecas, setor_final))
+
+            conn.commit()
+
+            if num_nao_conformidades > 0:
+                classe_inspecao.inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,list_causas,inspetoresSolda,setor_final,codigo_descricao,
+                                   setor,'','',observacaoSolda)
+                classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor_final,codigo_descricao,
+                                      operador,observacaoSolda,num_pecas)
+            else:
+                classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor_final,codigo_descricao,
+                                      '',observacaoSolda,num_pecas)
+
         return jsonify("Success")
     
-    return render_template('inspecao-tubos-cilindros.html')
+    dado_reteste_cilindros_tubos, dado_inspecao_cilindros_tubos = classe_inspecao.dados_reteste_tubos_cilindros()
+
+    return render_template('inspecao-tubos-cilindros.html',dado_reteste_cilindros_tubos=dado_reteste_cilindros_tubos, dado_inspecao_cilindros_tubos=dado_inspecao_cilindros_tubos)
 
 @app.route('/atualizar-conformidade',methods=['POST'])
 def atualizar_conformidade():
