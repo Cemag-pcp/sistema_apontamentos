@@ -63,8 +63,10 @@ class Inspecao:
 
         elif setor == 'Solda - Cilindro' or setor == 'Solda - Tubo':
 
-            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, operadores, observacao) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s)"""
-            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
+            motivo,observacao = observacaoSolda.split(" - ")
+
+            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, operadores, observacao, origem) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s, %s)"""
+            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacao, motivo)
 
         self.cur.execute(sql, values)
         self.conn.commit()
@@ -259,25 +261,52 @@ class Inspecao:
         dado_reteste_cilindros_tubos = self.cur.fetchall()
 
         inspecao = """SELECT 
-                    pi.id_inspecao,
-                    pi.data_inspecao,
-                    pi.conjunto
+                    id_inspecao,
+                    data_inspecao,
+                    conjunto,
+                    inspetor
                 FROM 
                     pcp.pecas_inspecionadas pi
-                LEFT JOIN 
-                    pcp.pecas_reinspecao pr
-                ON 
-                    pi.id_inspecao = pr.id
                 WHERE 
-                    (pi.setor = 'Solda - Cilindro' OR pi.setor = 'Solda - Tubo')
+                    (setor = 'Solda - Cilindro' OR setor = 'Solda - Tubo') AND num_inspecao = 0
                 ORDER BY 
-                    pi.id_inspecao DESC;
+                    id_inspecao DESC;
                 """
         self.cur.execute(inspecao)
 
         dado_inspecao_cilindros_tubos = self.cur.fetchall()
 
         return dado_reteste_cilindros_tubos, dado_inspecao_cilindros_tubos
+
+    def executando_reteste(self,id,reteste_status1,reteste_status2,reteste_status3):
+
+        query = """INSERT INTO pcp.inspecao_reteste (id,reteste_1,reteste_2,reteste_3) VALUES (%s,%s,%s,%s)"""
+        values = (id, reteste_status1, reteste_status2, reteste_status3)
+        self.cur.execute(query, values)
+
+         # Atualiza a tabela de reinspecao
+        sql = """UPDATE pcp.pecas_reinspecao SET excluidas = 'true' WHERE id=%s"""
+        self.cur.execute(sql, (id,))
+
+        query_select = """SELECT * FROM pcp.pecas_inspecionadas WHERE id_inspecao=%s"""
+        self.cur.execute(query_select, (id,))
+        row = self.cur.fetchone()
+
+        if row:
+            # Insere uma nova linha com os mesmos dados, mas com num_inspecao definido para 1
+            query_insert = """
+            INSERT INTO pcp.pecas_inspecionadas (
+                id_inspecao, inspetor, setor,
+                num_inspecao, conjunto, operadores, observacao, origem
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            values_insert = (
+                row['id_inspecao'],row['inspetor'], row['setor'],
+                1, row['conjunto'], row['operadores'], row['observacao'],row['origem']
+            )
+            self.cur.execute(query_insert, values_insert)
+
+        self.conn.commit()
 
     def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= '',tipos_causas_estamparia='',list_quantidade=[]):
 

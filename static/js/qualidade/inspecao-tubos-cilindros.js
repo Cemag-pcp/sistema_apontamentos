@@ -21,14 +21,6 @@ function modalCilindros() {
     $('#cilindrosModal').modal('show');
 }
 
-function modalReteste(codigo_descricao) {
-
-    $('#causaReteste1').val(codigo_descricao);
-
-    // Exibir o modal
-    $('#modalReteste').modal('show');
-}
-
 // ################ INÍCIO CILINDROS ################
 
 $("#codigo_cilindro").on('blur',function () {
@@ -129,6 +121,7 @@ $('#btnEnviarCilindro').on('click',function() {
     let list_quantidade = [];
     let observacao_cilindro = $('#observacao_cilindro').val();
     let tipos_causas_cilindro = $('#tipos_causas_cilindro').val();
+    let motivo_cilindro = $("#motivo_cilindro").val();
     let montador_cilindro = $('#montador_cilindro').val();
     let reinspecao = 'False';
 
@@ -155,6 +148,7 @@ $('#btnEnviarCilindro').on('click',function() {
     formData.append('list_quantidade', JSON.stringify(list_quantidade));
     formData.append('observacao_cilindro', observacao_cilindro);
     formData.append('tipos_causas_solda',tipos_causas_cilindro);
+    formData.append('motivo_cilindro',motivo_cilindro)
     formData.append('operador', montador_cilindro);
     formData.append('reinspecao', reinspecao);
     formData.append('setor', 'Cilindro');
@@ -272,14 +266,15 @@ $('#btnEnviarTubo').on('click',function() {
     let descricao_cilindro = $('#descricao_tubo').val();
     let qtd_inspecionada_cilindro = parseInt($('#qtd_inspecionada_tubo').val());
     let nao_conformidade_cilindro = $('#nao_conformidade_tubo').val();
-    let inputConformidadesSolda = (qtd_inspecionada_cilindro * 6) - nao_conformidade_cilindro
+    let inputConformidadesSolda = (qtd_inspecionada_cilindro * 1) - nao_conformidade_cilindro
     console.log(inputConformidadesSolda)
     let inspetores_cilindro = $('#inspetores_tubo').val();
     let list_causas = [];
     let list_quantidade = [];
     let observacao_cilindro = $('#observacao_tubo').val();
     let tipos_causas_cilindro = $('#tipos_causas_tubo').val();
-    let soldador_tubo = $('#soldador_tubo')
+    let motivo_cilindro = $("#motivo_tubo").val();
+    let soldador_tubo = $('#soldador_tubo').val();
     let reinspecao = 'False';
 
     for (var i = 0; i < tipos_causas_cilindro; i++) {
@@ -305,6 +300,7 @@ $('#btnEnviarTubo').on('click',function() {
     formData.append('list_quantidade', JSON.stringify(list_quantidade));
     formData.append('observacao_cilindro', observacao_cilindro);
     formData.append('tipos_causas_solda',tipos_causas_cilindro);
+    formData.append('motivo_cilindro',motivo_cilindro)
     formData.append('operador', soldador_tubo);
     formData.append('reinspecao', reinspecao);
     formData.append('setor', 'Tubo');
@@ -322,10 +318,28 @@ $('#btnEnviarTubo').on('click',function() {
         error: function (error) {
             $("#loading").hide();
             console.log(error);
-            $('#btnEnviarCilindro').prop('disabled',false);
+            $('#btnEnviarTubo').prop('disabled',false);
         }
     });
 
 })
 
 // ################ FIM TUBOS ################
+
+function formatarDatasDaTabela(tabela_inspecoes) {
+    var linhas = document.querySelectorAll('#' + tabela_inspecoes + ' .data-inspecao');
+    linhas.forEach(function(celula) {
+        var dataOriginal = celula.textContent.trim();
+        console.log(dataOriginal)
+        if (dataOriginal) {
+            var dataFormatada = formatarDataBrComHora(dataOriginal,0);
+            celula.textContent = dataFormatada;
+            console.log(dataFormatada)
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    formatarDatasDaTabela('tabela-inspecoes')
+    formatarDatasDaTabela('tabela-reteste')
+});

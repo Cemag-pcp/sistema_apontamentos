@@ -126,7 +126,7 @@ function setorCards(response) {
                         <small>Exec.:  ${item[5]}</small>
                     </div>
                 </div>
-                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1])}</p>
+                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1],3)}</p>
             `;
             
             listItem.html(content);
@@ -150,7 +150,79 @@ function setorCards(response) {
                 alert("Não possui nenhuma não conformidade")
             }
         }); 
-        
+
+    } else if(setor === 'Solda - Cilindro' || setor === 'Solda - Tubo') {
+
+        for (var i = 0; i < historico.length; i++) {
+
+            var item = historico[i];
+
+            qtd_na_reinspecao += item[2]
+
+            // Criar elemento da lista e definir atributos de dados
+            var listItem = $('<a>', {
+                class: 'list-group-item list-group-item-action modal-edit',
+                'aria-current': 'true',
+                'data-index': i, // Armazenar o índice do item como um atributo de dados
+                'data-item': JSON.stringify(item) // Armazenar todo o item como um atributo de dados
+            });
+
+            listItem.css('cursor','pointer');
+            
+            if(i == 0) {
+                var content = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-4">${item[9]}</h6>
+                    <div class="d-flex flex-column align-items-end">
+                        <small style="width:170px">Inspetor: ${item[3]}</small>
+                        <small style="width:170px">Quantidade inspecionada: ${item[12]}</small>
+                        <small>Exec.: ${item[5]}</small>
+                    </div>
+                </div>
+                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1],3)}</p>
+            `;
+            } else {
+                function verificarConformidade(valor) {
+                    if (valor === true) {
+                        return "Conforme";
+                    } else if (valor === false) {
+                        return "Não Conforme";
+                    } else {
+                        return "";
+                    }
+                }
+
+                var content = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-4" style="color:red">RETESTE</h6>
+                    <div class="d-flex flex-column align-items-end">
+                        <small style="width:150px">Reteste 1: ${verificarConformidade(item[2])}</small>
+                        <small style="width:150px">Reteste 2: ${verificarConformidade(item[7])}</small>
+                        <small style="width:150px">Reteste 3: ${verificarConformidade(item[8])}</small>
+                        <small>Exec.: ${item[5]}</small>
+                    </div>
+                </div>
+                <p class="mb-1" style="font-size: small;"><strong>Motivo:</strong> ${item[11]}</p>
+                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1],3)}</p>
+            `
+            }
+            
+            listItem.html(content);
+            
+            $('#listaHistorico').append(listItem);
+        }
+
+        $(".modal-edit").on('click', function() {
+            var dataItemString = $(this).data('item');
+            var concatenatedPhotos = concatPhotosByCriteria(foto_causa, dataItemString[5]);
+            if (Object.keys(concatenatedPhotos).length !== 0) {
+                $("#modalTimeline").modal('hide')
+                modalVisualizarCausas(concatenatedPhotos);
+            } else {
+                alert("Não possui nenhuma não conformidade ou é reteste")
+            }
+        }); 
+           
     } else if (setor === 'Solda') {
         for (var i = 0; i < historico.length; i++) {
 
@@ -185,7 +257,7 @@ function setorCards(response) {
                         <small>Exec.:  ${item[5]}</small>
                     </div>
                 </div>
-                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1])}</p>
+                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1],3)}</p>
             `;
             
             listItem.html(content);
@@ -254,7 +326,7 @@ function setorCards(response) {
                         <small>Exec.:  ${item[5]}</small>
                     </div>
                 </div>
-                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1])}</p>
+                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1],3)}</p>
             `;
             
             listItem.html(content);
@@ -395,7 +467,7 @@ function changeTab(tabName) {
     clickedTab.classList.add('active');
 }
 
-function formatarDataBrComHora(dataString) {
+function formatarDataBrComHora(dataString,sum) {
     // Cria um objeto Date a partir da string
     var data = new Date(dataString);
 
@@ -405,7 +477,7 @@ function formatarDataBrComHora(dataString) {
     var dia = data.getDate().toString().padStart(2, '0');
     var mes = (data.getMonth() + 1).toString().padStart(2, '0');
     var ano = data.getFullYear();
-    var hora = (data.getHours() + 3).toString().padStart(2, '0');
+    var hora = (data.getHours() + sum).toString().padStart(2, '0');
     var minuto = data.getMinutes().toString().padStart(2, '0');
     var segundo = data.getSeconds().toString().padStart(2, '0');
 

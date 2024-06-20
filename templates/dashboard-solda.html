@@ -173,7 +173,7 @@
                 <h6 class="m-0 font-weight-bold text-primary">Tubos</h6>
                 <select id="filtro_liquida" class="form-control" multiple style="width: 300px;">
                   {% for tubo in tubos %}
-                      <option value="{{tubo[1]}}">{{tubo[1]}}</option>
+                      <option value="{{tubo[3]}}">{{tubo[3]}}</option>
                   {% endfor %}
                 </select>
               </div>
@@ -184,7 +184,7 @@
                       <tr>
                         <th>Data</th>
                         <th>Conjunto</th>
-                        <th>Causa</th>
+                        <th>Motivo</th>
                         <th style="width: 50px;">Quantidade</th>
                       </tr>
                     </thead>
@@ -193,8 +193,8 @@
                           <tr>
                               <th scope="row">{{tubo[0]}}</th>
                               <td>{{tubo[1]}}</td>
-                              <td>{{tubo[2]}}</td>
                               <td>{{tubo[3]}}</td>
+                              <td>{{tubo[4]}}</td>
                           </tr>
                           {% endfor %}
                       </tbody>
@@ -213,7 +213,7 @@
                 <h6 class="m-0 font-weight-bold text-primary">Cilindros</h6>
                 <select id="filtro_po" class="form-control" multiple style="width: 300px;">
                     {% for cil in cilindro %}
-                        <option value="{{tubo[2]}}">{{tubo[2]}}</option>
+                        <option value="{{cil[3]}}">{{cil[3]}}</option>
                     {% endfor %}
                 </select>
               </div>
@@ -224,7 +224,7 @@
                       <tr>
                         <th>Data</th>
                         <th>Conjunto</th>
-                        <th>Causa</th>
+                        <th>Motivo</th>
                         <th style="width: 50px;">Quantidade</th>
                       </tr>
                     </thead>
@@ -233,8 +233,8 @@
                           <tr>
                               <th scope="row">{{cil[0]}}</th>
                               <td>{{cil[1]}}</td>
-                              <td>{{cil[2]}}</td>
                               <td>{{cil[3]}}</td>
+                              <td>{{cil[4]}}</td>
                           </tr>
                           {% endfor %}
                       </tbody>

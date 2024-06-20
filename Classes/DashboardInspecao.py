@@ -241,21 +241,26 @@ class DashboardInspecao:
 
         query_tubos = f"""
                     SELECT ano_mes,
-                        conjunto,
-                        causa,
-                        SUM(total_quantidade) as total_quantidade
-                    FROM (
-                        SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
-                            pi.codigo || '-' ||pi.peca as conjunto,
-                            foto.causa,
-                            foto.quantidade::INTEGER as total_quantidade
-                        FROM pcp.inspecao_foto foto
-                        LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
-                        WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-                        AND pi.peca LIKE '%TUBO%' AND foto.num_inspecao = 0 AND pi.setor = 'Solda'
-                    ) AS subquery
-                    GROUP BY ano_mes, conjunto, causa
-                    ORDER BY ano_mes desc;"""
+                            conjunto,
+                            causa,
+                            origem,
+                            SUM(total_quantidade) AS total_quantidade
+                        FROM (
+                            SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
+                                            pi.codigo || '-' || pi.peca AS conjunto,
+                                            foto.causa,
+                                            inspecionadas.origem,
+                                            foto.quantidade::INTEGER AS total_quantidade
+                            FROM pcp.inspecao_foto foto
+                            LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                            LEFT JOIN pcp.pecas_inspecionadas inspecionadas ON pi.id = inspecionadas.id_inspecao
+                            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                            AND foto.num_inspecao = 0
+                            AND pi.setor = 'Solda - Tubo'
+                        ) AS subquery
+                        GROUP BY ano_mes, conjunto, causa, origem
+                        ORDER BY ano_mes DESC;
+                    """
         
         cur.execute(query_tubos)
         tubos = cur.fetchall()
@@ -269,7 +274,7 @@ class DashboardInspecao:
                 FROM pcp.inspecao_foto foto
                 LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-                AND pi.peca LIKE '%TUBO%' AND foto.num_inspecao = 0 AND pi.setor = 'Solda'
+                AND foto.num_inspecao = 0 AND pi.setor = 'Solda - Tubo'
             ) AS subquery;
         """
 
@@ -278,21 +283,25 @@ class DashboardInspecao:
 
         query_cilindro = f"""
                     SELECT ano_mes,
-                        conjunto,
-                        causa,
-                        SUM(total_quantidade) as total_quantidade
-                    FROM (
-                        SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
-                            pi.codigo || '-' ||pi.peca as conjunto,
-                            foto.causa,
-                            foto.quantidade::INTEGER as total_quantidade
-                        FROM pcp.inspecao_foto foto
-                        LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
-                        WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-                        AND pi.peca LIKE '%CILINDRO%' AND foto.num_inspecao = 0 AND pi.setor = 'Solda'
-                    ) AS subquery
-                    GROUP BY ano_mes, conjunto, causa
-                    ORDER BY ano_mes desc;"""
+                            conjunto,
+                            causa,
+                            origem,
+                            SUM(total_quantidade) AS total_quantidade
+                        FROM (
+                            SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
+                                            pi.codigo || '-' || pi.peca AS conjunto,
+                                            foto.causa,
+                                            inspecionadas.origem,
+                                            foto.quantidade::INTEGER AS total_quantidade
+                            FROM pcp.inspecao_foto foto
+                            LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                            LEFT JOIN pcp.pecas_inspecionadas inspecionadas ON pi.id = inspecionadas.id_inspecao
+                            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                            AND foto.num_inspecao = 0
+                            AND pi.setor = 'Solda - Cilindro'
+                        ) AS subquery
+                        GROUP BY ano_mes, conjunto, causa, origem
+                        ORDER BY ano_mes DESC;"""
         
         cur.execute(query_cilindro)
         cilindro = cur.fetchall()
@@ -306,7 +315,7 @@ class DashboardInspecao:
                 FROM pcp.inspecao_foto foto
                 LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-                AND pi.peca LIKE '%CILINDRO%' AND foto.num_inspecao = 0 AND pi.setor = 'Solda'
+                AND foto.num_inspecao = 0 AND pi.setor = 'Solda - Cilindro'
             ) AS subquery;
         """
 

@@ -82,13 +82,22 @@ $(document).ready(function() {
     "iDisplayLength":10,
     order: [[0, 'desc']]
   });
-});dataTableRetesteSolda
+});
 
 $(document).ready(function() {
   $('#dataTableRetesteSolda').DataTable({
     "info":false,
     "aLengthMenu":[5,10,25],
     "iDisplayLength":10,
-    order: [[0, 'desc']]
+    order: [[1, 'desc']]
+  });
+});
+
+$(document).ready(function() {
+  $('#dataTableTubosCilindrosTable').DataTable({
+    "info":false,
+    "aLengthMenu":[5,10,25],
+    "iDisplayLength":10,
+    order: [[1, 'desc']]
   });
 });

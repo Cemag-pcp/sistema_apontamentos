@@ -41,7 +41,7 @@
                                 style="cursor: pointer;">Reteste</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" onclick="changeTab('inspecionados')"
+                            <a class="nav-link" onclick="changeTab('TubosCilindros')"
                                 style="cursor: pointer;">Inspecionados</a>
                         </li>
                     </ul>
@@ -62,11 +62,11 @@
                                         <th>Executar Reteste</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="tabela-reteste">
                                     {% for cilindro_tubo in dado_reteste_cilindros_tubos %}
                                     <tr>
                                         <td data-title="#">{{cilindro_tubo[0]}}</td>
-                                        <td data-title="Data da Inspecao">{{cilindro_tubo[1]}}</td>
+                                        <td data-title="Data da Inspecao" class="data-inspecao">{{cilindro_tubo[1]}}</td>
                                         <td data-title="Código - Descrição">{{cilindro_tubo[6]}}</td>
                                         <td data-title="Categoria">{{cilindro_tubo[7]}}</td>
                                         <td data-title="Qtd. Não Conforme">{{cilindro_tubo[2]}}</td>
@@ -79,7 +79,7 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a  class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalReteste('{{cilindro_tubo[6]}}')">
+                                                        style="cursor: pointer;" onclick="modalReteste('{{cilindro_tubo[0]}}','{{cilindro_tubo[6]}}','{{cilindro_tubo[3]}}')">
                                                         Executar Reteste
                                                     </a>
                                                 </div>
@@ -93,24 +93,26 @@
                     </div>
                 </div>
                 <!-- Card tabela inspecionados -->
-                <div class="card-body" id="inspecionadosTable" style="display: none;">
+                <div class="card-body" id="TubosCilindrosTable" style="display: none;">
                     <div id="no-more-tables">
                         <div class="table-responsive">
-                            <table class="table table-bordered" id="dataTableInspecionados" width="100%" cellspacing="0">
+                            <table class="table table-bordered" id="dataTableTubosCilindrosTable" width="100%" cellspacing="0">
                                 <thead class="cf">
                                     <tr>
                                         <th>#</th>
                                         <th>Data da Inspeção</th>
                                         <th>Código - Descrição</th>
-                                        <th>Tipo</th>
+                                        <th>Inspetor</th>
+                                        <th>Histórico</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="tabela-inspecoes">
                                     {% for dado_inspecao in dado_inspecao_cilindros_tubos %}
                                     <tr>
                                         <td data-title="#">{{dado_inspecao[0]}}</td>
-                                        <td data-title="Data da Inspeção">{{dado_inspecao[1]}}</td>
+                                        <td data-title="Data da Inspeção" class="data-inspecao">{{dado_inspecao[1]}}</td>
                                         <td data-title="Descrição">{{dado_inspecao[2]}}</td>
+                                        <td data-title="Inspetor">{{dado_inspecao[3]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -120,7 +122,7 @@
                                                 </a>
                                                 <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                     <a  class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="">
+                                                        style="cursor: pointer;" onclick="modalTimeline('{{dado_inspecao[0]}}','Solda - Cilindro ou Tubo')">
                                                         Histórico de Inspeção
                                                     </a>
                                                 </div>
@@ -205,7 +207,7 @@
                                         <option value="Amassado">Amassado</option>
                                         <option value="Oxidação">Oxidação</option>
                                         <option value="Solda">Solda</option>
-                                        <option value="Dimensional (625 mm)">Dimensional (625 mm)</option>
+                                        <option value="Dimensional">Dimensional</option>
                                         <option value="Pressão">Pressão</option>
                                         <option value="Vazamento">Vazamento</option>
                                     </select>
@@ -376,7 +378,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="modal fade" data-backdrop="static" id="modalReteste" tabindex="-1" role="dialog" aria-labelledby="modalRetesteLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -390,42 +392,36 @@
                             </button>
                         </div>
                         <div class="modal-body">
-                            <p id="p_confirmar_inspecao_tubo_cilindro"></p>
+                            <p id="p_confirmar_reteste_tubo_cilindro"></p>
                             <div class="row">
-                                <div class="col-sm-8 mb-4">
+                                <div class="col-sm-2 mb-4 d-none">
+                                    <label>id</label>
+                                    <input type="text" class="form-control" id="id_reteste" disabled>
+                                </div>
+                                <div class="col-sm-12 mb-4">
                                     <label>Descrição do Produto</label>
                                     <input type="text" class="form-control" id="causaReteste1" disabled>
                                 </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-sm-4 mb-4">
-                                    <label>Reteste</label>
+                                    <label>Reteste 1</label>
                                     <select class="form-control" name="reteste_status1" id="reteste_status1">
                                         <option value="" selected hidden disabled></option>
                                         <option value="Conforme">Conforme</option>
                                         <option value="Não Conforme">Não Conforme</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="row" style="display: none;">
-                                <div class="col-sm-8 mb-4">
-                                    <label>Descrição do Produto</label>
-                                    <input type="text" class="form-control" id="causaReteste2" disabled>
-                                </div>
-                                <div class="col-sm-4 mb-4">
-                                    <label>Reteste</label>
+                                <div class="col-sm-4 mb-4" id="linha_reteste2" style="display: none;">
+                                    <label>Reteste 2</label>
                                     <select class="form-control" name="reteste_status2" id="reteste_status2">
                                         <option value="" selected hidden disabled></option>
                                         <option value="Conforme">Conforme</option>
                                         <option value="Não Conforme">Não Conforme</option>
                                     </select>
                                 </div>
-                            </div>
-                            <div class="row" style="display: none;">
-                                <div class="col-sm-8 mb-4">
-                                    <label>Descrição do Produto</label>
-                                    <input type="text" class="form-control" id="causaReteste3" disabled>
-                                </div>
-                                <div class="col-sm-4 mb-4">
-                                    <label>Reteste</label>
+                                <div class="col-sm-4 mb-4" id="linha_reteste3" style="display: none;">
+                                    <label>Reteste 3</label>
                                     <select class="form-control" name="reteste_status3" id="reteste_status3">
                                         <option value="" selected hidden disabled></option>
                                         <option value="Conforme">Conforme</option>
@@ -435,8 +431,52 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarCilindro">Confirmar</button>
-                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarTubo">Confirmar</button>
+                            <button type="button" class="btn btn-primary" id="btnEnviarReteste">Confirmar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="modalTimeline" tabindex="-1" role="dialog" aria-labelledby="modalTimelineLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="m-0 font-weight-bold text-primary">Histórico</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="height: 60vh; overflow-y: auto;">
+                            <div class="list-group" id="listaHistorico">
+                                
+                            </div>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <p id="modal-footer-quantidade-produzida"></p>
+                            <p id="modal-footer-quantidade-reinspecao"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" data-backdrop="static" id="visualizacaoCausasModal" tabindex="-1" role="dialog"
+                aria-labelledby="visualizacaoCausasModalLabel" aria-hidden="true" style="overflow-y: auto;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="visualizacaoCausasModalLabel"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
+                            <h6 id="descricao_causas">Descrição das causas</h6>
+                            <ul id="lista_nao_ordenada" style="padding: 0;">
+                            </ul>
+                            
+                            <div id="img_visualizacaoCausas">
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -461,6 +501,8 @@
         <script src="static/js/demo/datatables-demo.js"></script>
         <script src="static/js/qualidade/inspecao-tubos-cilindros.js"></script>
         <script src="static/js/qualidade/causas/causa_tubos_cilindros.js"></script>
+        <script src="static/js/qualidade/reteste-tubos-cilindros.js"></script>
+        <script src="static/js/qualidade/inspecao-pintura.js"></script>
 
         <script>
             function changeTab(tabName) {
