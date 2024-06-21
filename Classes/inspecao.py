@@ -260,19 +260,18 @@ class Inspecao:
 
         dado_reteste_cilindros_tubos = self.cur.fetchall()
 
-        inspecao = """SELECT 
-                    id_inspecao,
-                    data_inspecao,
-                    conjunto,
-                    inspetor
-                FROM 
-                    pcp.pecas_inspecionadas pi
-                WHERE 
-                    (setor = 'Solda - Cilindro' OR setor = 'Solda - Tubo') AND num_inspecao = 0
-                ORDER BY 
-                    id_inspecao DESC;
+        inspecao_dados = """SELECT 
+                        id_inspecao,
+                        data_inspecao,
+                        conjunto,
+                        inspetor,
+                        pi2.qt_inspecionada
+                    FROM pcp.pecas_inspecionadas pi
+                    LEFT JOIN pcp.pecas_inspecao pi2 ON pi.id_inspecao = pi2.id
+                    WHERE (pi.setor = 'Solda - Cilindro' OR pi.setor = 'Solda - Tubo') AND num_inspecao = 0
+                    ORDER BY id_inspecao DESC;
                 """
-        self.cur.execute(inspecao)
+        self.cur.execute(inspecao_dados)
 
         dado_inspecao_cilindros_tubos = self.cur.fetchall()
 
@@ -430,43 +429,7 @@ class Inspecao:
 
         self.conn.commit()
 
-    def processar_ficha_inspecao(self,id_inspecao,ficha_producao='',ficha_completa=''):
-
-        if ficha_producao != '':
-
-            filename = secure_filename(ficha_producao.filename)
-            file_path = os.path.join(self.upload_folder_token, filename)
-            arquivos = file_path + ";"
-            arquivos = arquivos.replace('\\', '/')
-            ficha_producao.save(file_path)
-
-            query_ficha = """DO $$
-                            BEGIN
-                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                    INSERT INTO pcp.ficha_inspecao
-                                        (id, caminho_ficha, ficha_completa, num_inspecao) 
-                                    VALUES 
-                                        (%s, %s, 'false',
-                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
-                                        );
-                                ELSE
-                                    INSERT INTO pcp.ficha_inspecao
-                                        (id, caminho_ficha, ficha_completa, num_inspecao) 
-                                    VALUES 
-                                        (%s, %s, 'false', 0);
-                                END IF;
-                            END $$;"""
-
-            values_ficha = (
-                    id_inspecao,
-                    id_inspecao,
-                    arquivos,
-                    id_inspecao,
-                    id_inspecao,
-                    arquivos
-                )
-            
-            self.cur.execute(query_ficha, values_ficha)
+    def processar_ficha_inspecao(self,id_inspecao,ficha_completa=''):
 
         if ficha_completa != '':
             filename = secure_filename(ficha_completa.filename)

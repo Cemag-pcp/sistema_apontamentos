@@ -1018,18 +1018,12 @@ def inspecao_estamparia():
 
         outraCausaSolda = request.form.get('outraCausaEstamparia')  
         tipos_causas_estamparia = int(request.form.get('tipos_causas_estamparia'))
-        ficha_producao =  request.files.get("ficha_producao")
         ficha_completa =  request.files.get("ficha_completa")
 
-        print(ficha_producao)
         print(ficha_completa)
 
-        if ficha_producao == None:
-            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_completa=ficha_completa) 
-        elif ficha_completa == None: 
-            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_producao=ficha_producao)
-        else:
-            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_producao,ficha_completa)
+        if ficha_completa != None:
+            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_completa) 
 
         for i, item in enumerate(list_causas):
             if item == 'Outro':
@@ -1228,7 +1222,7 @@ def inspecao_tubos_cilindros():
 
         motivo_cilindro = request.form.get('motivo_cilindro')
 
-        print(motivo_cilindro)
+        motivo_cilindro = motivo_cilindro.title()
 
         observacaoAjustada = f"{motivo_cilindro} - {observacaoSolda}"
 
@@ -1239,9 +1233,9 @@ def inspecao_tubos_cilindros():
         setor = request.form.get('setor')
         setor_final = f"Solda - {setor}"
 
-        query_inspecao = """INSERT INTO pcp.pecas_inspecao (id,data_finalizada,codigo,peca,qt_inspecionada,setor,celula) VALUES (%s,%s,%s,%s,%s,%s,%s)"""
+        query_inspecao = """INSERT INTO pcp.pecas_inspecao (id,data_finalizada,codigo,peca,qt_inspecionada,setor,celula,qt_apontada,excluidas) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
 
-        cur.execute(query_inspecao, (id_inspecao_solda, data_inspecao, codigo, descricao_cilindro, num_pecas, setor_final,setor))
+        cur.execute(query_inspecao, (id_inspecao_solda, data_inspecao, codigo, descricao_cilindro, num_pecas, setor_final,setor,num_pecas,'true'))
 
         conn.commit()
 

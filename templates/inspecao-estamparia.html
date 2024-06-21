@@ -208,40 +208,97 @@
                         </div>
                         <div class="modal-body p-4" style="font-size: 14px; height: 60vh; overflow-y: auto;">
                             <div class="row">
-                                <div class="col-sm-6 mb-4">
+                                <div class="col-sm-4 mb-4">
                                     <label>Data da inspeção</label>
                                     <input type="text" class="form-control desabilitado" name="data_inspecao_estamparia"
                                         id="data_inspecao_estamparia" style="font-size: 14px;" disabled>
                                 </div>
-                                <div class="col-sm-6 mb-4">
+                                <div class="col-sm-4 mb-4">
+                                    <label>Inspetor</label>
+                                    <select class="form-control" name="inspetor_estamparia" id="inspetor_estamparia" style="font-size: 12px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="Severiano">Severiano</option>
+                                        <option value="Matheus">Matheus</option>
+                                        <option value="Guthemberg">Guthemberg</option>
+                                        <option value="Estefane">Estefane</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-4 mb-4">
                                     <label>Máquina</label>
                                     <input type="text" class="form-control desabilitado" id="inputMaquina_estamparia" autocomplete="off"
                                             aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
                                 </div>
                             </div>
                             <div class="row" style="align-items: end;">
-                                <div class="col-sm-6 mb-4">
+                                <div class="col-sm-4 mb-4">
                                     <label>Conjunto</label>
                                     <div class="input-group">
                                         <input type="text" class="form-control desabilitado" id="inputConjunto_estamparia" autocomplete="off"
                                             aria-describedby="basic-addon2" style="font-size: 12px; cursor: default;" disabled>
                                     </div>
                                 </div>
-                                <div class="col-sm-3 mb-4">
+                                <div class="col-sm-4 mb-4">
+                                    <label>Operador</label>
+                                    <select class="form-control" name="inspetor_estamparia" id="inspetor_estamparia" style="font-size: 12px;">
+                                        <option value="" selected hidden disabled></option>
+                                        <option value="4217 - Ronaldo">4217 - Ronaldo</option>
+                                        <option value="4348 - Leano">4348 - Leano</option>
+                                        <option value="4322 - Alex">4322 - Alex</option>
+                                        <option value="3654 - Airton">3654 - Airton</option>
+                                        <option value="4200 - Paiva">4200 - Paiva</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-4 mb-4">
                                     <label>N° de peças produzidas</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control desabilitado" id="inputPecasProduzidas_estamparia"
                                             style="font-size: 12px;" disabled>
                                     </div>
                                 </div>
-                                <div class="col-sm-3 mb-4">
-                                    <label>N° peças inspecionadas</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control desabilitado" id="inputPecasInspecionadas_estamparia"
-                                            style="font-size: 12px;">
-                                    </div>
-                                </div>
-                            </div>
+                            </div>                          
+
+                            <table class="table table-bordered">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th colspan="4" class="text-center">Medidas especificadas em desenho técnico</th>
+                                        <th colspan="2" style="text-align: center;align-content: center;">Situação da Amostra</th>
+                                    </tr>
+                                    <tr>
+                                        <th contenteditable="true"></th>
+                                        <th contenteditable="true"></th>
+                                        <th contenteditable="true"></th>
+                                        <th contenteditable="true"></th>
+                                        <th>Conforme</th>
+                                        <th>Não Conforme</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="tabela_editavel">
+                                    <tr>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td class="checkbox-container"><input type="checkbox" class="checkbox"></td>
+                                        <td class="checkbox-container"><input type="checkbox" class="checkbox"></td>
+                                    </tr>
+                                    <tr>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td class="checkbox-container"><input type="checkbox" class="checkbox"></td>
+                                        <td class="checkbox-container"><input type="checkbox" class="checkbox"></td>
+                                    </tr>
+                                    <tr>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td contenteditable="true" class="editable"></td>
+                                        <td class="checkbox-container"><input type="checkbox" class="checkbox"></td>
+                                        <td class="checkbox-container"><input type="checkbox" class="checkbox"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                             <div class="row">
                                 <div class="col-sm-6 mb-4">
                                     <label>Total de conformidades</label>
@@ -265,7 +322,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" id="selectContainer">
+                            <div class="row" id="selectContainer" style="display: none;">
                                 <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
                                     <label>Causas</label>
                                     <select id="causasEstamparia-0" name="causasEstamparia-0" class="form-control" style="font-size: 14px;">
@@ -287,36 +344,22 @@
                                     <input type="file" class="custom-file-input" id="inputGroupFile_estamparia-0" accept="image/*" multiple="true">
                                     <label class="custom-file-label" style="top: auto;">0 arquivos</label>
                                 </div>
-                                <div class="col-sm-12" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="col-sm-12 mb-4" style="display: flex; justify-content: space-between; align-items: center;">
                                     <button class="btn btn-primary" id="addButton" style="font-size: 10px;">Adicionar causa</button>
                                     <button class="btn btn-danger" id="removeButton" style="font-size: 10px;" disabled>Remover causa</button>
                                 </div>
-                            </div>                            
+                            </div>  
                             <div class="row">
-                                <div id="coluna_causa_estamparia" class="col-sm-12">
-
-                                </div>
-                            </div>
-                            <div class="row" style="align-items: end;">
-                                <div class="col-sm-6 mb-4">
-                                    <label>Inspetor</label>
-                                    <select class="form-control" name="inspetor_estamparia" id="inspetor_estamparia" style="font-size: 12px;">
+                                <div class="col-sm-6 mb-4" id="col_ficha_completa">
+                                    <label>Necessita realizar a inspeção 100%?</label>
+                                    <select class="form-control" name="" id="">
                                         <option value="" selected hidden disabled></option>
-                                        <option value="Severiano">Severiano</option>
-                                        <option value="Matheus">Matheus</option>
-                                        <option value="Guthemberg">Guthemberg</option>
-                                        <option value="Estefane">Estefane</option>
+                                        <option value="Não">Não</option>
+                                        <option value="Sim">Sim</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-6 mb-4">
-                                    <label>Outro motivo<small><code> *Preencha caso tenha "Outro" selecionado nas causas</code></small></label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control desabilitado" autocomplete="off"
-                                            id="outraCausa_estamparia" style="font-size: 12px;" disabled>
-                                    </div>
-                                </div>
                             </div>
-                            <div class="row">
+                            <!-- <div class="row">
                                 <div class="col-sm-6 mb-4">
                                     <label>Observação</label>
                                     <div class="input-group">
@@ -337,18 +380,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" style="display: flex; justify-content: space-around;" id="campo_fichas">
-                                <div class="col-sm-6 mb-4 customFile" id="col_ficha_producao">
-                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Ficha Inspeção de Produção</p></div>
-                                    <input type="file" class="custom-file-input" id="ficha_producao" accept="image/*">
-                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
-                                </div>
-                                <div class="col-sm-5 mb-4 customFile" id="col_ficha_completa">
+                            <div class="row"  id="campo_fichas">
+                                <div class="col-sm-6 mb-4 customFile" id="col_ficha_completa">
                                     <div><p style="display: inline-block;margin-bottom: .5rem;">Ficha de Inspeção 100%</p></div>
                                     <input type="file" class="custom-file-input" id="ficha_completa" accept="image/*">
                                     <label class="custom-file-label" style="top: auto;">0 arquivos</label>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="modal-footer"> 
                            <button class="btn btn-primary" id="envio_inspecao_estamparia">Enviar</button>
@@ -677,6 +715,7 @@
         <script src="static/js/qualidade/inspecao-pintura.js"></script>
         <script src="static/js/qualidade/inspecao-estamparia.js"></script>
         <script src="static/js/qualidade/reinspecao_estamparia.js"></script>
+        <script src="static/js/qualidade/tabela_medidas_estamparia.js"></script>
 
 
         {% endblock %}

@@ -162,24 +162,29 @@ class DashboardInspecao:
                 EXTRACT(MONTH FROM inspecao.data_finalizada) AS mes,
                 EXTRACT(YEAR FROM inspecao.data_finalizada) AS ano,
                 SUM(CASE WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.nao_conformidades ELSE 0 END) AS total_nao_conformidades,
-                SUM(CASE WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.total_conformidades + inspecionadas.nao_conformidades ELSE 0 END) AS num_inspecoes
+                SUM(CASE 
+                    WHEN inspecionadas.num_inspecao = 0 AND inspecionadas.setor = 'Solda' THEN inspecionadas.total_conformidades + inspecionadas.nao_conformidades
+                    WHEN inspecionadas.num_inspecao = 0 AND (inspecionadas.setor = 'Solda - Cilindro' OR inspecionadas.setor = 'Solda - Tubo') THEN inspecao.qt_inspecionada
+                    ELSE 0 
+                END) AS num_inspecoes
             FROM pcp.pecas_inspecionadas AS inspecionadas
             LEFT JOIN pcp.pecas_inspecao AS inspecao ON inspecao.id = inspecionadas.id_inspecao
-            WHERE inspecionadas.setor = 'Solda' AND inspecao.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+            WHERE (inspecionadas.setor = 'Solda' OR inspecionadas.setor = 'Solda - Cilindro' OR inspecionadas.setor = 'Solda - Tubo')
+            AND inspecao.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
             GROUP BY TO_CHAR(inspecao.data_finalizada, 'YYYY-Month'), EXTRACT(MONTH FROM inspecao.data_finalizada), EXTRACT(YEAR FROM inspecao.data_finalizada)
         ),
         pecas_inspecao AS (
             SELECT 
                 EXTRACT(MONTH FROM data_finalizada) AS mes,
                 EXTRACT(YEAR FROM data_finalizada) AS ano,
-                SUM(qt_apontada) FILTER (WHERE setor = 'Solda') AS num_pecas_produzidas
+                SUM(qt_apontada) FILTER (WHERE setor = 'Solda' OR setor = 'Solda - Cilindro' OR setor = 'Solda - Tubo') AS num_pecas_produzidas
             FROM pcp.pecas_inspecao
-            WHERE setor = 'Solda' 
+            WHERE (setor = 'Solda' OR setor = 'Solda - Cilindro' OR setor = 'Solda - Tubo')
             AND data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
             GROUP BY EXTRACT(MONTH FROM data_finalizada), EXTRACT(YEAR FROM data_finalizada)
         )
         SELECT 
-            COALESCE(pi2.ano_mes, TO_CHAR(TO_DATE(pi.ano || '-' || pi.mes, 'YYYY-MM'), 'YYYY-Month'||'❌')) AS ano_mes,
+            COALESCE(pi2.ano_mes, TO_CHAR(TO_DATE(pi.ano || '-' || pi.mes, 'YYYY-MM'), 'YYYY-Month' || '❌')) AS ano_mes,
             COALESCE(pi.num_pecas_produzidas, 0) AS num_pecas_produzidas,
             COALESCE(pi2.num_inspecoes, 0) AS num_inspecoes,
             COALESCE(pi2.total_nao_conformidades, 0) AS total_nao_conformidades,
@@ -248,6 +253,7 @@ class DashboardInspecao:
                         FROM (
                             SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
                                             pi.codigo || '-' || pi.peca AS conjunto,
+                                            foto.id,
                                             foto.causa,
                                             inspecionadas.origem,
                                             foto.quantidade::INTEGER AS total_quantidade
@@ -269,6 +275,7 @@ class DashboardInspecao:
             SELECT COALESCE(SUM(total_quantidade),0) as soma_total
             FROM (
                 SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                                foto.id,
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
                 FROM pcp.inspecao_foto foto
@@ -290,6 +297,7 @@ class DashboardInspecao:
                         FROM (
                             SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
                                             pi.codigo || '-' || pi.peca AS conjunto,
+                                            foto.id,
                                             foto.causa,
                                             inspecionadas.origem,
                                             foto.quantidade::INTEGER AS total_quantidade
@@ -310,6 +318,7 @@ class DashboardInspecao:
             SELECT COALESCE(SUM(total_quantidade),0) as soma_total
             FROM (
                 SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                                foto.id,
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
                 FROM pcp.inspecao_foto foto

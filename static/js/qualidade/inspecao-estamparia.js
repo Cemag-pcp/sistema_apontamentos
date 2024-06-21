@@ -3,7 +3,7 @@ function modalInspecaoEstamparia(id_inspecao,maquina,conjunto,quantidade) {
     const timeElapsed = Date.now();
     const today = new Date(timeElapsed);
 
-    $('#inspecionarEstampariaLabel').text(id_inspecao)
+    $('#inspecionarEstampariaLabel').text(id_inspecao + " - " + conjunto)
 
     $("#inputMaquina_estamparia").val(maquina);
     $("#inputConjunto_estamparia").val(conjunto);
@@ -79,7 +79,7 @@ $('#inputPecasInspecionadas_estamparia').on('blur', function() {
     let produzidas = parseInt($('#inputPecasProduzidas_estamparia').val());
     let inputConformidadesSolda = $('#inputConformidades_estamparia');
     let inputNaoConformidadesSolda = $('#inputNaoConformidades_estamparia');
-    let fichaCompleta = $("#col_ficha_completa");
+    let fichaCompleta = $("#campo_fichas");
     let fichaCompletaInput = $('#ficha_completa');
     let fichaCompletaLabel = fichaCompleta.find('label');
 
@@ -88,9 +88,9 @@ $('#inputPecasInspecionadas_estamparia').on('blur', function() {
         inspecionados.val('')
     }
     if(parseInt(inspecionados.val()) === produzidas){
-        fichaCompleta.css("visibility","visible")
+        fichaCompleta.css("display","block")
     } else {
-        fichaCompleta.css("visibility","hidden");
+        fichaCompleta.css("display","none");
         fichaCompletaInput.val('');
         fichaCompletaLabel.text('0 arquivos');
     }
@@ -107,7 +107,6 @@ $('#envio_inspecao_estamparia').on('click',function() {
     let observacaoSolda = $('#observacao_estamparia').val();
     let inspetoresSolda = $('#inspetor_estamparia').val();
     let tipos_causas_estamparia = $("#tipos_causas_estamparia").val();
-    let ficha_producao = $("#ficha_producao");
     let origemInspecaoSolda = $('#origemInspecao_estamparia').val();
     let qtd_causas = 0
 
@@ -121,7 +120,7 @@ $('#envio_inspecao_estamparia').on('click',function() {
         return; // Interrompe a execução
     }
 
-    if (inputConformidadesSolda === "" || inspetoresSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0 || ficha_producao.val() === '') {
+    if (inputConformidadesSolda === "" || inspetoresSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
         alert('Verifique se o campo de conformidades está com valor correto');
         $("#loading").hide();
         return; // Interrompe a execução
@@ -168,10 +167,7 @@ $('#btnEnviarEstamparia').on('click',function() {
     let observacaoSolda = $('#observacao_estamparia').val();
     let origemInspecaoSolda = $('#origemInspecao_estamparia').val();
     let tipos_causas_estamparia = $("#tipos_causas_estamparia").val();
-    let ficha_producao = $("#ficha_producao")[0].files;
-    for (let file of ficha_producao) {
-        formData.append('ficha_producao', file);
-    }
+
     let ficha_completa = $("#ficha_completa")[0].files;
     for (let complet of ficha_completa) {
         formData.append('ficha_completa', complet);

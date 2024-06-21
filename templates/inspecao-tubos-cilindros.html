@@ -1,7 +1,7 @@
 {% extends 'sidebar.html' %}
 
 {% block title %}
-<title>Inspeção Solda</title>
+<title>Inspeção Tubos e Cilindros</title>
 {% endblock %}
 
 {% block links %}
@@ -103,6 +103,7 @@
                                         <th>Data da Inspeção</th>
                                         <th>Código - Descrição</th>
                                         <th>Inspetor</th>
+                                        <th>Quantidade Inspecionada</th>
                                         <th>Histórico</th>
                                     </tr>
                                 </thead>
@@ -113,6 +114,7 @@
                                         <td data-title="Data da Inspeção" class="data-inspecao">{{dado_inspecao[1]}}</td>
                                         <td data-title="Descrição">{{dado_inspecao[2]}}</td>
                                         <td data-title="Inspetor">{{dado_inspecao[3]}}</td>
+                                        <td data-title="Quantidade Inspecionada">{{dado_inspecao[4]}}</td>
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
