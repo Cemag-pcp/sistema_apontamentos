@@ -309,7 +309,27 @@ function setorCards(response) {
             listItem.css('text-decoration','none');
             listItem.css('color','#6e707e');
             
-            var content = `
+            if(i == 0){
+                var content = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${item[9]}</h6>
+                    <div class="d-flex flex-column align-items-end text-right">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Opções</a>
+                            <div class="dropdown-menu drop">
+                                <a class="dropdown-item option1" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Visualizar causas da não conformidade</a>
+                            </div>
+                        </div>
+                        <small>Conformidade : ${item[2]}</small>
+                        <small>Não Conformidade : ${item[10]}</small>
+                        <small>Inspetor : ${item[3]}</small>
+                        <small>Exec.:  ${item[5]}</small>
+                    </div>
+                </div>
+                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1],3)}</p>
+            `;
+            } else if (i == 1){
+                var content = `
                 <div class="d-flex w-100 justify-content-between">
                     <h6 class="mb-1">${item[9]}</h6>
                     <div class="d-flex flex-column align-items-end text-right">
@@ -324,20 +344,37 @@ function setorCards(response) {
                         <small>Não Conformidade : ${item[10]}</small>
                         <small>Inspetor : ${item[3]}</small>
                         <small>Exec.:  ${item[5]}</small>
+                        <small style="width:250px">Contém a Ficha de Inspeção 100% <i class="fa-solid fa-circle-check" style="color: #63E6BE;"></i></small>
                     </div>
                 </div>
                 <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1],3)}</p>
             `;
-            
+            } else {
+                var content = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${item[9]}</h6>
+                    <div class="d-flex flex-column align-items-end text-right">
+                        <div class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Opções</a>
+                            <div class="dropdown-menu drop">
+                                <a class="dropdown-item option1" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Visualizar causas da não conformidade</a>
+                            </div>
+                        </div>
+                        <small>Conformidade : ${item[2]}</small>
+                        <small>Não Conformidade : ${item[10]}</small>
+                        <small>Inspetor : ${item[3]}</small>
+                        <small>Exec.:  ${item[5]}</small>
+                    </div>
+                </div>
+                <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1],3)}</p>
+            `;
+            }
+
             listItem.html(content);
             
             $('#listaHistorico').append(listItem);
 
         }
-
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-produzida").text("Total do conj. inspecionados : " + qt_apontada)
-
-        $("#modalTimeline .modal-footer #modal-footer-quantidade-reinspecao").text("Qtd. p/ reinspecionar : " + (qt_apontada - qtd_na_reinspecao))
 
         $(".option1").on('click', function() {
             var dataItemString = $(this).data('item');

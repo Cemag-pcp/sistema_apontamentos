@@ -42,7 +42,7 @@ class Inspecao:
 
         print("inserir_reinspecao")
 
-    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = ''):
+    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = '', operador_estamparia=''):
 
         id_inspecao = str(id_inspecao)
         if setor == 'Pintura':
@@ -58,8 +58,8 @@ class Inspecao:
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true', qt_inspecionada = {qtd_inspecionada} WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
 
-            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s)"""
-            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
+            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao,operadores) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s, %s)"""
+            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operador_estamparia)
 
         elif setor == 'Solda - Cilindro' or setor == 'Solda - Tubo':
 
@@ -244,9 +244,18 @@ class Inspecao:
         self.cur.execute(inspecionados)
         data_inspecionadas = self.cur.fetchall()
 
-        reinspecao = """SELECT *
-                        FROM pcp.pecas_reinspecao
-                        WHERE setor = 'Estamparia' AND excluidas IS NOT true"""
+        reinspecao = """SELECT pr.*, pi.qt_apontada, pi2.operadores, pi2.inspetor, pi2.num_inspecao
+                        FROM pcp.pecas_reinspecao pr
+                        LEFT JOIN pcp.pecas_inspecao pi ON pi.id = pr.id
+                        LEFT JOIN pcp.pecas_inspecionadas pi2 ON pi.id = pi2.id_inspecao
+                        INNER JOIN (
+                            SELECT pi2.id_inspecao, MAX(pi2.num_inspecao) AS max_num_inspecao
+                            FROM pcp.pecas_inspecionadas pi2
+                            GROUP BY pi2.id_inspecao
+                        ) max_pi2 ON pi.id = max_pi2.id_inspecao AND pi2.num_inspecao = max_pi2.max_num_inspecao
+                        WHERE pr.setor = 'Estamparia' AND pr.excluidas IS NOT true
+                        ORDER BY pi2.num_inspecao DESC;
+                    """
         
         self.cur.execute(reinspecao)
         data_reinspecao = self.cur.fetchall()

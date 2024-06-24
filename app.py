@@ -1006,24 +1006,29 @@ def inspecao_solda():
 @app.route('/inspecao-estamparia',methods=['GET','POST'])
 def inspecao_estamparia():
 
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
     if request.method == 'POST':
 
         n_nao_conformidades = int(request.form.get('inputNaoConformidadesEstamparia', 0))
         id_inspecao = request.form.get('id_inspecao')
         list_causas = json.loads(request.form.get('list_causas'))
         list_quantidade = json.loads(request.form.get('list_quantidade'))
+        tabela_dados = request.form.getlist('tabela_dados')  # Note o getlist para listas
+
+        # Avalia a string JSON para listas e pega apenas os primeiros quatro valores de cada item
+        tabela_dados = [json.loads(item)[:4] for item in tabela_dados]
+
+        # Substituir strings vazias por None
+        tabela_dados = [[None if val == "" else val for val in row] for row in tabela_dados]
 
         if list_quantidade == ['']:
             list_quantidade = [None]
 
         outraCausaSolda = request.form.get('outraCausaEstamparia')  
         tipos_causas_estamparia = int(request.form.get('tipos_causas_estamparia'))
-        ficha_completa =  request.files.get("ficha_completa")
-
-        print(ficha_completa)
-
-        if ficha_completa != None:
-            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_completa) 
 
         for i, item in enumerate(list_causas):
             if item == 'Outro':
@@ -1033,12 +1038,21 @@ def inspecao_estamparia():
             classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_estamparia,list_quantidade)
 
         data_inspecao = request.form.get('data_inspecao')
+
+        ficha_completa =  request.files.get("ficha_completa")
+
+        if ficha_completa != None:
+            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_completa=ficha_completa) 
         
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
         data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
 
         inputCategoria = request.form.get('inputCategoria')
         inputConjunto = request.form.get('inputConjunto')
+
+        inspecao_total = request.form.get('inspecao_total')
+
+        operador_estamparia = request.form.get('operador_estamparia')
 
         num_conformidades = request.form.get('inputConformidadesEstamparia')
         num_nao_conformidades = request.form.get('inputNaoConformidadesEstamparia')
@@ -1056,22 +1070,30 @@ def inspecao_estamparia():
 
             retrabalhoSolda = request.form.get('retrabalhoSolda')
 
-            retrabalhoSolda,operadores = retrabalhoSolda.split(" - ")
-
             classe_inspecao.alterar_reinspecao(id_inspecao,num_nao_conformidades,num_pecas,num_conformidades,list_causas,inspetoresSolda,setor,
                                inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda,retrabalhoSolda)
             return jsonify("Success")
         
         else:
-            if num_conformidades != num_pecas:
+            if inspecao_total == "Sim":
                 classe_inspecao.inserir_reinspecao(id_inspecao,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
-                                   inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
+                                   inputCategoria,outraCausaSolda)
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia)
             else:
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia)
+                
+            insert_ficha_inspecao = """
+            INSERT INTO pcp.ficha_inspecao (id,num_inspecao,medida_a,medida_b,medida_c,medida_d) 
+            VALUES (%s,0,%s,%s,%s,%s)
+            """
+            for row in tabela_dados:
+                cur.execute(insert_ficha_inspecao, (id_inspecao, row[0], row[1], row[2], row[3]))
 
+        conn.commit()
+        cur.close()
+        conn.close()
 
         return jsonify("Success")
         

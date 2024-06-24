@@ -359,7 +359,7 @@ class DashboardInspecao:
                     COUNT(inspecionadas.setor) FILTER (WHERE inspecionadas.setor = 'Estamparia') AS num_inspecoes
                 FROM pcp.pecas_inspecionadas AS inspecionadas
                 LEFT JOIN pcp.pecas_inspecao AS inspecao ON inspecao.id = inspecionadas.id_inspecao
-                WHERE inspecionadas.setor = 'Estamparia' AND inspecao.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                WHERE inspecionadas.setor = 'Estamparia' AND inspecao.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND inspecionadas.num_inspecao = 0
                 GROUP BY TO_CHAR(inspecao.data_finalizada, 'YYYY-Month'), EXTRACT(MONTH FROM inspecao.data_finalizada), EXTRACT(YEAR FROM inspecao.data_finalizada)
             ),
             pecas_inspecao AS (

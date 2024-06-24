@@ -12,7 +12,6 @@ function filtrarTabela(filtroId, tabelaId, somaId) {
     for (var i = 1; i < rows.length; i++) { // start at 1 to skip the header row
         var cells = rows[i].getElementsByTagName('td');
         var causa = cells[1].textContent || cells[1].innerText;
-        console.log(cells[1].textContent)
         console.log(cells[2].textContent)
         var quantidade = parseInt(cells[2].textContent || cells[2].innerText, 10);
         if (mostrarTodas || selectedValues.includes(causa.toLowerCase())) {

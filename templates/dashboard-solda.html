@@ -408,8 +408,8 @@ function updateChart(data) {
 function updateQualityIndex(data) {
     document.getElementById('indiceQualidade').innerText = `${data.ultimo_total_nao_conformidades || 0} %`;
     document.getElementById('total_causas').innerText = data.soma_total || 0;
-    document.getElementById('soma_total_liquida').innerText = data.soma_total_liquida;
-    document.getElementById('soma_total_po').innerText = data.soma_total_po;
+    document.getElementById('soma_total_liquida').innerText = data.tubos_soma;
+    document.getElementById('soma_total_po').innerText = data.cilindro_soma;
 }
 
 function updateTables(data) {
