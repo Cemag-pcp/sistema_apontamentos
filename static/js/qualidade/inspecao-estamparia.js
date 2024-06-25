@@ -102,7 +102,12 @@ $('#envio_inspecao_estamparia').on('click',function() {
     }
 
     if((qtd_causas != inputNaoConformidadesSolda) && inputNaoConformidadesSolda != 0){
-        alert('Verifique se a soma dos campos de "Quantidade" está igual ao valor de "Total de NÃO conformidades"');
+        alert('Um ou mais checkboxes ficaram desmarcados.');
+        return; // Interrompe a execução
+    }
+
+    if((inputConformidadesSolda + inputNaoConformidadesSolda) !== 3){
+        alert('Verifique se o campo de conformidades está com valor correto, ou se o campo de inspetor foi preenchido');
         $("#loading").hide();
         return; // Interrompe a execução
     }

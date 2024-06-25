@@ -114,7 +114,7 @@
                                     {% for inspecionada in inspecionadas %}
                                     <tr>
                                         <td data-title="#">{{inspecionada[0]}}</td>
-                                        <td data-title="Data Inspeção">{{inspecionada[1]}}</td>
+                                        <td data-title="Data Inspeção" class="data-inspecao">{{inspecionada[1]}}</td>
                                         <td data-title="Peca">{{inspecionada[6]}}</td>
                                         <td data-title="Inspetor">{{inspecionada[3]}}</td>
                                         <td data-title="Exec">
@@ -156,6 +156,7 @@
                                         <th>Quantidade Produzida</th>
                                         <th>Máquina</th>
                                         <th>Ficha 100% enviada?</th>
+                                        <th>Status</th>
                                         <th>Exec</th>
                                     </tr>
                                 </thead>
@@ -163,16 +164,18 @@
                                     {% for reinspecao in reinspecoes %}
                                     <tr>
                                         <td data-title="#">{{reinspecao[0]}}</td>
-                                        <td data-title="Data Reinspeção">{{reinspecao[1]}}</td>
+                                        <td data-title="Data Reinspeção" class="data-inspecao">{{reinspecao[1]}}</td>
                                         <td data-title="Conjunto">{{reinspecao[6]}}</td>
                                         <td data-title="Inspetor">{{reinspecao[4]}}</td>
                                         <td data-title="N° Não Conformidade">{{reinspecao[2]}}</td>
                                         <td data-title="Quantidade Produzida">{{reinspecao[12]}}</td>
                                         <td data-title="Máquina">{{reinspecao[7]}}</td>
-                                        {% if reinspecao[15] == 1 %}
+                                        {% if reinspecao[15] >= 1 %}
                                         <td data-title="Ficha enviada?"><i class="fa-solid fa-circle-check" style="color: #63E6BE; font-size: 24px;"></i></td>
+                                        <td data-title="Ficha enviada?">Aguardando Reinspeção</td>
                                         {% else %}
                                         <td data-title="Ficha enviada?"><i class="fa-solid fa-circle-xmark" style="color: #dd131d;font-size: 24px;"></i></td>
+                                        <td data-title="Ficha enviada?">Aguardando Envio da Ficha</td>
                                         {% endif %}
                                         <td data-title="Exec">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
@@ -536,13 +539,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row" style="align-items: end;">
                                 <div class="col-sm-6 mb-4">
-                                    <label>Observação</label>
+                                    <label>Outro motivo<small><code> *Preencha caso tenha "Outro" selecionado nas causas</code></small></label>
                                     <div class="input-group">
-                                        <input type="text" class="form-control desabilitado"
-                                            name="observacaoReinspecionadas_estamparia" id="observacaoReinspecionadas_estamparia"
-                                            style="font-size: 12px;">
+                                        <input type="text" class="form-control desabilitado" autocomplete="off"
+                                            id="outraCausaReinspecionadas_estamparia" style="font-size: 12px;" disabled>
                                     </div>
                                 </div>
                                 <div class="col-sm-6 mb-4" id="origemReinspecaoCol_estamparia">
@@ -559,6 +561,14 @@
                                 </div>
                             </div>
                             <div class="row" style="display: flex; justify-content: flex-end;" id="ficha_100">
+                                <div class="col-sm-6 mb-4">
+                                    <label>Observação</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control desabilitado"
+                                            name="observacaoReinspecionadas_estamparia" id="observacaoReinspecionadas_estamparia"
+                                            style="font-size: 12px;">
+                                    </div>
+                                </div>
                                 <div class="col-sm-6 mb-4 customFile" id="col_ficha_completa_reinspecao">
                                     <div><p style="display: inline-block;margin-bottom: .5rem;">Ficha de Inspeção 100%</p></div>
                                     <input type="file" class="custom-file-input" id="ficha_completa_reinspecao" accept="image/*">
@@ -736,6 +746,7 @@
         <script src="static/js/qualidade/inspecao-estamparia.js"></script>
         <script src="static/js/qualidade/reinspecao_estamparia.js"></script>
         <script src="static/js/qualidade/tabela_medidas_estamparia.js"></script>
+        <script src="static/js/qualidade/formatar-data.js"></script>
 
 
         {% endblock %}
