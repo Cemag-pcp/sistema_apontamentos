@@ -71,3 +71,13 @@
 .dropdown-list li:hover {
     background-color: #f2f2f2;
 }
+
+.editable {
+    min-width: 50px;
+}
+
+.checkbox-container input {
+    width: 70px;
+    height: 20px;
+    margin: auto;
+}

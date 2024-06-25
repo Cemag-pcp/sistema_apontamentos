@@ -1,6 +1,7 @@
 from flask import Flask,session,render_template, request, jsonify, redirect, url_for, flash, Blueprint, send_file
 import pandas as pd
 from Classes.inspecao import Inspecao
+from Classes.DashboardInspecao import DashboardInspecao
 import time
 import uuid
 import datetime
@@ -8,6 +9,7 @@ import psycopg2  # pip install psycopg2
 import psycopg2.extras
 from psycopg2.extras import execute_values
 from datetime import datetime, timedelta, date
+import calendar
 # from oauth2client.service_account import ServiceAccountCredentials
 import cachetools
 import gspread
@@ -816,6 +818,16 @@ def modal_historico():
                             LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
                             WHERE i.setor = '{setor}' and i.id_inspecao = '{idinspecao}'
                             ORDER BY num_inspecao ASC"""
+    elif setor == 'Solda - Cilindro ou Tubo':
+
+        query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,reteste.reteste_1,i.inspetor,
+                            i.setor,i.num_inspecao,i.operadores,reteste.reteste_2,reteste.reteste_3,i.conjunto,i.nao_conformidades,i.origem,insp.qt_inspecionada
+                                FROM pcp.pecas_inspecionadas as i
+                            LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
+                            LEFT JOIN pcp.inspecao_reteste reteste ON i.id_inspecao = reteste.id
+                            WHERE i.id_inspecao = '{idinspecao}'
+                            ORDER BY num_inspecao ASC"""
+        
     else: 
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,i.total_conformidades,i.inspetor,
                             i.setor,i.num_inspecao,om.operador,i.origem,i.observacao,i.conjunto,i.nao_conformidades,om.origem,insp.qt_inspecionada
@@ -994,30 +1006,29 @@ def inspecao_solda():
 @app.route('/inspecao-estamparia',methods=['GET','POST'])
 def inspecao_estamparia():
 
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
     if request.method == 'POST':
 
         n_nao_conformidades = int(request.form.get('inputNaoConformidadesEstamparia', 0))
         id_inspecao = request.form.get('id_inspecao')
         list_causas = json.loads(request.form.get('list_causas'))
         list_quantidade = json.loads(request.form.get('list_quantidade'))
+        tabela_dados = request.form.getlist('tabela_dados')  # Note o getlist para listas
+
+        # Avalia a string JSON para listas e pega apenas os primeiros quatro valores de cada item
+        tabela_dados = [json.loads(item)[:4] for item in tabela_dados]
+
+        # Substituir strings vazias por None
+        tabela_dados = [[None if val == "" else val for val in row] for row in tabela_dados]
 
         if list_quantidade == ['']:
             list_quantidade = [None]
 
         outraCausaSolda = request.form.get('outraCausaEstamparia')  
         tipos_causas_estamparia = int(request.form.get('tipos_causas_estamparia'))
-        ficha_producao =  request.files.get("ficha_producao")
-        ficha_completa =  request.files.get("ficha_completa")
-
-        print(ficha_producao)
-        print(ficha_completa)
-
-        if ficha_producao == None:
-            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_completa=ficha_completa) 
-        elif ficha_completa == None: 
-            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_producao=ficha_producao)
-        else:
-            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_producao,ficha_completa)
 
         for i, item in enumerate(list_causas):
             if item == 'Outro':
@@ -1027,12 +1038,21 @@ def inspecao_estamparia():
             classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_estamparia,list_quantidade)
 
         data_inspecao = request.form.get('data_inspecao')
+
+        ficha_completa =  request.files.get("ficha_completa")
+
+        if ficha_completa != None:
+            classe_inspecao.processar_ficha_inspecao(id_inspecao,ficha_completa=ficha_completa) 
         
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
         data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
 
         inputCategoria = request.form.get('inputCategoria')
         inputConjunto = request.form.get('inputConjunto')
+
+        inspecao_total = request.form.get('inspecao_total')
+
+        operador_estamparia = request.form.get('operador_estamparia')
 
         num_conformidades = request.form.get('inputConformidadesEstamparia')
         num_nao_conformidades = request.form.get('inputNaoConformidadesEstamparia')
@@ -1050,22 +1070,30 @@ def inspecao_estamparia():
 
             retrabalhoSolda = request.form.get('retrabalhoSolda')
 
-            retrabalhoSolda,operadores = retrabalhoSolda.split(" - ")
-
             classe_inspecao.alterar_reinspecao(id_inspecao,num_nao_conformidades,num_pecas,num_conformidades,list_causas,inspetoresSolda,setor,
                                inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda,retrabalhoSolda)
             return jsonify("Success")
         
         else:
-            if num_conformidades != num_pecas:
+            if inspecao_total == "Sim":
                 classe_inspecao.inserir_reinspecao(id_inspecao,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
-                                   inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda)
+                                   inputCategoria,outraCausaSolda)
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia)
             else:
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia)
+                
+            insert_ficha_inspecao = """
+            INSERT INTO pcp.ficha_inspecao (id,num_inspecao,medida_a,medida_b,medida_c,medida_d) 
+            VALUES (%s,0,%s,%s,%s,%s)
+            """
+            for row in tabela_dados:
+                cur.execute(insert_ficha_inspecao, (id_inspecao, row[0], row[1], row[2], row[3]))
 
+        conn.commit()
+        cur.close()
+        conn.close()
 
         return jsonify("Success")
         
@@ -1168,6 +1196,362 @@ def atualizar_conformidade():
     conn.commit()
 
     return jsonify('success')
+
+@app.route('/inspecao-tubos-cilindros',methods=['GET','POST'])
+def inspecao_tubos_cilindros():
+
+    if request.method == 'POST':
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        uuid_value = uuid.uuid4().int
+
+        # Extrai os primeiros 6 dígitos do UUID
+        id_inspecao_solda = str(uuid_value)[:6]
+
+        n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
+        list_causas = json.loads(request.form.get('list_causas'))
+        list_quantidade = json.loads(request.form.get('list_quantidade'))
+
+        if list_quantidade == ['']:
+            list_quantidade = [None]
+
+        retrabalhoSolda = request.form.get('retrabalhoSolda')
+
+        tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
+
+        if list_causas != [None]:
+            classe_inspecao.processar_fotos_inspecao(id_inspecao_solda, n_nao_conformidades, list_causas,'',tipos_causas_solda,list_quantidade)
+
+        data_inspecao = request.form.get('data_inspecao')
+
+        data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
+        data_inspecao = data_inspecao_obj.strftime("%Y-%m-%d")
+
+        descricao_cilindro = request.form.get('descricao_cilindro')
+        codigo = request.form.get('inputConjunto')
+        if codigo != '':
+            codigo_descricao = f"{codigo} - {descricao_cilindro}"
+        else:
+            codigo_descricao = f"{descricao_cilindro}"
+
+        num_conformidades = request.form.get('inputConformidadesSolda')
+        num_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda'))
+
+        observacaoSolda = request.form.get('observacao_cilindro')  
+
+        motivo_cilindro = request.form.get('motivo_cilindro')
+
+        motivo_cilindro = motivo_cilindro.title()
+
+        observacaoAjustada = f"{motivo_cilindro} - {observacaoSolda}"
+
+        inspetoresSolda = request.form.get('inspetorSolda')
+        num_pecas = request.form.get('num_pecas')
+        operador = request.form.get('operador')
+
+        setor = request.form.get('setor')
+        setor_final = f"Solda - {setor}"
+
+        query_inspecao = """INSERT INTO pcp.pecas_inspecao (id,data_finalizada,codigo,peca,qt_inspecionada,setor,celula,qt_apontada,excluidas) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+
+        cur.execute(query_inspecao, (id_inspecao_solda, data_inspecao, codigo, descricao_cilindro, num_pecas, setor_final,setor,num_pecas,'true'))
+
+        conn.commit()
+
+        if num_nao_conformidades > 0:
+            classe_inspecao.inserir_reinspecao(id_inspecao_solda,num_nao_conformidades,list_causas,inspetoresSolda,setor_final,codigo_descricao,
+                                setor,'',motivo_cilindro,observacaoSolda)
+            classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor_final,codigo_descricao,
+                                    operador,observacaoAjustada,num_pecas)
+        else:
+            classe_inspecao.inserir_inspecionados(id_inspecao_solda,num_conformidades,n_nao_conformidades,inspetoresSolda,setor_final,codigo_descricao,
+                                    motivo_cilindro,observacaoAjustada,num_pecas)
+
+        return jsonify("Success")
+    
+    dado_reteste_cilindros_tubos, dado_inspecao_cilindros_tubos = classe_inspecao.dados_reteste_tubos_cilindros()
+
+    return render_template('inspecao-tubos-cilindros.html',dado_reteste_cilindros_tubos=dado_reteste_cilindros_tubos, dado_inspecao_cilindros_tubos=dado_inspecao_cilindros_tubos)
+
+@app.route('/reteste-tubos-cilindros', methods=['POST'])
+def reteste_tubos_cilindros():
+    
+    id = request.form.get('id')
+    reteste_status1 = request.form.get('reteste_status1')
+    reteste_status2 = request.form.get('reteste_status2')
+    reteste_status3 = request.form.get('reteste_status3')
+
+    if reteste_status1 == 'null':
+        reteste_status1 = None
+    if reteste_status2 == 'null':
+        reteste_status2 = None
+    if reteste_status3 == 'null':
+        reteste_status3 = None
+
+    classe_inspecao.executando_reteste(id,reteste_status1,reteste_status2,reteste_status3)
+
+    return jsonify('sucess')
+
+# --------- DASHBOARD -----------
+
+@app.route('/dashboard-pintura', methods=['GET','POST'])
+def dashboard_pintura():
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        start_date = data.get('startDate')
+        end_date = data.get('endDate')
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Convert the dates to datetime objects
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Fetch data based on the provided dates
+        dash = DashboardInspecao(cur, start_date, end_date)
+        dados_dash_pintura = dash.dadosPintura(cur)
+        total_causas,soma_total,total_liquida,soma_total_liquida,total_po,soma_total_po = dash.dadosCausasPinturas(cur)
+        foto = dash.fotosPintura(cur)
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "dado": dado,
+            "ultimo_total_nao_conformidades": ultimo_total_nao_conformidades,
+            "dados_dash_pintura": dados_dash_pintura,
+            "total_causas":total_causas,
+            "soma_total":soma_total,
+            "total_liquida":total_liquida,
+            "soma_total_liquida":soma_total_liquida,
+            "total_po":total_po,
+            "soma_total_po":soma_total_po,
+            "foto":foto
+        })
+    
+    elif request.method == 'GET':
+        
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        hoje = datetime.today()
+        inicio_mes = hoje.replace(day=1)
+        ultimo_dia_mes = calendar.monthrange(hoje.year, hoje.month)[1]
+        fim_mes = hoje.replace(day=ultimo_dia_mes)
+
+        print(inicio_mes,fim_mes)
+
+        dash = DashboardInspecao(cur, inicio_mes, fim_mes)
+        dados_dash_pintura = dash.dadosPintura(cur)
+        total_causas,soma_total,total_liquida,soma_total_liquida,total_po,soma_total_po = dash.dadosCausasPinturas(cur)
+        foto = dash.fotosPintura(cur)
+
+        for item in foto:
+            item[1] = item[1].replace(';', '')
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return render_template("dashboard-pintura.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, 
+                               ultimo_total_nao_conformidades=ultimo_total_nao_conformidades,total_causas=total_causas,soma_total=soma_total,
+                               total_liquida=total_liquida,soma_total_liquida=soma_total_liquida,total_po=total_po,soma_total_po=soma_total_po,
+                               foto=foto)
+
+@app.route('/dashboard-solda', methods=['GET','POST'])
+def dashboard_solda():
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        start_date = data.get('startDate')
+        end_date = data.get('endDate')
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Convert the dates to datetime objects
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Fetch data based on the provided dates
+        dash = DashboardInspecao(cur, start_date, end_date)
+        dados_dash_pintura = dash.dadosSolda(cur)
+        total_causas, soma_total, tubos, tubos_soma, cilindro, cilindro_soma = dash.dadosCausasSolda(cur)
+        foto = dash.fotosSolda(cur)
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "dado": dado,
+            "ultimo_total_nao_conformidades": ultimo_total_nao_conformidades,
+            "dados_dash_pintura": dados_dash_pintura,
+            "total_causas":total_causas,
+            "soma_total":soma_total,
+            "tubos":tubos,
+            "tubos_soma":tubos_soma,
+            "cilindro":cilindro,
+            "cilindro_soma":cilindro_soma,
+            "foto":foto
+        })
+    
+    elif request.method == 'GET':
+        
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        hoje = datetime.today()
+        inicio_mes = hoje.replace(day=1)
+        ultimo_dia_mes = calendar.monthrange(hoje.year, hoje.month)[1]
+        fim_mes = hoje.replace(day=ultimo_dia_mes)
+
+        dash = DashboardInspecao(cur, inicio_mes, fim_mes)
+        dados_dash_pintura = dash.dadosSolda(cur)
+        total_causas, soma_total, tubos, tubos_soma, cilindro, cilindro_soma = dash.dadosCausasSolda(cur)
+        foto = dash.fotosSolda(cur)
+
+        for item in foto:
+            item[1] = item[1].replace(';', '')
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return render_template("dashboard-solda.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, 
+                               ultimo_total_nao_conformidades=ultimo_total_nao_conformidades,total_causas=total_causas,soma_total=soma_total,
+                               tubos=tubos,tubos_soma=tubos_soma,cilindro=cilindro,cilindro_soma=cilindro_soma,foto=foto)
+
+@app.route('/dashboard-estamparia', methods=['GET','POST'])
+def dashboard_estamparia():
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        start_date = data.get('startDate')
+        end_date = data.get('endDate')
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Convert the dates to datetime objects
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Fetch data based on the provided dates
+        dash = DashboardInspecao(cur, start_date, end_date)
+        dados_dash_pintura = dash.dadosEstamparia(cur)
+        total_causas, soma_total = dash.dadosCausasEstamparia(cur)
+        foto,ficha = dash.fotosFichaEstamparia(cur)
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "dado": dado,
+            "ultimo_total_nao_conformidades": ultimo_total_nao_conformidades,
+            "dados_dash_pintura": dados_dash_pintura,
+            "total_causas":total_causas,
+            "soma_total":soma_total,
+            "ficha":ficha,
+            "foto":foto
+        })
+    
+    elif request.method == 'GET':
+        
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        hoje = datetime.today()
+        inicio_mes = hoje.replace(day=1)
+        ultimo_dia_mes = calendar.monthrange(hoje.year, hoje.month)[1]
+        fim_mes = hoje.replace(day=ultimo_dia_mes)
+
+        dash = DashboardInspecao(cur, inicio_mes, fim_mes)
+        dados_dash_pintura = dash.dadosEstamparia(cur)
+        total_causas, soma_total = dash.dadosCausasEstamparia(cur)
+        foto,fichas = dash.fotosFichaEstamparia(cur)
+
+        for item in foto:
+            item[1] = item[1].replace(';', '')
+
+        for ficha in fichas:
+            ficha[1] = ficha[1].replace(';', '')
+
+        dado = {
+            "ano_mes": [item[0] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
+            "num_inspecoes": [item[2] for item in dados_dash_pintura],
+            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
+            "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
+        }
+
+        ultimo_total_nao_conformidades = dado["porcentagem_nao_conformidades"][-1] if dado["porcentagem_nao_conformidades"] else None
+
+        cur.close()
+        conn.close()
+
+        return render_template("dashboard-estamparia.html", dado=json.dumps(dado), dados_dash_pintura=dados_dash_pintura, 
+                               ultimo_total_nao_conformidades=ultimo_total_nao_conformidades,total_causas=total_causas,soma_total=soma_total,foto=foto,fichas=fichas)
+
+# --------- FIM DASHBOARD -----------
 
 # --------- FIM INSPEÇÃO -----------
 

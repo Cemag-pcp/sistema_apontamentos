@@ -33,12 +33,16 @@ class Inspecao:
             sql = """INSERT INTO pcp.pecas_reinspecao (id, nao_conformidades, causa_reinspecao, inspetor, setor, conjunto, categoria, outra_causa, origem, observacao) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
             values = (id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico, categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda)
 
+        elif setor == 'Solda - Cilindro' or setor == 'Solda - Tubo':
+            sql = """INSERT INTO pcp.pecas_reinspecao (id, nao_conformidades, causa_reinspecao, inspetor, setor, conjunto, categoria, outra_causa, origem, observacao) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+            values = (id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico,categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda)
+
         self.cur.execute(sql, values)
         self.conn.commit()
 
         print("inserir_reinspecao")
 
-    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = ''):
+    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = '', operador_estamparia=''):
 
         id_inspecao = str(id_inspecao)
         if setor == 'Pintura':
@@ -54,8 +58,15 @@ class Inspecao:
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true', qt_inspecionada = {qtd_inspecionada} WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
 
-            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s)"""
-            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda)
+            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao,operadores) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s, %s)"""
+            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operador_estamparia)
+
+        elif setor == 'Solda - Cilindro' or setor == 'Solda - Tubo':
+
+            motivo,observacao = observacaoSolda.split(" - ")
+
+            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, operadores, observacao, origem) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s, %s)"""
+            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacao, motivo)
 
         self.cur.execute(sql, values)
         self.conn.commit()
@@ -233,14 +244,77 @@ class Inspecao:
         self.cur.execute(inspecionados)
         data_inspecionadas = self.cur.fetchall()
 
-        reinspecao = """SELECT *
-                        FROM pcp.pecas_reinspecao
-                        WHERE setor = 'Estamparia' AND excluidas IS NOT true"""
+        reinspecao = """SELECT pr.*, pi.qt_apontada, pi2.operadores, pi2.inspetor, pi2.num_inspecao
+                        FROM pcp.pecas_reinspecao pr
+                        LEFT JOIN pcp.pecas_inspecao pi ON pi.id = pr.id
+                        LEFT JOIN pcp.pecas_inspecionadas pi2 ON pi.id = pi2.id_inspecao
+                        INNER JOIN (
+                            SELECT pi2.id_inspecao, MAX(pi2.num_inspecao) AS max_num_inspecao
+                            FROM pcp.pecas_inspecionadas pi2
+                            GROUP BY pi2.id_inspecao
+                        ) max_pi2 ON pi.id = max_pi2.id_inspecao AND pi2.num_inspecao = max_pi2.max_num_inspecao
+                        WHERE pr.setor = 'Estamparia' AND pr.excluidas IS NOT true
+                        ORDER BY pi2.num_inspecao DESC;
+                    """
         
         self.cur.execute(reinspecao)
         data_reinspecao = self.cur.fetchall()
 
         return data_inspecao, data_reinspecao, data_inspecionadas
+
+    def dados_reteste_tubos_cilindros(self):
+
+        inspecao = """SELECT * FROM pcp.pecas_reinspecao WHERE excluidas = 'false' AND (setor = 'Solda - Cilindro' or setor = 'Solda - Tubo') ORDER BY id desc"""
+        self.cur.execute(inspecao)
+
+        dado_reteste_cilindros_tubos = self.cur.fetchall()
+
+        inspecao_dados = """SELECT 
+                        id_inspecao,
+                        data_inspecao,
+                        conjunto,
+                        inspetor,
+                        pi2.qt_inspecionada
+                    FROM pcp.pecas_inspecionadas pi
+                    LEFT JOIN pcp.pecas_inspecao pi2 ON pi.id_inspecao = pi2.id
+                    WHERE (pi.setor = 'Solda - Cilindro' OR pi.setor = 'Solda - Tubo') AND num_inspecao = 0
+                    ORDER BY id_inspecao DESC;
+                """
+        self.cur.execute(inspecao_dados)
+
+        dado_inspecao_cilindros_tubos = self.cur.fetchall()
+
+        return dado_reteste_cilindros_tubos, dado_inspecao_cilindros_tubos
+
+    def executando_reteste(self,id,reteste_status1,reteste_status2,reteste_status3):
+
+        query = """INSERT INTO pcp.inspecao_reteste (id,reteste_1,reteste_2,reteste_3) VALUES (%s,%s,%s,%s)"""
+        values = (id, reteste_status1, reteste_status2, reteste_status3)
+        self.cur.execute(query, values)
+
+         # Atualiza a tabela de reinspecao
+        sql = """UPDATE pcp.pecas_reinspecao SET excluidas = 'true' WHERE id=%s"""
+        self.cur.execute(sql, (id,))
+
+        query_select = """SELECT * FROM pcp.pecas_inspecionadas WHERE id_inspecao=%s"""
+        self.cur.execute(query_select, (id,))
+        row = self.cur.fetchone()
+
+        if row:
+            # Insere uma nova linha com os mesmos dados, mas com num_inspecao definido para 1
+            query_insert = """
+            INSERT INTO pcp.pecas_inspecionadas (
+                id_inspecao, inspetor, setor,
+                num_inspecao, conjunto, operadores, observacao, origem
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            values_insert = (
+                row['id_inspecao'],row['inspetor'], row['setor'],
+                1, row['conjunto'], row['operadores'], row['observacao'],row['origem']
+            )
+            self.cur.execute(query_insert, values_insert)
+
+        self.conn.commit()
 
     def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= '',tipos_causas_estamparia='',list_quantidade=[]):
 
@@ -255,7 +329,7 @@ class Inspecao:
                     if foto != '':
                         filename = secure_filename(foto.filename)
                         file_path = os.path.join(self.upload_folder, filename)
-                        arquivos = file_path + ";"
+                        arquivos = file_path
                         arquivos = arquivos.replace('\\', '/')
                         foto.save(file_path)
                     else:
@@ -364,43 +438,7 @@ class Inspecao:
 
         self.conn.commit()
 
-    def processar_ficha_inspecao(self,id_inspecao,ficha_producao='',ficha_completa=''):
-
-        if ficha_producao != '':
-
-            filename = secure_filename(ficha_producao.filename)
-            file_path = os.path.join(self.upload_folder_token, filename)
-            arquivos = file_path + ";"
-            arquivos = arquivos.replace('\\', '/')
-            ficha_producao.save(file_path)
-
-            query_ficha = """DO $$
-                            BEGIN
-                                IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
-                                    INSERT INTO pcp.ficha_inspecao
-                                        (id, caminho_ficha, ficha_completa, num_inspecao) 
-                                    VALUES 
-                                        (%s, %s, 'false',
-                                            (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
-                                        );
-                                ELSE
-                                    INSERT INTO pcp.ficha_inspecao
-                                        (id, caminho_ficha, ficha_completa, num_inspecao) 
-                                    VALUES 
-                                        (%s, %s, 'false', 0);
-                                END IF;
-                            END $$;"""
-
-            values_ficha = (
-                    id_inspecao,
-                    id_inspecao,
-                    arquivos,
-                    id_inspecao,
-                    id_inspecao,
-                    arquivos
-                )
-            
-            self.cur.execute(query_ficha, values_ficha)
+    def processar_ficha_inspecao(self,id_inspecao,ficha_completa=''):
 
         if ficha_completa != '':
             filename = secure_filename(ficha_completa.filename)

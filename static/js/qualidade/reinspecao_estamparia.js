@@ -1,12 +1,19 @@
 
-function modalReinspecaoEstamparia(id,data, n_nao_conformidades,conjunto,categoria) {
-
+function modalReinspecaoEstamparia(id,data, n_nao_conformidades,conjunto,categoria,qt_apontada,operador,inspetor,num_inspecao) {
     // Configurar o conteúdo do modal com os parâmetros recebidos
     $('#reinspecionarConjuntoLabel').text(id)
     $('#data_reinspecao_estamparia').val(formatarDataBrSemHoraEs(data));
-    $('#inputPecasReinspecionadas_estamparia').val(n_nao_conformidades)
+    if(num_inspecao == 0){
+        $('#inputPecasReinspecionadas_estamparia').val(qt_apontada);
+    } else {
+        $('#inputPecasReinspecionadas_estamparia').val(n_nao_conformidades);
+        $("#ficha_100").css('display','none')
+    }
     $("#inputConjuntoReinspecao_estamparia").val(conjunto);
     $("#maquina_reinspecao_estamparia").val(categoria);
+    $("#retrabalho_estamparia").val(operador);
+    $("#inspetoresReinspecao_estamparia").val(inspetor);
+
     $("#causasEstampariaR-0").val('')
     $("#quantidade_causas_estampariaR-0").val('')
     
@@ -77,24 +84,23 @@ $('#inputReinspecionadasConformidades_estamparia').on('input',function() {
 
 })
 
-$('#envio_reinspecao_estamparia').on('click',function() {
+$('#envio_reinspecao_estamparia').on('click', function() {
     let inputConformidadesSolda = parseInt($('#inputReinspecionadasConformidades_estamparia').val());
     let inputNaoConformidadesSolda = parseInt($('#inputReinspecionadasNaoConformidades_estamparia').val());
     let inputPecasInspecionadasSolda = parseInt($('#inputPecasReinspecionadas_estamparia').val());
     let inputConjunto = $('#inputConjuntoReinspecao_estamparia').val();
     let observacaoSolda = $('#observacaoReinspecionadas_estamparia').val();
-    let origemReinspecionadas_estamparia = $("#origemReinspecionadas_estamparia").val()
     let tipos_causas_estamparia = $("#tipos_causas_estamparia_reinspecao").val();
     let inspetoresSolda = $('#inspetoresReinspecao_estamparia').val();
     let retrabalhoSolda = $('#retrabalho_estamparia').val();
-    let qtd_causas = 0
-    let ficha_completa_reinspecao = $("#ficha_completa_reinspecao").val()
+    let qtd_causas = 0;
+    let ficha_completa_reinspecao = $("#ficha_completa_reinspecao").val();
 
     for (let i = 0; i < tipos_causas_estamparia; i++) {
-        qtd_causas += parseInt($("#quantidade_causas_estampariaR-" + i).val())
+        qtd_causas += parseInt($("#quantidade_causas_estampariaR-" + i).val());
     }
 
-    if((qtd_causas != inputNaoConformidadesSolda) && inputNaoConformidadesSolda != 0){
+    if ((qtd_causas != inputNaoConformidadesSolda) && inputNaoConformidadesSolda != 0) {
         alert('Verifique se a soma dos campos de "Quantidade" está igual ao valor de "Total de NÃO conformidades"');
         $("#loading").hide();
         return; // Interrompe a execução
@@ -105,10 +111,12 @@ $('#envio_reinspecao_estamparia').on('click',function() {
 
     $('#modalConfirmacaoEstamparia #p_confirmar_inspecao_estamparia').text("Deseja confirmar as informações preenchidas referente a reinspeção do conjunto " + inputConjunto);
 
-    $("#btnEnviarEstampariaReinspecao").css("display","block")
-    $("#btnEnviarEstamparia").css("display","none")
+    $("#btnEnviarEstampariaReinspecao").css("display", "block");
+    $("#btnEnviarEstamparia").css("display", "none");
 
-    if (inputConformidadesSolda === "" || inspetoresSolda === null || retrabalhoSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0 || ficha_completa_reinspecao === "" ) {
+    let isFicha100Visible = $("#ficha_100").css("display") !== "none";
+
+    if (inputConformidadesSolda === "" || inspetoresSolda === null || retrabalhoSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0 || (isFicha100Visible && ficha_completa_reinspecao === "")) {
         alert('Verifique se os campos estão corretos');
         $("#loading").hide();
         return; // Interrompe a execução
