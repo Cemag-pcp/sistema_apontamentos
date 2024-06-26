@@ -266,7 +266,6 @@ def gerar_cambao():
 
     return render_template('gerar-cambao.html', sheet_data=sheet_data)
 
-
 @app.route('/gerar-cambao-pintura', methods=['POST'])
 def gerar_planilha():
     """
@@ -4012,14 +4011,50 @@ def baixar_resumo_levantamento():
         resumo_estamparia_agrupada.to_excel(writer, sheet_name='Resumo Estamparia agrupada', index=False)
         resumo_estamparia.to_excel(writer, sheet_name='Resumo Estamparia', index=False)
 
-    # Salva a planilha em um arquivo temporário
+    # atualizar google sheets
+    
+    excel_start_date = pd.Timestamp('1899-12-30')
+    resumo_estamparia['data_carga'] = resumo_estamparia['data_carga'].apply(lambda x: (pd.Timestamp(x) - excel_start_date).days)
 
-    # Renomeia o arquivo temporário para "planilha.xlsx"
-    # import os
-    # os.rename('planilha.xlsx', temp_file_path)
-
+    atualizar_planilha_sheets(resumo_estamparia.values.tolist())
+    
     # Retorna o arquivo Excel como resposta para o cliente
     return send_file(temp_file_path, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', as_attachment=True, download_name='resumos.xlsx')
+
+def atualizar_planilha_sheets(df_list):
+    
+    gc = gspread.service_account(filename='service_account.json')
+
+    # Abra a planilha com base no ID
+    planilha = gc.open_by_key("1FuraRvKZp90qNefxuncu5qI849tBhNdTcRRiziOqIVw")
+
+    # Acessar a aba "BD_saldo_diario"
+    aba = planilha.worksheet("base-automacao")
+
+    if len(df_list) > 0:
+        
+        # Defina o intervalo (range) que você deseja apagar (por exemplo, A2:H5)
+        range_to_clear = "A2:M"
+        
+        # Obtém a lista de células no intervalo especificado
+        cell_list = aba.range(range_to_clear)
+        
+        # Define o valor de todas as células no intervalo como uma string vazia ('')
+        for cell in cell_list:
+            cell.value = ""
+        
+        # Atualiza as células no intervalo com os valores vazios
+        aba.update_cells(cell_list)
+        
+        planilha.values_append("base-automacao", {'valueInputOption': 'RAW'}, {'values': df_list})
+        # aba.update('A1', df_list)
+
+        format_range = f'A2:A'  # Define o intervalo de formatação para todas as linhas preenchidas
+        aba.format(format_range, {'numberFormat': {'type': 'DATE', 'pattern': 'dd/MM/yyyy'}})
+
+    
+    return 'sucess'
+    
 
 def tabela_resumo_montagem(data_inicial, data_final):
     
