@@ -74,6 +74,7 @@
                                     <th>Cambão</th>
                                     <th>Tipo</th>
                                     <th>Codificação</th>
+                                    <th style="display: none;">Ped_chcriacao</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -88,6 +89,7 @@
                                     <th>Cambão</th>
                                     <th>Tipo</th>
                                     <th>Codificação</th>
+                                    <th style="display: none;">Ped_chcriacao</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -112,6 +114,7 @@
                                             </select>
                                         </td>
                                         <td>{{ data[9] }}</td>
+                                        <td style="display: none;">{{ data[10] }}</td>
                                     </tr>
                                     {% endfor %}
                             
@@ -366,16 +369,17 @@
                     var cambao = $(this).find('td:eq(7) input').val().trim();
                     var tipo = $(this).find('td:eq(8) select').val();
                     var celula = $(this).find('td:eq(9)').val();
+                    var ped_chcriacao = $(this).find('td:eq(10)').text();
                     // ... Adicione outras colunas conforme necessário
 
                     // Adiciona os dados da linha ao array
-                    linhas.push({ data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo,celula:celula,chave:chave });
+                    linhas.push({ data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,cambao:cambao,tipo:tipo,celula:celula,chave:chave,ped_chcriacao:ped_chcriacao });
                 }
                 else {
                     return;
                 }
             });
-
+            console.log(linhas)
             // Envia os dados para o backend
             $.ajax({
                 type: 'POST',

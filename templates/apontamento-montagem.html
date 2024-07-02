@@ -97,6 +97,7 @@
                                     <th>Operador</th>
                                     <th>Observação</th>
                                     <th>Codificação</th>
+                                    <th style="display: none;">Ped_chcriacao</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -110,6 +111,7 @@
                                     <th>Operador</th>
                                     <th>Observação</th>
                                     <th>Codificação</th>
+                                    <th style="display: none;">Ped_chcriacao</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -133,6 +135,7 @@
                                             <textarea class="form-control" id='textObservacao'></textarea>
                                         </td>
                                         <td>{{ data[6] }}</td>
+                                        <td style="display: none;">{{ data[7] }}</td>
                                     </tr>
                                     {% endfor %}
                             
@@ -404,17 +407,19 @@
                     var operador = $(this).find('td:eq(6) input').val();
                     var obs = $(this).find('td:eq(7) textarea').val();
                     var codificacao = $(this).find('td:eq(8)').text().trim();
+                    var ped_chcriacao = $(this).find('td:eq(9)').text();
 
                     // Adiciona os dados da linha ao array
                     linhas.push({ data:data,celula:celula,codigo:codigo,descricao:descricao,prod:qt_produzida,
-                                    operador:operador, obs:obs, codificacao:codificacao });
-
-                    console.log(linhas);    
+                                    operador:operador, obs:obs, codificacao:codificacao, ped_chcriacao:ped_chcriacao });
+  
                 }   
                 else {
                     return;
                 }
             });
+
+            console.log(linhas); 
 
             // Envia os dados para o backend
             $.ajax({

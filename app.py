@@ -53,33 +53,38 @@ def dados_sequenciamento():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     sql = """select 	t3.id,
-                        t3.data_carga,
-                        t3.codigo,
-                        t3.peca,
-                        coalesce((qt_planejada - qt_apontada),qt_planejada) as restante,
-                        t3.cor,
-                        t3.celula
-                from (
-                select 	t1.id,
-						t1.data_carga,
-                        t1.codigo,
-                        t1.peca,
-                        t1.qt_planejada,
-                        t1.cor,
-                        t1.celula,
-                        sum(qt_apontada) as qt_apontada
-                from pcp.gerador_ordens_pintura as t1
-                left join pcp.ordens_pintura as t2 on t1.id = t2.chave
-                group by 	t1.id,
-							t1.data_carga,
-                            t1.codigo,
-                            t1.peca,
-                            t1.qt_planejada,
-                            t1.cor,
-                            t1.celula
-                order by t1.data_carga desc limit 500) as t3"""
+                t3.data_carga,
+                t3.codigo,
+                t3.peca,
+                coalesce((qt_planejada - qt_apontada),qt_planejada) as restante,
+                t3.cor,
+                t3.celula,
+                t3.ped_chcriacao
+        from (
+        select 	t1.id,
+                t1.data_carga,
+                t1.codigo,
+                t1.peca,
+                t1.qt_planejada,
+                t1.cor,
+                t1.celula,
+                t1.ped_chcriacao,
+                sum(qt_apontada) as qt_apontada
+        from pcp.gerador_ordens_pintura as t1
+        left join pcp.ordens_pintura as t2 on t1.id = t2.chave
+        group by 	t1.id,
+                    t1.data_carga,
+                    t1.codigo,
+                    t1.peca,
+                    t1.qt_planejada,
+                    t1.cor,
+                    t1.celula,
+                    t1.ped_chcriacao
+        order by t1.data_carga desc limit 500) as t3"""
     
     df = pd.read_sql_query(sql,conn)
+
+    df['ped_chcriacao'] = df['ped_chcriacao'].fillna('')
 
     return df
 
@@ -116,6 +121,10 @@ def dados_sequenciamento_montagem():
             LIMIT 500;"""
 
     df = pd.read_sql_query(sql,conn)
+
+    df['ped_chcriacao'] = df['ped_chcriacao'].fillna('')
+
+    print(df)
 
     return df
 
@@ -168,8 +177,10 @@ def gerar_cambao():
     table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
 
-    table = table[['id','data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao']]
+    table = table[['id','data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao','ped_chcriacao']]
     sheet_data = table.values.tolist()
+
+    print(table)
 
     return render_template('gerar-cambao.html', sheet_data=sheet_data)
 
@@ -192,12 +203,12 @@ def gerar_planilha():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Lista de tuplas contendo os dados a serem inseridos
-    values = [(linha['codigo'], linha['descricao'], linha['qt_itens'], linha['cor'], linha['prod'], linha['cambao'], linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(), linha['celula'], linha['chave']) for linha in dados_recebidos]
+    values = [(linha['codigo'], linha['descricao'], linha['qt_itens'], linha['cor'], linha['prod'], linha['cambao'], linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(), linha['celula'], linha['chave'], linha['ped_chcriacao']) for linha in dados_recebidos]
 
     print(values)
 
     # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
-    query = """INSERT INTO pcp.ordens_pintura (codigo, peca, qt_planejada, cor, qt_apontada, cambao, tipo, data_carga, data_finalizada, celula, chave) VALUES %s"""
+    query = """INSERT INTO pcp.ordens_pintura (codigo, peca, qt_planejada, cor, qt_apontada, cambao, tipo, data_carga, data_finalizada, celula, chave, ped_chcriacao) VALUES %s"""
 
     # Use execute_values para inserir várias linhas de uma vez
     execute_values(cur, query, values)
@@ -216,7 +227,7 @@ def gerar_planilha():
     table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
 
-    table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao']]
+    table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao','ped_chcriacao']]
     sheet_data = table.values.tolist()
 
     return jsonify({"linhas": sheet_data})
@@ -409,7 +420,7 @@ def apontar_montagem():
     table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
 
-    table = table[['data_carga','celula','codigo','peca','qt_planejada','qt_produzida','codificacao']]
+    table = table[['data_carga','celula','codigo','peca','qt_planejada','qt_produzida','codificacao','ped_chcriacao']]
 
     sheet_data = table.values.tolist()
 
@@ -436,13 +447,13 @@ def salvar_apontamento_montagem():
     # Lista de tuplas contendo os dados a serem inseridos
     values = [(linha['celula'], linha['codigo'], linha['descricao'], linha['prod'],
                 datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(),
-                linha['operador'], linha['obs'], linha['codificacao'],'Sequenciamento') for linha in dados_recebidos]
+                linha['operador'], linha['obs'], linha['codificacao'],'Sequenciamento',linha['ped_chcriacao']) for linha in dados_recebidos]
 
     print(values)
 
     for dado in values:
         # Construir e executar a consulta INSERT
-        query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+        query = """INSERT INTO pcp.ordens_montagem (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem, ped_chcriacao) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
         cur.execute(query, dado)
     
     conn.commit()
