@@ -554,8 +554,6 @@ def salvar_apontamento_montagem():
 
     dados_recebidos = request.json['linhas']
 
-    print(dados_recebidos)
-
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -565,8 +563,6 @@ def salvar_apontamento_montagem():
                datetime.strptime(
                    linha['data'], '%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(),
                linha['operador'], linha['obs'], linha['codificacao'], 'Sequenciamento') for linha in dados_recebidos]
-
-    print(values)
 
     for dado in values:
         # Construir e executar a consulta INSERT
@@ -4055,7 +4051,6 @@ def atualizar_planilha_sheets(df_list):
     
     return 'sucess'
     
-
 def tabela_resumo_montagem(data_inicial, data_final):
     
     dados_carga = buscar_dados(filename)
