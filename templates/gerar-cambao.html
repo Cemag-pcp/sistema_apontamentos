@@ -76,6 +76,7 @@
                                     <th>Cambão</th>
                                     <th>Tipo</th>
                                     <th>Codificação</th>
+                                    <th style="display: none;">Ped_chcriacao</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -91,6 +92,7 @@
                                     <th>Cambão</th>
                                     <th>Tipo</th>
                                     <th>Codificação</th>
+                                    <th style="display: none;">Ped_chcriacao</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -117,6 +119,7 @@
                                         </select>
                                     </td>
                                     <td>{{ data[10] }}</td>
+                                    <td style="display: none;">{{ data[11] }}</td>
                                 </tr>
                                 {% endfor %}
 
@@ -420,9 +423,10 @@
                         var cambao = $(this).find('td:eq(8) input').val().trim();
                         var tipo = $(this).find('td:eq(9) select').val();
                         var celula = $(this).find('td:eq(10)').val();
+                        var ped_chcriacao = $(this).find('td:eq(11)').text();
 
                         // Adiciona os dados da linha ao array
-                        linhas.push({ data: data, codigo: codigo, descricao: descricao, cor: cor, qt_itens: qt_planejada, prod: qt_produzida, cambao: cambao, tipo: tipo, celula: celula, chave: chave, operador: operador });
+                        linhas.push({ data: data, codigo: codigo, descricao: descricao, cor: cor, qt_itens: qt_planejada, prod: qt_produzida, cambao: cambao, tipo: tipo, celula: celula, chave: chave, operador: operador, ped_chcriacao:ped_chcriacao});
                     }
                     else {
                         return;

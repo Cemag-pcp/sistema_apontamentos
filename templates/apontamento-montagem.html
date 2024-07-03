@@ -194,6 +194,7 @@
                                         <th
                                             style="display: none;">codificacao</th>
                                         <th style="display: none;">id</th>
+                                        <th style="display: none;">ped_chcriacao</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -237,6 +238,9 @@
                                             }}</td>
                                         <td data-title="id"
                                             style="display: none;">{{ data[9]
+                                            }}</td>
+                                        <td data-title="ped_chcriacao"
+                                            style="display: none;">{{ data[10]
                                             }}</td>
                                     </tr>
                                     {% endfor %}
@@ -1306,6 +1310,7 @@
 
             document.getElementById('pecaTextoModalIniciar').textContent = (rowData[2] + " - " + rowData[3]);
 
+            console.log(rowData[10])
             // Associar o evento de clique ao botão #confimarInicioProducao dentro do evento de clique do botão #btnIniciarProducao
             $('#confimarInicioProducao').off('click').on('click', function () {
 
@@ -1318,7 +1323,8 @@
                     qtPlanejada: rowData[6],
                     codificacao: rowData[8],
                     chave: rowData[9],
-                    origem: 'Sequenciamento'
+                    origem: 'Sequenciamento',
+                    ped_chcriacao:rowData[10]
                 };
 
                 showLoading();
