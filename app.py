@@ -23,6 +23,7 @@ import os
 from werkzeug.utils import secure_filename
 import shortuuid
 from google.oauth2 import service_account
+from dotenv import load_dotenv
 
 async_mode = None
 warnings.filterwarnings('ignore')
@@ -3675,6 +3676,8 @@ def buscar_dados():
 
     sheet_id = '1olnMhK7OI6W0eJ-dvsi3Lku5eCYqlpzTGJfh1Q7Pv9I'
     worksheet1 = 'Importar Dados'
+    
+    load_dotenv()  # Carrega as variáveis do arquivo .env
 
     credentials = service_account.Credentials.from_service_account_info({
         "type": os.environ.get('GOOGLE_TYPE'),
@@ -3686,8 +3689,10 @@ def buscar_dados():
         "auth_uri": os.environ.get('GOOGLE_AUTH_URI'),
         "token_uri": os.environ.get('GOOGLE_TOKEN_URI'),
         "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
-        "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL')
+        "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
+        "universe_domain": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL')
     },scopes=scope)
+
 
     # sa = gspread.service_account(credentials)
     sa = gspread.authorize(credentials)
