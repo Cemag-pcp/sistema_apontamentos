@@ -3666,6 +3666,8 @@ def tela_levantamento():
 @cachetools.cached(cache_carretas)
 def buscar_dados():
 
+    print(os.environ)  # Imprime todas as variáveis de ambiente
+    
     """
     Função para acessar google sheets via api e
     buscar dados da base de carretas.
@@ -3690,7 +3692,7 @@ def buscar_dados():
         "token_uri": os.environ.get('GOOGLE_TOKEN_URI'),
         "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
         "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
-        "universe_domain": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL')
+        "universe_domain": os.environ.get('GOOGLE_UNIVERSE_DOMAIN')
     },scopes=scope)
 
 
