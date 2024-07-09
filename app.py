@@ -4045,7 +4045,24 @@ def baixar_resumo_levantamento():
 
 def atualizar_planilha_sheets(df_list):
     
-    gc = gspread.service_account(filename='service_account.json')
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+         "https://www.googleapis.com/auth/drive"]
+
+    credentials = service_account.Credentials.from_service_account_info({
+        "type": os.environ.get('GOOGLE_TYPE'),
+        "project_id": os.environ.get('GOOGLE_PROJECT_ID'),
+        "private_key_id": os.environ.get('GOOGLE_PRIVATE_KEY_ID'),
+        "private_key": os.environ.get('GOOGLE_PRIVATE_KEY'),
+        "client_email": os.environ.get('GOOGLE_CLIENT_EMAIL'),
+        "client_id": os.environ.get('GOOGLE_CLIENT_ID'),
+        "auth_uri": os.environ.get('GOOGLE_AUTH_URI'),
+        "token_uri": os.environ.get('GOOGLE_TOKEN_URI'),
+        "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
+        "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
+        "universe_domain": os.environ.get('GOOGLE_UNIVERSE_DOMAIN')
+    },scopes=scope)
+
+    gc = gspread.service_account(credentials)
 
     # Abra a planilha com base no ID
     planilha = gc.open_by_key("1FuraRvKZp90qNefxuncu5qI849tBhNdTcRRiziOqIVw")
@@ -4268,13 +4285,33 @@ def tabela_resumo_estamparia(data_inicial, data_final):
     return base_final
 
 def saldo_recurso_levantamento():
+    
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+         "https://www.googleapis.com/auth/drive"]
+    
+    credentials = service_account.Credentials.from_service_account_info({
+        "type": os.environ.get('GOOGLE_TYPE'),
+        "project_id": os.environ.get('GOOGLE_PROJECT_ID'),
+        "private_key_id": os.environ.get('GOOGLE_PRIVATE_KEY_ID'),
+        "private_key": os.environ.get('GOOGLE_PRIVATE_KEY'),
+        "client_email": os.environ.get('GOOGLE_CLIENT_EMAIL'),
+        "client_id": os.environ.get('GOOGLE_CLIENT_ID'),
+        "auth_uri": os.environ.get('GOOGLE_AUTH_URI'),
+        "token_uri": os.environ.get('GOOGLE_TOKEN_URI'),
+        "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
+        "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
+        "universe_domain": os.environ.get('GOOGLE_UNIVERSE_DOMAIN')
+    },scopes=scope)
 
-    filename='service_account.json'
+    # sa = gspread.service_account(credentials)
+
+    # filename='service_account.json'
 
     sheet_id = '1u2Iza-ocp6ROUBXG9GpfHvEJwLHuW7F2uiO583qqLIE'
     worksheet1 = 'saldo de recurso'
 
-    sa = gspread.service_account(filename)
+    sa = gspread.authorize(credentials)
+    # sa = gspread.service_account(filename)
     sh = sa.open_by_key(sheet_id)
 
     wks1 = sh.worksheet(worksheet1)
@@ -4903,6 +4940,27 @@ def adicionar_operador_bases():
 
 @app.route('/receber_dataframe_nf_compras', methods=['POST'])
 def receber_dataframe():
+    
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+         "https://www.googleapis.com/auth/drive"]
+    
+    credentials = service_account.Credentials.from_service_account_info({
+        "type": os.environ.get('GOOGLE_TYPE'),
+        "project_id": os.environ.get('GOOGLE_PROJECT_ID'),
+        "private_key_id": os.environ.get('GOOGLE_PRIVATE_KEY_ID'),
+        "private_key": os.environ.get('GOOGLE_PRIVATE_KEY'),
+        "client_email": os.environ.get('GOOGLE_CLIENT_EMAIL'),
+        "client_id": os.environ.get('GOOGLE_CLIENT_ID'),
+        "auth_uri": os.environ.get('GOOGLE_AUTH_URI'),
+        "token_uri": os.environ.get('GOOGLE_TOKEN_URI'),
+        "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
+        "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
+        "universe_domain": os.environ.get('GOOGLE_UNIVERSE_DOMAIN')
+    },scopes=scope)
+
+    # sa = gspread.service_account(credentials)
+    # sa = gspread.authorize(credentials)
+
     # Verificar se os dados JSON foram recebidos corretamente
     if not request.json:
         return jsonify({'error': 'Dados JSON ausentes'}), 400
@@ -4913,7 +4971,7 @@ def receber_dataframe():
     # Criar um DataFrame a partir dos dados
     df = pd.DataFrame(json.loads(data))
 
-    gc = gspread.service_account(filename='service_account.json')
+    gc = gspread.authorize(credentials)
 
     # Abra a planilha com base no ID
     planilha = gc.open_by_key("1ukzOH-ERdJlGMvZjau1ivTrgqOlxOWUhlPsXLY0Y0nY")
