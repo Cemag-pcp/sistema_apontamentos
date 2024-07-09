@@ -22,6 +22,7 @@ import tempfile
 import os
 from werkzeug.utils import secure_filename
 import shortuuid
+from google.oauth2 import service_account
 
 async_mode = None
 warnings.filterwarnings('ignore')
@@ -3662,17 +3663,35 @@ def tela_levantamento():
     return render_template('levantamento.html')
 
 @cachetools.cached(cache_carretas)
-def buscar_dados(filename):
+def buscar_dados():
 
     """
     Função para acessar google sheets via api e
     buscar dados da base de carretas.
     """
 
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+         "https://www.googleapis.com/auth/drive"]
+
     sheet_id = '1olnMhK7OI6W0eJ-dvsi3Lku5eCYqlpzTGJfh1Q7Pv9I'
     worksheet1 = 'Importar Dados'
 
-    sa = gspread.service_account(filename)
+    credentials = service_account.Credentials.from_service_account_info({
+        "type": os.environ.get('GOOGLE_TYPE'),
+        "project_id": os.environ.get('GOOGLE_PROJECT_ID'),
+        "private_key_id": os.environ.get('GOOGLE_PRIVATE_KEY_ID'),
+        "private_key": os.environ.get('GOOGLE_PRIVATE_KEY'),
+        "client_email": os.environ.get('GOOGLE_CLIENT_EMAIL'),
+        "client_id": os.environ.get('GOOGLE_CLIENT_ID'),
+        "auth_uri": os.environ.get('GOOGLE_AUTH_URI'),
+        "token_uri": os.environ.get('GOOGLE_TOKEN_URI'),
+        "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
+        "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL')
+    },scopes=scope)
+
+    # sa = gspread.service_account(credentials)
+    sa = gspread.authorize(credentials)
+
     sh = sa.open_by_key(sheet_id)
 
     wks1 = sh.worksheet(worksheet1)
@@ -3726,7 +3745,7 @@ def consultar_carretas(data_inicial,data_final):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
 
-    dados_carga = buscar_dados(filename)
+    dados_carga = buscar_dados()
     dados_carga['PED_PREVISAOEMISSAODOC'] = pd.to_datetime(dados_carga['PED_PREVISAOEMISSAODOC'])
     
     dados_carga_data_filtrada = dados_carga[(dados_carga['PED_PREVISAOEMISSAODOC'] >= data_inicial) & (dados_carga['PED_PREVISAOEMISSAODOC'] <= data_final)]
@@ -4053,7 +4072,7 @@ def atualizar_planilha_sheets(df_list):
     
 def tabela_resumo_montagem(data_inicial, data_final):
     
-    dados_carga = buscar_dados(filename)
+    dados_carga = buscar_dados()
     dados_carga['PED_PREVISAOEMISSAODOC'] = pd.to_datetime(dados_carga['PED_PREVISAOEMISSAODOC'])
     
     dados_carga_data_filtrada = dados_carga[(dados_carga['PED_PREVISAOEMISSAODOC'] >= data_inicial) & (dados_carga['PED_PREVISAOEMISSAODOC'] <= data_final)]
@@ -4265,7 +4284,7 @@ def saldo_recurso_levantamento():
 
 def carretas_planilha_carga(datainicio, datafim):
 
-    data = buscar_dados(filename)
+    data = buscar_dados()
 
     filtrar_data = data[(data['PED_PREVISAOEMISSAODOC'] >= pd.to_datetime(datainicio)) &
                          (data['PED_PREVISAOEMISSAODOC'] <= pd.to_datetime(datafim))]
@@ -4902,5 +4921,5 @@ def receber_dataframe():
     return jsonify({'message': 'DataFrame recebido com sucesso'}), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
     # socketio.run(app)
