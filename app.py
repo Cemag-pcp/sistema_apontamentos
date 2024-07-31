@@ -3677,7 +3677,10 @@ def buscar_dados():
     sheet_id = '1olnMhK7OI6W0eJ-dvsi3Lku5eCYqlpzTGJfh1Q7Pv9I'
     worksheet1 = 'Importar Dados'
     
+    from dotenv import load_dotenv
+
     load_dotenv()  # Carrega as variáveis do arquivo .env
+    # load_dotenv(override=True)
 
     credentials = service_account.Credentials.from_service_account_info({
         "type": os.environ.get('GOOGLE_TYPE'),
@@ -3692,7 +3695,6 @@ def buscar_dados():
         "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
         "universe_domain": os.environ.get('GOOGLE_UNIVERSE_DOMAIN')
     },scopes=scope)
-
 
     # sa = gspread.service_account(credentials)
     sa = gspread.authorize(credentials)
