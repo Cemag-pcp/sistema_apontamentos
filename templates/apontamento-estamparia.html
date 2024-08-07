@@ -1481,7 +1481,7 @@
                         <div class="card shadow mb-4" name="${peca[8]}">
                             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                 <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-                                <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>   
+                                <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>   
                                 <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
                             </div>
                             <div class="card-body">
@@ -1549,7 +1549,7 @@
                     <div class="card shadow mb-4" name="${peca[8]}">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
-                            <span id="contador-${peca[1]}" class="badge badge-primary badge-pill"></span>  
+                            <span id="contador-${peca[0]}" class="badge badge-primary badge-pill"></span>  
                             <input style="display:none;" id="dataInicial-${peca[0]}" type="datetime" value="${peca[3]}">
                         </div>
                         <div class="card-body">
@@ -1654,7 +1654,7 @@
 
                 const formatoTempo = `${dias.toString().padStart(2, '0')} : ${horasRestantes.toString().padStart(2, '0')} : ${minutosRestantes.toString().padStart(2, '0')} : ${segundosRestantes.toString().padStart(2, '0')}`;
 
-                document.getElementById(`contador-${peca[1]}`).textContent = formatoTempo;
+                document.getElementById(`contador-${peca[0]}`).textContent = formatoTempo;
 
             })
         }
