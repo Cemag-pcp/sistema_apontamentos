@@ -217,7 +217,7 @@ def criar_codificacao(row):
         return f"{row['celula'].replace(' ','')[:3]}{str(row['data_carga']).replace('/', '')}"
 
 
-@cachetools.cached(cache_historico_pintura)
+# @cachetools.cached(cache_historico_pintura)
 def dados_historico_pintura():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -3663,7 +3663,7 @@ def tela_levantamento():
 
     return render_template('levantamento.html')
 
-@cachetools.cached(cache_carretas)
+# @cachetools.cached(cache_carretas)
 def buscar_dados():
 
     """
@@ -3717,7 +3717,7 @@ def buscar_dados():
 
     return base_carretas
 
-@cachetools.cached(cache_saldo)
+# @cachetools.cached(cache_saldo)
 def buscar_planilha_saldo():
 
     """
@@ -5005,5 +5005,5 @@ def receber_dataframe():
     return jsonify({'message': 'DataFrame recebido com sucesso'}), 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
-    # socketio.run(app)
+    # app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=80)
