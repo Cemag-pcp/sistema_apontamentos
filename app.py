@@ -1738,39 +1738,108 @@ def api_apontamento_corte():
 
     return jsonify(data)
 
+@app.route("/alerta-celula",methods=['POST'])
+def alerta_celula():
+    """
+    Rota para mostrar página de painel de montagem
+    """
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+    celula = data['cellName']
+
+    # Check if the celula already exists
+    check_query = """SELECT COUNT(*) FROM pcp.alerta_celula WHERE celula = %s"""
+    cur.execute(check_query, (celula,))
+    exists = cur.fetchone()[0]
+
+    if not exists:
+        # Insert only if the celula does not already exist
+        insert_alert = """INSERT INTO pcp.alerta_celula (celula, setor) VALUES (%s, 'Montagem')"""
+        cur.execute(insert_alert, (celula,))
+        conn.commit()  # Commit the transaction
+        message = "Alerta criado com sucesso."
+        status = "success"
+    else:
+        # Alert already exists
+        message = "Já existe um alerta solicitado para essa célula."
+        status = "exists"
+
+    cur.close()
+    conn.close()
+
+    # Return a JSON response with the result
+    return jsonify({'status': status, 'message': message})
+
 @app.route("/painel-montagem")
 def painel_montagem():
     """
     Rota para mostrar página de painel de montagem
     """
-
-    today = datetime.now().date().strftime("%d/%m/%Y")
-
-    return render_template("painel-montagem.html", today=today)
-
-@app.route("/atualizar-painel-montagem")
-def atualizar_painel_montagem():
-    """
-    Rota para retornar dados para atualização do painel montagem
-    """
-
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    today = datetime.now().date().strftime("%Y-%m-%d")
+    # Query to get alerts
+    alerta_query = """SELECT celula FROM pcp.alerta_celula"""
+    cur.execute(alerta_query)
+    lista_alerta = cur.fetchall()
 
-    sql = 'SELECT * FROM pcp.planejamento_montagem where data_planejamento = %s'
+    # Create a dictionary to track alerts for each cell
+    alert_flags = {
+        'CHASSI': False,
+        'PLAT. TANQUE. CAÇAM.': False,
+        'EIXO SIMPLES': False,
+        'EIXO COMPLETO': False,
+        'FUEIRO': False,
+        'IÇAMENTO': False,
+        'LATERAL': False,
+        'CUBO DE RODA': False
+    }
 
-    cur.execute(sql, (today,))
-    data_pecas_planejada = cur.fetchall()
+    # Update the dictionary based on the alerts from the database
+    for alerta in lista_alerta:
+        celula_name = alerta['celula'].strip().upper()  # Ensure the name matches exactly
+        if celula_name in alert_flags:
+            alert_flags[celula_name] = True
 
-    today = datetime.now().date().strftime("%d/%m/%Y")
+    return render_template("painel-montagem.html", alert_flags=alert_flags)
 
-    return jsonify({
-        'data_pecas_planejada': data_pecas_planejada,
-        'today': today
-    })
+@app.route("/atualizar-painel-montagem", methods=['GET','POST'])
+def atualizar_painel_montagem():
+    """
+    Rota para retornar dados para atualização do painel montagem
+    """
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if request.method == 'POST':
+        data = request.get_json()
+        cellName = data.get('cellName')
+        delete = """DELETE FROM pcp.alerta_celula
+        WHERE celula = %s"""
+        cur.execute(delete,(cellName,))
+
+        conn.commit()
+
+        cur.close()
+        conn.close()
+        return jsonify('success')
+    else:
+        sql = """select id,data_carga,data_inicio,codigo,setor,celula,descricao from pcp.tb_pecas_em_processo
+        where setor = 'Montagem' and status = 'Em processo' and data_fim isnull 
+        order by id desc"""
+
+        cur.execute(sql)
+        data_pecas_planejada = cur.fetchall()
+
+        return jsonify({
+            'data_pecas_planejada': data_pecas_planejada
+        })
 
 @app.route("/api/planejamento/montagem")
 def api_planejamento_montagem_csv():

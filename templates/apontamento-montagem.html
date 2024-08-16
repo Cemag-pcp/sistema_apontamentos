@@ -57,74 +57,132 @@
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <div class="row mb-4">
-                            <div class="col mb-2"><button id="filterChassi"
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'CHASSI')">CHASSI</button></div>
-                            <div class="col mb-2"><button
-                                    id="filterEixoCompleto" type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'EIXO COMPLETO')">EIXO
-                                    COMPLETO</button></div>
-                            <div class="col mb-2"><button id="filterEixoSimples"
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'EIXO SIMPLES')">EIXO
-                                    SIMPLES</button></div>
-                            <div class="col mb-2"><button id="filterConjInterm"
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'CONJ INTERMED')">CONJ
-                                    INTERMED</button></div>
-                            <div class="col mb-2"><button id="filterEstamparia"
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'ESTAMPARIA')">ESTAMPARIA</button></div>
-                            <div class="col mb-2"><button id="filterCilindro2"
-                                type="button"
-                                class="btn btn-outline-secondary"
-                                style="width: 149px; height: 62px;"
-                                onclick="applyCelulaFilter(this, 'CILINDRO 2')">CILINDRO 2</button></div>
-                            <div class="col mb-2"><button id="filterCilindro"
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'CILINDRO')">CILINDRO</button></div>
-                            <div class="col mb-2"><button id="filterPlat"
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'PLAT. TANQUE. CAÇAM.')">PLAT.
-                                    TANQUE.
-                                    CAÇAM.</button>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterChassi"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 100px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'CHASSI')">CHASSI</button>
+                                        <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="CHASSI" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                    </div>
+                                </div>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button
+                                        id="filterEixoCompleto" type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 130px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'EIXO COMPLETO')">EIXO
+                                        COMPLETO</button>
+                                    <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="EIXO COMPLETO" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                </div>
                             </div>
-                            <div class="col mb-2"><button id="filterLat"
-                                type="button"
-                                class="btn btn-outline-secondary"
-                                style="width: 149px; height: 62px;"
-                                onclick="applyCelulaFilter(this, 'LATERAL')">LATERAL</button>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterEixoSimples"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 100px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'EIXO SIMPLES')">EIXO
+                                        SIMPLES</button>
+                                    <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="EIXO SIMPLES" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                </div>
                             </div>
-                            <div class="col mb-2"><button id="filterFueiro"
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterConjInterm"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 130px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'CONJ INTERMED')">CONJ
+                                        INTERMED</button>
+                                    <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="CONJ INTERMED" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                </div>
+                            </div>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterEstamparia"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 100px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'ESTAMPARIA')">ESTAMPARIA</button>
+                                    <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="ESTAMPARIA" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                </div>
+                            </div>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterCilindro2"
                                     type="button"
                                     class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'FUEIRO')">FUEIRO</button></div>
-                            <div class="col mb-2"><button id="filterIcamento"
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'IÇAMENTO')">IÇAMENTO</button></div>
-                            <div class="col mb-2"><button id="filterCuboDeRoda"
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyCelulaFilter(this, 'CUBO DE RODA')">CUBO
-                                    DE RODA</button></div>
+                                    style="width: 130px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                    onclick="applyCelulaFilter(this, 'CILINDRO 2')">CILINDRO 2</button>
+                                    <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="CILINDRO 2" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                </div>
+                            </div>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterCilindro"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 100px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'CILINDRO')">CILINDRO</button>
+                                    <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="CILINDRO" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                </div>
+                            </div>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterPlat"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 130px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'PLAT. TANQUE. CAÇAM.')">PLAT.
+                                        TANQUE.
+                                        CAÇAM.</button>
+                                    <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="PLAT. TANQUE. CAÇAM" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                </div>
+                            </div>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterLat"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 100px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'LATERAL')">LATERAL</button>
+                                    <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="LATERAL" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                </div>
+                            </div>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterFueiro"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 130px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'FUEIRO')">FUEIRO</button>
+                                        <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="FUEIRO" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                    </div>
+                                </div>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterIcamento"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 100px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'IÇAMENTO')">IÇAMENTO</button>
+                                        <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="IÇAMENTO" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                    </div>
+                                </div>
+                            <div class="col mb-2">
+                                <div class="d-flex">
+                                    <button id="filterCuboDeRoda"
+                                        type="button"
+                                        class="btn btn-outline-secondary"
+                                        style="width: 130px;height: 62px;border-radius: 5px 0px 0px 5px; font-size: 14px;"
+                                        onclick="applyCelulaFilter(this, 'CUBO DE RODA')">CUBO
+                                        DE RODA</button>
+                                    <button type="button" class="btn btn-outline-danger danger-link" data-cell-name="CUBO DE RODA" style="height: 62px;border-radius: 0px 10px 10px 0px;"><i class="fas fa-exclamation-triangle"></i></button>
+                                </div>
+                            </div>
                         </div>
                         <div class="row mb-2">
                             <div class="col-sm-6">
@@ -1830,6 +1888,60 @@
             }
         }
 
+    </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dangerLinks = document.querySelectorAll('.danger-link');
+    
+        dangerLinks.forEach(function(dangerLink) {
+            dangerLink.addEventListener('click', function(event) {
+                // Get the cell name from the data attribute
+                $("#loading").show();
+                const cellName = dangerLink.getAttribute('data-cell-name');
+                
+                // Construct the message
+                let message = `Deseja alertar um problema referente a ${cellName}?`;
+                
+                const confirmDanger = confirm(message);
+                if (confirmDanger) {
+                    // If confirmed, send a POST request to update the server
+                    fetch('/alerta-celula', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ cellName : cellName })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Network response was not ok.');
+                        }
+                    })
+                    .then(data => {
+                        // Handle successful response (e.g., show a success message or update the UI)
+                        console.log('Success:', data);
+                        alert(data.message);
+                        $("#loading").hide();
+                    })
+                    .catch(error => {
+                        // Handle errors (e.g., show an error message)
+                        console.error('Error:', error);
+                        alert('Houve um erro ao processar sua solicitação.');
+                        $("#loading").hide();
+                    });
+    
+                    event.preventDefault(); // Prevent the default action (e.g., following a link)
+                } else {
+                    event.preventDefault(); // Prevent the default action if not confirmed
+                    $("#loading").hide();
+                }
+            });
+        });
+    });
+    
     </script>
 
     {% endblock %}

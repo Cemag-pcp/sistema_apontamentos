@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block title %}
-<title>Apontamneto Montagem</title>
+<title>Peças em processo - Montagem</title>
 {% endblock %}
 
 {% block links %}
@@ -27,58 +27,78 @@
                 <!-- Card Header - Dropdown -->
                 <div
                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Planejamento de produção para o dia {{ today }}</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Peças em processo</h6>
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
                     <div class="row">
-                        <div class="col"> 
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
                             <div class="card shadow mb-4" id="cardChassi">
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: yellow;"></div> -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Chassi</h6>
+                                    {% if alert_flags['CHASSI'] %}
+                                        <span class="text-danger delete-link" data-cell-name="CHASSI" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="card-body" style="height: 400px; overflow-y: auto;">
-                                    <div class="list-group">
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
                                                    
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col"> 
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
                             <div class="card shadow mb-4" id="cardPlataforma">
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:gray;"></div> -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Plat. Tanq. e Caç.</h6>
+                                    {% if alert_flags['PLAT. TANQUE. CAÇAM.'] %}
+                                        <span class="text-danger delete-link" data-cell-name="PLAT. TANQUE. CAÇAM." style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="card-body" style="height: 400px; overflow-y: auto;">
-                                    <div class="list-group">
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
                                         
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col"> 
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
                             <div class="card shadow mb-4" id="cardEixoS">
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:gray;"></div> -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Eixo simples</h6>
+                                    {% if alert_flags['EIXO SIMPLES'] %}
+                                        <span class="text-danger delete-link" data-cell-name="EIXO SIMPLES" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="card-body" style="height: 400px; overflow-y: auto;">
-                                    <div class="list-group">
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
                                                    
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col"> 
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
                             <div class="card shadow mb-4" id="cardEixoC">
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color:orange;"></div> -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Eixo completo</h6>
+                                    {% if alert_flags['EIXO COMPLETO'] %}
+                                        <span class="text-danger delete-link" data-cell-name="EIXO COMPLETO" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="card-body" style="height: 400px; overflow-y: auto;">
-                                    <div class="list-group">
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
                                                      
                                     </div>
                                 </div>
@@ -86,53 +106,73 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col"> 
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
                             <div class="card shadow mb-4" id="cardFueiro">
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: green;"></div> -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Fueiro</h6>
+                                    {% if alert_flags['FUEIRO'] %}
+                                        <span class="text-danger delete-link" data-cell-name="FUEIRO" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="card-body" style="height: 400px; overflow-y: auto;">
-                                    <div class="list-group">
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
                                                    
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col"> 
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
                             <div class="card shadow mb-4" id="cardIcamento">
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div> -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Içamento</h6>
+                                    {% if alert_flags['IÇAMENTO'] %}
+                                        <span class="text-danger delete-link" data-cell-name="IÇAMENTO" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="card-body" style="height: 400px; overflow-y: auto;">
-                                    <div class="list-group">
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
                                                     
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col"> 
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
                             <div class="card shadow mb-4" id="cardLateral">
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div> -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Lateral</h6>
+                                    {% if alert_flags['LATERAL'] %}
+                                        <span class="text-danger delete-link" data-cell-name="LATERAL" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="card-body" style="height: 400px; overflow-y: auto;">
-                                    <div class="list-group">
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
                                                      
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col"> 
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
                             <div class="card shadow mb-4" id="cardCubo">
                                 <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div> -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Cubo de roda</h6>
+                                    {% if alert_flags['CUBO DE RODA'] %}
+                                        <span class="text-danger delete-link" data-cell-name="CUBO DE RODA" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
                                 </div>
-                                <div class="card-body" style="height: 400px; overflow-y: auto;">
-                                    <div class="list-group">
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
                                                   
                                     </div>
                                 </div>
@@ -142,6 +182,12 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="loading" id="loading" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="sr-only">Loading...</span>
     </div>
 </div>
 {% endblock %}
@@ -157,7 +203,7 @@
             url: '/atualizar-painel-montagem',
             success: function (data) {
                 // Atualiza os dados em cada card
-                
+                console.log(data)
                 // Peças planejadas
                 atualizarCardPecasPlanejada('#cardChassi', data.data_pecas_planejada, 'CHASSI');
                 atualizarCardPecasPlanejada('#cardPlataforma', data.data_pecas_planejada, 'PLAT. TANQUE. CAÇAM.');
@@ -168,7 +214,7 @@
                 atualizarCardPecasPlanejada('#cardLateral', data.data_pecas_planejada, 'LATERAL');
                 atualizarCardPecasPlanejada('#cardCubo', data.data_pecas_planejada, 'CUBO DE RODA');
 
-                console.log(data.data_pecas_processo)
+                console.log(data.data_pecas_planejada)
             },
             error: function (error) {
                 console.error('Erro na solicitação AJAX:', error);
@@ -181,22 +227,23 @@
         card.empty(); // Limpa os dados existentes
 
         var dadosFiltrados = dados.filter(function (linha) {
-            return linha[8] === celula; // 4 é o índice da coluna 'cor'
+            return linha[5] === celula; // 4 é o índice da coluna 'cor'
         });
 
         // Adiciona os novos dados ao card
         for (var i = 0; i < dadosFiltrados.length; i++) {
 
             var dataCarga = formatarDataParaString(new Date(dadosFiltrados[i][1]));
+            var dataInicio = formatarDataParaString(new Date(dadosFiltrados[i][2]));
 
             card.append(`
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">${dadosFiltrados[i][3]} - ${dadosFiltrados[i][4]}</h5>
+                    <h5 class="mb-1">${dadosFiltrados[i][3]} - ${dadosFiltrados[i][6]}</h5>
                 </div>
-                <small>Quantidade: <strong>${dadosFiltrados[i][6]}</strong></small>
-                <small>Lote: <strong>${dadosFiltrados[i][7]}</strong></small> <!-- Correção aqui -->
+                <small>Setor: <strong>${dadosFiltrados[i][4]}</strong></small>
                 <small>Data da carga: <strong>${dataCarga}</strong></small>
-                <hr>
+                <small style="border-bottom: 1px solid rgb(0, 0, 0, 0.1);padding-bottom: 15px;">
+                    Data de início: <strong>${dataInicio}</strong></small>
             `);
         }
     }
@@ -210,7 +257,62 @@
     }   
 
     // Chama a função de atualização a cada 2 segundos
+    atualizarDados()
     // setInterval(atualizarDados, 2000);
+
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteLinks = document.querySelectorAll('.delete-link');
+
+    deleteLinks.forEach(function(deleteLink) {
+        deleteLink.addEventListener('click', function(event) {
+            // Get the cell name from the data attribute
+            $("#loading").show();
+            const cellName = deleteLink.getAttribute('data-cell-name');
+            
+            // Construct the message
+            let message = `Você quer marcar como resolvido o problema referente a ${cellName}?`;
+            
+            const confirmDelete = confirm(message);
+            if (confirmDelete) {
+                // If confirmed, send a POST request to update the server
+                fetch('/atualizar-painel-montagem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ cellName : cellName })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Network response was not ok.');
+                    }
+                })
+                .then(data => {
+                    // Handle successful response (e.g., show a success message or update the UI)
+                    console.log('Success:', data);
+                    alert(`Problema referente a ${cellName} foi marcado como resolvido.`);
+                    location.reload()
+                })
+                .catch(error => {
+                    // Handle errors (e.g., show an error message)
+                    console.error('Error:', error);
+                    alert('Houve um erro ao processar sua solicitação.');
+                    $("#loading").hide();
+                });
+
+                event.preventDefault(); // Prevent the default action (e.g., following a link)
+            } else {
+                event.preventDefault(); // Prevent the default action if not confirmed
+                $("#loading").hide();
+            }
+        });
+    });
+});
 
 </script>
 
