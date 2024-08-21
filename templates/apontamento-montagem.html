@@ -1468,6 +1468,7 @@
                                             </div>
                                             <div class="col-sm-6">
                                                 <h6 class="m-0 font-weight-bold text-primary"><small><strong>Origem:</strong> ${peca[13]}</small></h6>
+                                                <h6 class="m-0 font-weight-bold text-primary"><small><strong>Data da carga:</strong> ${formatarDataBr(peca[5])}</small></h6>
                                             </div>
                                         </div>
                                     </div>
@@ -1538,6 +1539,7 @@
                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Célula:</strong> ${peca[8]}</small></h6>
                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Qt. Planejada:</strong> ${peca[7]}</small></h6>
                             <h6 class="m-0 font-weight-bold text-primary"><small><strong>Motivo:</strong> ${peca[12]}</small></h6>
+                            <h6 class="m-0 font-weight-bold text-primary"><small><strong>Data da carga:</strong> ${formatarDataBr(peca[5])}</small></h6>
                         </div>
                         <div class="card-footer">
                             <button type="button" class="btn btn-info btn-retornar-producao"
@@ -1570,6 +1572,14 @@
         function formatarData(dataString) {
             var data = new Date(dataString);
             return data.toISOString().slice(0, 19);
+        }
+
+        function formatarDataBr(dataString) {
+            const data = new Date(dataString);
+            const dia = data.getUTCDate().toString().padStart(2, '0'); // Dia com dois dígitos
+            const mes = (data.getUTCMonth() + 1).toString().padStart(2, '0'); // Mês com dois dígitos (Janeiro é 0, por isso o +1)
+            const ano = data.getUTCFullYear();
+            return `${dia}/${mes}/${ano}`;
         }
 
         // Função para finalizar a peça e mostrar informações
