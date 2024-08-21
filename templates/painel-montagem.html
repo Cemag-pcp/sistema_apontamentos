@@ -179,6 +179,80 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
+                            <div class="card shadow mb-4" id="cardConjIntermed">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: green;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Conj Intermed</h6>
+                                    {% if alert_flags['CONJ INTERMED'] %}
+                                        <span class="text-danger delete-link" data-cell-name="CONJ INTERMED" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
+                                                   
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
+                            <div class="card shadow mb-4" id="cardEstamparia">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Estamparia</h6>
+                                    {% if alert_flags['ESTAMPARIA'] %}
+                                        <span class="text-danger delete-link" data-cell-name="ESTAMPARIA" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
+                                                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
+                            <div class="card shadow mb-4" id="cardCilindro">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Cilindro </h6>
+                                    {% if alert_flags['CILINDRO'] %}
+                                        <span class="text-danger delete-link" data-cell-name="CILINDRO" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
+                                                     
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-3 mb-4"> 
+                            <div class="card shadow mb-4" id="cardCilindroDois">
+                                <!-- <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style="background-color: red;"></div> -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Cilindro 2</h6>
+                                    {% if alert_flags['CILINDRO 2'] %}
+                                        <span class="text-danger delete-link" data-cell-name="CILINDRO 2" style="cursor: pointer;">
+                                            <i class="fas fa-exclamation-triangle"></i> <!-- Warning icon -->
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                                    <div class="list-group" style="gap: 15px;">
+                                                  
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -212,6 +286,10 @@
                 atualizarCardPecasPlanejada('#cardFueiro', data.data_pecas_planejada, 'FUEIRO');
                 atualizarCardPecasPlanejada('#cardIcamento', data.data_pecas_planejada, 'IÇAMENTO');
                 atualizarCardPecasPlanejada('#cardLateral', data.data_pecas_planejada, 'LATERAL');
+                atualizarCardPecasPlanejada('#cardCilindro', data.data_pecas_planejada, 'CILINDRO');
+                atualizarCardPecasPlanejada('#cardCilindroDois', data.data_pecas_planejada, 'CILINDRO 2');
+                atualizarCardPecasPlanejada('#cardEstamparia', data.data_pecas_planejada, 'ESTAMPARIA');
+                atualizarCardPecasPlanejada('#cardConjIntermed', data.data_pecas_planejada, 'CONJ INTERMED');
                 atualizarCardPecasPlanejada('#cardCubo', data.data_pecas_planejada, 'CUBO DE RODA');
 
                 console.log(data.data_pecas_planejada)
