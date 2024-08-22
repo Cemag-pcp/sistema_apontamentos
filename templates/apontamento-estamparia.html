@@ -314,7 +314,7 @@
     <!-- Modal planejar produção -->
     <div class="modal fade" id="modalPlanejarPeca" tabindex="-1" role="dialog"
         aria-labelledby="modalPlanejarPecaLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalPlanejarPecaLabel">Planejar
@@ -326,26 +326,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-12">
-                            <div class="form-floating mb-3">
-                                <label for="userInput_">Peça</label>
-                                <div class="position-relative">
-                                    <input class="form-control" type="text"
-                                        id="userInput_"
-                                        oninput="showSuggestionsPecas()">
-                                    <span id="peca-modal_"
-                                        class="clear-icon-operador"
-                                        onclick="clearInput()">x</span>
-                                    <ul id="suggestionsPecas_"
-                                        class="custom-dropdown-menu"
-                                        style="display: none;">
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm">
+                        <div class="col-6">
                             <div class="form-floating mb-3">
                                 <label for="inputData_">Data do
                                     planejamento</label>
@@ -353,50 +334,53 @@
                                     id="inputData_">
                             </div>
                         </div>
-                        <div class="col-sm">
-                            <div class="form-floating mb-3">
-                                <label for="inputQuantidade_">Quantidade</label>
-                                <input class="form-control" type="number"
-                                    id="inputQuantidade_">
-                                <!-- Quantidade -->
-                            </div>
-                        </div>
                     </div>
-                    <div class="row mb-2">
-                        <div class="col-sm-12 mb-2">
-                            <label for="maquinaForaDoPlanejado_">Máquina</label>
-                            <div class="position-relative">
-                                <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="radio"
-                                            name="maquinaForaDoPlanejado_"
-                                            value="Viradeira 3">
-                                        Viradeira 3
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="radio"
-                                            name="maquinaForaDoPlanejado_"
-                                            value="Viradeira 4">
-                                        Viradeira 4
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="radio"
-                                            name="maquinaForaDoPlanejado_"
-                                            value="Viradeira 5">
-                                        Viradeira 5
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="radio"
-                                            name="maquinaForaDoPlanejado_"
-                                            value="Prensa">
-                                        Prensa
-                                    </label>
+                    <hr>
+                    <div id="campo_dinamico_container">
+                        <div class="campo_dinamico">
+                            <h6 class="mb-3 font-weight-bold text-primary">Peça 1</h6>
+                            <hr>
+                            <div class="row">
+                                <div class="col-sm-5 mb-4">
+                                    <div class="form-floating mb-3">
+                                        <label for="userInput_1">Peça</label>
+                                        <div class="position-relative">
+                                            <input class="form-control" type="text" id="userInput_1" 
+                                                oninput="showSuggestionsPecas('userInput_1', 'suggestionsPecas_1')">
+                                            <span id="peca-modal_1" class="clear-icon-operador" 
+                                                onclick="clearInput('userInput_1','suggestionsPecas_1')">x</span>
+                                            <ul id="suggestionsPecas_1" class="custom-dropdown-menu" 
+                                                style="display: none;"></ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 mb-4">
+                                    <div class="form-floating mb-3">
+                                        <label for="inputQuantidade_">Quantidade</label>
+                                        <input class="form-control" type="number"
+                                            id="inputQuantidade_">
+                                        <!-- Quantidade -->
+                                    </div>
+                                </div>
+                                <div class="col-sm-3 mb-4">
+                                    <label for="maquinaForaDoPlanejado_">Máquina</label>
+                                    <div class="position-relative">
+                                        <select id="maquinaForaDoPlanejado_" name="maquinaForaDoPlanejado_" class="form-control">
+                                            <option value="" disabled selected>Selecione uma máquina</option>
+                                            <option value="Viradeira 3">Viradeira 3</option>
+                                            <option value="Viradeira 4">Viradeira 4</option>
+                                            <option value="Viradeira 5">Viradeira 5</option>
+                                            <option value="Prensa">Prensa</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <hr>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer d-flex justify-content-between">
+                    <button id="adicionar-peca" class="btn btn-primary mb-4"><i class="fa-solid fa-plus" ></i></button>
                     <button id="btnSalvarPlanejamento" type="button"
                         class="btn btn-primary">Salvar</button>
                 </div>
@@ -616,6 +600,7 @@
     <script
         src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="static/js/demo/datatables-demo.js"></script>
+    <script src="static/js/estamparia/adicionar-mais-planejamentos.js"></script>
 
     <!-- Scripts para iniciar tabela -->
 

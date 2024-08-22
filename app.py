@@ -157,7 +157,7 @@ def dados_sequenciamento_montagem():
             ON
                 concat(gerador_ordens_montagem.data_carga, gerador_ordens_montagem.codigo) = concat(ordens_montagem.data_carga, ordens_montagem.codigo)
             order by id desc
-            LIMIT 500;"""
+            LIMIT 5000;"""
 
     df = pd.read_sql_query(sql, conn)
 
