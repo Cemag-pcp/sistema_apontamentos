@@ -324,7 +324,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="height: 500px; overflow-y: auto;">
                     <div class="row">
                         <div class="col-6">
                             <div class="form-floating mb-3">
@@ -346,11 +346,12 @@
                                         <label for="userInput_1">Peça</label>
                                         <div class="position-relative">
                                             <input class="form-control" type="text" id="userInput_1" 
-                                                oninput="showSuggestionsPecas('userInput_1', 'suggestionsPecas_1')">
+                                                oninput="showSuggestionsPecas('userInput_1', 'suggestionsPecas_1')" autocomplete="off">
                                             <span id="peca-modal_1" class="clear-icon-operador" 
                                                 onclick="clearInput('userInput_1','suggestionsPecas_1')">x</span>
                                             <ul id="suggestionsPecas_1" class="custom-dropdown-menu" 
                                                 style="display: none;"></ul>
+                                                
                                         </div>
                                     </div>
                                 </div>
@@ -895,68 +896,71 @@
             $('#btnSalvarPlanejamento').on('click', function () {
                 showLoading();
 
-                var peca_ = $('#userInput_').val();
-                var dataPlanejamento_ = $('#inputData_').val();
-                var quantidade_ = $('#inputQuantidade_').val();
+                // Cria um array para armazenar os dados das peças
+                const pecas = [];
+                let hasEmptyFields = false;
 
-                var selectedMaquina_ = document.querySelector('input[name="maquinaForaDoPlanejado_"]:checked');
+                // Pega todos os blocos de campos dinâmicos
+                $('.campo_dinamico').each(function () {
+                    const pecaInput = $(this).find('input[id^="userInput_"]');
+                    const quantidadeInput = $(this).find('input[id^="inputQuantidade_"]');
+                    const maquinaSelect = $(this).find('select[id^="maquinaForaDoPlanejado_"]');
 
-                if (selectedMaquina_) {
-                    selectedMaquina_ = selectedMaquina_.value;
-                } else {
-                    selectedMaquina_ = '';
-                }
+                    const peca_ = pecaInput.val();
+                    const quantidade_ = quantidadeInput.val();
+                    const selectedMaquina_ = maquinaSelect.val();
 
-                console.log(peca_, dataPlanejamento_, quantidade_, selectedMaquina_);
+                    const dataPlanejamento_ = $('#inputData_').val(); // Se você tiver um campo de data comum para todas as peças
 
-                if (peca_ === '' || dataPlanejamento_ === '' || quantidade_ === '' || selectedMaquina_ === '') {
-                    $('.alert').alert()
+                    // Verifica se todos os campos estão preenchidos
+                    if (dataPlanejamento_ === '' ||peca_ === '' || quantidade_ === '' || selectedMaquina_ === null) {
+                        hideLoading();
+                        showAndHideAlert('Preencha todos os campos.', 2000);
+                        hasEmptyFields = true;
+                        return;
+                    }
+
+                    var pecaSplit = peca_.split(' - ');
+                    var descricao = pecaSplit[1] || '';  // O segundo elemento
+
+                    if (pecaSplit.length > 2) {
+                        descricao += ' - ' + pecaSplit[2];
+                    }
+
+                    // Adiciona os dados da peça ao array
+                    pecas.push({
+                        peca: peca_.split(' - ')[0],
+                        descricao: descricao,
+                        dataPlanejamento: dataPlanejamento_,
+                        qtPlanejada: quantidade_,
+                        codificacao: '',
+                        origem: 'Sequenciamento',
+                        selectedMaquina: selectedMaquina_,
+                    });
+                });
+
+                // Verifica se há pelo menos uma peça para enviar
+                if (pecas.length === 0 || hasEmptyFields) {
                     hideLoading();
-                    showAndHideAlert('Preencha todos os campos.', 2000);
+                    showAndHideAlert('Erro ao tentar salvar peça', 2000);
                     return;
                 }
-
-                var descricao = peca_.split(' - ')[1];
-                if (!descricao) {
-                    descricao = '';
-                }
-
-                // Criar objeto com os dados
-                const dados = {
-                    peca: peca_.split(' - ')[0],
-                    descricao: descricao,
-                    dataPlanejamento: dataPlanejamento_,
-                    qtPlanejada: quantidade_,
-                    codificacao: '',
-                    origem: 'Sequenciamento',
-                    selectedMaquina: selectedMaquina_,
-                };
 
                 // Enviar dados para o backend
                 $.ajax({
                     url: '/api/planejar-pecas/estamparia',
                     method: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(dados),
+                    data: JSON.stringify(pecas),
                     success: function (response) {
-                        // Tratar a resposta do backend, se necessário
                         console.log(response);
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalPecaFora').modal('hide');
 
-                        $('#userInput_').val('');
-                        $('#inputData_').val('');
-                        $('#inputQuantidade_').val('');
-
-                        var radios = document.querySelectorAll('input[name="maquinaForaDoPlanejado_"]');
-
-                        radios.forEach(function (radio) {
-                            radio.checked = false;
-                        });
-
-                        location.reload();
-
+                        // Limpa todos os campos após o envio
+                        $('.campo_dinamico').find('input, select').val('');
+                        location.reload(); // Atualiza a página após salvar
                     },
                     error: function (err) {
                         console.error('Erro ao enviar dados para o backend', err);
@@ -1071,92 +1075,6 @@
                 });
             }
 
-            // Chama a função para obter os dados brutos do backend
-            fetchSuggestionsDataTeste();
-        });
-
-
-    </script>
-
-    <!-- Script para lista input peças dentro do modal de planejar peças -->
-
-    <script>
-
-        $(document).ready(function () {
-            // Evento de clique no input para mostrar a lista de sugestões
-            $('#userInput_').click(function (event) {
-                event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
-                showSuggestionsPecas();
-            });
-
-            // Evento de clique no ícone de limpar para limpar o campo de entrada e esconder a lista de sugestões
-            $('#peca-modal_').click(function (event) {
-                event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
-                clearInput();
-            });
-
-            // Evento de clique fora da lista de sugestões para escondê-la
-            $(document).click(function (event) {
-                var suggestionsList = $('#suggestionsPecas_');
-                if (!$(event.target).closest('#userInput_').length) {
-                    suggestionsList.hide();
-                }
-            });
-
-            // Evento de clique em um item da lista de sugestões para preencher o campo de entrada e esconder a lista
-            $('#suggestionsPecas_').on('click', 'li', function () {
-                $('#userInput_').val($(this).text());
-                $('#suggestionsPecas_').hide();
-            });
-
-            // Evento de entrada para filtrar as sugestões enquanto o usuário digita
-            $('#userInput_').on('input', function () {
-                showSuggestionsPecas();
-            });
-
-            // Função para mostrar sugestões ao digitar
-            function showSuggestionsPecas() {
-                var input = $('#userInput_').val().toLowerCase();
-                var suggestionsList = $('#suggestionsPecas_');
-                suggestionsList.empty(); // Limpa a lista de sugestões
-
-                // Filtra os dados com base no texto de entrada
-                var filteredData = suggestionsDataPecaModal.filter(item => item.toLowerCase().includes(input));
-
-                // Preenche a lista de sugestões com os itens filtrados
-                filteredData.forEach(item => {
-                    $('<li>').text(item).appendTo(suggestionsList);
-                });
-
-                // Mostra a lista de sugestões
-                suggestionsList.show();
-            }
-
-            // Função para limpar o campo de entrada e ocultar a lista de sugestões
-            function clearInput() {
-                $('#userInput_').val('');
-                $('#suggestionsPecas_').hide();
-            }
-
-            // Variável para armazenar os dados brutos do backend
-            var suggestionsDataPecaModal = [];
-
-            // Função para obter os dados brutos do backend
-            function fetchSuggestionsDataTeste() {
-                $.ajax({
-                    url: '/sugestao-pecas-estamparia',
-                    method: 'GET',
-                    success: function (data) {
-                        suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
-                    },
-                    error: function (err) {
-                        console.error('Erro ao obter dados brutos do backend', err);
-                    }
-                });
-            }
-
-            // Chama a função para obter os dados brutos do backend
-            fetchSuggestionsDataTeste();
         });
 
 
@@ -1572,9 +1490,9 @@
 
         function formatarDataSemHora(dataString) {
             var data = new Date(dataString);
-            var dia = ("0" + data.getDate()).slice(-2);
-            var mes = ("0" + (data.getMonth() + 1)).slice(-2);
-            var ano = data.getFullYear();
+            var dia = ("0" + data.getUTCDate()).slice(-2);
+            var mes = ("0" + (data.getUTCMonth() + 1)).slice(-2);
+            var ano = data.getUTCFullYear();
             return dia + '/' + mes + '/' + ano;
         }
 

@@ -2326,34 +2326,35 @@ def planejar_pecas_estamparia():
     rota para receber peças planejadas para estamparia
     """
 
-    data = request.json
+    data_list = request.json
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    print(data)
+    for data in data_list:
 
-    chave = str(uuid.uuid1())
-    codigo = data['peca']
-    descricao = data['descricao']
+        chave = str(uuid.uuid1())
+        codigo = data['peca']
+        descricao = data['descricao']
 
-    try:
-        data_planejada = pd.to_datetime(
-            data['dataPlanejamento'], format="%d/%m/%Y")
-    except ValueError:
-        data_planejada = data['dataPlanejamento']
+        try:
+            data_planejada = pd.to_datetime(
+                data['dataPlanejamento'], format="%d/%m/%Y")
+        except ValueError:
+            data_planejada = data['dataPlanejamento']
 
-    celula = data['selectedMaquina']
-    qt_planejada = data['qtPlanejada']
-    origem = data['origem']
+        celula = data['selectedMaquina']
+        qt_planejada = data['qtPlanejada']
+        origem = data['origem']
 
-    query = """ 
-            INSERT INTO pcp.planejamento_estamparia (data_planejada,codigo,descricao,qt_planejada,maquina,origem,chave) VALUES (%s,%s,%s,%s,%s,%s,%s)
-            """
+        query = """ 
+                INSERT INTO pcp.planejamento_estamparia (data_planejada,codigo,descricao,qt_planejada,maquina,origem,chave) 
+                VALUES (%s,%s,%s,%s,%s,%s,%s)
+                """
 
-    cur.execute(query, (data_planejada, codigo, descricao,
-                qt_planejada, celula, origem, chave))
+        cur.execute(query, (data_planejada, codigo, descricao,
+                            qt_planejada, celula, origem, chave))
 
     conn.commit()
 

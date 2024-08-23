@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <label for="userInput_${pieceCount}">Peça</label>
                         <div class="position-relative">
                             <input class="form-control" type="text" id="userInput_${pieceCount}" oninput="showSuggestionsPecas('userInput_${pieceCount}', 'suggestionsPecas_${pieceCount}','peca-modal_${pieceCount}')">
-                            <span id="peca-modal_${pieceCount}" class="clear-icon-operador" onclick="clearInput()">x</span>
+                            <span id="peca-modal_${pieceCount}" class="clear-icon-operador" onclick="clearInput('userInput_${pieceCount}', 'suggestionsPecas_${pieceCount}')">x</span>
                             <ul id="suggestionsPecas_${pieceCount}" class="custom-dropdown-menu" style="display: none;"></ul>
                         </div>
                     </div>
@@ -67,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Delegação de eventos para remover blocos
     document.getElementById('campo_dinamico_container').addEventListener('click', function (event) {
-        if (event.target.classList.contains('btn-remover')) {
+        if (event.target.closest('.btn-remover')) {
             event.target.closest('.campo_dinamico').remove();
-            updatePieceNumbers(); // Atualiza a numeração após remoção
+            updatePieceNumbers();
         }
     });
 
@@ -77,10 +77,13 @@ document.addEventListener('DOMContentLoaded', function () {
     updatePieceNumbers();
 });
 
+let suggestionsDataPecaModal = [];
+
 // Função para mostrar sugestões ao digitar
 function showSuggestionsPecas(inputId, suggestionsId,pecaModalId) {
-    var suggestionsDataPecaModal = [];
+
     var input = $(`#${inputId}`).val().toLowerCase();
+
     var suggestionsList = $(`#${suggestionsId}`);
     var pecaModal = $(`#${pecaModalId}`);
     suggestionsList.empty(); // Limpa a lista de sugestões
@@ -96,30 +99,47 @@ function showSuggestionsPecas(inputId, suggestionsId,pecaModalId) {
         clearInput(inputId,suggestionsId);
     });
 
-    $.ajax({
-        url: '/sugestao-pecas-estamparia',
-        method: 'GET',
-        success: function (data) {
-            suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
-            // Filtra os dados com base no texto de entrada
-            var filteredData = suggestionsDataPecaModal.filter(item => item.toLowerCase().includes(input));
+    const filteredSuggestions = suggestionsDataPecaModal.filter(suggestion =>
+        suggestion.toLowerCase().includes(input)
+    );
 
-            // Preenche a lista de sugestões com os itens filtrados
-            filteredData.forEach(item => {
-                $(`<li class="mb-3" style="cursor:pointer">`).text(item).appendTo(suggestionsList);
-            });
-
-            // Mostra a lista de sugestões
-            suggestionsList.show();
-        },
-        error: function (err) {
-            console.error('Erro ao obter dados brutos do backend', err);
-        }
+    // Preenche a lista de sugestões com os itens filtrados
+    filteredSuggestions.forEach(suggestion => {
+        const li = $('<li>');
+        const a = $('<a>').attr('href', '#').text(suggestion);
+        a.on('click', function (event) {
+            event.preventDefault();
+            // Ação ao selecionar uma sugestão (pode ser ajustada conforme necessário)
+            $(`#${inputId}`).val(suggestion);
+            suggestionsList.css('display', 'none');
+        });
+        li.append(a);
+        suggestionsList.append(li);
     });
+
+    // Mostra a lista de sugestões
+    suggestionsList.css('display', filteredSuggestions.length ? 'block' : 'none');
 
 }
 
 function clearInput(inputId,suggestionsId) {
     $(`#${inputId}`).val('');
     $(`#${suggestionsId}`).hide();
+}
+
+$(document).ready(function () {
+    fetchSuggestion();
+});
+
+function fetchSuggestion() {
+    $.ajax({
+        url: '/sugestao-pecas-estamparia',
+        method: 'GET',
+        success: function (data) {
+            suggestionsDataPecaModal = data.map(row => row[Object.keys(row)[0]]);
+        },
+        error: function (err) {
+            console.error('Erro ao obter dados brutos do backend', err);
+        }
+    });
 }
