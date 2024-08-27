@@ -49,7 +49,8 @@ $(document).ready(function () {
     function applyDateFilter() {
         var columnIndex = $('#dataCarga').data('column');
         var filterValue = $('#dataCarga').val();
-
+        console.log(filterValue)
+        console.log(columnIndex)
         // Formata a data usando Moment.js
         if (filterValue === '') {
             filterValue = moment().format('DD/MM/YYYY');
