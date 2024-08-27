@@ -1710,6 +1710,7 @@
                         showAndHideSuccessAlert('Salvo.', 2000);
                         chamarAPI();
                         chamarAPIInterrompidas();
+                        location.reload();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
