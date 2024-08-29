@@ -317,22 +317,28 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalPlanejarPecaLabel">Planejar
-                        peças</h5>
-                    <button type="button" class="close" data-dismiss="modal"
-                        aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title" id="modalPlanejarPecaLabel">Planejar peças</h5>
+                        <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close"><span aria-hidden="true">&times;</span>
+                        </button>
                 </div>
                 <div class="modal-body" style="height: 500px; overflow-y: auto;">
-                    <div class="row">
+                    <div class="row flex-column">
                         <div class="col-6">
                             <div class="form-floating mb-3">
-                                <label for="inputData_">Data do
-                                    planejamento</label>
+                                <label for="inputData_">Data do planejamento</label>
                                 <input class="form-control" type="date"
                                     id="inputData_">
                             </div>
+                        </div>
+                        <div class="col-6">
+                            <label>Inserir arquivo</label>
+                            <input type="file" accept=".csv" id="inserir-arquivos">
+                        </div>
+                        <div class="col-6 mt-4">
+                            <a href="{{ url_for('download_csv') }}" download="modelo_estamparia.csv">
+                                Baixar Modelo CSV <i class="fa-solid fa-download"></i>
+                            </a>
                         </div>
                     </div>
                     <hr>
@@ -384,6 +390,8 @@
                     <button id="adicionar-peca" class="btn btn-primary mb-4"><i class="fa-solid fa-plus" ></i></button>
                     <button id="btnSalvarPlanejamento" type="button"
                         class="btn btn-primary">Salvar</button>
+                    <button id="btnSalvarArquivos" type="button"
+                        class="btn btn-primary d-none">Enviar arquivos</button>
                 </div>
             </div>
         </div>
@@ -602,12 +610,12 @@
         src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="static/js/demo/datatables-demo.js"></script>
     <script src="static/js/estamparia/adicionar-mais-planejamentos.js"></script>
+    <script src="/static/js/estamparia/input-file.js"></script>
+    <script src="/static/js/estamparia/enviar-arquivo.js"></script>
 
     <!-- Scripts para iniciar tabela -->
 
     <script>
-        // $(document).ready(function () {
-        //     setInterval(preencherTabela, 1000);
 
         // Função para iniciar um item
         function iniciar(chave, codigo, descricao) {

@@ -1,4 +1,4 @@
-from flask import Flask,session,render_template, request, jsonify, redirect, url_for, flash, Blueprint, send_file
+from flask import Flask,session,render_template, request, jsonify, redirect, url_for, flash, Blueprint, send_file, send_from_directory
 import pandas as pd
 from Classes.inspecao import Inspecao
 from Classes.DashboardInspecao import DashboardInspecao
@@ -232,6 +232,38 @@ def dados_historico_pintura():
 
 def formatar_data(data):
     return data.strftime('%d/%m/%Y')
+
+def inserir_arquivos_banco_dados(df, data_planejada):
+    try:
+        # Conectando ao banco de dados PostgreSQL
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Inserindo os dados no banco
+        for _, row in df.iterrows():
+            chave = str(uuid.uuid1())
+            peca = row['peca']
+            if ' - ' in peca:
+                codigo, descricao = peca.split(' - ', 1)  # Divide em duas partes, onde a primeira é o código e o resto é a descrição
+            else:
+                codigo = peca
+                descricao = ''  # Se não houver ' - ', assume que a descrição está vazia
+            celula = row['maquina']
+            quantidade = row['quantidade']
+            query = """
+            INSERT INTO pcp.planejamento_estamparia (data_planejada,codigo,descricao,qt_planejada,maquina,origem,chave) 
+            VALUES (%s, %s, %s, %s, %s, 'Sequenciamento', %s)
+            """
+            cur.execute(query, (data_planejada, codigo, descricao, quantidade, celula, chave))
+
+        # Commit e fechamento da conexão
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        print(f"Erro ao inserir dados no banco de dados: {str(e)}")
 
 @app.route('/', methods=['GET'])
 def pagina_inicial():
@@ -2360,6 +2392,59 @@ def planejar_pecas_estamparia():
 
     return 'sucess'
 
+@app.route("/api/enviar-arquivos/estamparia", methods=['POST'])
+def enviar_arquivos_estamparia():
+    """
+    Rota para receber peças planejadas para estamparia
+    """
+    if 'arquivo' not in request.files or 'data' not in request.form:
+        return {"error": "Arquivo e/ou data não foram enviados."}, 400
+    
+    arquivo = request.files['arquivo']
+    data = request.form['data']
+
+    if arquivo.filename == '':
+        print({"error": "Nenhum arquivo foi selecionado."})
+        return {"error": "Nenhum arquivo foi selecionado."}, 400
+
+    file_extension = arquivo.filename.rsplit('.', 1)[-1].lower()
+    try:
+        if file_extension == 'csv':
+            df = pd.read_csv(arquivo.stream)
+        elif file_extension in ['xlsx', 'xls']:
+            df = pd.read_excel(arquivo.stream, engine='openpyxl') 
+        else:
+            print({"error": "Tipo de arquivo não suportado. Envie um arquivo CSV ou Excel."})
+            return {"error": "Tipo de arquivo não suportado. Envie um arquivo CSV ou Excel."}, 400
+        
+        df.columns = df.columns.str.strip()
+        df.columns = df.columns.str.replace(';', '', regex=True)
+        required_columns = {'peca', 'quantidade', 'maquina'}
+        print(df.columns)
+        if not required_columns.issubset(df.columns):
+            print({"error": "O arquivo deve conter as colunas: peca, quantidade, maquina."})
+            return {"error": "O arquivo deve conter as colunas: peca, quantidade, maquina."}, 400
+
+        maquinas_permitidas = {'Viradeira 3', 'Viradeira 4', 'Viradeira 5', 'Prensa'}
+        df = df[df['maquina'].isin(maquinas_permitidas)]
+
+        if df.empty:
+            print({"error": "Nenhuma linha correspondente ao filtro foi encontrada."})
+            return {"error": "Nenhuma linha correspondente ao filtro foi encontrada."}, 400
+
+        inserir_arquivos_banco_dados(df, data)
+
+    except Exception as e:
+        print({"error": f"Erro ao processar o arquivo: {str(e)}"})
+        return {"error": f"Erro ao processar o arquivo: {str(e)}"}, 400
+    
+    return {"message": "Arquivo e data recebidos com sucesso."}, 200
+
+@app.route('/download_csv')
+def download_csv():
+    # Caminho para o arquivo CSV dentro da pasta 'static/modelo'
+    return send_from_directory('static/modelo', 'modelo_estamparia.csv', as_attachment=True)
+
 @app.route("/api/consulta-pecas-em-processo/estamparia", methods=['GET'])
 def api_consulta_pecas_em_processo_estamparia():
     
@@ -2972,6 +3057,8 @@ def planejamento_corte():
         'data': data,
         'total_pages': total_pages
     })
+
+
 
 @app.route("/api/pecas-interrompida/corte", methods=['POST'])
 def api_pecas_interrompida_corte():
@@ -5080,4 +5167,4 @@ def receber_dataframe():
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=80,debug=True)
+    app.run(host='0.0.0.0', port=80)
