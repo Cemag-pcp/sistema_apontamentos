@@ -331,9 +331,12 @@
                                     id="inputData_">
                             </div>
                         </div>
-                        <div class="col-6">
-                            <label>Inserir arquivo</label>
-                            <input type="file" accept=".csv" id="inserir-arquivos">
+                        <label for="inputData_" style="margin-left: 12px;">Inserir arquivo</label>
+                        <div class="col-12 input-group">
+                            <div class="custom-file">
+                              <input type="file" class="custom-file-input" id="inserir-arquivos" accept=".csv" aria-describedby="inputGroupFileAddon03">
+                              <label class="custom-file-label" for="inputGroupFile03">Inserir arquivo</label>
+                            </div>
                         </div>
                         <div class="col-6 mt-4">
                             <a href="{{ url_for('download_csv') }}" download="modelo_estamparia.csv">
