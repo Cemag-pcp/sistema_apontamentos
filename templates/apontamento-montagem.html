@@ -261,10 +261,10 @@
                                         <th>Qt. planejada</th>
                                         <th>Qt. restante</th>
                                         <th>Iniciar</th>
-                                        <th>Editar</th>
                                         <th
                                             style="display: none;">codificacao</th>
                                         <th style="display: none;">id</th>
+                                        <th>Editar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -303,7 +303,13 @@
                                                 data-target="#modalConfirmarInicioProducao">Iniciar</button>
                                         </td>
                                         {% endif %}
-                                        <td data-title="Iniciar"><button
+                                        <td data-title="codificacao"
+                                            style="display: none;">{{ data[8]
+                                            }}</td>
+                                        <td data-title="id"
+                                            style="display: none;">{{ data[9]
+                                            }}</td>
+                                        <td data-title="Editar"><button
                                             id="btnEditarProducao"
                                             type="button"
                                             class="btn btn-primary"
@@ -311,12 +317,6 @@
                                             data-target="#modalEditarProducao"
                                             onclick="modalEditar('{{data[0]}}','{{data[1]}}','{{data[3]}}','{{data[4]}}','{{data[5]}}','{{data[9]}}')">Editar</button>
                                         </td>
-                                        <td data-title="codificacao"
-                                            style="display: none;">{{ data[8]
-                                            }}</td>
-                                        <td data-title="id"
-                                            style="display: none;">{{ data[9]
-                                            }}</td>
                                     </tr>
                                     {% endfor %}
 
