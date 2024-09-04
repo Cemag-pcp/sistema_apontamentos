@@ -555,6 +555,46 @@ def apontar_montagem():
     
     return render_template('apontamento-montagem.html', sheet_data=sheet_data)
 
+@app.route('/editar-montagem', methods=['POST'])
+def editar_montagem():
+    """
+    Rota para página de apontamento de montagem
+    """
+    try:
+        # Conectar ao banco de dados
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                                password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Obter dados do request
+        dados = request.get_json()
+        id = dados['id_planejada_montagem']
+        quantidade_planejada = dados['nova_quantidade_planejada']
+
+        # Atualizar a quantidade planejada
+        query = """UPDATE pcp.gerador_ordens_montagem
+                   SET qt_planejada = %s
+                   WHERE id = %s"""
+        
+        cur.execute(query, (quantidade_planejada, id))
+
+        # Comitar as alterações
+        conn.commit()
+        print('commitou')
+
+        return jsonify({'message': 'Success'})
+    
+    except Exception as e:
+        # Em caso de erro, logar a exceção
+        print(f"Erro ao editar montagem: {e}")
+        return jsonify({'message': 'Error', 'error': str(e)}), 500
+
+    finally:
+        # Garantir que a conexão será fechada
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 @app.route('/planejamento-estamparia', methods=['GET', 'POST'])
 def planejamento_estamparia():
@@ -5167,4 +5207,4 @@ def receber_dataframe():
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=80,debug=True)

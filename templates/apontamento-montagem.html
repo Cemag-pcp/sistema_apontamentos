@@ -261,6 +261,7 @@
                                         <th>Qt. planejada</th>
                                         <th>Qt. restante</th>
                                         <th>Iniciar</th>
+                                        <th>Editar</th>
                                         <th
                                             style="display: none;">codificacao</th>
                                         <th style="display: none;">id</th>
@@ -302,6 +303,14 @@
                                                 data-target="#modalConfirmarInicioProducao">Iniciar</button>
                                         </td>
                                         {% endif %}
+                                        <td data-title="Iniciar"><button
+                                            id="btnEditarProducao"
+                                            type="button"
+                                            class="btn btn-primary"
+                                            data-toggle="modal"
+                                            data-target="#modalEditarProducao"
+                                            onclick="modalEditar('{{data[0]}}','{{data[1]}}','{{data[3]}}','{{data[4]}}','{{data[5]}}','{{data[9]}}')">Editar</button>
+                                        </td>
                                         <td data-title="codificacao"
                                             style="display: none;">{{ data[8]
                                             }}</td>
@@ -643,6 +652,57 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalEditarProducao"
+        role="dialog" data-backdrop="static" data-keyboard="false" tabindex="-1"
+        aria-labelledby="modalEditarProducaoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="modalEditarProducaoLabel">Editar</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label for="editar_data_carga_montagem">Data da carga</label>
+                            <input class="form-control" type="text" name="editar_data_carga_montagem" id="editar_data_carga_montagem" disabled>
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label for="editar_data_planejada_montagem">Data planejada</label>
+                            <input class="form-control" type="text" name="editar_data_planejada_montagem" id="editar_data_planejada_montagem" disabled>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label for="editar_codigo_montagem">Código</label>
+                            <input class="form-control" type="text" name="editar_codigo_montagem" id="editar_codigo_montagem" disabled>
+                        </div>
+                        <div class="col-sm-6 mb-4">
+                            <label for="editar_descricao_montagem">Descrição</label>
+                            <input class="form-control" type="text" name="editar_descricao_montagem" id="editar_descricao_montagem" disabled>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-4">
+                            <label for="editar_quantidade_planejada_montagem">Quantidade Planejada</label>
+                            <input class="form-control" type="text" name="editar_quantidade_planejada_montagem" id="editar_quantidade_planejada_montagem">
+                        </div>
+                        <div class="d-none col-sm-6 mb-4">
+                            <label for="editar_id_planejada_montagem"></label>
+                            <input class="form-control" type="text" name="editar_id_planejada_montagem" id="editar_id_planejada_montagem" disabled>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="submitEditar">Editar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="loading" id="loading" style="display: none;">
         <div class="spinner-border text-primary" role="status">
             <span class="sr-only">Loading...</span>
@@ -667,6 +727,7 @@
     <script
         src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="static/js/demo/datatables-demo.js"></script>
+    <script src="static/js/montagem/modal_editar.js"></script>
 
     <!-- Scripts campos de filtro -->
 
