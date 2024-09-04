@@ -1,11 +1,12 @@
-function getResumo() {
+function getResumo(consumo=false) {
 
+    console.log(consumo)
     $("#loading").show();
     
     var dataInicial = document.getElementById('dataReuniaoInicial').value;
     var dataFinal = document.getElementById('dataReuniaoFinal').value;
 
-    var url = '/resumos-geral?datainicio='+ encodeURIComponent(dataInicial) +'&datafim='+ encodeURIComponent(dataFinal);
+    var url = '/resumos-geral/'+ consumo +'?datainicio='+ encodeURIComponent(dataInicial) +'&datafim='+ encodeURIComponent(dataFinal);
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url);
@@ -52,9 +53,16 @@ function getResumo() {
 
 document.addEventListener('DOMContentLoaded',function() {
     var botaoFiltrar = document.getElementById('filtrar_datas');
+    var botaoFiltrarPorCarreta = document.getElementById('filtrar_datas_por_carretas');
+    
     botaoFiltrar.addEventListener('click',function () {
         // document.getElementById('filtro_faltando_pecas').checked = false
         getResumo();
+    })
+
+    botaoFiltrarPorCarreta.addEventListener('click',function () {
+        // document.getElementById('filtro_faltando_pecas').checked = false
+        getResumo(true);
     })
 })
 

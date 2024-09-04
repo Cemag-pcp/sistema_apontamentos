@@ -4595,8 +4595,13 @@ def tela_reuniao():
 
     return render_template('reuniao.html')
 
-@app.route('/resumos-geral')
-def tabela_resumos():
+@app.route('/reuniao-consulta-carreta')
+def consuta_carreta():
+
+    return render_template('reuniao-consulta-carreta.html')
+
+@app.route('/resumos-geral/<consumo>')
+def tabela_resumos(consumo):
 
     try:
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -4604,6 +4609,7 @@ def tabela_resumos():
             # Acessando os parâmetros da URL
         datainicio = request.args.get('datainicio') 
         datafim = request.args.get('datafim') 
+        consumo = True if consumo == 'true' else False
 
         query_montagem = """
                         select distinct tbce.carreta,
@@ -4708,8 +4714,10 @@ def tabela_resumos():
         pintura_agrupada = df_pintura.groupby(['celula', 'codigo', 'data_carga'])[['qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum().reset_index()
 
         ##########################################
+
         df_final_com_codigos = carga_e_montagem.merge(pintura_agrupada, how='left', left_on=['data_carga','codigo_tratado'], right_on=['data_carga','codigo'])
         df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga','Qtd. Carretas'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum()
+        
         ##########################################
 
         # Lógica de status

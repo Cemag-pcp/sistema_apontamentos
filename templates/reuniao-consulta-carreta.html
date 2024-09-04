@@ -25,7 +25,7 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Reunião</h1>
+        <h1 class="h3 mb-0 text-gray-800">Consultar por carreta</h1>
         <!-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                 class="fas fa-download fa-sm text-white-50"></i> Generate Report</a> -->
     </div>
@@ -37,10 +37,6 @@
                 <!-- Card Header - Dropdown -->
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
-                    <div class="btn-group" role="group" aria-label="Criar OP">
-                        <button id="btnModalCarretasCadastradas" type="button" class="btn btn-sm btn-secondary mr-2"
-                            data-toggle="modal" data-target="#modalCarretasCadastradas">Carretas</button>
-                    </div>
                 </div>
                 <br>
                 <!-- Card Body -->
@@ -56,12 +52,12 @@
                             <input class="form-control" type="date" id="dataReuniaoFinal">
                         </div>
                     </div>
-                    <div class="col-md-3 col-sm-6">
+                    <div class="d-none col-md-3 col-sm-6">
                         <!-- Botão para filtrar as datas -->
                         <button id="filtrar_datas" class="btn btn-primary mt-4">Filtrar</button>
                     </div>
 
-                    <div class="d-none col-md-3 col-sm-6">
+                    <div class="col-md-3 col-sm-6">
                         <!-- Botão para filtrar as datas -->
                         <button id="filtrar_datas_por_carretas" class="btn btn-primary mt-4">Filtrar</button>
                     </div>
