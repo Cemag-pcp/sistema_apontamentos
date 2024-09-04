@@ -141,7 +141,7 @@ def dados_sequenciamento_montagem():
     sql = """SELECT
                 gerador_ordens_montagem.*,
                 COALESCE(ordens_montagem.qt_apontada, 0) as qt_apontada,
-                ABS(gerador_ordens_montagem.qt_planejada - COALESCE(ordens_montagem.qt_apontada, 0)) as restante
+                gerador_ordens_montagem.qt_planejada - COALESCE(ordens_montagem.qt_apontada, 0) as restante
             FROM
                 pcp.gerador_ordens_montagem
             LEFT JOIN (
