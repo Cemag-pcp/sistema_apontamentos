@@ -241,7 +241,7 @@
                                 <div class="position-relative">
                                     <input class="form-control" type="text"
                                         id="userInput"
-                                        oninput="showSuggestionsPecas_()">
+                                        oninput="showSuggestionsPecas_()" placeholder="'Digite...">
                                     <span id="peca-modal"
                                         class="clear-icon-operador"
                                         onclick="clearInput_()">x</span>
@@ -355,12 +355,11 @@
                                         <label for="userInput_1">Peça</label>
                                         <div class="position-relative">
                                             <input class="form-control" type="text" id="userInput_1" 
-                                                oninput="showSuggestionsPecas('userInput_1', 'suggestionsPecas_1')" autocomplete="off">
+                                                oninput="showSuggestionsPecas('userInput_1', 'suggestionsPecas_1')" autocomplete="off" placeholder="Digite...">
                                             <span id="peca-modal_1" class="clear-icon-operador" 
                                                 onclick="clearInput('userInput_1','suggestionsPecas_1')">x</span>
                                             <ul id="suggestionsPecas_1" class="custom-dropdown-menu" 
                                                 style="display: none;"></ul>
-                                                
                                         </div>
                                     </div>
                                 </div>
@@ -1013,7 +1012,25 @@
 
     <script>
 
+        function showSuggestionsPecas_() {
+            var input = $('#userInput').val().toLowerCase();
+            var suggestionsList = $('#suggestionsPecas');
+            suggestionsList.empty(); // Limpa a lista de sugestões
+
+            // Filtra os dados com base no texto de entrada
+            var filteredData = suggestionsDataPecaModal.filter(item => item.toLowerCase().includes(input));
+
+            // Preenche a lista de sugestões com os itens filtrados
+            filteredData.forEach(item => {
+                $('<li>').text(item).appendTo(suggestionsList);
+            });
+
+            // Mostra a lista de sugestões
+            suggestionsList.show();
+        }
+
         $(document).ready(function () {
+
             // Evento de clique no input para mostrar a lista de sugestões
             $('#userInput').click(function (event) {
                 event.stopPropagation(); // Impede a propagação do evento para não ser capturado pelo document click
@@ -1046,22 +1063,7 @@
             });
 
             // Função para mostrar sugestões ao digitar
-            function showSuggestionsPecas_() {
-                var input = $('#userInput').val().toLowerCase();
-                var suggestionsList = $('#suggestionsPecas');
-                suggestionsList.empty(); // Limpa a lista de sugestões
-
-                // Filtra os dados com base no texto de entrada
-                var filteredData = suggestionsDataPecaModal.filter(item => item.toLowerCase().includes(input));
-
-                // Preenche a lista de sugestões com os itens filtrados
-                filteredData.forEach(item => {
-                    $('<li>').text(item).appendTo(suggestionsList);
-                });
-
-                // Mostra a lista de sugestões
-                suggestionsList.show();
-            }
+            
 
             // Função para limpar o campo de entrada e ocultar a lista de sugestões
             function clearInput_() {
