@@ -52,244 +52,47 @@
                             <input class="form-control" type="date" id="dataReuniaoFinal">
                         </div>
                     </div>
-                    <div class="d-none col-md-3 col-sm-6">
-                        <!-- Botão para filtrar as datas -->
-                        <button id="filtrar_datas" class="btn btn-primary mt-4">Filtrar</button>
-                    </div>
-
                     <div class="col-md-3 col-sm-6">
-                        <!-- Botão para filtrar as datas -->
-                        <button id="filtrar_datas_por_carretas" class="btn btn-primary mt-4">Filtrar</button>
+                        <button id="filtrar_datas_por_carretas" class="btn btn-primary mt-4">Simular</button>
                     </div>
 
                 </div>
             </div>
 
-            <div class="card shadow mb-4" id="campoTable" style="display: none; font-size: 14px;">
-                <!-- Card Header - Dropdown -->
-                <div class="card-header py-3 d-flex bd-highlight mb-3 align-items-center">
-                    <div class="mr-auto p-2 bd-highlight">
-                        <ul class="nav nav-tabs">
-                            <li class="nav-item">
-                                <a class="nav-link active" onclick="changeTab('reuniao')" style="cursor: pointer; font-size: 16px; width: 160px;">Reunião</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" onclick="changeTab('baseFinal')" style="cursor: pointer; font-size: 16px; width: 160px;">Base atualizada</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="row justify-content-end" id="filtros_resumo_reuniao" style="display: none;">
-                        <div class="p-2 bd-highlight">
-                            <label>Filtro Processo</label>
-                            <input type="text" id="filtrar_processo" class="form-control">
-                        </div>
-                        <div class="p-2 bd-highlight">
-                            <label>Filtrar Conjunto</label>
-                            <input type="text" id="filtrar_conjunto" class="form-control">
-                        </div>
+            <div class="card shadow mb-4 p-2" id="campoTableConsulta" style="display: none; font-size: 14px;">
+                <div class="m-2" style="display: flex; flex-direction: column; align-items: flex-end;">
+                    <div class="col-12-sm mb-3">
+                        <label for="recursoFiltro">Filtro Recurso:</label>
+                        <input type="text" id="recursoFiltro" class="form-control" placeholder="Filtrar recurso">
                     </div>
                 </div>
-                <!-- Card tabela a inspecionar -->
                 <div class="table-body" id="reuniaoTable">
                     <div id="no-more-tables">
                         <div class="table-responsive-header">
-                            <table class="table table-bordered table-sticky" id="dataTableReuniao" width="100%" cellspacing="0">
+                            <table class="table table-bordered table-sticky" id="dataTableConsulta" width="100%" cellspacing="0">
                                 <thead class="theadConjuntoReuniao">
                                     <tr>
-                                        <th>Produto</th>
                                         <th>Data</th>
-                                        <th>Código do Produto</th>
-                                        <th>Descrição</th>
-                                        <th>Código Único</th>
-                                        <th>Quantidade</th>
-                                        <th>Status</th>
+                                        <th>Recurso</th>
+                                        <th>Qtde. Ped</th>
+                                        <th>Nr. Série</th>
+                                        <th>Consumir</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tbodyConjuntoReuniao" >
-                                
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="table-body" id="baseFinalTable" style="display: none;">
-                    <div id="no-more-tables">
-                        <div class="table-responsive-header">
-                            <table class="table table-bordered table-sticky" id="dataTableBaseFinal" width="100%" cellspacing="0">
-                                <thead class="theadConjuntoReuniao">
+                                <tbody>
                                     <tr>
-                                        <th>Data da Carga</th>
-                                        <th>Processo</th>
-                                        <th>Código do Conjunto</th>
-                                        <th>Descrição do Conjunto</th>
-                                        <th>Código da Peça</th> 
-                                        <th>Descrição da Peça</th>
-                                        <th>Quantidade Atualizada</th>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
                                     </tr>
-                                </thead>
-                                <tbody id="tbodyBaseFinal" >
-                                
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Content Row -->
-        <div class="row">
-
-            <!-- Modal criar op laser -->
-            <div class="modal fade" id="modalCarretasCadastradas" tabindex="-1" role="dialog"
-                aria-labelledby="modalCarretasCadastradasLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="TittleModalCarretasCadastradas">Carretas cadastradas na base
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body" style="max-height: 500px; overflow-y:auto;">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Carreta</th>
-                                        <th scope="col">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="bodyCarretasCadastradasReuniao">
-
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="modal-footer">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal -->
-            <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true" data-backdrop="static">
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="infoModalLabel"></h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body" style="overflow-y: auto; max-height: 700px;">
-                            <div class="row">
-                                <div class="col-sm-6 mb-4">
-                                    <label for="data_carga">Data da Carga:</label>
-                                    <input type="date" name="data_carga" id="data_carga" class="form-control" disabled>
-                                </div>
-                                <div class="col-sm-6 mb-4">
-                                    <label for="data_carga">Carreta:</label>
-                                    <input type="text" name="carreta_conjunto" id="carreta_conjunto" class="form-control" disabled>
-                                </div>
-                            </div>
-                            <hr>
-                            <h6 id="informacoes_conjuntos" class="m-0 font-weight-bold text-primary"></h6>
-                            <hr>
-                            <div id="formContainerConjunto">
-
-                            </div>
-                            <hr>
-                            <h6 id="informacoes_pecas" class="m-0 font-weight-bold text-primary">Peças Faltantes</h6>
-                            <hr>
-                            <div id="formContainerPecas">
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal histórico de levantamento -->
-            <div class="modal fade" id="modalHistoricoLevantamento" tabindex="-1" role="dialog"
-                aria-labelledby="modalHistoricoLevantamentoLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="TittleModalDuplicarOP">Histórico de levantamento</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body" style="max-height: 700px; overflow-y: auto;">
-                            <div class="row mb-3">
-                                <div class="col-sm-2 col-sm-6 mb-3">
-                                    <label for="dataSolicitacaoLevantamento">Data da carga</label>
-                                    <input class="form-control" type="date" id="dataSolicitacaoLevantamento">
-                                </div>
-                                <div class="col-sm-2 col-sm-6 mb-3">
-                                    <label for="celulaSolicitacaoLevantamento">Célula</label>
-                                    <input class="form-control" type="text" id="celulaSolicitacaoLevantamento">
-                                    <ul class="lista-celulaHistorico" style="display: none;">
-                                </div>
-                                <div class="col-sm-2 col-sm-6 mb-3">
-                                    <label for="matPrimaSolicitacaoLevantamento">Mat. Prima</label>
-                                    <input class="form-control" type="text" id="matPrimaSolicitacaoLevantamento">
-                                    <ul class="lista-mpHistorico" style="display: none;">
-                                </div>
-                                <div class="col-sm-2 col-sm-6 mb-3">
-                                    <label for="conjuntoSolicitacaoLevantamento">Conjunto</label>
-                                    <input class="form-control" type="text" id="conjuntoSolicitacaoLevantamento">
-                                    <ul class="lista-conjuntoHistorico" style="display: none;">
-                                </div>
-                                <div class="col-sm-2 col-sm-6 mb-3">
-                                    <label for="pecaSolicitacaoLevantamento">Peça</label>
-                                    <input class="form-control" type="text" id="pecaSolicitacaoLevantamento">
-                                    <ul class="lista-pecaHistorico" style="display: none;">
-                                </div>
-
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-sm-2 align-self-end">
-                                    <button class="btn btn-primary" id="btnFiltraHistorico">Filtrar</button>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Célula</th>
-                                            <th scope="col">Conjunto</th>
-                                            <th scope="col">Peça</th>
-                                            <th scope="col">Descrição</th>
-                                            <th scope="col">Quantidade</th>
-                                            <th scope="col">Mat.prima</th>
-                                            <th scope="col">Obs</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="bodyTableHistorico">
-
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <td colspan="9">
-                                                <nav aria-label="Page navigation example">
-                                                    <ul class="pagination justify-content-end" id="paginationHistorico">
-                                                        <!-- Os números das páginas e os botões de navegação serão inseridos aqui dinamicamente -->
-                                                    </ul>
-                                                </nav>
-                                            </td>
-                                        </tr>
-                                    </tfoot>
-
-                                </table>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
         <div class="loading" id="loading" style="display: none;">
@@ -314,12 +117,14 @@
 
     <!-- Script tabela JQuery -->
 
-    <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="static/js/resumo-producao/consumo-reuniao-carreta/reuniao-consulta-carreta.js"></script>
+    <script src="static/js/resumo-producao/consumo-reuniao-carreta/funcoes_consulta.js"></script>
+    <!-- <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="static/js/demo/datatables-demo.js"></script>
     <script src="static/js/resumo-producao/modal_faltando_peca.js"></script>
     <script src="static/js/resumo-producao/resumo.js"></script>
     <script src="static/js/resumo-producao/filtros_resumo.js"></script>
-    <script src="static/js/resumo-producao/baixar-resumo.js"></script>
+    <script src="static/js/resumo-producao/baixar-resumo.js"></script> -->
 
     {% endblock %}
