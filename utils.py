@@ -212,13 +212,13 @@ for processo, faltantes in resultado.items():
 
 import pandas as pd
 
-def buscar_necessidade(df_agrupado):
+def buscar_necessidade(df_agrupado_carretas):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor()
 
     # Transformar as carretas em uma lista para o WHERE IN
-    carretas = tuple(df_agrupado['carreta'].drop_duplicates())
+    carretas = tuple(df_agrupado_carretas['carreta'].drop_duplicates())
 
     # Certifique-se de que a lista tem ao menos 2 itens, caso contrário o SQL terá erro de sintaxe
     if len(carretas) == 1:
@@ -233,7 +233,7 @@ def buscar_necessidade(df_agrupado):
 
     necessidade = cur.fetchall()
     df_necessidade = pd.DataFrame(necessidade, columns=['carreta', 'conjunto', 'processo', 'qt_conjunto'])
-    df_necessidade = df_necessidade.merge(df_agrupado, how='left', on='carreta')
+    df_necessidade = df_necessidade.merge(df_agrupado_carretas, how='left', on='carreta')
     df_necessidade['necessidade_total'] = df_necessidade['qt_conjunto'] * df_necessidade['quantidade']
     df_necessidade = df_necessidade[['carreta','conjunto','processo','necessidade_total']]
 
@@ -242,31 +242,29 @@ def buscar_necessidade(df_agrupado):
 df_consumido = consulta_consumo_carretas()
 
 # Trazer através do botão de "simular"
-df_carretas = pd.DataFrame({'id':[0,1,2],
-                            'data':['2024-09-05','2024-09-05','2024-09-05'],
-                            'carreta':['F4 SS RS/RS A45 M23','F4 SS RS/RS A45 M23','CBHM5000 GR SS RD M17'],
-                            'quantidade':[1,1,1],
-                            'id_carreta':['A-41493/0824','A-41494/0824','T-25324/0724'],
-                            # Criar colunas abaixo
-                            'Intermed.':['','',''],
-                            'Traseira':['','',''],
-                            'Plataforma':['','',''],
-                            'Chassi':['','',''],
-                            'Macaco':['','',''],
-                            'Fueiro':['','',''],
-                            'Dianteira':['','',''],
-                            'Lateral':['','',''],
-                            'Eixo':['','',''],
-                            'Içamento':['','','']
-                            })
+df_carretas = pd.DataFrame({
+    'id': [0, 1, 2, 3, 4, 5],
+    'data': ['2024-09-05', '2024-09-05', '2024-09-05', '2024-09-06', '2024-09-06', '2024-09-06'],
+    'carreta': ['F4 SS RS/RS A45 M23', 'F4 SS RS/RS A45 M23', 'CBHM5000 GR SS RD M17', 'F4 SS RS/RS A45 M23', 'F4 SS RS/RS A45 M23', 'CBHM5000 GR SS RD M17'],
+    'quantidade': [1, 1, 1, 1, 1, 1],
+    'id_carreta': ['A-41493/0824', 'A-41494/0824', 'T-25324/0724', 'teste', 'teste2', 'teste3'],
+    'Intermed.': ['', '', '', '', '', ''],
+    'Traseira': ['', '', '', '', '', ''],
+    'Plataforma': ['', '', '', '', '', ''],
+    'Chassi': ['', '', '', '', '', ''],
+    'Macaco': ['', '', '', '', '', ''],
+    'Fueiro': ['', '', '', '', '', ''],
+    'Dianteira': ['', '', '', '', '', ''],
+    'Lateral': ['', '', '', '', '', ''],
+    'Eixo': ['', '', '', '', '', ''],
+    'Içamento': ['', '', '', '', '', '']
+})
 
-df_agrupado = df_carretas.groupby('carreta').agg({'quantidade': 'sum'}).reset_index()
+df_agrupado_carretas = df_carretas.groupby('carreta').agg({'quantidade': 'sum'}).reset_index()
 
-df_necessidade = buscar_necessidade(df_agrupado)
+df_necessidade = buscar_necessidade(df_agrupado_carretas)
 
 df_estoque = consulta_saldo_estoque()
-
-import math
 
 def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido):
     saldo_estoque_acumulado = df_estoque.set_index('conjunto')['saldo'].to_dict()
@@ -274,8 +272,10 @@ def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque,
 
     # Iterar por cada carreta no DataFrame
     for index, row_carreta in df_carretas.iterrows():
+        
         faltas_por_processo = {}
 
+        # Quantidade de carretas iguais
         ajuste_quantidade = df_agrupado_carretas[df_agrupado_carretas['carreta'] == row_carreta['carreta']]['quantidade'].iloc[0]
 
         # Filtrar os conjuntos usados pela carreta atual
@@ -288,16 +288,19 @@ def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque,
         for index, row_necessidade in df_necessidade_carreta.iterrows():
             conjunto = row_necessidade['conjunto']
             processo = row_necessidade['processo']
-            necessidade = row_necessidade['necessidade_total']
+            necessidade = row_necessidade['necessidade_total']/ajuste_quantidade
 
             # Verificar se já foi consumido por essa carreta
             consumido = df_consumido_carreta[df_consumido_carreta['conjunto'] == conjunto]['quantidade_consumida'].sum()
 
-            # Subtrair o que já foi consumido
-            necessidade_restante = necessidade - consumido
+            # Subtrair o que já foi consumido da necessidade
+            if consumido >= necessidade:
+                necessidade_restante = 0
+            else:
+                necessidade_restante = necessidade - consumido
 
             # Se a necessidade já foi atendida pelo consumo anterior, não calcular déficit
-            if necessidade_restante <= 0:
+            if necessidade_restante == 0:
                 resultado = f"Já consumido - {conjunto}"
             else:
                 # Garantir que o conjunto está no estoque (saldo inicializado com zero, se não existir)
@@ -317,8 +320,8 @@ def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque,
                     saldo_estoque_acumulado[conjunto] -= necessidade_restante  # Atualiza o saldo acumulado, permitindo saldo negativo
                     
                     # Arredondar para baixo, não mostrar frações
-                    falta_ajustada = max(0, math.floor(falta / ajuste_quantidade))
-                    resultado = f"Falta {falta_ajustada} - {conjunto}"
+                    # falta_ajustada = falta
+                    resultado = f"Falta {falta} - {conjunto}"
 
             # Registrar o resultado no processo correspondente
             if processo not in faltas_por_processo:
@@ -332,10 +335,12 @@ def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque,
     return resultado_por_carreta, saldo_estoque_acumulado
 
 # Executar a simulação com o estoque consumido
-resultado_carreta_deficit_progresso, saldo_final_deficit_progresso = simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque, df_agrupado, df_consumido)
+resultado_carreta_deficit_progresso, saldo_final_deficit_progresso = simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
 
 # Adicionar as faltas acumuladas ao DataFrame de carretas, apenas para os processos consumidos
 for processo in df_necessidade['processo'].unique():
     df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_deficit_progresso]
 
+
+print(df_carretas)
     
