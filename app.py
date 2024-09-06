@@ -2228,7 +2228,6 @@ def api_pecas_interrompida_montagem():
 
     data_request = request.json
 
-    print(data_request)
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2278,7 +2277,6 @@ def api_pecas_retornou_montagem():
 
     data_request = request.json
 
-    print(data_request)
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
