@@ -423,8 +423,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mb-2">
-                        <div class="col-6 mb-2">
+                    <div class="row mb-2 align-items-end">
+                        <div class="col-4 mb-2">
                             <div class="form-floating mb-3">
                                 <label for="inputQuantidadePlanejada">Quantidade
                                     planejada</label>
@@ -434,12 +434,20 @@
                                 <!-- Quantidade -->
                             </div>
                         </div>
-                        <div class="col-6 mb-2">
+                        <div class="col-4 mb-2">
                             <div class="form-floating mb-3">
                                 <label for="inputQuantidadeRealizada">Quantidade
                                     realizada</label>
                                 <input class="form-control" type="number"
                                     id="inputQuantidadeRealizada">
+                                <!-- Quantidade -->
+                            </div>
+                        </div>
+                        <div class="col-4 mb-2">
+                            <div class="form-floating mb-3">
+                                <label for="">Quantidade morta</label>
+                                <input class="form-control" type="number"
+                                    id="">
                                 <!-- Quantidade -->
                             </div>
                         </div>
@@ -513,7 +521,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="d-flex justify-content-between modal-footer">
+                    <button id="btnFinalizarOrdemParcial" type="button"
+                        class="btn btn-primary">Confirmar Parcialmente</button>
                     <button id="btnFinalizarOrdem" type="button"
                         class="btn btn-primary">Confirmar</button>
                 </div>
@@ -547,6 +557,35 @@
                         class="btn btn-success">Sim</button>
                     <button id="desistirInicioProducao" type="button"
                         class="btn btn-danger">Não</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalConfirmarApontamentoFinalizado" tabindex="-1"
+        role="dialog"
+        aria-labelledby="modalConfirmarApontamentoFinalizadoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmarApontamento">Confirmar Apontamento</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="labelFinalizar"></p>
+                    <p id="pecaTextoFinalizar"></p>
+                    <!-- <input id="retornarPecaProducao" style="display: none;"> -->
+                </div>
+                <div class="modal-footer">
+                    <button id="desistirFimApontamento" type="button"
+                        class="btn btn-danger">Não</button>
+                    <button style="display: none;" id="confimarFimApontamentoParcial" type="button"
+                        class="btn btn-success">Sim</button>
+                    <button style="display: none;" id="confimarFimApontamento" type="button"
+                        class="btn btn-success">Sim</button>
                 </div>
             </div>
         </div>
@@ -614,6 +653,7 @@
     <script src="static/js/estamparia/adicionar-mais-planejamentos.js"></script>
     <script src="/static/js/estamparia/input-file.js"></script>
     <script src="/static/js/estamparia/enviar-arquivo.js"></script>
+    <script src="/static/js/estamparia/finalizar-apontamento/finalizar-apontamento-parcial.js"></script>
 
     <!-- Scripts para iniciar tabela -->
 
@@ -1592,9 +1632,8 @@
     <script>
         $(document).ready(function () {
             $('#btnFinalizarOrdem').on('click', function () {
-
                 pecaFinalizada = $('#nomePecaApontada').val();
-                quantidadePlanejada = $('#inputQuantidadePlanejada').val();
+                quantidadePlanejada = parseInt($('#inputQuantidadePlanejada').val());
                 codificacao = $('#codificacaoOrdem').val();
                 celula = $('#celulaOrdem').val();
                 textAreaObservacao = $('#textAreaObservacao_').val();
@@ -1611,6 +1650,43 @@
                     descricao = '';
                 }
 
+                if (inputQuantidadeRealizada === '') {
+                    showAndHideAlert('Por favor informe a quantidade.', 2000);
+                    return;
+                };
+
+                if (parseInt($('#inputQuantidadeRealizada').val()) < 0 || parseInt($('#inputQuantidadeRealizada').val()) > quantidadePlanejada ) {
+                    showAndHideAlert('Por favor informe a quantidade correta.', 2000);
+                    return;
+                };
+
+                if (operadorInputModal_1 === '') {
+                    showAndHideAlert('Por favor informar o operador.', 2000);
+                    return;
+                }
+
+                $('#confimarFimApontamentoParcial').css('display','none');
+                $('#confimarFimApontamento').css('display','block');
+                $('#modalExecucaoApontamento').modal('hide');
+                $('#modalConfirmarApontamentoFinalizado').modal('show');
+                
+                $("#pecaTextoFinalizar").text('Deseja finalizar a peça '+pecaFinalizada)
+                $("#confirmarApontamento").text('Confirmar Apontamento')
+            });
+
+            $('#confimarFimApontamento').on('click', function () {
+                pecaFinalizada = $('#nomePecaApontada').val();
+                quantidadePlanejada = $('#inputQuantidadePlanejada').val();
+                codificacao = $('#codificacaoOrdem').val();
+                celula = $('#celulaOrdem').val();
+                textAreaObservacao = $('#textAreaObservacao_').val();
+                dataHoraInicio = $('#dataHoraInicio').val();
+                operadorInputModal_1 = $('#operadorInputModal_1').val();
+                inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
+                dataCarga = $('#dataCargaFinalizacao').val();
+                idPecaEmProcesso = $('#idPecaEmProcesso').val();
+                origem = $('#origemPecaEmProcesso').val();
+            
                 dados = {
                     codigo: pecaFinalizada.split(' - ')[0],
                     descricao: descricao,
@@ -1623,21 +1699,9 @@
                     inputQuantidadeRealizada: inputQuantidadeRealizada,
                     dataCarga: formatarData(dataCarga),
                     idPecaEmProcesso: idPecaEmProcesso,
-                    origem: origem
+                    origem: origem,
+                    parcial:""
                 }
-
-                if (inputQuantidadeRealizada === '') {
-                    showAndHideAlert('Por favor informe a quantidade.', 2000);
-                    return;
-                };
-
-                if (operadorInputModal_1 === '') {
-                    showAndHideAlert('Por favor informar o operador.', 2000);
-                    return;
-                }
-
-                showAndHideSuccessAlert('Enviado!', 2000);
-                $('#modalExecucaoApontamento').modal('hide');
 
                 $.ajax({
                     type: 'POST',
@@ -1649,10 +1713,12 @@
                         showAndHideSuccessAlert('Salvo.', 2000);
                         chamarAPI();
                         chamarAPIInterrompidas();
+                        $('#modalConfirmarApontamentoFinalizado').modal('hide');
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
                         hideLoading();
+                        $('#modalConfirmarApontamentoFinalizado').modal('hide');
                     }
                 });
             });

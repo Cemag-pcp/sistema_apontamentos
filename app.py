@@ -174,9 +174,11 @@ def dados_planejamento_estamparia():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = """select * from pcp.planejamento_estamparia pe 
-            left join pcp.tb_pecas_em_processo pp on pe.chave = pp.chave
-            where pp.status isnull"""
+    sql = """SELECT * 
+            FROM pcp.planejamento_estamparia pe 
+            LEFT JOIN pcp.tb_pecas_em_processo pp ON pe.chave = pp.chave
+            WHERE pp.status IS NULL OR pe.parcial IS NOT NULL;
+            """
 
     cur.execute(sql)
     data = cur.fetchall()
@@ -233,6 +235,13 @@ def dados_historico_pintura():
 
 def formatar_data(data):
     return data.strftime('%d/%m/%Y')
+
+def enviar_parcialmenete(chave,cur,conn):
+    
+    query_update = """update pcp.planejamento_estamparia set parcial = 'Parcial' where chave = %s"""
+
+    cur.execute(query_update, (chave,))
+    conn.commit()
 
 def inserir_arquivos_banco_dados(df, data_planejada):
     try:
@@ -2563,8 +2572,6 @@ def finalizar_peca_em_processo_estamparia():
 
     agora = datetime.now()
     query_update = """update pcp.tb_pecas_em_processo set data_fim = %s where chave = %s"""
-    cur.execute(query_update, (agora, data['idPecaEmProcesso']))
-    conn.commit()
 
     id = data['idPecaEmProcesso']
     codigo = data['codigo']
@@ -2580,6 +2587,13 @@ def finalizar_peca_em_processo_estamparia():
     dataCarga = data['dataCarga']
     data_finalizacao = datetime.now().date().strftime("%Y-%m-%d")
     origem = data['origem']
+    parcial = data['parcial']
+
+    print(parcial)
+    print(parcial != "")
+
+    if parcial != "":
+        enviar_parcialmenete(chave,cur,conn)
 
     query = """ 
             INSERT INTO pcp.ordens_estamparia (celula,codigo,descricao,qt_apontada,data_planejamento,data_finalizacao,operador,observacao,chave,origem,data_hora_atual)
@@ -2589,6 +2603,9 @@ def finalizar_peca_em_processo_estamparia():
     cur.execute(query, (celula, codigo, descricao, inputQuantidadeRealizada, dataCarga,
                 data_finalizacao, operadorInputModal_1, textAreaObservacao, chave, origem, dataHoraInicio))
 
+    conn.commit()
+
+    cur.execute(query_update, (agora, data['idPecaEmProcesso']))
     conn.commit()
 
     trazendo_id = """SELECT id
