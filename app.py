@@ -24,6 +24,7 @@ from werkzeug.utils import secure_filename
 import shortuuid
 from google.oauth2 import service_account
 from dotenv import load_dotenv
+from utils import *
 
 async_mode = None
 warnings.filterwarnings('ignore')
@@ -612,8 +613,6 @@ def tela_estamparia():
     """
     Rota para tela de estamparia
     """
-
-    
 
     return render_template('apontamento-estamparia.html') #async_mode=socketio.async_mode)
 
@@ -2124,7 +2123,6 @@ def api_consulta_pecas_interrompidas_montagem():
 
     return jsonify(consulta)
 
-
 @app.route("/consulta-id-em-processo", methods=['GET'])
 def consulta_id_em_processo_montagem():
     """
@@ -2148,12 +2146,13 @@ def consulta_id_em_processo_montagem():
 
     return jsonify(consulta)
 
-
 @app.route("/finalizar-peca-em-processo", methods=['POST'])
 def finalizar_peca_em_processo_montagem():
+    
     """
     Finalizar ordem de serviço
     """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2180,7 +2179,7 @@ def finalizar_peca_em_processo_montagem():
     data_finalizacao = datetime.now().date().strftime("%Y-%m-%d")
     origem = data['origem']
 
-    print(textAreaObservacao)
+    # print(textAreaObservacao)
 
     query = """ 
             INSERT INTO pcp.ordens_montagem (celula,codigo,peca,qt_apontada,data_carga,data_finalizacao,operador,observacao,codificacao,origem,data_hora_inicio)
@@ -2209,6 +2208,15 @@ def finalizar_peca_em_processo_montagem():
     cur.execute(query_inspecao, (last_id_montagem, data_finalizacao, codigo, descricao, inputQuantidadeRealizada, celula))
 
     conn.commit()
+    
+    itens_json = {
+                'codigo':codigo,
+                'descricao':descricao,
+                'quantidade':inputQuantidadeRealizada,
+                'almoxarifado':'Almox Mont Carretas'
+                }
+
+    atualizar_saldo(itens_json)
 
     return 'sucess'
 
@@ -2220,7 +2228,6 @@ def api_pecas_interrompida_montagem():
 
     data_request = request.json
 
-    print(data_request)
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2262,7 +2269,6 @@ def api_pecas_interrompida_montagem():
 
     return 'sucess'
 
-
 @app.route("/api/pecas-retornou/montagem", methods=['POST'])
 def api_pecas_retornou_montagem():
     """
@@ -2271,7 +2277,6 @@ def api_pecas_retornou_montagem():
 
     data_request = request.json
 
-    print(data_request)
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -2309,7 +2314,6 @@ def api_pecas_retornou_montagem():
     conn.commit()
 
     return 'sucess'
-
 
 @app.route("/api/pecas-em-processo/estamparia", methods=['POST'])
 def api_pecas_em_processo_estamparia():
@@ -2352,7 +2356,6 @@ def api_pecas_em_processo_estamparia():
 
     return 'sucess'
 
-
 @app.route("/api/pecas-em-processo-planejamento/estamparia", methods=['POST'])
 def api_pecas_em_processo_planejamento_estamparia():
     """
@@ -2390,7 +2393,6 @@ def api_pecas_em_processo_planejamento_estamparia():
     conn.commit()
 
     return 'sucess'
-
 
 @app.route("/api/planejar-pecas/estamparia", methods=['POST'])
 def planejar_pecas_estamparia():
@@ -2524,7 +2526,6 @@ def api_consulta_pecas_em_processo_estamparia():
 
     return jsonify(consulta)
 
-
 @app.route("/consulta-id-em-processo/estamparia", methods=['GET'])
 def consulta_id_em_processo_estamparia():
     """
@@ -2548,7 +2549,6 @@ def consulta_id_em_processo_estamparia():
 
     return jsonify(consulta)
 
-
 @app.route("/finalizar-peca-em-processo/estamparia", methods=['POST'])
 def finalizar_peca_em_processo_estamparia():
     """
@@ -2560,8 +2560,6 @@ def finalizar_peca_em_processo_estamparia():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     data = request.get_json()
-
-    print(data)
 
     agora = datetime.now()
     query_update = """update pcp.tb_pecas_em_processo set data_fim = %s where chave = %s"""
@@ -2613,7 +2611,6 @@ def finalizar_peca_em_processo_estamparia():
 
     return 'sucess'
 
-
 @app.route("/api/pecas-interrompida/estamparia", methods=['POST'])
 def api_pecas_interrompida_estamparia():
     """
@@ -2664,7 +2661,6 @@ def api_pecas_interrompida_estamparia():
 
     return 'sucess'
 
-
 @app.route("/api/consulta-pecas-interrompidas/estamparia", methods=['GET'])
 def api_consulta_pecas_interrompidas_estamparia():
     """
@@ -2683,7 +2679,6 @@ def api_consulta_pecas_interrompidas_estamparia():
     consulta = cur.fetchall()
 
     return jsonify(consulta)
-
 
 @app.route("/api/pecas-retornou/estamparia", methods=['POST'])
 def api_pecas_retornou_estamparia():
@@ -3097,8 +3092,6 @@ def planejamento_corte():
         'data': data,
         'total_pages': total_pages
     })
-
-
 
 @app.route("/api/pecas-interrompida/corte", methods=['POST'])
 def api_pecas_interrompida_corte():
