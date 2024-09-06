@@ -2216,7 +2216,7 @@ def finalizar_peca_em_processo_montagem():
                 'almoxarifado':'Almox Mont Carretas'
                 }
 
-    atualizar_saldo(itens_json)
+    # atualizar_saldo(itens_json)
 
     return 'sucess'
 
