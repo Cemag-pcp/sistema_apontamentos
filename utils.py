@@ -266,14 +266,97 @@ df_necessidade = buscar_necessidade(df_agrupado_carretas)
 
 df_estoque = consulta_saldo_estoque()
 
-def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido):
-    saldo_estoque_acumulado = df_estoque.set_index('conjunto')['saldo'].to_dict()
+# def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido):
+#     saldo_estoque_acumulado = df_estoque.set_index('conjunto')['saldo'].to_dict()
+#     resultado_por_carreta = []
+
+#     # Iterar por cada carreta no DataFrame
+#     for index, row_carreta in df_carretas.iterrows():
+        
+#         faltas_por_processo = {}
+
+#         # Quantidade de carretas iguais
+#         ajuste_quantidade = df_agrupado_carretas[df_agrupado_carretas['carreta'] == row_carreta['carreta']]['quantidade'].iloc[0]
+
+#         # Filtrar os conjuntos usados pela carreta atual
+#         df_necessidade_carreta = df_necessidade[df_necessidade['carreta'] == row_carreta['carreta']]
+
+#         # Verificar o que já foi consumido por essa carreta
+#         df_consumido_carreta = df_consumido[df_consumido['id_carreta'] == row_carreta['id_carreta']]
+
+#         # Processar cada conjunto da carreta
+#         for index, row_necessidade in df_necessidade_carreta.iterrows():
+#             conjunto = row_necessidade['conjunto']
+#             processo = row_necessidade['processo']
+#             necessidade = row_necessidade['necessidade_total']/ajuste_quantidade
+
+#             # Verificar se já foi consumido por essa carreta
+#             consumido = df_consumido_carreta[df_consumido_carreta['conjunto'] == conjunto]['quantidade_consumida'].sum()
+
+#             # Subtrair o que já foi consumido da necessidade
+#             if consumido >= necessidade:
+#                 necessidade_restante = 0
+#             else:
+#                 necessidade_restante = necessidade - consumido
+
+#             # Se a necessidade já foi atendida pelo consumo anterior, não calcular déficit
+#             if necessidade_restante == 0:
+#                 resultado = f"Já consumido - {conjunto}"
+#             else:
+#                 # Garantir que o conjunto está no estoque (saldo inicializado com zero, se não existir)
+#                 if conjunto not in saldo_estoque_acumulado:
+#                     saldo_estoque_acumulado[conjunto] = 0
+
+#                 saldo_estoque = saldo_estoque_acumulado[conjunto]
+
+#                 # Verificar o saldo disponível e calcular o déficit progressivo
+#                 if saldo_estoque >= necessidade_restante:
+#                     # Consumo completo, saldo suficiente
+#                     saldo_estoque_acumulado[conjunto] -= necessidade_restante
+#                     resultado = f"Necessidade em estoque - {necessidade_restante} - {conjunto}"
+#                 else:
+#                     # Consumo parcial ou déficit
+#                     falta = necessidade_restante - saldo_estoque
+#                     saldo_estoque_acumulado[conjunto] -= necessidade_restante  # Atualiza o saldo acumulado, permitindo saldo negativo
+                    
+#                     # Arredondar para baixo, não mostrar frações
+#                     # falta_ajustada = falta
+#                     resultado = f"Falta {falta} - {conjunto}"
+
+#             # Registrar o resultado no processo correspondente
+#             if processo not in faltas_por_processo:
+#                 faltas_por_processo[processo] = []
+#             faltas_por_processo[processo].append(resultado)
+
+#         # Concatenar faltas por processo e registrar apenas processos consumidos
+#         faltas_concatenadas = {proc: '\n'.join(faltas_por_processo.get(proc, [])) for proc in faltas_por_processo}
+#         resultado_por_carreta.append(faltas_concatenadas)
+
+#     return resultado_por_carreta, saldo_estoque_acumulado
+
+# # Executar a simulação com o estoque consumido
+# resultado_carreta_deficit_progresso, saldo_final_deficit_progresso = simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
+
+# # Adicionar as faltas acumuladas ao DataFrame de carretas, apenas para os processos consumidos
+# for processo in df_necessidade['processo'].unique():
+#     df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_deficit_progresso]
+
+# print(df_carretas)
+    
+import streamlit as st
+
+############################################
+
+def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido):
     resultado_por_carreta = []
 
     # Iterar por cada carreta no DataFrame
     for index, row_carreta in df_carretas.iterrows():
         
         faltas_por_processo = {}
+
+        # Criar uma cópia do saldo do estoque para tratar cada carreta de forma independente
+        saldo_estoque = df_estoque.set_index('conjunto')['saldo'].to_dict()
 
         # Quantidade de carretas iguais
         ajuste_quantidade = df_agrupado_carretas[df_agrupado_carretas['carreta'] == row_carreta['carreta']]['quantidade'].iloc[0]
@@ -288,7 +371,7 @@ def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque,
         for index, row_necessidade in df_necessidade_carreta.iterrows():
             conjunto = row_necessidade['conjunto']
             processo = row_necessidade['processo']
-            necessidade = row_necessidade['necessidade_total']/ajuste_quantidade
+            necessidade = row_necessidade['necessidade_total'] / ajuste_quantidade
 
             # Verificar se já foi consumido por essa carreta
             consumido = df_consumido_carreta[df_consumido_carreta['conjunto'] == conjunto]['quantidade_consumida'].sum()
@@ -303,24 +386,16 @@ def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque,
             if necessidade_restante == 0:
                 resultado = f"Já consumido - {conjunto}"
             else:
-                # Garantir que o conjunto está no estoque (saldo inicializado com zero, se não existir)
-                if conjunto not in saldo_estoque_acumulado:
-                    saldo_estoque_acumulado[conjunto] = 0
-
-                saldo_estoque = saldo_estoque_acumulado[conjunto]
+                # Garantir que o conjunto está no estoque
+                saldo_atual = saldo_estoque.get(conjunto, 0)
 
                 # Verificar o saldo disponível e calcular o déficit progressivo
-                if saldo_estoque >= necessidade_restante:
+                if saldo_atual >= necessidade_restante:
                     # Consumo completo, saldo suficiente
-                    saldo_estoque_acumulado[conjunto] -= necessidade_restante
-                    resultado = f"OK - Consumo de {necessidade_restante} unidades do conjunto {conjunto}"
+                    resultado = f"Necessidade em estoque - {necessidade_restante} - {conjunto}"
                 else:
                     # Consumo parcial ou déficit
-                    falta = necessidade_restante - saldo_estoque
-                    saldo_estoque_acumulado[conjunto] -= necessidade_restante  # Atualiza o saldo acumulado, permitindo saldo negativo
-                    
-                    # Arredondar para baixo, não mostrar frações
-                    # falta_ajustada = falta
+                    falta = necessidade_restante - saldo_atual
                     resultado = f"Falta {falta} - {conjunto}"
 
             # Registrar o resultado no processo correspondente
@@ -332,15 +407,19 @@ def simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque,
         faltas_concatenadas = {proc: '\n'.join(faltas_por_processo.get(proc, [])) for proc in faltas_por_processo}
         resultado_por_carreta.append(faltas_concatenadas)
 
-    return resultado_por_carreta, saldo_estoque_acumulado
+    return resultado_por_carreta
 
-# Executar a simulação com o estoque consumido
-resultado_carreta_deficit_progresso, saldo_final_deficit_progresso = simular_consumo_acumulado_progresso(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
+# Executar a simulação sem acumular déficit de estoque
+resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
 
-# Adicionar as faltas acumuladas ao DataFrame de carretas, apenas para os processos consumidos
+# Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
 for processo in df_necessidade['processo'].unique():
-    df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_deficit_progresso]
+    df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_unitario]
 
+st.write("Sem criar deficit de estoque (Apenas para montagem)")
+st.dataframe(df_carretas)
 
-print(df_carretas)
-    
+# resumo completo
+
+# Mostrar as peças que faltam por carreta conjunto de forma agrupada
+
