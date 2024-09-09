@@ -4573,19 +4573,25 @@ def saldo_recurso_levantamento():
     
     return base_saldo_recurso
 
-def carretas_planilha_carga(datainicio, datafim):
+def carretas_planilha_carga(datainicio, datafim,consumo=False):
 
     data = buscar_dados()
 
     filtrar_data = data[(data['PED_PREVISAOEMISSAODOC'] >= pd.to_datetime(datainicio)) &
                          (data['PED_PREVISAOEMISSAODOC'] <= pd.to_datetime(datafim))]
 
-    filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE']]
+    if consumo:
+        filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE','PED_NUMEROSERIE','PED_NUCLEO.CODIGO']]
+    else:
+        filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE']]
 
     filtrar_data_carreta['PED_QUANTIDADE'] = filtrar_data_carreta['PED_QUANTIDADE'].apply(lambda x: x.replace('.',"").replace(",","."))
     filtrar_data_carreta['PED_QUANTIDADE'] = filtrar_data_carreta['PED_QUANTIDADE'].astype(float)
 
-    result = filtrar_data_carreta.groupby(['PED_PREVISAOEMISSAODOC', 'Carreta Trat'], as_index=False)['PED_QUANTIDADE'].sum()
+    if not consumo:
+        result = filtrar_data_carreta.groupby(['PED_PREVISAOEMISSAODOC', 'Carreta Trat'], as_index=False)['PED_QUANTIDADE'].sum()
+    else:
+        result = filtrar_data_carreta
     
     dados_lista = result[['Carreta Trat']].values.tolist()
 
@@ -4617,10 +4623,111 @@ def verificar_status(row):
     else:
         return f'{setor}: Aguardando'
 
+@app.route('/reuniao-consulta-carreta')
+def reuniao_consuta_carreta():
+
+    return render_template('reuniao-consulta-carreta.html')
+
 @app.route('/reuniao')
 def tela_reuniao():
 
     return render_template('reuniao.html')
+
+def verificarConjuntosFaltantes(id,carreta):
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query_conjuntos_faltantes = """SELECT DISTINCT tb2.conjunto, tb2.processo, tb2.conjunto_desc, tb2.qt_conjunto
+        FROM pcp.tb_base_carretas_explodidas tb2
+        LEFT JOIN pcp.consumo_carretas tb1
+            ON tb1.conjunto = tb2.conjunto
+            AND tb1.carreta = tb2.carreta
+            AND tb1.id_carreta = %s  -- Adicionando o filtro aqui
+        WHERE tb2.carreta = %s
+        AND tb1.conjunto IS NULL;  
+    """
+
+    cur.execute(query_conjuntos_faltantes,(id,carreta))
+    conjuntos_faltantes = cur.fetchall()
+
+    return
+
+@app.route('/consultar-carreta-reuniao', methods=['POST'])
+def consuta_carreta_reuniao():
+    data = request.get_json()
+
+    data_inicial = data.get('data_inicial')
+    data_final = data.get('data_final')
+
+    dados_explodido, carretas = carretas_planilha_carga(data_inicial, data_final, True)
+
+    dados_explodido = dados_explodido[dados_explodido['PED_NUCLEO.CODIGO'] == 'Almox Expedição']
+
+    dados_explodido = dados_explodido[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE','PED_NUMEROSERIE']]
+
+    dados_explodido['PED_PREVISAOEMISSAODOC'] = pd.to_datetime(dados_explodido['PED_PREVISAOEMISSAODOC'])
+
+    # Dicionário para contar as ocorrências de números de série
+    serie_counter = {}
+    # Lista para armazenar as novas linhas duplicadas
+    linhas_expandidas = []
+
+    # Iterando sobre o DataFrame original
+    for i, row in dados_explodido.iterrows():
+        numero_serie = row['PED_NUMEROSERIE']
+        quantidade = int(row['PED_QUANTIDADE'])
+
+        # Contabilizando as ocorrências do número de série
+        if numero_serie in serie_counter:
+            serie_counter[numero_serie] += 1
+        else:
+            serie_counter[numero_serie] = 1
+
+        # Se a quantidade for maior que 1, duplicar a linha
+        for quantidade_index in range(1, quantidade + 1):
+            # Copiando a linha e ajustando o número de série
+            nova_linha = row.copy()
+
+            # Adiciona sufixo apenas se houver mais de uma ocorrência de 'numero_serie'
+            if numero_serie != '' and (serie_counter[numero_serie] > 1 or quantidade > 1):
+                nova_linha['PED_NUMEROSERIE'] = f"{numero_serie}-{quantidade_index}"
+            else:
+                nova_linha['PED_NUMEROSERIE'] = numero_serie
+
+            # Definir a quantidade para 1 em cada linha duplicada
+            nova_linha['PED_QUANTIDADE'] = 1
+
+            # Adiciona a nova linha à lista de linhas expandidas
+            linhas_expandidas.append(nova_linha)
+
+    # Criando um novo DataFrame com as linhas expandidas
+    columns_list = ['Chassi','Plataforma','Içamento','Tanque','Fueiro','Intermed.']
+
+    # Definir as colunas no DF com columns_list
+    # Passar por linha a linha, filtrando carreta e id e verificando o que falta por carreta e id 
+    # Preencher nas linhas o que falta e caso não falte colocar um hífen para dizer que está OK
+
+    dados_expandidos_df = pd.DataFrame(linhas_expandidas)
+
+    dados_expandidos_df = dados_expandidos_df.sort_values(by=['PED_PREVISAOEMISSAODOC','Carreta Trat'], ascending=[True, True])
+    
+    print(dados_expandidos_df)
+
+    # Converter o novo DataFrame em uma lista de listas para serialização
+    dados_explodido_list = dados_expandidos_df.values.tolist()
+
+    return jsonify({'ImportarDados': dados_explodido_list})
+
+@app.route('/consumir-item', methods=['POST'])
+def consumir_item():
+    data = request.get_json()
+    numero_serie = data.get('numero_serie')
+
+    print(numero_serie)
+
+    return jsonify({"message":numero_serie})
 
 @app.route('/resumos-geral')
 def tabela_resumos():
@@ -4735,8 +4842,10 @@ def tabela_resumos():
         pintura_agrupada = df_pintura.groupby(['celula', 'codigo', 'data_carga'])[['qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum().reset_index()
 
         ##########################################
+
         df_final_com_codigos = carga_e_montagem.merge(pintura_agrupada, how='left', left_on=['data_carga','codigo_tratado'], right_on=['data_carga','codigo'])
         df_final_com_processos = df_final_com_codigos.groupby(['carreta','processo','data_carga','Qtd. Carretas'])[['qt_planejada_montagem','qt_apontada_montagem','qt_faltante_montagem','qt_planejada','qt_apontada_pintura','qt_faltante_pintura']].sum()
+        
         ##########################################
 
         # Lógica de status

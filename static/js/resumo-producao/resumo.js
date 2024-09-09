@@ -52,6 +52,7 @@ function getResumo() {
 
 document.addEventListener('DOMContentLoaded',function() {
     var botaoFiltrar = document.getElementById('filtrar_datas');
+    
     botaoFiltrar.addEventListener('click',function () {
         // document.getElementById('filtro_faltando_pecas').checked = false
         getResumo();
