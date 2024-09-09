@@ -8,6 +8,7 @@ $(document).ready(function () {
         dataHoraInicio = $('#dataHoraInicio').val();
         operadorInputModal_1 = $('#operadorInputModal_1').val();
         inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
+        inputQuantidadeMorta = $('#inputQuantidadeMorta').val();
         dataCarga = $('#dataCargaFinalizacao').val();
         idPecaEmProcesso = $('#idPecaEmProcesso').val();
         origem = $('#origemPecaEmProcesso').val();
@@ -18,29 +19,19 @@ $(document).ready(function () {
             descricao = '';
         }
 
-        dados = {
-            codigo: pecaFinalizada.split(' - ')[0],
-            descricao: descricao,
-            qtdePlanejada: quantidadePlanejada,
-            codificacao: codificacao,
-            celula: celula,
-            textAreaObservacao: textAreaObservacao,
-            dataHoraInicio: dataHoraInicio,
-            operadorInputModal_1: operadorInputModal_1,
-            inputQuantidadeRealizada: inputQuantidadeRealizada,
-            dataCarga: formatarData(dataCarga),
-            idPecaEmProcesso: idPecaEmProcesso,
-            origem: origem
-        }
-
-        if (inputQuantidadeRealizada === '') {
-            showAndHideAlert('Por favor informe a quantidade.', 2000);
+        if (inputQuantidadeRealizada === '' || inputQuantidadeMorta === '') {
+            showAndHideAlert('Por favor informe a quantidade realizada e a quantidade morta', 2000);
             return;
         };
 
 
-        if (parseInt($('#inputQuantidadeRealizada').val()) < 0 || parseInt($('#inputQuantidadeRealizada').val()) >= quantidadePlanejada ) {
-            showAndHideAlert('Por favor informe a quantidade correta.', 2000);
+        if (parseInt($('#inputQuantidadeRealizada').val()) < 0) {
+            showAndHideAlert('Por favor informe a quantidade correta de peças realizadas.', 2000);
+            return;
+        };
+
+        if (parseInt($('#inputQuantidadeMorta').val()) < 0) {
+            showAndHideAlert('Por favor informe a quantidade correta de peças mortas.', 2000);
             return;
         };
 
@@ -59,6 +50,8 @@ $(document).ready(function () {
     });
 
     $('#confimarFimApontamentoParcial').on('click', function () {
+        
+        showLoading();
 
         pecaFinalizada = $('#nomePecaApontada').val();
 
@@ -69,6 +62,7 @@ $(document).ready(function () {
         dataHoraInicio = $('#dataHoraInicio').val();
         operadorInputModal_1 = $('#operadorInputModal_1').val();
         inputQuantidadeRealizada = parseInt($('#inputQuantidadeRealizada').val());
+        inputQuantidadeMorta = parseInt($('#inputQuantidadeMorta').val());
         dataCarga = $('#dataCargaFinalizacao').val();
         idPecaEmProcesso = $('#idPecaEmProcesso').val();
         origem = $('#origemPecaEmProcesso').val();
@@ -85,6 +79,7 @@ $(document).ready(function () {
             dataHoraInicio: dataHoraInicio,
             operadorInputModal_1: operadorInputModal_1,
             inputQuantidadeRealizada: inputQuantidadeRealizada,
+            inputQuantidadeMorta:inputQuantidadeMorta,
             dataCarga: formatarData(dataCarga),
             idPecaEmProcesso: idPecaEmProcesso,
             origem: origem,
@@ -101,6 +96,7 @@ $(document).ready(function () {
                 showAndHideSuccessAlert('Salvo.', 2000);
                 chamarAPI();
                 chamarAPIInterrompidas();
+                updateTable();
                 $('#modalConfirmarApontamentoFinalizado').modal('hide');
             },
             error: function (error) {

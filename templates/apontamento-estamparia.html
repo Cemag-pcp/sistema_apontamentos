@@ -402,7 +402,7 @@
     <!-- Modal finalizar apontamento -->
     <div class="modal fade" id="modalExecucaoApontamento" tabindex="-1"
         role="dialog"
-        aria-labelledby="modalExecucaoApontamentoLabel" aria-hidden="true">
+        aria-labelledby="modalExecucaoApontamentoLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -426,8 +426,7 @@
                     <div class="row mb-2 align-items-end">
                         <div class="col-4 mb-2">
                             <div class="form-floating mb-3">
-                                <label for="inputQuantidadePlanejada">Quantidade
-                                    planejada</label>
+                                <label for="inputQuantidadePlanejada">Quantidade planejada</label>
                                 <input class="form-control" type="number"
                                     id="inputQuantidadePlanejada"
                                     readonly>
@@ -436,8 +435,7 @@
                         </div>
                         <div class="col-4 mb-2">
                             <div class="form-floating mb-3">
-                                <label for="inputQuantidadeRealizada">Quantidade
-                                    realizada</label>
+                                <label for="inputQuantidadeRealizada">Quantidade realizada</label>
                                 <input class="form-control" type="number"
                                     id="inputQuantidadeRealizada">
                                 <!-- Quantidade -->
@@ -445,10 +443,9 @@
                         </div>
                         <div class="col-4 mb-2">
                             <div class="form-floating mb-3">
-                                <label for="">Quantidade morta</label>
+                                <label for="inputQuantidadeMorta">Quantidade morta</label>
                                 <input class="form-control" type="number"
-                                    id="">
-                                <!-- Quantidade -->
+                                    id="inputQuantidadeMorta">
                             </div>
                         </div>
                     </div>
@@ -551,12 +548,12 @@
                     <input id="retornarPecaProducao" style="display: none;">
                 </div>
                 <div class="modal-footer">
+                    <button id="desistirInicioProducao" type="button"
+                        class="btn btn-danger">Não</button>
                     <button id="confimarInicioProducao" type="button"
                         class="btn btn-success">Sim</button>
                     <button id="confimarRetornoProducao" type="button"
                         class="btn btn-success">Sim</button>
-                    <button id="desistirInicioProducao" type="button"
-                        class="btn btn-danger">Não</button>
                 </div>
             </div>
         </div>
@@ -564,7 +561,7 @@
 
     <div class="modal fade" id="modalConfirmarApontamentoFinalizado" tabindex="-1"
         role="dialog"
-        aria-labelledby="modalConfirmarApontamentoFinalizadoLabel" aria-hidden="true">
+        aria-labelledby="modalConfirmarApontamentoFinalizadoLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -683,14 +680,18 @@
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalConfirmarInicioProducao').modal('hide');
                         hideLoading();
+
+                        // Esconde a linha da tabela armazenada anteriormente
+                        if (linhaAtual) {
+                            linhaAtual.css('display', 'none');
+                        }
+
                         chamarAPI();
                         chamarAPIInterrompidas();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
-                        // Adiciona um pequeno atraso antes de chamar hideLoading()
                         hideLoading();
-                        // location.reload();
                     }
                 });
 
@@ -702,6 +703,8 @@
         // var rowsPerPage = 10;
 
         // Função para preencher a tabela com os dados da página atual
+        var linhaAtual; // Variável global para armazenar a linha atual
+
         function updateTable() {
             $.ajax({
                 url: '/planejamento-estamparia',
@@ -710,13 +713,13 @@
                     $('#bodyTablePlanejadas').empty(); // Limpa o corpo da tabela
 
                     var maquinaSelecionada = document.getElementById('maquinaEscolhida').value.trim();
-                    // var codigo_peca_estamparia = document.getElementById('codigoPecaEstamparia').value.trim();
 
-                    // Verifica se a máquina selecionada está vazia
                     if (maquinaSelecionada !== '') {
                         // Filtra os dados com base na máquina selecionada
                         data = data.filter(peca => peca[5] === maquinaSelecionada);
                     }
+
+                    console.log(data)
 
                     // Preenche a tabela com os dados da página atual
                     data.forEach(function (item) {
@@ -732,9 +735,12 @@
                             '<td data-title="Iniciar"><button type="button" class="btn btn-info btn-iniciar">Iniciar</button></td>' +
                             '</tr>';
                         var newRow = $(row).appendTo('#bodyTablePlanejadas');
+
                         // Captura o valor do item dentro do escopo da função de clique
                         (function (item) {
                             newRow.find('.btn-iniciar').click(function () {
+                                // Armazena a referência da linha atual
+                                linhaAtual = $(this).closest('tr');
                                 iniciar(item[8], item[2], item[3]);
                             });
                         })(item);
@@ -1574,9 +1580,10 @@
                     $('#idPecaEmProcesso').val(data[0][11]);
                     $('#origemPecaEmProcesso').val(data[0][13]);
 
-                    $('#inputQuantidadeRealizada').val();
-                    $('#textAreaObservacao_').val();
-                    $('#operadorInputModal_1').val();
+                    $('#inputQuantidadeRealizada').val("");
+                    $('#textAreaObservacao_').val("");
+                    $('#operadorInputModal_1').val("");
+                    $('#inputQuantidadeMorta').val("");
 
                     hideLoading();
                     $('#modalExecucaoApontamento').modal('show');
@@ -1640,6 +1647,7 @@
                 dataHoraInicio = $('#dataHoraInicio').val();
                 operadorInputModal_1 = $('#operadorInputModal_1').val();
                 inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
+                inputQuantidadeMorta = $('#inputQuantidadeMorta').val();
                 dataCarga = $('#dataCargaFinalizacao').val();
                 idPecaEmProcesso = $('#idPecaEmProcesso').val();
                 origem = $('#origemPecaEmProcesso').val();
@@ -1650,13 +1658,19 @@
                     descricao = '';
                 }
 
-                if (inputQuantidadeRealizada === '') {
-                    showAndHideAlert('Por favor informe a quantidade.', 2000);
+                if (inputQuantidadeRealizada === '' || inputQuantidadeMorta === '') {
+                    showAndHideAlert('Por favor informe a quantidade realizada e a quantidade morta', 2000);
                     return;
                 };
 
-                if (parseInt($('#inputQuantidadeRealizada').val()) < 0 || parseInt($('#inputQuantidadeRealizada').val()) > quantidadePlanejada ) {
-                    showAndHideAlert('Por favor informe a quantidade correta.', 2000);
+
+                if (parseInt($('#inputQuantidadeRealizada').val()) < 0) {
+                    showAndHideAlert('Por favor informe a quantidade correta de peças realizadas.', 2000);
+                    return;
+                };
+
+                if (parseInt($('#inputQuantidadeMorta').val()) < 0) {
+                    showAndHideAlert('Por favor informe a quantidade correta de peças mortas.', 2000);
                     return;
                 };
 
@@ -1675,6 +1689,7 @@
             });
 
             $('#confimarFimApontamento').on('click', function () {
+                showLoading();
                 pecaFinalizada = $('#nomePecaApontada').val();
                 quantidadePlanejada = $('#inputQuantidadePlanejada').val();
                 codificacao = $('#codificacaoOrdem').val();
@@ -1682,7 +1697,8 @@
                 textAreaObservacao = $('#textAreaObservacao_').val();
                 dataHoraInicio = $('#dataHoraInicio').val();
                 operadorInputModal_1 = $('#operadorInputModal_1').val();
-                inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
+                inputQuantidadeRealizada = parseInt($('#inputQuantidadeRealizada').val());
+                inputQuantidadeMorta = parseInt($('#inputQuantidadeMorta').val());
                 dataCarga = $('#dataCargaFinalizacao').val();
                 idPecaEmProcesso = $('#idPecaEmProcesso').val();
                 origem = $('#origemPecaEmProcesso').val();
@@ -1697,6 +1713,7 @@
                     dataHoraInicio: dataHoraInicio,
                     operadorInputModal_1: operadorInputModal_1,
                     inputQuantidadeRealizada: inputQuantidadeRealizada,
+                    inputQuantidadeMorta:inputQuantidadeMorta,
                     dataCarga: formatarData(dataCarga),
                     idPecaEmProcesso: idPecaEmProcesso,
                     origem: origem,

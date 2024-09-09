@@ -174,10 +174,11 @@ def dados_planejamento_estamparia():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = """SELECT * 
+    sql = """SELECT DISTINCT pe.id,pe.data_planejada,pe.codigo,pe.descricao,pe.qt_planejada,pe.maquina,pe.origem,
+            pe.data_hora_planejada, pe.chave, pe.parcial
             FROM pcp.planejamento_estamparia pe 
             LEFT JOIN pcp.tb_pecas_em_processo pp ON pe.chave = pp.chave
-            WHERE pp.status IS NULL OR pe.parcial IS NOT NULL;
+            WHERE pp.status IS NULL OR pe.parcial IS NOT NULL
             """
 
     cur.execute(sql)
@@ -2392,6 +2393,14 @@ def api_pecas_em_processo_planejamento_estamparia():
     status = 'Em processo'
     origem = data_query[6]
 
+    query_update = """ 
+            UPDATE pcp.planejamento_estamparia 
+            SET parcial = NULL
+            WHERE chave = %s
+            """
+
+    cur.execute(query_update, (data['chave'],))
+
     query = """ 
             INSERT INTO pcp.tb_pecas_em_processo (codigo,descricao,data_carga,setor,qt_planejada,celula,status,chave,origem) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
@@ -2571,7 +2580,15 @@ def finalizar_peca_em_processo_estamparia():
     data = request.get_json()
 
     agora = datetime.now()
-    query_update = """update pcp.tb_pecas_em_processo set data_fim = %s where chave = %s"""
+    query_update = """UPDATE pcp.tb_pecas_em_processo 
+                    SET data_fim = %s 
+                    WHERE id = (
+                        SELECT id 
+                        FROM pcp.tb_pecas_em_processo 
+                        WHERE chave = %s 
+                        ORDER BY id DESC 
+                        LIMIT 1
+                    );"""
 
     id = data['idPecaEmProcesso']
     codigo = data['codigo']
@@ -2584,6 +2601,7 @@ def finalizar_peca_em_processo_estamparia():
         data['dataHoraInicio']).strftime("%Y-%m-%d %H:%M:%S")
     operadorInputModal_1 = data['operadorInputModal_1']
     inputQuantidadeRealizada = data['inputQuantidadeRealizada']
+    inputQuantidadeMorta = data['inputQuantidadeMorta']
     dataCarga = data['dataCarga']
     data_finalizacao = datetime.now().date().strftime("%Y-%m-%d")
     origem = data['origem']
@@ -2596,16 +2614,15 @@ def finalizar_peca_em_processo_estamparia():
         enviar_parcialmenete(chave,cur,conn)
 
     query = """ 
-            INSERT INTO pcp.ordens_estamparia (celula,codigo,descricao,qt_apontada,data_planejamento,data_finalizacao,operador,observacao,chave,origem,data_hora_atual)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            INSERT INTO pcp.ordens_estamparia (celula,codigo,descricao,qt_apontada,data_planejamento,data_finalizacao,operador,observacao,chave,origem,data_hora_atual,qt_morta)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
 
     cur.execute(query, (celula, codigo, descricao, inputQuantidadeRealizada, dataCarga,
-                data_finalizacao, operadorInputModal_1, textAreaObservacao, chave, origem, dataHoraInicio))
-
-    conn.commit()
+                data_finalizacao, operadorInputModal_1, textAreaObservacao, chave, origem, dataHoraInicio,inputQuantidadeMorta))
 
     cur.execute(query_update, (agora, data['idPecaEmProcesso']))
+
     conn.commit()
 
     trazendo_id = """SELECT id
