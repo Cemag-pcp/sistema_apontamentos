@@ -212,7 +212,7 @@ for processo, faltantes in resultado.items():
 
 import pandas as pd
 
-def buscar_necessidade(df_agrupado_carretas):
+def buscar_necessidade(df_agrupado_carretas, setor):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor()
@@ -228,8 +228,8 @@ def buscar_necessidade(df_agrupado_carretas):
     cur.execute("""
         SELECT DISTINCT carreta, conjunto, processo, qt_conjunto 
         FROM pcp.tb_base_carretas_explodidas 
-        WHERE carreta IN %s
-    """, (carretas,))
+        WHERE carreta IN %s and setor = %s
+    """, (carretas,setor))
 
     necessidade = cur.fetchall()
     df_necessidade = pd.DataFrame(necessidade, columns=['carreta', 'conjunto', 'processo', 'qt_conjunto'])
@@ -262,7 +262,7 @@ df_carretas = pd.DataFrame({
 
 df_agrupado_carretas = df_carretas.groupby('carreta').agg({'quantidade': 'sum'}).reset_index()
 
-df_necessidade = buscar_necessidade(df_agrupado_carretas)
+df_necessidade = buscar_necessidade(df_agrupado_carretas,'Montagem')
 
 df_estoque = consulta_saldo_estoque()
 
@@ -367,7 +367,7 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
         # Verificar o que já foi consumido por essa carreta
         df_consumido_carreta = df_consumido[df_consumido['id_carreta'] == row_carreta['id_carreta']]
 
-        # Processar cada conjunto da carreta
+        # Processar cada conjunto da carreta no almox de montagem
         for index, row_necessidade in df_necessidade_carreta.iterrows():
             conjunto = row_necessidade['conjunto']
             processo = row_necessidade['processo']
@@ -402,6 +402,9 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
             if processo not in faltas_por_processo:
                 faltas_por_processo[processo] = []
             faltas_por_processo[processo].append(resultado)
+
+        # Processar cada conjunto da carreta no almox de pintura
+
 
         # Concatenar faltas por processo e registrar apenas processos consumidos
         faltas_concatenadas = {proc: '\n'.join(faltas_por_processo.get(proc, [])) for proc in faltas_por_processo}
