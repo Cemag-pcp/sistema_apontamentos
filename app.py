@@ -4701,33 +4701,62 @@ def consuta_carreta_reuniao():
 
             # Adiciona a nova linha à lista de linhas expandidas
             linhas_expandidas.append(nova_linha)
-
-    # Criando um novo DataFrame com as linhas expandidas
-    columns_list = ['Chassi','Plataforma','Içamento','Tanque','Fueiro','Intermed.']
-
-    # Definir as colunas no DF com columns_list
-    # Passar por linha a linha, filtrando carreta e id e verificando o que falta por carreta e id 
-    # Preencher nas linhas o que falta e caso não falte colocar um hífen para dizer que está OK
-
-    dados_expandidos_df = pd.DataFrame(linhas_expandidas)
-
-    dados_expandidos_df = dados_expandidos_df.sort_values(by=['PED_PREVISAOEMISSAODOC','Carreta Trat'], ascending=[True, True])
     
-    print(dados_expandidos_df)
+    # Criando um novo DataFrame com as linhas expandidas
+    df_consumido = consulta_consumo_carretas()
 
+    colunas = ['Intermed.', 'Chassi', 'Macaco', 'Caçamba', 'Fueiro', 'Traseira', 'Plataforma',
+            'Cilindro', 'Eixo', 'Lateral', 'Dianteira ', 'Içamento', 'Tanque','5ª RODA', 'Eixo simples',
+            'Eixo completo','Acessórios']
+
+    # Cria o DataFrame e adiciona as colunas, transformando o índice em coluna
+    df_carretas = pd.DataFrame(linhas_expandidas).assign(**{col: '' for col in colunas})
+
+    df_carretas = df_carretas.sort_values(by=['PED_PREVISAOEMISSAODOC','Carreta Trat'], ascending=[True, True])
+    
+    df_carretas = df_carretas.rename(columns={'Carreta Trat':'carreta','PED_QUANTIDADE':'quantidade','PED_PREVISAOEMISSAODOC':'data',
+                                              'PED_NUMEROSERIE':'id_carreta'})
+
+    df_agrupado_carretas = df_carretas.groupby('carreta').agg({'quantidade': 'sum'}).reset_index()
+
+    df_necessidade = buscar_necessidade(df_agrupado_carretas,'Montagem')
+
+    df_estoque = consulta_saldo_estoque()
+    
+    # Executar a simulação sem acumular déficit de estoque
+    resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
+
+    # Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
+    for processo in df_necessidade['processo'].unique():
+        df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_unitario]
+    
+    print(df_carretas.columns)
+    
     # Converter o novo DataFrame em uma lista de listas para serialização
-    dados_explodido_list = dados_expandidos_df.values.tolist()
+    df_carretas_list = df_carretas.values.tolist()
 
-    return jsonify({'ImportarDados': dados_explodido_list})
+    return jsonify({'ImportarDados': df_carretas_list})
 
 @app.route('/consumir-item', methods=['POST'])
 def consumir_item():
     data = request.get_json()
-    numero_serie = data.get('numero_serie')
+    id_carreta = data.get('id_carreta')
+    carreta = data.get('carreta')
 
-    print(numero_serie)
+    resultado = consumir_db(id_carreta, carreta)
 
-    return jsonify({"message":numero_serie})
+    return jsonify({"message":"Consumiu"})
+
+@app.route('/consumir-tudo', methods=['POST'])
+def consumir_tudo():
+    
+    datas = request.get_json()
+    datas = datas['itens']
+
+    for data in datas:
+        resultado = consumir_db(data['numeroSerie'], data['carreta'])
+
+    return jsonify({"message":"Consumiu tudo"})
 
 @app.route('/resumos-geral')
 def tabela_resumos():
@@ -5343,4 +5372,4 @@ def receber_dataframe():
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=80,debug=True)
+    app.run(host='0.0.0.0', port=80)

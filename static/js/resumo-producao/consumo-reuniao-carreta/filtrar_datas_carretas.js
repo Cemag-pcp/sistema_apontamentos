@@ -1,4 +1,4 @@
-document.getElementById('filtrar_datas_por_carretas').addEventListener('click', function() {
+function filtrarDatasPorCarretas() {
     showLoading();
     const dataInicial = document.getElementById('dataReuniaoInicial').value;
     const dataFinal = document.getElementById('dataReuniaoFinal').value;
@@ -24,19 +24,22 @@ document.getElementById('filtrar_datas_por_carretas').addEventListener('click', 
         window.receivedData = result.ImportarDados;
 
         // Atualize a tabela com os dados recebidos e o filtro atual
-        updateTable();
+        updateSearch(dataInicial,dataFinal);
         
         hideLoading();
         document.getElementById('campoTableConsulta').style.display = 'block';
+        document.getElementById('consumir_tudo').style.display = 'block';
     })
     .catch(error => {
         console.error('Erro:', error);
         hideLoading();
     });
-});
+}
+
+document.getElementById('filtrar_datas_por_carretas').addEventListener('click', filtrarDatasPorCarretas);
 
 document.getElementById('recursoFiltro').addEventListener('input', function() {
     if (window.receivedData) {
-        updateTable();
+        updateSearch();
     }
 });

@@ -64,14 +64,14 @@ def consulta_consumo_carretas():
 
     return df_consumido
 
-def consulta_saldo_estoque():
+def consulta_saldo_estoque(almoxarifado='Almox Mont Carretas'):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     cur.execute("""
-        SELECT codigo, saldo FROM pcp.saldo_recurso 
-    """,)
+        SELECT codigo, saldo FROM pcp.saldo_recurso WHERE almoxarifado = %s
+    """,(almoxarifado,))
 
     df_estoque = cur.fetchall()
     df_estoque =pd.DataFrame(df_estoque, columns=['conjunto','saldo'])
@@ -226,16 +226,16 @@ def buscar_necessidade(df_agrupado_carretas, setor):
 
     # Executar a consulta
     cur.execute("""
-        SELECT DISTINCT carreta, conjunto, processo, qt_conjunto 
+        SELECT DISTINCT carreta, conjunto, conjunto_desc, processo, qt_conjunto 
         FROM pcp.tb_base_carretas_explodidas 
         WHERE carreta IN %s and setor = %s
     """, (carretas,setor))
 
     necessidade = cur.fetchall()
-    df_necessidade = pd.DataFrame(necessidade, columns=['carreta', 'conjunto', 'processo', 'qt_conjunto'])
+    df_necessidade = pd.DataFrame(necessidade, columns=['carreta', 'conjunto', 'conjunto_desc' ,'processo', 'qt_conjunto'])
     df_necessidade = df_necessidade.merge(df_agrupado_carretas, how='left', on='carreta')
     df_necessidade['necessidade_total'] = df_necessidade['qt_conjunto'] * df_necessidade['quantidade']
-    df_necessidade = df_necessidade[['carreta','conjunto','processo','necessidade_total']]
+    df_necessidade = df_necessidade[['carreta','conjunto','conjunto_desc','processo','necessidade_total']]
 
     return df_necessidade
 
@@ -370,6 +370,7 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
         # Processar cada conjunto da carreta no almox de montagem
         for index, row_necessidade in df_necessidade_carreta.iterrows():
             conjunto = row_necessidade['conjunto']
+            descricao = row_necessidade['conjunto_desc']
             processo = row_necessidade['processo']
             necessidade = row_necessidade['necessidade_total'] / ajuste_quantidade
 
@@ -384,7 +385,7 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
 
             # Se a necessidade já foi atendida pelo consumo anterior, não calcular déficit
             if necessidade_restante == 0:
-                resultado = f"Já consumido - {conjunto}"
+                resultado = f"Já consumido - {conjunto} - {descricao}"
             else:
                 # Garantir que o conjunto está no estoque
                 saldo_atual = saldo_estoque.get(conjunto, 0)
@@ -392,11 +393,11 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
                 # Verificar o saldo disponível e calcular o déficit progressivo
                 if saldo_atual >= necessidade_restante:
                     # Consumo completo, saldo suficiente
-                    resultado = f"Necessidade em estoque - {necessidade_restante} - {conjunto}"
+                    resultado = f"Em estoque - {necessidade_restante} - {conjunto} - {descricao}"
                 else:
                     # Consumo parcial ou déficit
                     falta = necessidade_restante - saldo_atual
-                    resultado = f"Falta {falta} - {conjunto}"
+                    resultado = f"Falta {falta} - {conjunto} - {descricao}"
 
             # Registrar o resultado no processo correspondente
             if processo not in faltas_por_processo:
