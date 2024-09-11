@@ -9,6 +9,30 @@
 <link rel="stylesheet" type="text/css"
     href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
 
+<style>
+    
+.custom-switch.custom-switch-md .custom-control-label {
+    padding-left: 1rem;
+    padding-bottom: 1.5rem;
+}
+
+.custom-switch.custom-switch-md .custom-control-label::before {
+    height: 1.5rem;
+    width: calc(2rem + 0.75rem);
+    border-radius: 3rem;
+}
+
+.custom-switch.custom-switch-md .custom-control-label::after {
+    width: calc(1.5rem - 4px);
+    height: calc(1.5rem - 4px);
+    border-radius: calc(2rem - (1.5rem / 2));
+}
+
+.custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
+    transform: translateX(calc(1.5rem - 0.25rem));
+}
+</style>
+
 {% endblock %}
 
 {% block containerFluid %}
@@ -38,7 +62,6 @@
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">Peça fora
                         do sequenciamento</button>
                 </div>
-                <br>
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <div class="form-row">
                         <div class="col-sm">
@@ -55,6 +78,18 @@
                                 <datalist id="listaCor">
                                 </datalist>
                             </div>
+                        </div>
+                    </div>
+                    <div class="p-2">
+                        <div class="custom-control custom-switch custom-switch-md">
+                            <input type="checkbox" class="custom-control-input" id="customSwitch1" checked>
+                            <label class="custom-control-label" for="customSwitch1">PÓ</label>
+                        </div>
+                        
+                        <!-- Switch 2 -->
+                        <div class="custom-control custom-switch custom-switch-md">
+                            <input type="checkbox" class="custom-control-input" id="customSwitch2">
+                            <label class="custom-control-label" for="customSwitch2">PU</label>
                         </div>
                     </div>
                 </div>
@@ -74,7 +109,7 @@
                                     <th>Cor</th>
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
-                                    <th>Tipo</th>
+                                    <th style="display: none;">Tipo</th>
                                     <th>Codificação</th>
                                 </tr>
                             </thead>
@@ -89,14 +124,14 @@
                                     <th>Cor</th>
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
-                                    <th>Tipo</th>
+                                    <th style="display: none;">Tipo</th>
                                     <th>Codificação</th>
                                 </tr>
                             </tfoot>
-                            <tbody>
+                            <tbody id="tableBody">
                                 {% if sheet_data %}
                                 {% for data in sheet_data %}
-                                <tr>
+                                <tr data-type="{{ data[9] }}">
                                     <td style="display: none;">{{ data[0] }}</td>
                                     <td>{{ data[1] }}</td>
                                     <td>{{ data[2] }}</td>
@@ -107,22 +142,15 @@
                                     <td>
                                         <input class="form-control" id='prod' type="number">
                                     </td>
-                                    <td><input class="form-control" id='cambao' type="number" value="{{ data[7] }}">
+                                    <td><input class="form-control" id='cambao' type="number">
                                     </td>
-                                    <td>
-                                        <select class="form-control" id='tipo' type="text" value="">
-                                            <option value=""></option>
-                                            <option value="PÓ">PÓ</option>
-                                            <option value="PU">PU</option>
-                                        </select>
-                                    </td>
+                                    <td class="typePintura" style="display: none;">{{ data[9] }}</td>
                                     <td>{{ data[10] }}</td>
                                 </tr>
                                 {% endfor %}
-
                                 {% else %}
                                 <tr>
-                                    <td colspan="7">Nenhum dado disponível</td>
+                                    <td colspan="11">Nenhum dado disponível</td>
                                 </tr>
                                 {% endif %}
                             </tbody>
@@ -282,6 +310,7 @@
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="static/js/demo/datatables-demo.js"></script>
+<script src="static/js/pintura/switch-gerar-cambao.js"></script>
 
 <!-- Scripts campos de filtro -->
 
@@ -327,7 +356,7 @@
         function applyDateFilter() {
             var columnIndex = $('#dataCarga').data('column');
             var filterValue = $('#dataCarga').val();
-
+            
 
             // Formata a data usando Moment.js
             if (filterValue === '') {
@@ -340,6 +369,8 @@
             table.column(columnIndex).search(filterValue).draw();
 
             populateDatalistOptions('listaCor', 6);
+            // Inicialize a tabela com base no estado inicial dos switches
+            filterTable();
         }
 
         function applyColorFilter() {
@@ -423,8 +454,7 @@
 
                         // Adiciona os dados da linha ao array
                         linhas.push({ data: data, codigo: codigo, descricao: descricao, cor: cor, qt_itens: qt_planejada, prod: qt_produzida, cambao: cambao, tipo: tipo, celula: celula, chave: chave, operador: operador });
-                    }
-                    else {
+                    } else {
                         return;
                     }
                 });
