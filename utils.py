@@ -2,12 +2,66 @@ import psycopg2  # pip install psycopg2
 import psycopg2.extras
 from psycopg2.extras import execute_values
 import pandas as pd
+import gspread
+from google.oauth2 import service_account
+import os
+from dotenv import load_dotenv
 
 DB_HOST = "database-1.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_HOST_REPRESENTANTE = "database-2.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
+
+def buscar_planilha_saldo():
+
+    """
+    Função para acessar google sheets via api e
+    buscar dados da base de carretas.
+    """
+    load_dotenv()
+    
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+         "https://www.googleapis.com/auth/drive"]
+
+    credentials = service_account.Credentials.from_service_account_info({
+        "type": os.environ.get('GOOGLE_TYPE'),
+        "project_id": os.environ.get('GOOGLE_PROJECT_ID'),
+        "private_key_id": os.environ.get('GOOGLE_PRIVATE_KEY_ID'),
+        "private_key": os.environ.get('GOOGLE_PRIVATE_KEY'),
+        "client_email": os.environ.get('GOOGLE_CLIENT_EMAIL'),
+        "client_id": os.environ.get('GOOGLE_CLIENT_ID'),
+        "auth_uri": os.environ.get('GOOGLE_AUTH_URI'),
+        "token_uri": os.environ.get('GOOGLE_TOKEN_URI'),
+        "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
+        "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
+        "universe_domain": os.environ.get('GOOGLE_UNIVERSE_DOMAIN')
+    },scopes=scope)
+
+    # sa = gspread.service_account(credentials)
+    sa = gspread.authorize(credentials)
+
+    sheet_id = '1u2Iza-ocp6ROUBXG9GpfHvEJwLHuW7F2uiO583qqLIE'
+    worksheet1 = 'saldo de recurso'
+
+    # sa = gspread.service_account(filename)
+    sh = sa.open_by_key(sheet_id)
+
+    wks = sh.worksheet(worksheet1)
+
+    headers = wks.row_values(1)
+
+    tabela = wks.get()
+    tabela = pd.DataFrame(tabela)
+    tabela_saldo = tabela.set_axis(headers, axis=1)[1:]
+
+    # Filtrar linhas onde a coluna '1o. Agrupamento' é 'Almox Mont Carretas'
+    tabela_saldo_mont = tabela_saldo[tabela_saldo['1o. Agrupamento'] == 'Almox Mont Carretas']
+
+    # Selecionar apenas as colunas 'codigo_peca' e 'Saldo'
+    tabela_saldo_mont = tabela_saldo_mont[['codigo_peca', 'Saldo']]
+
+    return tabela_saldo_mont
 
 def atualizar_saldo(itens_json):
     
@@ -246,7 +300,7 @@ def buscar_necessidade(df_agrupado_carretas, setor):
 # df_carretas = pd.DataFrame({
 #     'id': [0, 1, 2, 3, 4, 5],
 #     'data': ['2024-09-05', '2024-09-05', '2024-09-05', '2024-09-06', '2024-09-06', '2024-09-06'],
-#     'carreta': ['F4 SS RS/RS A45 M23', 'F4 SS RS/RS A45 M23', 'CBHM5000 GR SS RD M17', 'F4 SS RS/RS A45 M23', 'F4 SS RS/RS A45 M23', 'CBHM5000 GR SS RD M17'],
+#     'carreta': ['CBH6-2E FO SS RS/RD P750(I) M21', 'CBH6-2E FO SS RS/RD P750(I) M21', 'CBHM5000 GR SS RD M17', 'F4 SS RS/RS A45 M23', 'F4 SS RS/RS A45 M23', 'CBHM5000 GR SS RD M17'],
 #     'quantidade': [1, 1, 1, 1, 1, 1],
 #     'id_carreta': ['A-41493/0824', 'A-41494/0824', 'T-25324/0724', 'teste', 'teste2', 'teste3'],
 #     'Intermed.': ['', '', '', '', '', ''],
@@ -343,8 +397,37 @@ def buscar_necessidade(df_agrupado_carretas, setor):
 #     df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_deficit_progresso]
 
 # print(df_carretas)
+
+def verificar_estoque(df_planilha_saldo,conjunto,quantidade):
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """ SELECT DISTINCT codigo,descricao,quantidade
+        FROM pcp.tb_base_carretas_explodidas
+        WHERE conjunto = %s """
     
-def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido):
+    cur.execute(query,(conjunto,))
+    pecas = cur.fetchall()
+
+    df = pd.DataFrame(pecas)
+    df.columns = ['codigo', 'descricao', 'quantidade']
+    df['quantidade'] = pd.to_numeric(df['quantidade'], errors='coerce')
+
+    tabela_saldo = df_planilha_saldo
+    tabela_saldo['Saldo'] = pd.to_numeric(tabela_saldo['Saldo'], errors='coerce')
+    tabela_saldo = tabela_saldo.rename(columns={'codigo_peca': 'codigo'})
+
+    merged_df = pd.merge(df, tabela_saldo, on='codigo', how='left')
+
+    merged_df.fillna(0, inplace=True)
+        
+    result = merged_df[merged_df['quantidade'] > merged_df['Saldo']]
+
+    return result
+    
+
+def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido,df_planilha_saldo):
     resultado_por_carreta = []
 
     # Iterar por cada carreta no DataFrame
@@ -364,12 +447,16 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
         # Verificar o que já foi consumido por essa carreta
         df_consumido_carreta = df_consumido[df_consumido['id_carreta'] == row_carreta['id_carreta']]
 
+        df_necessidade_carreta = df_necessidade_carreta.drop_duplicates(subset='conjunto')
+
         # Processar cada conjunto da carreta no almox de montagem
         for index, row_necessidade in df_necessidade_carreta.iterrows():
             conjunto = row_necessidade['conjunto']
             descricao = row_necessidade['conjunto_desc']
             processo = row_necessidade['processo']
             necessidade = row_necessidade['necessidade_total'] / ajuste_quantidade
+
+            print(processo,conjunto)
 
             # Verificar se já foi consumido por essa carreta
             consumido = df_consumido_carreta[df_consumido_carreta['conjunto'] == conjunto]['quantidade_consumida'].sum()
@@ -394,8 +481,18 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
                 else:
                     # Consumo parcial ou déficit
                     falta = necessidade_restante - saldo_atual
-                    resultado = f"Falta {falta} - {conjunto} - {descricao}"
 
+                    resultado_df = verificar_estoque(df_planilha_saldo,conjunto,1)
+                    resultado = ""
+
+                    for index,result in resultado_df.iterrows():
+                        codigo = result['codigo']
+                        descricao = result['descricao']
+                        quantidade = result['quantidade']
+
+                        resultado += f"Falta {quantidade} - {codigo} - {descricao}\n"
+                    
+            print(resultado)
             # Registrar o resultado no processo correspondente
             if processo not in faltas_por_processo:
                 faltas_por_processo[processo] = []
@@ -410,8 +507,11 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
 
     return resultado_por_carreta
 
+# df_carretas = df_carretas.iloc[0:1,:]
+
+# df_planilha_saldo = buscar_planilha_saldo()
 # Executar a simulação sem acumular déficit de estoque
-# resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
+# resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido,df_planilha_saldo)
 
 # Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
 # for processo in df_necessidade['processo'].unique():
@@ -420,4 +520,6 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
 # resumo completo
 
 # Mostrar as peças que faltam por carreta conjunto de forma agrupada
+
+
 

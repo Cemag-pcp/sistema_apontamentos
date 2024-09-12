@@ -4654,6 +4654,8 @@ def verificarConjuntosFaltantes(id,carreta):
 
     return
 
+# --------- INICIO CONSUMO E CONSULTA -----------
+
 @app.route('/consultar-carreta-reuniao', methods=['POST'])
 def consuta_carreta_reuniao():
     data = request.get_json()
@@ -4722,9 +4724,11 @@ def consuta_carreta_reuniao():
     df_necessidade = buscar_necessidade(df_agrupado_carretas,'Montagem')
 
     df_estoque = consulta_saldo_estoque()
+
+    df_planilha_saldo = buscar_planilha_saldo()
     
     # Executar a simulação sem acumular déficit de estoque
-    resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
+    resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido,df_planilha_saldo)
 
     # Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
     for processo in df_necessidade['processo'].unique():
@@ -4757,6 +4761,45 @@ def consumir_tudo():
         resultado = consumir_db(data['numeroSerie'], data['carreta'])
 
     return jsonify({"message":"Consumiu tudo"})
+
+@app.route('/consultar-pecas-conjuntos', methods=['GET'])
+def consultar_pecas_conjuntos():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    code = request.args.get('code')  # '031290'
+    quantity = request.args.get('quantity')  # 1.0
+
+    query = """ SELECT DISTINCT codigo,descricao,quantidade
+        FROM pcp.tb_base_carretas_explodidas
+        WHERE conjunto = %s """
+    
+    cur.execute(query,(code,))
+    pecas = cur.fetchall()
+
+    df = pd.DataFrame(pecas)
+    df.columns = ['codigo', 'descricao', 'quantidade']
+    df['quantidade'] = pd.to_numeric(df['quantidade'], errors='coerce')
+
+    tabela_saldo = buscar_planilha_saldo()
+    tabela_saldo['Saldo'] = pd.to_numeric(tabela_saldo['Saldo'], errors='coerce')
+    tabela_saldo = tabela_saldo.rename(columns={'codigo_peca': 'codigo'})
+
+    merged_df = pd.merge(df, tabela_saldo, on='codigo', how='left')
+
+    merged_df.fillna(0, inplace=True)
+        
+    result = merged_df[merged_df['quantidade'] > merged_df['Saldo']]
+
+    print(result)
+
+    result_list = result.values.tolist()
+
+    return jsonify(result_list)
+
+# --------- FIM CONSUMO E CONSULTA -----------
 
 @app.route('/resumos-geral')
 def tabela_resumos():
@@ -5372,4 +5415,4 @@ def receber_dataframe():
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8000, debug=True)

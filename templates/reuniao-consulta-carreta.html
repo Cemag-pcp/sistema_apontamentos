@@ -147,31 +147,32 @@
 
     </div>
 
+    <div class="modal fade" id="modalPecas" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modalPecasLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modalPecasLabel">Modal title</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <p>Código: <span id="codigoModal"></span></p>
+                <p>Quantidade: <span id="quantidadeModal"></span></p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary">Understood</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
     <div id="alertBox" class="alert alert-danger">
         <strong>Erro!</strong> Preencha todos os campos.
     </div>
 
     <div id="successAlert" class="alert alert-success" role="alert">
         Salvo!
-    </div>
-
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                ...
-                </div>
-                <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     {% endblock %}
@@ -183,9 +184,10 @@
     <script src="/static/js/resumo-producao/consumo-reuniao-carreta/filtrar_datas_carretas.js"></script>
     <script src="/static/js/resumo-producao/consumo-reuniao-carreta/simular.js"></script>
     <script src="/static/js/resumo-producao/consumo-reuniao-carreta/consumir.js"></script>
-    <!-- <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
-    <script src="static/js/demo/datatables-demo.js"></script>
+    <script src="/static/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="/static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="/static/js/resumo-producao/consumo-reuniao-carreta/modal-pecas.js"></script>
+    <!-- <script src="static/js/demo/datatables-demo.js"></script>
     <script src="static/js/resumo-producao/modal_faltando_peca.js"></script>
     <script src="static/js/resumo-producao/resumo.js"></script>
     <script src="static/js/resumo-producao/filtros_resumo.js"></script>
