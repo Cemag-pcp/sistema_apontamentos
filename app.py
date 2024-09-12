@@ -4705,9 +4705,9 @@ def consuta_carreta_reuniao():
     # Criando um novo DataFrame com as linhas expandidas
     df_consumido = consulta_consumo_carretas()
 
-    colunas = ['Intermed.', 'Chassi', 'Macaco', 'Caçamba', 'Fueiro', 'Traseira', 'Plataforma',
+    colunas = ['Chassi','Caçamba', 'Traseira', 'Plataforma','Fueiro',
             'Cilindro', 'Eixo', 'Lateral', 'Dianteira ', 'Içamento', 'Tanque','5ª RODA', 'Eixo simples',
-            'Eixo completo','Acessórios']
+            'Eixo completo','Acessórios','Macaco','Intermed.']
 
     # Cria o DataFrame e adiciona as colunas, transformando o índice em coluna
     df_carretas = pd.DataFrame(linhas_expandidas).assign(**{col: '' for col in colunas})
@@ -5372,4 +5372,4 @@ def receber_dataframe():
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=8000)
