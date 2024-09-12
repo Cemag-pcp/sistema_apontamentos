@@ -138,9 +138,28 @@ def dados_planejamento_pintura():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = """SELECT *
-            FROM pcp.planejamento_pintura
-            ORDER by id desc"""
+    sql = """select 	t3.id,
+                    t3.data_carga,
+                    t3.data_planejamento,
+                    t3.codigo,
+                    t3.peca,
+                    coalesce((qt_planejada - qt_apontada),qt_planejada) as qt_planejada,
+                    t3.cor,
+                    t3.tipo,
+                    t3.codificacao
+            from (
+            select 	t1.*,
+                    sum(qt_apontada) as qt_apontada
+            from pcp.planejamento_pintura as t1
+            left join pcp.ordens_pintura as t2 on t1.id = t2.chave
+            group by 	t1.id,
+                        t1.data_carga,
+                        t1.codigo,
+                        t1.peca,
+                        t1.qt_planejada,
+                        t1.cor,
+                        t1.tipo
+            order by t1.data_carga desc limit 500) as t3"""
 
     df = pd.read_sql_query(sql, conn)
 
@@ -355,14 +374,16 @@ def gerar_planilha():
     cur.close()
     conn.close()
 
-    table = dados_sequenciamento()
+    table = dados_planejamento_pintura()
     table['qt_produzida'] = ''
     table['cambao'] = ''
-    table['tipo'] = ''
-    table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
-    table['codificacao'] = table.apply(criar_codificacao, axis=1)
+    table['data_carga'] = pd.to_datetime(
+        table['data_carga']).dt.strftime("%d/%m/%Y")
+    table['data_planejamento'] = pd.to_datetime(
+        table['data_planejamento']).dt.strftime("%d/%m/%Y")
 
-    table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao']]
+    table = table[['id', 'data_carga', 'data_planejamento', 'codigo', 'peca',
+                   'qt_planejada', 'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
     sheet_data = table.values.tolist()
 
     return jsonify({"linhas": sheet_data})
