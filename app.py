@@ -2590,6 +2590,8 @@ def finalizar_peca_em_processo_estamparia():
                         LIMIT 1
                     );"""
 
+    cur.execute(query_update, (agora, data['idPecaEmProcesso']))
+
     id = data['idPecaEmProcesso']
     codigo = data['codigo']
     descricao = data['descricao']
@@ -2620,8 +2622,6 @@ def finalizar_peca_em_processo_estamparia():
 
     cur.execute(query, (celula, codigo, descricao, inputQuantidadeRealizada, dataCarga,
                 data_finalizacao, operadorInputModal_1, textAreaObservacao, chave, origem, dataHoraInicio,inputQuantidadeMorta))
-
-    cur.execute(query_update, (agora, data['idPecaEmProcesso']))
 
     conn.commit()
 

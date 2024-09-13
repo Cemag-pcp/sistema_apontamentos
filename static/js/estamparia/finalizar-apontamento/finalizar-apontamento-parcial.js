@@ -53,24 +53,28 @@ $(document).ready(function () {
         
         showLoading();
 
-        pecaFinalizada = $('#nomePecaApontada').val();
+        var pecaFinalizada = $('#nomePecaApontada').val();
 
-        quantidadePlanejada = parseInt($('#inputQuantidadePlanejada').val());
-        codificacao = $('#codificacaoOrdem').val();
-        celula = $('#celulaOrdem').val();
-        textAreaObservacao = $('#textAreaObservacao_').val();
-        dataHoraInicio = $('#dataHoraInicio').val();
-        operadorInputModal_1 = $('#operadorInputModal_1').val();
-        inputQuantidadeRealizada = parseInt($('#inputQuantidadeRealizada').val());
-        inputQuantidadeMorta = parseInt($('#inputQuantidadeMorta').val());
-        dataCarga = $('#dataCargaFinalizacao').val();
-        idPecaEmProcesso = $('#idPecaEmProcesso').val();
-        origem = $('#origemPecaEmProcesso').val();
+        var quantidadePlanejada = parseInt($('#inputQuantidadePlanejada').val());
+        var codificacao = $('#codificacaoOrdem').val();
+        var celula = $('#celulaOrdem').val();
+        var textAreaObservacao = $('#textAreaObservacao_').val();
+        var dataHoraInicio = $('#dataHoraInicio').val();
+        var operadorInputModal_1 = $('#operadorInputModal_1').val();
+        var inputQuantidadeRealizada = parseInt($('#inputQuantidadeRealizada').val());
+        var inputQuantidadeMorta = parseInt($('#inputQuantidadeMorta').val());
+        var dataCarga = $('#dataCargaFinalizacao').val();
+        var idPecaEmProcesso = $('#idPecaEmProcesso').val();
+        var origem = $('#origemPecaEmProcesso').val();
 
         quantidadePlanejada = quantidadePlanejada - inputQuantidadeRealizada;
     
+        var partes = pecaFinalizada.split(' - ');
+        var codigo = partes[0];
+        var descricao = partes.slice(1).join(' - ');
+
         dados = {
-            codigo: pecaFinalizada.split(' - ')[0],
+            codigo: codigo,
             descricao: descricao,
             qtdePlanejada: quantidadePlanejada,
             codificacao: codificacao,
@@ -98,11 +102,13 @@ $(document).ready(function () {
                 chamarAPIInterrompidas();
                 updateTable();
                 $('#modalConfirmarApontamentoFinalizado').modal('hide');
+                location.reload();
             },
             error: function (error) {
                 console.error('Erro na solicitação POST:', error);
                 hideLoading();
                 $('#modalConfirmarApontamentoFinalizado').modal('hide');
+                location.reload();
             }
         });
     });
