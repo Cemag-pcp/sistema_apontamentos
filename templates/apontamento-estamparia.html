@@ -980,15 +980,12 @@
                     }
 
                     var pecaSplit = peca_.split(' - ');
-                    var descricao = pecaSplit[1] || '';  // O segundo elemento
-
-                    if (pecaSplit.length > 2) {
-                        descricao += ' - ' + pecaSplit[2];
-                    }
+                    var codigo = pecaSplit[0];
+                    var descricao = pecaSplit.slice(1).join(' - ');
 
                     // Adiciona os dados da peça ao array
                     pecas.push({
-                        peca: peca_.split(' - ')[0],
+                        peca: codigo,
                         descricao: descricao,
                         dataPlanejamento: dataPlanejamento_,
                         qtPlanejada: quantidade_,
