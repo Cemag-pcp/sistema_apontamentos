@@ -4776,6 +4776,11 @@ def consumir_item():
 
     return jsonify({"message":"Consumiu"})
 
+@app.route('/retrabalho-pintura', methods=['GET'])
+def retrabalho_pintura():
+    
+    return render_template('retrabalho-pintura.html')
+
 @app.route('/consumir-tudo', methods=['POST'])
 def consumir_tudo():
     

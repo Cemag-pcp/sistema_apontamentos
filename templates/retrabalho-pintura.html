@@ -1,0 +1,147 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Pintura</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Apontamento pintura - Retrabalho Pintura</h1>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- tabela gerar cambão -->
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <!-- Card Header - Dropdown -->
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Retrabalho Pintura</h6>
+                </div>
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <div class="form-row">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label for="cor">Cor</label>
+                                <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
+                                <input list="listaCor" id="cor" class="form-control" data-column="5">
+                                <datalist id="listaCor">
+                                </datalist>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data da reinspecao</th>
+                                    <th>Código</th>
+                                    <th>Peça</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Codificação</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Data da reinspecao</th>
+                                    <th>Código</th>
+                                    <th>Peça</th>
+                                    <th>Qt. planejada</th>
+                                    <th>Cor</th>
+                                    <th>Qt. produzida</th>
+                                    <th>Cambão</th>
+                                    <th>Tipo</th>
+                                    <th>Codificação</th>
+                                    <th>Status</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7">Nenhum dado disponível</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12 mb-4">
+            <button id="abrirModalOperadorFinalizarCambao" type="button" class="btn btn-success">Enviar</button>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="operadorFinalizarCambao" tabindex="-1" role="dialog"
+        aria-labelledby="operadorFinalizarCambaoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="operadorFinalizarCambaoLabel">Operador
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <select class="form-control" name="selectOperadorFinalizarCambao"
+                                id="selectOperadorFinalizarCambao">
+                                <option value=""></option>
+                                <option value="Lucas">Lucas</option>
+                                <option value="Fábio">Fábio</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnFinalizarCambao" type="button" class="btn btn-success">Finalizar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="static/js/demo/datatables-demo.js"></script>
+
+{% endblock %}
