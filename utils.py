@@ -243,23 +243,23 @@ def buscar_necessidade(df_agrupado_carretas, setor):
 # df_consumido = consulta_consumo_carretas()
 
 # Trazer através do botão de "simular"
-# df_carretas = pd.DataFrame({
-#     'id': [0, 1, 2, 3, 4, 5],
-#     'data': ['2024-09-05', '2024-09-05', '2024-09-05', '2024-09-06', '2024-09-06', '2024-09-06'],
-#     'carreta': ['F4 SS RS/RS A45 M23', 'F4 SS RS/RS A45 M23', 'CBHM5000 GR SS RD M17', 'F4 SS RS/RS A45 M23', 'F4 SS RS/RS A45 M23', 'CBHM5000 GR SS RD M17'],
-#     'quantidade': [1, 1, 1, 1, 1, 1],
-#     'id_carreta': ['A-41493/0824', 'A-41494/0824', 'T-25324/0724', 'teste', 'teste2', 'teste3'],
-#     'Intermed.': ['', '', '', '', '', ''],
-#     'Traseira': ['', '', '', '', '', ''],
-#     'Plataforma': ['', '', '', '', '', ''],
-#     'Chassi': ['', '', '', '', '', ''],
-#     'Macaco': ['', '', '', '', '', ''],
-#     'Fueiro': ['', '', '', '', '', ''],
-#     'Dianteira': ['', '', '', '', '', ''],
-#     'Lateral': ['', '', '', '', '', ''],
-#     'Eixo': ['', '', '', '', '', ''],
-#     'Içamento': ['', '', '', '', '', '']
-# })
+df_carretas = pd.DataFrame({
+    'id': [0, 1, 2, 3, 4, 5],
+    'data': ['2024-09-05', '2024-09-05', '2024-09-05', '2024-09-06', '2024-09-06', '2024-09-06'],
+    'carreta': ['F4 SS RS/RS A45 M23', 'F4 SS RS/RS A45 M23', 'CBHM5000 GR SS RD M17', 'F4 SS RS/RS A45 M23', 'F4 SS RS/RS A45 M23', 'CBHM5000 GR SS RD M17'],
+    'quantidade': [1, 1, 1, 1, 1, 1],
+    'id_carreta': ['A-41493/0824', 'A-41494/0824', 'T-25324/0724', 'teste', 'teste2', 'teste3'],
+    'Intermed.': ['', '', '', '', '', ''],
+    'Traseira': ['', '', '', '', '', ''],
+    'Plataforma': ['', '', '', '', '', ''],
+    'Chassi': ['', '', '', '', '', ''],
+    'Macaco': ['', '', '', '', '', ''],
+    'Fueiro': ['', '', '', '', '', ''],
+    'Dianteira': ['', '', '', '', '', ''],
+    'Lateral': ['', '', '', '', '', ''],
+    'Eixo': ['', '', '', '', '', ''],
+    'Içamento': ['', '', '', '', '', '']
+})
 
 # df_agrupado_carretas = df_carretas.groupby('carreta').agg({'quantidade': 'sum'}).reset_index()
 
@@ -410,12 +410,15 @@ def simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupad
 
     return resultado_por_carreta
 
-# Executar a simulação sem acumular déficit de estoque
+# # Executar a simulação sem acumular déficit de estoque
 # resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
 
-# Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
+# # Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
 # for processo in df_necessidade['processo'].unique():
 #     df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_unitario]
+
+# st.write("Sem criar deficit de estoque (Apenas para montagem)")
+# st.dataframe(df_carretas)
 
 # resumo completo
 

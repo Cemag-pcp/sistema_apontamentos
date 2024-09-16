@@ -129,6 +129,41 @@ def dados_sequenciamento():
 
     return df
 
+def dados_planejamento_pintura():
+    """
+    Função para buscar os dados do sequenciamento de pintura
+    """
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = """select 	t3.id,
+                    t3.data_carga,
+                    t3.data_planejamento,
+                    t3.codigo,
+                    t3.peca,
+                    coalesce((qt_planejada - qt_apontada),qt_planejada) as qt_planejada,
+                    t3.cor,
+                    t3.tipo,
+                    t3.codificacao
+            from (
+            select 	t1.*,
+                    sum(qt_apontada) as qt_apontada
+            from pcp.planejamento_pintura as t1
+            left join pcp.ordens_pintura as t2 on t1.id = t2.chave
+            group by 	t1.id,
+                        t1.data_carga,
+                        t1.codigo,
+                        t1.peca,
+                        t1.qt_planejada,
+                        t1.cor,
+                        t1.tipo
+            order by t1.data_carga desc limit 500) as t3"""
+
+    df = pd.read_sql_query(sql, conn)
+
+    return df
 
 def dados_sequenciamento_montagem():
     """
@@ -291,22 +326,16 @@ def gerar_cambao():
     Rota para página de gerar cambão
     """
 
-    table = dados_sequenciamento()
+    table = dados_planejamento_pintura()
     table['qt_produzida'] = ''
     table['cambao'] = ''
-    table['tipo'] = ''
     table['data_carga'] = pd.to_datetime(
         table['data_carga']).dt.strftime("%d/%m/%Y")
-    table['codificacao'] = table.apply(criar_codificacao, axis=1)
-    table['data_planejada'] = pd.to_datetime(
-        table['data_carga'], format="%d/%m/%Y") - timedelta(1)
+    table['data_planejamento'] = pd.to_datetime(
+        table['data_planejamento']).dt.strftime("%d/%m/%Y")
 
-    # Aplica a função de ajuste para cada valor na coluna 'data_planejada'
-    table['data_planejada'] = table['data_planejada'].apply(ajustar_para_sexta)
-    table['data_planejada'] = table['data_planejada'].dt.strftime("%d/%m/%Y")
-
-    table = table[['id', 'data_carga', 'data_planejada', 'codigo', 'peca',
-                   'restante', 'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
+    table = table[['id', 'data_carga', 'data_planejamento', 'codigo', 'peca',
+                   'qt_planejada', 'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
     sheet_data = table.values.tolist()
 
     return render_template('gerar-cambao.html', sheet_data=sheet_data)
@@ -345,14 +374,16 @@ def gerar_planilha():
     cur.close()
     conn.close()
 
-    table = dados_sequenciamento()
+    table = dados_planejamento_pintura()
     table['qt_produzida'] = ''
     table['cambao'] = ''
-    table['tipo'] = ''
-    table['data_carga'] = pd.to_datetime(table['data_carga']).dt.strftime("%d/%m/%Y")
-    table['codificacao'] = table.apply(criar_codificacao, axis=1)
+    table['data_carga'] = pd.to_datetime(
+        table['data_carga']).dt.strftime("%d/%m/%Y")
+    table['data_planejamento'] = pd.to_datetime(
+        table['data_planejamento']).dt.strftime("%d/%m/%Y")
 
-    table = table[['data_carga','codigo','peca','restante','cor','qt_produzida','cambao','tipo','codificacao']]
+    table = table[['id', 'data_carga', 'data_planejamento', 'codigo', 'peca',
+                   'qt_planejada', 'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
     sheet_data = table.values.tolist()
 
     return jsonify({"linhas": sheet_data})
@@ -1675,8 +1706,6 @@ def receber_dados_planejamento():
             data = datetime.strptime(
                 dado['data'], '%d/%m/%Y').strftime('%Y-%m-%d')
             # Construir e executar a consulta UPDATE
-            if dado['prod'] == '':
-                dado['prod'] = dado['qt_itens']
 
             query = ("insert into pcp.planejamento_pintura (data_carga,data_planejamento,codigo,peca,cor,qt_planejada,qt_produzida,tipo,codificacao) values (%s,%s,%s,%s,%s,%s,%s,%s,%s)")
             cursor.execute(query, (data,
@@ -1685,8 +1714,8 @@ def receber_dados_planejamento():
                                    dado['descricao'],
                                    dado['cor'],
                                    dado['qt_itens'],
-                                   dado['prod'] if 'prod' in dado else None,
-                                   dado['tipo'],
+                                   0,
+                                   dado['maquina'],
                                    dado['codificacao']))
 
         # Commit para aplicar as alterações
@@ -4747,6 +4776,48 @@ def consumir_item():
 
     return jsonify({"message":"Consumiu"})
 
+@app.route('/retrabalho-pintura', methods=['POST','GET'])
+def retrabalho_pintura():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if request.method == 'POST':
+
+        data = request.get_json()
+
+        query_update = """UPDATE pcp.pecas_reinspecao set status_pintura = 'true' where id = %s"""
+        cur.execute(query_update, (data['id'],))
+
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({"message":"Liberada para reinspecionar"})
+
+
+    query = """SELECT op.id,r.data_reinspecao, op.codigo, op.peca, op.qt_apontada,r.nao_conformidades,op.cor,op.tipo,r.inspetor
+                FROM pcp.pecas_reinspecao as r
+                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
+                WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true AND r.status_pintura IS false
+            """
+    
+    cur.execute(query)
+    retrabalho = cur.fetchall()
+
+    query = """SELECT op.id,r.data_reinspecao, op.codigo, op.peca, op.qt_apontada,r.nao_conformidades,op.cor,op.tipo,r.inspetor
+                FROM pcp.pecas_reinspecao as r
+                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
+                WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true AND r.status_pintura IS false
+            """
+    
+    cur.execute(query)
+    retrabalho = cur.fetchall()
+    
+    return render_template('retrabalho-pintura.html',retrabalho=retrabalho)
+
 @app.route('/consumir-tudo', methods=['POST'])
 def consumir_tudo():
     
@@ -5372,4 +5443,4 @@ def receber_dataframe():
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=80)

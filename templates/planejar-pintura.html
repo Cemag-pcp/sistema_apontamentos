@@ -68,9 +68,7 @@
                                     <th>Descrição</th>
                                     <th>Qt. planejada</th>
                                     <th>Cor</th>
-                                    <th>Qt. produzida</th>
-                                    <th>Cambão</th>
-                                    <th>Tipo</th>
+                                    <th>Máquina</th>
                                     <th>Codificação</th>
                                     <th>Planejar</th>
                                 </tr>
@@ -82,9 +80,7 @@
                                     <th>Descrição</th>
                                     <th>Qt. planejada</th>
                                     <th>Cor</th>
-                                    <th>Qt. produzida</th>
-                                    <th>Cambão</th>
-                                    <th>Tipo</th>
+                                    <th>Máquina</th>
                                     <th>Codificação</th>
                                     <th>Planejar</th>
                                 </tr>
@@ -98,10 +94,6 @@
                                         <td>{{ data[2] }}</td>
                                         <td>{{ data[3] }}</td>
                                         <td>{{ data[4] }}</td>
-                                        <td>
-                                            <input class="form-control" id='prod' type="number">
-                                        </td>
-                                        <td><input class="form-control" id='cambao' type="number" value="{{ data[6] }}"></td>
                                         <td>
                                             <select class="form-control" id='tipo' type="text" value="">
                                                 <option value=""></option>
@@ -430,7 +422,7 @@
                 // var qt_produzida = $(this).find('td:eq(9) input').val().trim(); // Obtém o valor da coluna 5
                 // console.log(qt_produzida);
                 
-                if ($(this).find('td:eq(9) input').prop('checked')) {
+                if ($(this).find('td:eq(7) input').prop('checked')) {
                     // Obtém os valores das outras colunas se necessário
                     var data = $(this).find('td:eq(0)').text().trim();
                     var codigo = $(this).find('td:eq(1)').text().trim();
@@ -450,13 +442,12 @@
                     } else if (cor === 'Amarelo') {
                         cor = 'AV'
                     }
-                    
-                    var qt_produzida = $(this).find('td:eq(5) input').val().trim();
-                    var tipo = $(this).find('td:eq(7) select').val();
-                    var codificacao = $(this).find('td:eq(8)').text().trim();
+
+                    var maquina = $(this).find('td:eq(5) select').val();
+                    var codificacao = $(this).find('td:eq(6)').text().trim();
 
                     // Adiciona os dados da linha ao array
-                    linhas.push({data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,tipo:tipo,dataPlanejamento:dataPlanejamento,codificacao:codificacao});
+                    linhas.push({data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,maquina:maquina,dataPlanejamento:dataPlanejamento,codificacao:codificacao});
 
                 }
                 else {
@@ -509,7 +500,7 @@
                 // var qt_produzida = $(this).find('td:eq(9) input').val().trim(); // Obtém o valor da coluna 5
                 // console.log(qt_produzida);
                 
-                if ($(this).find('td:eq(9) input').prop('checked')) {
+                if ($(this).find('td:eq(7) input').prop('checked')) {
                     // Obtém os valores das outras colunas se necessário
                     var data = $(this).find('td:eq(0)').text().trim();
                     var codigo = $(this).find('td:eq(1)').text().trim();
@@ -530,11 +521,10 @@
                         cor = 'AV'
                     }
                     
-                    var qt_produzida = $(this).find('td:eq(5) input').val().trim();
-                    var tipo = $(this).find('td:eq(7) select').val();
+                    var maquina = $(this).find('td:eq(5) select').val();
 
                     // Adiciona os dados da linha ao array
-                    linhas.push({data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,prod:qt_produzida,tipo:tipo,dataPlanejamento:dataPlanejamento});
+                    linhas.push({data:data,codigo:codigo,descricao:descricao,cor:cor,qt_itens:qt_planejada,maquina:maquina,dataPlanejamento:dataPlanejamento});
 
                 }
                 else {

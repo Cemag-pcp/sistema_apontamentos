@@ -1,6 +1,27 @@
 // Call the dataTables jQuery plugin
 $(document).ready(function() {
-  $('#dataTable').DataTable();
+  $('#dataTable').DataTable({
+    "info":false,
+    "aLengthMenu":[5,10,25],
+    "iDisplayLength":10,
+    order: [[0, 'desc']]
+  });
+});
+$(document).ready(function() {
+  $('#dataTableEmProcesso').DataTable({
+    "info":false,
+    "aLengthMenu":[5,10,25],
+    "iDisplayLength":10,
+    order: [[0, 'desc']]
+  });
+});
+$(document).ready(function() {
+  $('#dataTableFinalizada').DataTable({
+    "info":false,
+    "aLengthMenu":[5,10,25],
+    "iDisplayLength":10,
+    order: [[0, 'desc']]
+  });
 });
 
 $(document).ready(function() {
