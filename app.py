@@ -4776,10 +4776,47 @@ def consumir_item():
 
     return jsonify({"message":"Consumiu"})
 
-@app.route('/retrabalho-pintura', methods=['GET'])
+@app.route('/retrabalho-pintura', methods=['POST','GET'])
 def retrabalho_pintura():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if request.method == 'POST':
+
+        data = request.get_json()
+
+        query_update = """UPDATE pcp.pecas_reinspecao set status_pintura = 'true' where id = %s"""
+        cur.execute(query_update, (data['id'],))
+
+        conn.commit()
+
+        cur.close()
+        conn.close()
+
+        return jsonify({"message":"Liberada para reinspecionar"})
+
+
+    query = """SELECT op.id,r.data_reinspecao, op.codigo, op.peca, op.qt_apontada,r.nao_conformidades,op.cor,op.tipo,r.inspetor
+                FROM pcp.pecas_reinspecao as r
+                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
+                WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true AND r.status_pintura IS false
+            """
     
-    return render_template('retrabalho-pintura.html')
+    cur.execute(query)
+    retrabalho = cur.fetchall()
+
+    query = """SELECT op.id,r.data_reinspecao, op.codigo, op.peca, op.qt_apontada,r.nao_conformidades,op.cor,op.tipo,r.inspetor
+                FROM pcp.pecas_reinspecao as r
+                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
+                WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true AND r.status_pintura IS false
+            """
+    
+    cur.execute(query)
+    retrabalho = cur.fetchall()
+    
+    return render_template('retrabalho-pintura.html',retrabalho=retrabalho)
 
 @app.route('/consumir-tudo', methods=['POST'])
 def consumir_tudo():

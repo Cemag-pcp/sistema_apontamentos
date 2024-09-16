@@ -22,7 +22,7 @@ class Inspecao:
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true' WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
 
-            sql = """INSERT INTO pcp.pecas_reinspecao (id, nao_conformidades, causa_reinspecao, inspetor, setor) VALUES (%s, %s, %s, %s, %s)"""
+            sql = """INSERT INTO pcp.pecas_reinspecao (id, nao_conformidades, causa_reinspecao, inspetor, setor, status_pintura) VALUES (%s, %s, %s, %s, %s,'false')"""
             values = (id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor)
 
         elif setor == 'Solda' or setor == 'Estamparia':
@@ -220,10 +220,11 @@ class Inspecao:
         self.cur.execute(inspecionados)
         data_inspecionadas = self.cur.fetchall()
 
-        reinspecao = """SELECT r.*, op.peca, op.cor, op.tipo
+        reinspecao = """SELECT r.id,r.data_reinspecao,r.nao_conformidades,r.causa_reinspecao,r.inspetor,r.setor,r.conjunto,r.categoria,
+                            r.outra_causa,r.origem,r.observacao,r.excluidas,op.peca, op.cor, op.tipo
                         FROM pcp.pecas_reinspecao as r
                         LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
-                        WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true"""
+                        WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true AND r.status_pintura IS true"""
         
         self.cur.execute(reinspecao)
         data_reinspecao = self.cur.fetchall()
@@ -244,7 +245,8 @@ class Inspecao:
         self.cur.execute(inspecionados)
         data_inspecionadas = self.cur.fetchall()
 
-        reinspecao = """SELECT pr.*, pi.qt_apontada, pi2.operadores, pi2.inspetor, pi2.num_inspecao
+        reinspecao = """SELECT pr.id,pr.data_reinspecao,pr.nao_conformidades,pr.causa_reinspecao,pr.inspetor,pr.setor,pr.conjunto,pr.categoria,
+                            pr.outra_causa,pr.origem,pr.observacao,pr.excluidas, pi.qt_apontada, pi2.operadores, pi2.inspetor, pi2.num_inspecao
                         FROM pcp.pecas_reinspecao pr
                         LEFT JOIN pcp.pecas_inspecao pi ON pi.id = pr.id
                         LEFT JOIN pcp.pecas_inspecionadas pi2 ON pi.id = pi2.id_inspecao

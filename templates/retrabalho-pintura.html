@@ -17,7 +17,7 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Apontamento pintura - Retrabalho Pintura</h1>
+        <h1 class="h3 mb-0 text-gray-800">Retrabalho Pintura</h1>
     </div>
 
     <!-- Content Row -->
@@ -30,19 +30,6 @@
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <h6 class="m-0 font-weight-bold text-primary">Retrabalho Pintura</h6>
                 </div>
-                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <div class="form-row">
-                        <div class="col-sm">
-                            <div class="form-group">
-                                <label for="cor">Cor</label>
-                                <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
-                                <input list="listaCor" id="cor" class="form-control" data-column="5">
-                                <datalist id="listaCor">
-                                </datalist>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Card Body -->
                 <div class="card-body">
@@ -54,13 +41,12 @@
                                     <th>Data da reinspecao</th>
                                     <th>Código</th>
                                     <th>Peça</th>
-                                    <th>Qt. planejada</th>
+                                    <th>Qt. apontada</th>
+                                    <th>Ñ conformidades</th>
                                     <th>Cor</th>
-                                    <th>Qt. produzida</th>
-                                    <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th>Codificação</th>
-                                    <th>Status</th>
+                                    <th>Inspetor</th>
+                                    <th>Retrabalho</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -69,19 +55,39 @@
                                     <th>Data da reinspecao</th>
                                     <th>Código</th>
                                     <th>Peça</th>
-                                    <th>Qt. planejada</th>
+                                    <th>Qt. apontada</th>
+                                    <th>Ñ conformidades</th>
                                     <th>Cor</th>
-                                    <th>Qt. produzida</th>
-                                    <th>Cambão</th>
                                     <th>Tipo</th>
-                                    <th>Codificação</th>
-                                    <th>Status</th>
+                                    <th>Inspetor</th>
+                                    <th>Retrabalho</th>
                                 </tr>
                             </tfoot>
                             <tbody>
+                                {% if retrabalho %}
+                                {% for data in retrabalho %}
                                 <tr>
-                                    <td colspan="7">Nenhum dado disponível</td>
+                                    <td>{{ data[0] }}</td>
+                                    <td>{{ data[1] }}</td>
+                                    <td>{{ data[2] }}</td>
+                                    <td>{{ data[3] }}</td>
+                                    <td>{{ data[4] }}</td>
+                                    <td>{{ data[5] }}</td>
+                                    <td>{{ data[6] }}</td>
+                                    <td>{{ data[7] }}</td>
+                                    <td>{{ data[8] }}</td>
+                                    <td data-title="Exec"> 
+                                        <button class="btn btn-primary" data-toggle="modal" style="cursor: pointer;">
+                                            Iniciar
+                                        </button>
+                                    </td>
                                 </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="11">Nenhum dado disponível</td>
+                                </tr>
+                                {% endif %}
                             </tbody>
                         </table>
                     </div>
@@ -90,42 +96,98 @@
         </div>
 
     </div>
+            <div class="row">
 
-    <div class="row">
-        <div class="col-lg-12 mb-4">
-            <button id="abrirModalOperadorFinalizarCambao" type="button" class="btn btn-success">Enviar</button>
-        </div>
-
-    </div>
-
-    <div class="modal fade" id="operadorFinalizarCambao" tabindex="-1" role="dialog"
-        aria-labelledby="operadorFinalizarCambaoLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="operadorFinalizarCambaoLabel">Operador
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <select class="form-control" name="selectOperadorFinalizarCambao"
-                                id="selectOperadorFinalizarCambao">
-                                <option value=""></option>
-                                <option value="Lucas">Lucas</option>
-                                <option value="Fábio">Fábio</option>
-                            </select>
+                <!-- tabela gerar cambão -->
+                <div class="col-xl-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Em processo</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
+                                <table class="table table-bordered" id="dataTableEmProcesso" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th>#</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        <tr>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button id="btnFinalizarCambao" type="button" class="btn btn-success">Finalizar</button>
+                <div class="col-xl-6">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">10 últimos retrabalhos</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
+                                <table class="table table-bordered" id="dataTableFinalizada" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Data da reinspecao</th>
+                                            <th>Código</th>
+                                            <th>Peça</th>
+                                            <th>Qt. apontada</th>
+                                            <th>Ñ conformidades</th>
+                                            <th>Cor</th>
+                                            <th>Tipo</th>
+                                            <th>Inspetor</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Data da reinspecao</th>
+                                            <th>Código</th>
+                                            <th>Peça</th>
+                                            <th>Qt. apontada</th>
+                                            <th>Ñ conformidades</th>
+                                            <th>Cor</th>
+                                            <th>Tipo</th>
+                                            <th>Inspetor</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                        {% if retrabalho %}
+                                        {% for data in retrabalho %}
+                                        <tr>
+                                            <td>{{ data[0] }}</td>
+                                            <td>{{ data[1] }}</td>
+                                            <td>{{ data[2] }}</td>
+                                            <td>{{ data[3] }}</td>
+                                            <td>{{ data[4] }}</td>
+                                            <td>{{ data[5] }}</td>
+                                            <td>{{ data[6] }}</td>
+                                            <td>{{ data[7] }}</td>
+                                            <td>{{ data[8] }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="11">Nenhum dado disponível</td>
+                                        </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
     </div>
 
     <div class="loading" id="loading" style="display: none;">
@@ -143,5 +205,45 @@
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="static/js/demo/datatables-demo.js"></script>
+
+<script>
+    function confirmAndPost(id) {
+    // Exibe o confirm() e verifica se o usuário clicou em "OK"
+    if (confirm("Deseja concluir esse retrabalho?")) {
+        $('#loading').show();
+        // Se o usuário clicar em "Sim", faça um POST
+        fetch('retrabalho-pintura', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                // Inclua os dados que deseja enviar no POST
+                id: id // Exemplo de dado adicional
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao enviar retrabalho.');
+                $('#loading').hide();
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert("Retrabalho concluído com sucesso!");
+            console.log(data.message); // Lide com a resposta do servidor
+            location.reload()
+        })
+        .catch(error => {
+            alert("Ocorreu um erro: " + error.message);
+            console.error("Erro:", error);
+            $('#loading').hide();
+        });
+    } else {
+        // Caso o usuário clique em "Cancelar"
+        console.log("Ação cancelada pelo usuário.");
+    }
+}
+</script>
 
 {% endblock %}
