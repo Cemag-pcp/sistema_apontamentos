@@ -3910,7 +3910,7 @@ def buscar_dados():
     load_dotenv()  # Carrega as variáveis do arquivo .env
     # load_dotenv(override=True)
 
-    credentials = service_account.Credentials.from_service_account_info({
+    credentials_info = {
         "type": os.environ.get('GOOGLE_TYPE'),
         "project_id": os.environ.get('GOOGLE_PROJECT_ID'),
         "private_key_id": os.environ.get('GOOGLE_PRIVATE_KEY_ID'),
@@ -3922,7 +3922,10 @@ def buscar_dados():
         "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
         "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
         "universe_domain": os.environ.get('GOOGLE_UNIVERSE_DOMAIN')
-    },scopes=scope)
+    }
+
+    # Criar as credenciais a partir das informações da conta de serviço
+    credentials = service_account.Credentials.from_service_account_info(credentials_info, scopes=scope)
 
     # sa = gspread.service_account(credentials)
     sa = gspread.authorize(credentials)
@@ -4705,10 +4708,11 @@ def consuta_carreta_reuniao():
             linhas_expandidas.append(nova_linha)
     
     # Criando um novo DataFrame com as linhas expandidas
-    df_consumido = consulta_consumo_carretas()
+    df_consumido = consulta_consumo_carretas('Almox Mont Carretas')
+    df_consumido_pintura = consulta_consumo_carretas('Almox pintura')
 
     colunas = ['Chassi','Caçamba', 'Traseira', 'Plataforma','Fueiro',
-            'Cilindro', 'Eixo', 'Lateral', 'Dianteira ', 'Içamento', 'Tanque','5ª RODA', 'Eixo simples',
+            'Cilindro', 'Eixo', 'Lateral', 'Dianteira', 'Içamento', 'Tanque','5ª RODA', 'Eixo simples',
             'Eixo completo','Acessórios','Macaco','Intermed.']
 
     # Cria o DataFrame e adiciona as colunas, transformando o índice em coluna
@@ -4722,19 +4726,20 @@ def consuta_carreta_reuniao():
     df_agrupado_carretas = df_carretas.groupby('carreta').agg({'quantidade': 'sum'}).reset_index()
 
     df_necessidade = buscar_necessidade(df_agrupado_carretas,'Montagem')
+    df_necessidade_pintura = buscar_necessidade(df_agrupado_carretas,'Pintura')
 
-    df_estoque = consulta_saldo_estoque()
+    df_estoque = consulta_saldo_estoque('Almox Mont Carretas')
+    df_estoque_pintura = consulta_saldo_estoque('Almox Mont Carretas')
 
     df_planilha_saldo = buscar_planilha_saldo()
     
     # Executar a simulação sem acumular déficit de estoque
-    resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido,df_planilha_saldo)
+    resultado_carreta_unitario = simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,df_estoque,df_estoque_pintura,
+                                                          df_agrupado_carretas,df_consumido,df_consumido_pintura,df_planilha_saldo)
 
     # Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
-    for processo in df_necessidade['processo'].unique():
+    for processo in colunas:
         df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_unitario]
-    
-    print(df_carretas.columns)
     
     # Converter o novo DataFrame em uma lista de listas para serialização
     df_carretas_list = df_carretas.values.tolist()

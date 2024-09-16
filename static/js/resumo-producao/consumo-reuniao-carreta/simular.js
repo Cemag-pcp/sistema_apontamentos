@@ -56,7 +56,8 @@ function updateSearch(dataInicial,dataFinal) {
             } else if (index < 3) {
                 td.textContent = cell;
             } else {
-                td.setAttribute('title', "M: \n"+ cell + "\nP: ");
+                // td.setAttribute('title', "M: \n"+ cell + "\nP: ");
+                td.setAttribute('title', cell);
                 cell = String(cell)
 
                 cell = formatCellText(cell);
@@ -88,7 +89,8 @@ function updateSearch(dataInicial,dataFinal) {
                 }
     
                 // Define o conteúdo HTML da célula
-                td.innerHTML ="M:"+ cell + "<br>P: ";
+                // td.innerHTML ="M:"+ cell + "<br>P: ";
+                td.innerHTML = cell;
             }
     
             tr.appendChild(td);
