@@ -494,20 +494,19 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
                 # Conjunto já consumido na montagem
 
                 # Verificar se o conjunto já foi consumido na pintura
-                
-                # Codigo alterado para pintura
-                # df_necessidade_pintura = 
-                print(df_consumido_pintura)
-                consumido_pintura = df_consumido_pintura[(df_consumido_pintura['conjunto'] == conjunto & df_consumido_pintura['almoxarifado'] == 'Almox pintura')]['quantidade_consumida'].sum()
-                necessidade_restante_pintura = max(0, necessidade - consumido_pintura)
 
-                if necessidade_restante_pintura == 0:
-                    status_por_processo[processo] = 'OK'
-                else:
-                    status_por_processo[processo] = 'Pintar'                      
-                                
+                codigo_pintura = df_necessidade_pintura[df_necessidade_pintura['codigo'] == conjunto]['conjunto'][0]
+                consumido_pintura = df_consumido_pintura[df_consumido_pintura['conjunto'] == codigo_pintura]['quantidade_consumida'].sum()
+
+                print(consumido_pintura)
                 
+                if consumido_pintura == 0:
+                    status_por_processo[processo] = 'Pintar'                      
+                else:
+                    status_por_processo[processo] = 'OK'
+                                
                 continue
+            
             else:
                 saldo_atual = saldo_estoque.get(conjunto, 0)
                 if saldo_atual >= necessidade_restante:
