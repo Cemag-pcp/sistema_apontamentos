@@ -480,7 +480,7 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
             if necessidade_total == 0 or pd.isna(conjunto):
                 # Processo não existe na carreta ou conjunto inválido
                 continue
-
+            
             necessidade = necessidade_total / ajuste_quantidade
 
             consumido = df_consumido_carreta[df_consumido_carreta['conjunto'] == conjunto]['quantidade_consumida'].sum()
@@ -494,17 +494,17 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
                 # Conjunto já consumido na montagem
 
                 # Verificar se o conjunto já foi consumido na pintura
-
-                codigo_pintura = df_necessidade_pintura[df_necessidade_pintura['codigo'] == conjunto]['conjunto'][0]
-                consumido_pintura = df_consumido_pintura[df_consumido_pintura['conjunto'] == codigo_pintura]['quantidade_consumida'].sum()
-
-                print(consumido_pintura)
+                try:
+                    codigo_pintura = df_necessidade_pintura[df_necessidade_pintura['codigo'] == conjunto]['conjunto'][0]
+                    consumido_pintura = df_consumido_pintura[(df_consumido_pintura['conjunto'] == codigo_pintura) & (df_consumido_pintura['id_carreta'] == row_carreta['id_carreta'])]['quantidade_consumida'].sum()
+                except:
+                    consumido_pintura = 0
                 
                 if consumido_pintura == 0:
                     status_por_processo[processo] = 'Pintar'                      
                 else:
                     status_por_processo[processo] = 'OK'
-                                
+                        
                 continue
             
             else:
@@ -531,23 +531,22 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
                             descricao_extra = result['descricao']
                             quantidade_total = result['quantidade']
                             # Se a peça já está no dicionário, somar as quantidades
-                            if codigo in faltas_por_processo[processo]:
-                                faltas_por_processo[processo][codigo]['quantidade'] += quantidade_total
-                            else:
-                                faltas_por_processo[processo][codigo] = {
-                                    'descricao': descricao_extra,
-                                    'quantidade': quantidade_total
-                                }
+                            # if codigo in faltas_por_processo[processo]:
+                            #     faltas_por_processo[processo][codigo]['quantidade'] += quantidade_total
+                            # else:
+                            faltas_por_processo[processo][codigo] = {
+                                'descricao': descricao_extra,
+                                'quantidade': quantidade_total
+                            }
                     else:
                         # Se não houver detalhes das peças faltantes, indicar que o conjunto está faltando
-                        if processo not in faltas_por_processo:
-                            faltas_por_processo[processo] = {}
-                        faltas_por_processo[processo][conjunto] = {
-                            'descricao': row_necessidade['conjunto_desc'],
-                            'quantidade': necessidade_restante
-                        }
-                    # Atualizar o status para indicar que há faltas
-                    status_por_processo[processo] = None  # Indica que haverá peças faltantes listadas
+                        # if processo not in faltas_por_processo:
+                        #     faltas_por_processo[processo] = {}
+                        # faltas_por_processo[processo][conjunto] = {
+                        #     'Montar'
+                        # }
+                        # Atualizar o status para indicar que há faltas
+                        status_por_processo[processo] = 'Montar'  # Indica que contém as peças em estoque mas o conjunto nao foi apontado
 
         # Construir o resultado final para cada processo
         faltas_concatenadas = {}
@@ -576,6 +575,7 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
         resultado_por_carreta.append(faltas_concatenadas)
 
     return resultado_por_carreta
+
 
 
 # df_carretas = df_carretas.iloc[0:1,:]
