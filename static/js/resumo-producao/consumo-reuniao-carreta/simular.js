@@ -56,23 +56,41 @@ function updateSearch(dataInicial,dataFinal) {
             } else if (index < 3) {
                 td.textContent = cell;
             } else {
-                td.setAttribute('title', "M: \n"+ cell + "\nP: ");
+                // td.setAttribute('title', "M: \n"+ cell + "\nP: ");
+                td.setAttribute('title', cell);
                 cell = String(cell)
 
                 cell = formatCellText(cell);
 
+                console.log(cell)
                 if (cell.includes('Já consumido')) {
-                    cell = cell.replace(/Já consumido/g, '<br><i class="fas fa-check-circle" style="color:green"></i> OK');
-                } 
-                if (cell.includes('Em estoque')) {
-                    cell = cell.replace(/Em estoque -/g, '<br><i class="fas fa-box" style="color:orange"></i> ');
+                    // Expressão regular para capturar todas as ocorrências de "Já consumido" com quantidade e código
+                    cell = cell.replace(/Já consumido\s(\d+\.\d+)\s-\s(\d{6})/g, function(_, quantity, code) {
+                        return `<br><a href="#" data-toggle="modal" data-target="#modalPecas" data-code="${code}" data-quantity="${quantity}">
+                                    <i class="fas fa-check-circle" style="color:green"></i> ${code} - ${quantity}
+                                </a> OK`;
+                    });
                 }
-                if (cell.includes('Falta')) { 
-                    cell = cell.replace(/Falta/g, '<br><i class="fas fa-exclamation-triangle" style="color:red"></i> ');
+                if (cell.includes('Em estoque')) {
+                    // Expressão regular para capturar todas as ocorrências de "Em estoque" com quantidade e código
+                    cell = cell.replace(/Em estoque\s-\s(\d+\.\d+)\s-\s(\d{6})/g, function(_, quantity, code) {
+                        return `<br><a href="#" data-toggle="modal" data-target="#modalPecas" data-code="${code}" data-quantity="${quantity}">
+                                    <i class="fas fa-box" style="color:orange"></i> ${code} - ${quantity}
+                                </a>`;
+                    });
+                }
+                if (cell.includes('Falta')) {
+                    // Expressão regular para capturar todas as ocorrências de "Falta" com quantidade e código
+                    cell = cell.replace(/Falta\s(\d+\.\d+)\s-\s(\d{6})/g, function(_, quantity, code) {
+                        return `<br><a href="#" data-toggle="modal" data-target="#modalPecas" data-code="${code}" data-quantity="${quantity}">
+                                    <i class="fas fa-exclamation-triangle" style="color:red"></i> ${code} - ${quantity}
+                                </a>`;
+                    });
                 }
     
                 // Define o conteúdo HTML da célula
-                td.innerHTML ="M:"+ cell + "<br>P: ";
+                // td.innerHTML ="M:"+ cell + "<br>P: ";
+                td.innerHTML = cell;
             }
     
             tr.appendChild(td);

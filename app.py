@@ -3939,7 +3939,7 @@ def buscar_dados():
     load_dotenv()  # Carrega as variáveis do arquivo .env
     # load_dotenv(override=True)
 
-    credentials = service_account.Credentials.from_service_account_info({
+    credentials_info = {
         "type": os.environ.get('GOOGLE_TYPE'),
         "project_id": os.environ.get('GOOGLE_PROJECT_ID'),
         "private_key_id": os.environ.get('GOOGLE_PRIVATE_KEY_ID'),
@@ -3951,7 +3951,10 @@ def buscar_dados():
         "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
         "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
         "universe_domain": os.environ.get('GOOGLE_UNIVERSE_DOMAIN')
-    },scopes=scope)
+    }
+
+    # Criar as credenciais a partir das informações da conta de serviço
+    credentials = service_account.Credentials.from_service_account_info(credentials_info, scopes=scope)
 
     # sa = gspread.service_account(credentials)
     sa = gspread.authorize(credentials)
@@ -4683,6 +4686,8 @@ def verificarConjuntosFaltantes(id,carreta):
 
     return
 
+# --------- INICIO CONSUMO E CONSULTA -----------
+
 @app.route('/consultar-carreta-reuniao', methods=['POST'])
 def consuta_carreta_reuniao():
     data = request.get_json()
@@ -4732,14 +4737,17 @@ def consuta_carreta_reuniao():
             linhas_expandidas.append(nova_linha)
     
     # Criando um novo DataFrame com as linhas expandidas
-    df_consumido = consulta_consumo_carretas()
+    df_consumido = consulta_consumo_carretas('Almox Mont Carretas')
+    df_consumido_pintura = consulta_consumo_carretas('Almox pintura')
 
     colunas = ['Chassi','Caçamba', 'Traseira', 'Plataforma','Fueiro',
-            'Cilindro', 'Eixo', 'Lateral', 'Dianteira ', 'Içamento', 'Tanque','5ª RODA', 'Eixo simples',
+            'Cilindro', 'Eixo', 'Lateral', 'Dianteira', 'Içamento', 'Tanque','5ª RODA', 'Eixo simples',
             'Eixo completo','Acessórios','Macaco','Intermed.']
 
     # Cria o DataFrame e adiciona as colunas, transformando o índice em coluna
     df_carretas = pd.DataFrame(linhas_expandidas).assign(**{col: '' for col in colunas})
+    
+    print(df_carretas)
 
     df_carretas = df_carretas.sort_values(by=['PED_PREVISAOEMISSAODOC','Carreta Trat'], ascending=[True, True])
     
@@ -4749,17 +4757,21 @@ def consuta_carreta_reuniao():
     df_agrupado_carretas = df_carretas.groupby('carreta').agg({'quantidade': 'sum'}).reset_index()
 
     df_necessidade = buscar_necessidade(df_agrupado_carretas,'Montagem')
+    df_necessidade_pintura = buscar_necessidade(df_agrupado_carretas,'Pintura')
 
-    df_estoque = consulta_saldo_estoque()
+    df_estoque = consulta_saldo_estoque('Almox Mont Carretas')
+    df_estoque_pintura = consulta_saldo_estoque('Almox Mont Carretas')
+
+    df_planilha_saldo = buscar_planilha_saldo()
     
     # Executar a simulação sem acumular déficit de estoque
-    resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
+    df_carretas = df_carretas.iloc[:2,:]
+    resultado_carreta_unitario = simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,df_estoque,df_estoque_pintura,
+                                                          df_agrupado_carretas,df_consumido,df_consumido_pintura,df_planilha_saldo)
 
     # Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
-    for processo in df_necessidade['processo'].unique():
+    for processo in colunas:
         df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_unitario]
-    
-    print(df_carretas.columns)
     
     # Converter o novo DataFrame em uma lista de listas para serialização
     df_carretas_list = df_carretas.values.tolist()
@@ -4828,6 +4840,45 @@ def consumir_tudo():
         resultado = consumir_db(data['numeroSerie'], data['carreta'])
 
     return jsonify({"message":"Consumiu tudo"})
+
+@app.route('/consultar-pecas-conjuntos', methods=['GET'])
+def consultar_pecas_conjuntos():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    code = request.args.get('code')  # '031290'
+    quantity = request.args.get('quantity')  # 1.0
+
+    query = """ SELECT DISTINCT codigo,descricao,quantidade
+        FROM pcp.tb_base_carretas_explodidas
+        WHERE conjunto = %s """
+    
+    cur.execute(query,(code,))
+    pecas = cur.fetchall()
+
+    df = pd.DataFrame(pecas)
+    df.columns = ['codigo', 'descricao', 'quantidade']
+    df['quantidade'] = pd.to_numeric(df['quantidade'], errors='coerce')
+
+    tabela_saldo = buscar_planilha_saldo()
+    tabela_saldo['Saldo'] = pd.to_numeric(tabela_saldo['Saldo'], errors='coerce')
+    tabela_saldo = tabela_saldo.rename(columns={'codigo_peca': 'codigo'})
+
+    merged_df = pd.merge(df, tabela_saldo, on='codigo', how='left')
+
+    merged_df.fillna(0, inplace=True)
+        
+    result = merged_df[merged_df['quantidade'] > merged_df['Saldo']]
+
+    print(result)
+
+    result_list = result.values.tolist()
+
+    return jsonify(result_list)
+
+# --------- FIM CONSUMO E CONSULTA -----------
 
 @app.route('/resumos-geral')
 def tabela_resumos():
@@ -5443,4 +5494,4 @@ def receber_dataframe():
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=5000, debug=True)
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=8000, debug=True)
