@@ -8,7 +8,7 @@ DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
 
-def atualizar_saldo(itens_json):
+def atualizar_saldo(itens_json,conn,cur):
     
     codigo = itens_json['codigo']
     descricao = itens_json['descricao']

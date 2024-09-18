@@ -77,7 +77,7 @@
                                     <td>{{ data[7] }}</td>
                                     <td>{{ data[8] }}</td>
                                     <td data-title="Exec"> 
-                                        <button class="btn btn-primary" data-toggle="modal" style="cursor: pointer;">
+                                        <button class="btn btn-primary" data-toggle="modal" style="cursor: pointer;" onclick="iniciarProcesso('{{data[0]}}')">
                                             Iniciar
                                         </button>
                                     </td>
@@ -95,11 +95,12 @@
             </div>
         </div>
 
-    </div>
+    </div>  
             <div class="row">
 
                 <!-- tabela gerar cambão -->
                 <div class="col-xl-6">
+                    <h1 class="h3 mb-4 text-gray-800">Em processo</h1>
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-primary">Em processo</h6>
@@ -110,17 +111,50 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
+                                            <th>Data início</th>
+                                            <th>Código</th>
+                                            <th>Peça</th>
+                                            <th>Qt. Apontada</th>
+                                            <th>Cor</th>
+                                            <th>Tipo</th>
+                                            <th>Finalizar</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
                                         <tr>
                                             <th>#</th>
+                                            <th>Data início</th>
+                                            <th>Código</th>
+                                            <th>Peça</th>
+                                            <th>Qt. Apontada</th>
+                                            <th>Cor</th>
+                                            <th>Tipo</th>
+                                            <th>Finalizar</th>
                                         </tr>
                                     </tfoot>
                                     <tbody>
+                                        {% if em_processo %}
+                                        {% for data in em_processo %}
                                         <tr>
-                                            <td></td>
+                                            <td>{{ data[0] }}</td>
+                                            <td>{{ data[1] }}</td>
+                                            <td>{{ data[2] }}</td>
+                                            <td>{{ data[3] }}</td>
+                                            <td>{{ data[4] }}</td>
+                                            <td>{{ data[5] }}</td>
+                                            <td>{{ data[6] }}</td>
+                                            <td data-title="Exec"> 
+                                                <button class="btn btn-primary" data-toggle="modal" style="cursor: pointer;" onclick="finalizarRetrabalho('{{data[0]}}')">
+                                                    Finalizar
+                                                </button>
+                                            </td>
                                         </tr>
+                                        {% endfor %}
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="11">Nenhum dado disponível</td>
+                                        </tr>
+                                        {% endif %}
                                     </tbody>
                                 </table>
                             </div>
@@ -128,9 +162,10 @@
                     </div>
                 </div>
                 <div class="col-xl-6">
+                    <h1 class="h3 mb-4 text-gray-800">5 últimos retrabalhos</h1>
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                            <h6 class="m-0 font-weight-bold text-primary">10 últimos retrabalhos</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">5 últimos retrabalhos</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
@@ -145,7 +180,6 @@
                                             <th>Ñ conformidades</th>
                                             <th>Cor</th>
                                             <th>Tipo</th>
-                                            <th>Inspetor</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
@@ -158,24 +192,22 @@
                                             <th>Ñ conformidades</th>
                                             <th>Cor</th>
                                             <th>Tipo</th>
-                                            <th>Inspetor</th>
                                         </tr>
                                     </tfoot>
                                     <tbody>
-                                        {% if retrabalho %}
-                                        {% for data in retrabalho %}
-                                        <tr>
-                                            <td>{{ data[0] }}</td>
-                                            <td>{{ data[1] }}</td>
-                                            <td>{{ data[2] }}</td>
-                                            <td>{{ data[3] }}</td>
-                                            <td>{{ data[4] }}</td>
-                                            <td>{{ data[5] }}</td>
-                                            <td>{{ data[6] }}</td>
-                                            <td>{{ data[7] }}</td>
-                                            <td>{{ data[8] }}</td>
-                                        </tr>
-                                        {% endfor %}
+                                        {% if ultimos_retrabalhos %}
+                                            {% for data in ultimos_retrabalhos %}
+                                            <tr>
+                                                <td>{{ data[0] }}</td>
+                                                <td>{{ data[1] }}</td>
+                                                <td>{{ data[2] }}</td>
+                                                <td>{{ data[3] }}</td>
+                                                <td>{{ data[4] }}</td>
+                                                <td>{{ data[5] }}</td>
+                                                <td>{{ data[6] }}</td>
+                                                <td>{{ data[7] }}</td>
+                                            </tr>
+                                            {% endfor %}
                                         {% else %}
                                         <tr>
                                             <td colspan="11">Nenhum dado disponível</td>
@@ -207,7 +239,7 @@
 <script src="static/js/demo/datatables-demo.js"></script>
 
 <script>
-    function confirmAndPost(id) {
+    function finalizarRetrabalho(id) {
     // Exibe o confirm() e verifica se o usuário clicou em "OK"
     if (confirm("Deseja concluir esse retrabalho?")) {
         $('#loading').show();
@@ -231,6 +263,44 @@
         })
         .then(data => {
             alert("Retrabalho concluído com sucesso!");
+            console.log(data.message); // Lide com a resposta do servidor
+            location.reload()
+        })
+        .catch(error => {
+            alert("Ocorreu um erro: " + error.message);
+            console.error("Erro:", error);
+            $('#loading').hide();
+        });
+    } else {
+        // Caso o usuário clique em "Cancelar"
+        console.log("Ação cancelada pelo usuário.");
+    }
+}
+
+function iniciarProcesso(id) {
+    // Exibe o confirm() e verifica se o usuário clicou em "OK"
+    if (confirm("Deseja iniciar o processo de retrabalho?")) {
+        $('#loading').show();
+        // Se o usuário clicar em "Sim", faça um POST
+        fetch('retrabalho-em-processo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                // Inclua os dados que deseja enviar no POST
+                id: id // Exemplo de dado adicional
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao enviar retrabalho.');
+                $('#loading').hide();
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert("Início de processo concluído com sucesso!");
             console.log(data.message); // Lide com a resposta do servidor
             location.reload()
         })
