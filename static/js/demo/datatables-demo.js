@@ -1,12 +1,12 @@
 // Call the dataTables jQuery plugin
-$(document).ready(function() {
-  $('#dataTable').DataTable({
-    "info":false,
-    "aLengthMenu":[5,10,25],
-    "iDisplayLength":10,
-    order: [[0, 'desc']]
-  });
-});
+// $(document).ready(function() {
+//   $('#dataTable').DataTable({
+//     "info":false,
+//     "aLengthMenu":[5,10,25],
+//     "iDisplayLength":10,
+//     order: [[0, 'desc']]
+//   });
+// });
 $(document).ready(function() {
   $('#dataTableEmProcesso').DataTable({
     "info":false,
@@ -20,7 +20,7 @@ $(document).ready(function() {
     "info":false,
     "aLengthMenu":[5,10,25],
     "iDisplayLength":10,
-    order: [[0, 'desc']]
+    order: [[1, 'desc']]
   });
 });
 

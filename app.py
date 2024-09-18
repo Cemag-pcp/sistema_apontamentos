@@ -438,6 +438,15 @@ def receber_dados_finalizar_cambao():
                 dado['tipo']
             )
             cursor.execute(sql, values)
+                
+            itens_json = {
+                        'codigo':dado['codigo'],
+                        'descricao':dado['descricao'],
+                        'quantidade':dado['prod'],
+                        'almoxarifado':'Almox Pintura'
+                        }
+            
+            atualizar_saldo(itens_json,conn,cursor)
 
         # Commit para aplicar as alterações
         conn.commit()
@@ -4800,6 +4809,13 @@ def retrabalho_pintura():
         query_update = """UPDATE pcp.pecas_reinspecao set status_pintura = 'true' where id = %s"""
         cur.execute(query_update, (data['id'],))
 
+        query_update_em_processo = """
+                                    UPDATE pcp.pecas_retrabalho_em_processo 
+                                    SET em_processo = 'false', data_fim = NOW() 
+                                    WHERE id = %s
+                                   """
+        cur.execute(query_update_em_processo, (data['id'],))
+
         conn.commit()
 
         cur.close()
@@ -4808,25 +4824,63 @@ def retrabalho_pintura():
         return jsonify({"message":"Liberada para reinspecionar"})
 
 
-    query = """SELECT op.id,r.data_reinspecao, op.codigo, op.peca, op.qt_apontada,r.nao_conformidades,op.cor,op.tipo,r.inspetor
-                FROM pcp.pecas_reinspecao as r
+    query = """SELECT op.id, r.data_reinspecao, op.codigo, op.peca, op.qt_apontada, r.nao_conformidades, op.cor, op.tipo, r.inspetor
+                    FROM pcp.pecas_reinspecao as r
                 LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
-                WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true AND r.status_pintura IS false
+                LEFT JOIN pcp.pecas_retrabalho_em_processo as prep ON prep.id = r.id
+                WHERE r.setor = 'Pintura' 
+                    AND r.excluidas = false 
+                    AND r.status_pintura = false 
+                    AND (prep.id IS NULL OR prep.em_processo <> true);
             """
     
     cur.execute(query)
     retrabalho = cur.fetchall()
 
-    query = """SELECT op.id,r.data_reinspecao, op.codigo, op.peca, op.qt_apontada,r.nao_conformidades,op.cor,op.tipo,r.inspetor
-                FROM pcp.pecas_reinspecao as r
-                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
-                WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true AND r.status_pintura IS false
-            """
+    query_em_processo = """SELECT op.id,prep.data_inicio, op.codigo, op.peca, op.qt_apontada,op.cor,op.tipo
+                        FROM pcp.pecas_retrabalho_em_processo as prep
+                        LEFT JOIN pcp.ordens_pintura as op ON prep.id = op.id::varchar
+                        WHERE prep.em_processo = 'true'
+                        """
     
-    cur.execute(query)
-    retrabalho = cur.fetchall()
+    cur.execute(query_em_processo)
+    em_processo = cur.fetchall()
+
+    query_ultimos_retrabalhos = """SELECT op.id,r.data_reinspecao, op.codigo, op.peca, op.qt_apontada,op.cor,op.tipo,r.inspetor
+                                        FROM pcp.pecas_reinspecao as r
+                                    LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
+                                    LEFT JOIN pcp.pecas_retrabalho_em_processo as prep ON prep.id = r.id
+                                    WHERE r.setor = 'Pintura' AND r.excluidas <> true AND r.status_pintura = true AND prep.em_processo = false
+                                    ORDER BY r.data_reinspecao DESC
+                                    LIMIT 5
+                                """
     
-    return render_template('retrabalho-pintura.html',retrabalho=retrabalho)
+    cur.execute(query_ultimos_retrabalhos)
+    ultimos_retrabalhos = cur.fetchall()
+    
+    return render_template('retrabalho-pintura.html',retrabalho=retrabalho,em_processo=em_processo,ultimos_retrabalhos=ultimos_retrabalhos)
+
+@app.route('/retrabalho-em-processo', methods=['POST'])
+def retrabalho_em_processo():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+
+    id = data['id']
+
+    query_insert = """INSERT INTO pcp.pecas_retrabalho_em_processo (id,em_processo) VALUES (%s,'true')"""
+    
+    cur.execute(query_insert,(id,))
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+    return jsonify({"message":"Em processo"})
 
 @app.route('/consumir-tudo', methods=['POST'])
 def consumir_tudo():
