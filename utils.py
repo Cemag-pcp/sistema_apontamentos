@@ -495,7 +495,7 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
 
                 # Verificar se o conjunto já foi consumido na pintura
                 try:
-                    codigo_pintura = df_necessidade_pintura[df_necessidade_pintura['codigo'] == conjunto]['conjunto'][0]
+                    codigo_pintura = df_necessidade_pintura[df_necessidade_pintura['codigo'] == conjunto].reset_index(drop=True)['conjunto'][0]
                     consumido_pintura = df_consumido_pintura[(df_consumido_pintura['conjunto'] == codigo_pintura) & (df_consumido_pintura['id_carreta'] == row_carreta['id_carreta'])]['quantidade_consumida'].sum()
                 except:
                     consumido_pintura = 0

@@ -4747,8 +4747,6 @@ def consuta_carreta_reuniao():
     # Cria o DataFrame e adiciona as colunas, transformando o índice em coluna
     df_carretas = pd.DataFrame(linhas_expandidas).assign(**{col: '' for col in colunas})
     
-    print(df_carretas)
-
     df_carretas = df_carretas.sort_values(by=['PED_PREVISAOEMISSAODOC','Carreta Trat'], ascending=[True, True])
     
     df_carretas = df_carretas.rename(columns={'Carreta Trat':'carreta','PED_QUANTIDADE':'quantidade','PED_PREVISAOEMISSAODOC':'data',
@@ -4765,7 +4763,7 @@ def consuta_carreta_reuniao():
     df_planilha_saldo = buscar_planilha_saldo()
     
     # Executar a simulação sem acumular déficit de estoque
-    df_carretas = df_carretas.iloc[:2,:]
+    # df_carretas = df_carretas.iloc[:2,:]
     resultado_carreta_unitario = simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,df_estoque,df_estoque_pintura,
                                                           df_agrupado_carretas,df_consumido,df_consumido_pintura,df_planilha_saldo)
 
