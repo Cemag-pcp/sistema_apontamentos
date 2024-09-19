@@ -1211,8 +1211,8 @@ def inspecao_estamparia():
                 cur.execute(insert_ficha_inspecao, (id_inspecao, row[0], row[1], row[2], row[3]))
 
         conn.commit()
-        cur.close()
-        conn.close()
+        # cur.close()
+        # conn.close()
 
         return jsonify("Success")
         
