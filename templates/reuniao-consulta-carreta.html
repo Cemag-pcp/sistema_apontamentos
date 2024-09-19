@@ -64,21 +64,19 @@
                 <div class="m-2" style="display: flex; justify-content: flex-end; gap: 20px;">
                     <div class="col-6-sm mb-3">
                         <div class="d-flex justify-content-between align-items-baseline" style="gap: 5px;">
-                            <label for="recursoFiltro">Já consumido</label>
-                            <i class="fas fa-check-circle" style="color:green"></i>
+                            <label for="recursoFiltro"><strong>Montar: </strong>Conjunto ainda não apontado, mas há peças em estoque</label>
+                            <!-- <i class="fas fa-check-circle" style="color:green"></i> -->
                         </div>
                         <div class="d-flex justify-content-between align-items-baseline" style="gap: 5px;">
-                            <label for="recursoFiltro">Em estoque</label>
-                            <i class="fas fa-box" style="color:orange"></i>
+                            <label for="recursoFiltro"><strong>Pintar: </strong>Consumido do almox da montagem</label>
+                            <!-- <i class="fas fa-box" style="color:orange"></i> -->
                         </div>
                         <div class="d-flex justify-content-between align-items-baseline" style="gap: 5px;">
-                            <label for="recursoFiltro">Falta</label>
-                            <i class="fas fa-exclamation-triangle" style="color:red"></i>
+                            <label for="recursoFiltro"><i class="fas fa-exclamation-triangle" style="color:red"></i> Não há peças em estoque</label>
                         </div>
                     </div>
                     <div class="col-6-sm mb-3">
-                        <label for="recursoFiltro">Filtro Recurso:</label>
-                        <input type="text" id="recursoFiltro" class="form-control" placeholder="Filtrar recurso">
+                        <input type="text" id="recursoFiltro" class="form-control" placeholder="Filtrar carreta">
                     </div>
                 </div>
                 <div class="table-body" id="consultaTable">

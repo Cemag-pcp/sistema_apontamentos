@@ -437,16 +437,17 @@ def receber_dados_finalizar_cambao():
                 dado['prod'],
                 dado['tipo']
             )
+            
             cursor.execute(sql, values)
                 
             itens_json = {
                         'codigo':dado['codigo'],
                         'descricao':dado['descricao'],
                         'quantidade':dado['prod'],
-                        'almoxarifado':'Almox Pintura'
+                        'almoxarifado':'Almox pintura'
                         }
             
-            atualizar_saldo(itens_json,conn,cursor)
+            atualizar_saldo(itens_json,)
 
         # Commit para aplicar as alterações
         conn.commit()
@@ -2227,8 +2228,6 @@ def finalizar_peca_em_processo_montagem():
     data_finalizacao = datetime.now().date().strftime("%Y-%m-%d")
     origem = data['origem']
 
-    # print(textAreaObservacao)
-
     query = """ 
             INSERT INTO pcp.ordens_montagem (celula,codigo,peca,qt_apontada,data_carga,data_finalizacao,operador,observacao,codificacao,origem,data_hora_inicio)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
@@ -2264,7 +2263,7 @@ def finalizar_peca_em_processo_montagem():
                 'almoxarifado':'Almox Mont Carretas'
                 }
 
-    # atualizar_saldo(itens_json)
+    atualizar_saldo(itens_json,)
 
     return 'sucess'
 

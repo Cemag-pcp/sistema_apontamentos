@@ -64,7 +64,7 @@ def buscar_planilha_saldo():
     return tabela_saldo_mont
 
 def atualizar_saldo(itens_json):
-    
+
     codigo = itens_json['codigo']
     descricao = itens_json['descricao']
     almoxarifado = itens_json['almoxarifado']
@@ -194,68 +194,73 @@ def registrar_consumo_batch(conn, atualizacoes):
     conn.commit()
     cur.close()
 
-def consumir_db(id_carreta, carreta, almoxarifado='Almox Mont Carretas'):
+def consumir_db(id_carreta, carreta):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-    
     cur = conn.cursor()
-    
-    # Consulta todos os conjuntos necessários para a carreta de uma vez
-    cur.execute("""
-        SELECT distinct(conjunto), processo, qt_conjunto 
-        FROM pcp.tb_base_carretas_explodidas 
-        WHERE carreta = %s
-    """, (carreta,))
-    
-    necessidade = cur.fetchall()
-    cur.close()
 
-    conjuntos = [item[0] for item in necessidade]
+    setores_almox = {
+        'Montagem': 'Almox Mont Carretas',
+        'Pintura': 'Almox pintura'
+    }
 
-    # Verificar consumo e saldo de todos os itens
-    saldos = consulta_saldo_batch(conn, almoxarifado, conjuntos)
-    consumos = verificar_consumo_previo_batch(conn, id_carreta, almoxarifado, conjuntos)
-
-    atualizacoes_saldo = []
-    atualizacoes_consumo = []
     resultado_faltante = {}
 
-    # Itera sobre os itens necessários e consome do estoque
-    for item in necessidade:
-        conjunto = item[0]
-        processo = item[1]
-        qt_conjunto = item[2]
+    for setor, almoxarifado in setores_almox.items():
+        # Consulta todos os conjuntos necessários para a carreta, filtrando por setor
+        cur.execute("""
+            SELECT DISTINCT conjunto, processo, qt_conjunto
+            FROM pcp.tb_base_carretas_explodidas
+            WHERE carreta = %s AND setor = %s
+        """, (carreta, setor))
 
-        consumo_previo = consumos.get(conjunto, 0)
-        qt_restante = qt_conjunto - consumo_previo
+        necessidade = cur.fetchall()
+        conjuntos = [item[0] for item in necessidade]
 
-        if qt_restante <= 0:
-            # Se já foi totalmente consumido, não fazer nada
-            continue
+        # Verificar consumo e saldo de todos os itens
+        saldos = consulta_saldo_batch(conn, almoxarifado, conjuntos)
+        consumos = verificar_consumo_previo_batch(conn, id_carreta, almoxarifado, conjuntos)
 
-        saldo_disponivel = saldos.get(conjunto, 0)
+        atualizacoes_saldo = []
+        atualizacoes_consumo = []
 
-        if saldo_disponivel >= qt_restante:
-            # Se houver saldo suficiente, consome a quantidade necessária
-            atualizacoes_saldo.append((qt_restante, conjunto, almoxarifado))
-            atualizacoes_consumo.append((id_carreta, carreta, conjunto, processo, qt_restante, almoxarifado))
-        else:
-            # Se o saldo for insuficiente, consome o que for possível
-            if saldo_disponivel > 0:
-                atualizacoes_saldo.append((saldo_disponivel, conjunto, almoxarifado))
-                atualizacoes_consumo.append((id_carreta, carreta, conjunto, processo, saldo_disponivel, almoxarifado))
+        # Itera sobre os itens necessários e consome do estoque
+        for item in necessidade:
+            conjunto = item[0]
+            processo = item[1]
+            qt_conjunto = item[2]
 
-            faltante = qt_restante - saldo_disponivel
-            if processo not in resultado_faltante:
-                resultado_faltante[processo] = []
-            resultado_faltante[processo].append(f"Falta {faltante} do conjunto {conjunto}")
+            consumo_previo = consumos.get(conjunto, 0)
+            qt_restante = qt_conjunto - consumo_previo
 
-    # Atualiza o saldo e o consumo em batch
-    abater_saldo_batch(conn, atualizacoes_saldo)
-    registrar_consumo_batch(conn, atualizacoes_consumo)
+            if qt_restante <= 0:
+                # Se já foi totalmente consumido, não fazer nada
+                continue
 
+            saldo_disponivel = saldos.get(conjunto, 0)
+
+            if saldo_disponivel >= qt_restante:
+                # Se houver saldo suficiente, consome a quantidade necessária
+                atualizacoes_saldo.append((qt_restante, conjunto, almoxarifado))
+                atualizacoes_consumo.append((id_carreta, carreta, conjunto, processo, qt_restante, almoxarifado))
+            else:
+                # Se o saldo for insuficiente, consome o que for possível
+                if saldo_disponivel > 0:
+                    atualizacoes_saldo.append((saldo_disponivel, conjunto, almoxarifado))
+                    atualizacoes_consumo.append((id_carreta, carreta, conjunto, processo, saldo_disponivel, almoxarifado))
+
+                faltante = qt_restante - saldo_disponivel
+                if processo not in resultado_faltante:
+                    resultado_faltante[processo] = []
+                resultado_faltante[processo].append(f"Falta {faltante} do conjunto {conjunto} no setor {setor}")
+
+        # Atualiza o saldo e o consumo em batch para o setor correspondente
+        abater_saldo_batch(conn, atualizacoes_saldo)
+        registrar_consumo_batch(conn, atualizacoes_consumo)
+
+    cur.close()
     conn.close()
 
-    # Retorna apenas o que ainda falta por processo
+    # Retorna o que ainda falta por processo e setor
     return resultado_faltante
 
 # Exemplo de uso:

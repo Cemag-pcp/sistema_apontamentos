@@ -6,7 +6,7 @@ function modalInspecaoEstamparia(id_inspecao,maquina,conjunto,quantidade,codigo)
     $('#inspecionarEstampariaLabel').text(id_inspecao)
 
     $("#inputMaquina_estamparia").val(maquina);
-    $("#inputConjunto_estamparia").val(conjunto);
+    $("#inputConjunto_estamparia").val(codigo + ' - ' + conjunto);
     $('#inputPecasProduzidas_estamparia').val(quantidade);
     $('#codigo_estamparia').val(codigo);
 
