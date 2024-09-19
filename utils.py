@@ -105,6 +105,7 @@ def atualizar_saldo(itens_json):
     # Commit para salvar as mudanças no banco
     conn.commit()
 
+
 def consulta_consumo_carretas(setor):
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
