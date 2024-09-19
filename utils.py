@@ -8,16 +8,16 @@ DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
 
-def atualizar_saldo(itens_json,conn,cur):
+def atualizar_saldo(itens_json,cur):
     
     codigo = itens_json['codigo']
     descricao = itens_json['descricao']
     almoxarifado = itens_json['almoxarifado']
     quantidade = float(itens_json['quantidade'])
     
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                        password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    # conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+    #                     password=DB_PASS, host=DB_HOST)
+    # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Verifica se o item já existe no saldo_recurso
     cur.execute("""
@@ -48,7 +48,7 @@ def atualizar_saldo(itens_json,conn,cur):
 
 
     # Commit para salvar as mudanças no banco
-    conn.commit()
+    # conn.commit()
 
 def consulta_consumo_carretas():
 

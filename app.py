@@ -446,7 +446,7 @@ def receber_dados_finalizar_cambao():
                         'almoxarifado':'Almox Pintura'
                         }
             
-            atualizar_saldo(itens_json,conn,cursor)
+            atualizar_saldo(itens_json,cursor)
 
         # Commit para aplicar as alterações
         conn.commit()
@@ -849,6 +849,9 @@ def planejar_pintura():
     """
     Rota para página de gerar cambão
     """
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     table = dados_sequenciamento()
     table['qt_produzida'] = ''
@@ -862,7 +865,16 @@ def planejar_pintura():
                    'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
     sheet_data = table.values.tolist()
 
-    return render_template('planejar-pintura.html', sheet_data=sheet_data)
+    query = """SELECT data_carga, data_finalizacao, celula, codigo, peca, SUM(qt_apontada) AS total_apontada
+                FROM pcp.ordens_montagem
+            WHERE data_finalizacao = CURRENT_DATE - INTERVAL '1 day'
+            GROUP BY data_carga, data_finalizacao, celula, codigo, peca;"""
+    
+    cur.execute(query)
+
+    ordens_montagem = cur.fetchall()
+
+    return render_template('planejar-pintura.html', sheet_data=sheet_data,ordens_montagem=ordens_montagem)
 
 # --------- INICIO INSPEÇÃO -----------
 
@@ -1073,7 +1085,8 @@ def inspecao_solda():
         if isinstance(item[1], datetime):
             item[1] = formatar_data(item[1])
 
-    query_inspecao = """SELECT pi.*, inspecao.celula, inspecao.codigo 
+    query_inspecao = """SELECT pi.id_inspecao,pi.data_inspecao,pi.total_conformidades,pi.inspetor,pi.setor,pi.num_inspecao,pi.conjunto,
+                        pi.origem,pi.observacao,pi.nao_conformidades,pi.operadores,inspecao.celula, inspecao.codigo 
                     FROM pcp.pecas_inspecionadas pi
                     LEFT JOIN pcp.pecas_inspecao inspecao ON pi.id_inspecao = inspecao.id
                     WHERE pi.setor = 'Solda' AND pi.num_inspecao = '0' """
@@ -1176,7 +1189,10 @@ def inspecao_estamparia():
         num_nao_conformidades = request.form.get('inputNaoConformidadesEstamparia')
 
         observacaoSolda = request.form.get('observacaoEstamparia')  
-        origemInspecaoSolda = request.form.get('origemInspecaoEstamparia')  
+        origemInspecaoSolda = request.form.get('origemInspecaoEstamparia')
+
+        qtd_mortas = request.form.get('qtd_pecas_mortas')  
+        motivo_mortas = request.form.get('motivo_pecas_mortas')  
 
         inspetoresSolda = request.form.get('inspetorEstamparia')
         num_pecas = request.form.get('num_pecas')
@@ -1188,6 +1204,8 @@ def inspecao_estamparia():
 
             retrabalhoSolda = request.form.get('retrabalhoSolda')
 
+            origemInspecaoSolda = ""
+
             classe_inspecao.alterar_reinspecao(id_inspecao,num_nao_conformidades,num_pecas,num_conformidades,list_causas,inspetoresSolda,setor,
                                inputConjunto,inputCategoria,outraCausaSolda,origemInspecaoSolda,observacaoSolda,retrabalhoSolda)
             return jsonify("Success")
@@ -1197,10 +1215,10 @@ def inspecao_estamparia():
                 classe_inspecao.inserir_reinspecao(id_inspecao,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
                                    inputCategoria,outraCausaSolda)
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas)
             else:
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas)
                 
             insert_ficha_inspecao = """
             INSERT INTO pcp.ficha_inspecao (id,num_inspecao,medida_a,medida_b,medida_c,medida_d) 
@@ -1210,8 +1228,6 @@ def inspecao_estamparia():
                 cur.execute(insert_ficha_inspecao, (id_inspecao, row[0], row[1], row[2], row[3]))
 
         conn.commit()
-        cur.close()
-        conn.close()
 
         return jsonify("Success")
         
