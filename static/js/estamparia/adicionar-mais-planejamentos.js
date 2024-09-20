@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="position-relative">
                         <select id="maquinaForaDoPlanejado_${pieceCount}" name="maquinaForaDoPlanejado_${pieceCount}" class="form-control">
                             <option value="" disabled selected>Selecione uma máquina</option>
+                            <option value="Viradeira 1">Viradeira 1</option>
+                            <option value="Viradeira 2">Viradeira 2</option>
                             <option value="Viradeira 3">Viradeira 3</option>
                             <option value="Viradeira 4">Viradeira 4</option>
                             <option value="Viradeira 5">Viradeira 5</option>

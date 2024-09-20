@@ -2522,7 +2522,7 @@ def enviar_arquivos_estamparia():
             print({"error": "O arquivo deve conter as colunas: peca, quantidade, maquina."})
             return {"error": "O arquivo deve conter as colunas: peca, quantidade, maquina."}, 400
 
-        maquinas_permitidas = {'Viradeira 3', 'Viradeira 4', 'Viradeira 5', 'Prensa'}
+        maquinas_permitidas = {'Viradeira 1','Viradeira 2','Viradeira 3', 'Viradeira 4', 'Viradeira 5', 'Prensa'}
         df = df[df['maquina'].isin(maquinas_permitidas)]
 
         if df.empty:

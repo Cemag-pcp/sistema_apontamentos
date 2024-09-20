@@ -63,28 +63,40 @@
                         </div>
                         <div class="row mb-2">
                             <div class="col mb-2"><button
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyMaquinaFilter(this, 'Viradeira 3')">Viradeira
-                                    3</button></div>
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                style="width: 149px; height: 62px;"
+                                onclick="applyMaquinaFilter(this, 'Viradeira 1')">Viradeira
+                                1</button></div>
                             <div class="col mb-2"><button
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyMaquinaFilter(this, 'Viradeira 4')">Viradeira
-                                    4</button></div>
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                style="width: 149px; height: 62px;"
+                                onclick="applyMaquinaFilter(this, 'Viradeira 2')">Viradeira
+                                2</button></div>
                             <div class="col mb-2"><button
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyMaquinaFilter(this, 'Viradeira 5')">Viradeira
-                                    5</button></div>
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                style="width: 149px; height: 62px;"
+                                onclick="applyMaquinaFilter(this, 'Viradeira 3')">Viradeira
+                                3</button></div>
                             <div class="col mb-2"><button
-                                    type="button"
-                                    class="btn btn-outline-secondary"
-                                    style="width: 149px; height: 62px;"
-                                    onclick="applyMaquinaFilter(this, 'Prensa')">Prensa</button></div>
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                style="width: 149px; height: 62px;"
+                                onclick="applyMaquinaFilter(this, 'Viradeira 4')">Viradeira
+                                4</button></div>
+                            <div class="col mb-2"><button
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                style="width: 149px; height: 62px;"
+                                onclick="applyMaquinaFilter(this, 'Viradeira 5')">Viradeira
+                                5</button></div>
+                            <div class="col mb-2"><button
+                                type="button"
+                                class="btn btn-outline-secondary"
+                                style="width: 149px; height: 62px;"
+                                onclick="applyMaquinaFilter(this, 'Prensa')">Prensa</button></div>
                         </div>
                         <div class="row mb-2">
                             <!-- <div class="col-sm-6">
@@ -273,31 +285,43 @@
                         <div class="col-sm-12 mb-2">
                             <label for="maquinaForaDoPlanejado">Máquina</label>
                             <div class="position-relative">
-                                <div class="btn-group" data-toggle="buttons">
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="radio"
-                                            name="maquinaForaDoPlanejado"
-                                            value="Viradeira 3">
-                                        Viradeira 3
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="radio"
-                                            name="maquinaForaDoPlanejado"
-                                            value="Viradeira 4">
-                                        Viradeira 4
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="radio"
-                                            name="maquinaForaDoPlanejado"
-                                            value="Viradeira 5">
-                                        Viradeira 5
-                                    </label>
-                                    <label class="btn btn-outline-secondary">
-                                        <input type="radio"
-                                            name="maquinaForaDoPlanejado"
-                                            value="Prensa">
-                                        Prensa
-                                    </label>
+                                <div class="btn-group d-flex flex-wrap" data-toggle="buttons">
+                                    <div class="col-4">
+                                        <label class="btn btn-outline-secondary w-100">
+                                            <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 1">
+                                            <small>Viradeira 1</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="btn btn-outline-secondary w-100">
+                                            <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 2">
+                                            <small>Viradeira 2</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="btn btn-outline-secondary w-100">
+                                            <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 3">
+                                            <small>Viradeira 3</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="btn btn-outline-secondary w-100">
+                                            <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 4">
+                                            <small>Viradeira 4</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="btn btn-outline-secondary w-100">
+                                            <input type="radio" name="maquinaForaDoPlanejado" value="Viradeira 5">
+                                            <small>Viradeira 5</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="btn btn-outline-secondary w-100">
+                                            <input type="radio" name="maquinaForaDoPlanejado" value="Prensa">
+                                            <small>Prensa</small>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -376,6 +400,8 @@
                                     <div class="position-relative">
                                         <select id="maquinaForaDoPlanejado_" name="maquinaForaDoPlanejado_" class="form-control">
                                             <option value="" disabled selected>Selecione uma máquina</option>
+                                            <option value="Viradeira 1">Viradeira 1</option>
+                                            <option value="Viradeira 2">Viradeira 2</option>
                                             <option value="Viradeira 3">Viradeira 3</option>
                                             <option value="Viradeira 4">Viradeira 4</option>
                                             <option value="Viradeira 5">Viradeira 5</option>
