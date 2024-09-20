@@ -853,28 +853,38 @@ def planejar_pintura():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    table = dados_sequenciamento()
-    table['qt_produzida'] = ''
-    table['cambao'] = ''
-    table['tipo'] = ''
-    table['data_carga'] = pd.to_datetime(
-        table['data_carga']).dt.strftime("%d/%m/%Y")
-    table['codificacao'] = table.apply(criar_codificacao, axis=1)
+    if request.method == 'GET':
 
-    table = table[['data_carga', 'codigo', 'peca', 'restante',
-                   'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
-    sheet_data = table.values.tolist()
+        table = dados_sequenciamento()
+        table['qt_produzida'] = ''
+        table['cambao'] = ''
+        table['tipo'] = ''
+        table['data_carga'] = pd.to_datetime(
+            table['data_carga']).dt.strftime("%d/%m/%Y")
+        table['codificacao'] = table.apply(criar_codificacao, axis=1)
 
-    query = """SELECT data_carga, data_finalizacao, celula, codigo, peca, SUM(qt_apontada) AS total_apontada
-                FROM pcp.ordens_montagem
-            WHERE data_finalizacao = CURRENT_DATE - INTERVAL '1 day'
-            GROUP BY data_carga, data_finalizacao, celula, codigo, peca;"""
+        table = table[['data_carga', 'codigo', 'peca', 'restante',
+                    'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
+        sheet_data = table.values.tolist()
+
+        return render_template('planejar-pintura.html', sheet_data=sheet_data)
     
-    cur.execute(query)
+    elif request.method == 'POST':
 
-    ordens_montagem = cur.fetchall()
+        data = request.json.get('data')
 
-    return render_template('planejar-pintura.html', sheet_data=sheet_data,ordens_montagem=ordens_montagem)
+        print(data)
+
+        query = """SELECT data_carga, data_finalizacao, celula, codigo, peca, SUM(qt_apontada) AS total_apontada
+                    FROM pcp.ordens_montagem
+                WHERE data_finalizacao = %s
+                GROUP BY data_carga, data_finalizacao, celula, codigo, peca;"""
+        
+        cur.execute(query,(data,))
+
+        ordens_montagem = cur.fetchall()
+    
+        return jsonify(ordens_montagem)
 
 # --------- INICIO INSPEÇÃO -----------
 
