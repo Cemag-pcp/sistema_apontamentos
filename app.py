@@ -333,7 +333,7 @@ def gerar_cambao():
         table['data_carga']).dt.strftime("%d/%m/%Y")
     table['data_planejamento'] = pd.to_datetime(
         table['data_planejamento']).dt.strftime("%d/%m/%Y")
-
+    table = table[table['qt_planejada']>0]
     table = table[['id', 'data_carga', 'data_planejamento', 'codigo', 'peca',
                    'qt_planejada', 'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
     sheet_data = table.values.tolist()
@@ -858,7 +858,7 @@ def planejar_pintura():
     table['data_carga'] = pd.to_datetime(
         table['data_carga']).dt.strftime("%d/%m/%Y")
     table['codificacao'] = table.apply(criar_codificacao, axis=1)
-
+    table = table[table['restante']>0]
     table = table[['data_carga', 'codigo', 'peca', 'restante',
                    'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
     sheet_data = table.values.tolist()
