@@ -480,6 +480,6 @@ class Inspecao:
         self.conn.commit()
         print("processar_ficha_inspecao")
 
-    def fechar_conexao(self):
-        self.cur.close()
-        self.conn.close()
+    # def fechar_conexao(self):
+    #     self.cur.close()
+    #     self.conn.close()
