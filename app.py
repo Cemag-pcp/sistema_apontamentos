@@ -868,24 +868,24 @@ def planejar_pintura():
                     'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
         sheet_data = table.values.tolist()
 
-    return render_template('planejar-pintura.html', sheet_data=sheet_data)
+        return render_template('planejar-pintura.html', sheet_data=sheet_data)
     
-    # elif request.method == 'POST':
+    elif request.method == 'POST':
 
-    #     data = request.json.get('data')
+        data = request.json.get('data')
 
-    #     print(data)
+        print(data)
 
-    #     query = """SELECT data_carga, data_finalizacao, celula, codigo, peca, SUM(qt_apontada) AS total_apontada
-    #                 FROM pcp.ordens_montagem
-    #             WHERE data_finalizacao = %s
-    #             GROUP BY data_carga, data_finalizacao, celula, codigo, peca;"""
+        query = """SELECT data_carga, data_finalizacao, celula, codigo, peca, SUM(qt_apontada) AS total_apontada
+                    FROM pcp.ordens_montagem
+                WHERE data_finalizacao = %s
+                GROUP BY data_carga, data_finalizacao, celula, codigo, peca;"""
         
-    #     cur.execute(query,(data,))
+        cur.execute(query,(data,))
 
-    #     ordens_montagem = cur.fetchall()
+        ordens_montagem = cur.fetchall()
     
-    #     return jsonify(ordens_montagem)
+        return jsonify(ordens_montagem)
 
 # --------- INICIO INSPEÇÃO -----------
 
