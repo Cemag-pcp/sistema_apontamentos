@@ -50,6 +50,14 @@ function modalInspecaoEstamparia(id_inspecao,maquina,conjunto,quantidade,codigo)
         }
     }
 
+    document.querySelectorAll('.editable').forEach(cell => {
+        cell.addEventListener('input', function (e) {
+            if (!/^\d*\.?\d*$/.test(e.target.innerText)) {
+                e.target.innerText = e.target.innerText.replace(/[^\d.]/g, '');
+            }
+        });
+    });
+    
     initializeCheckboxLogic('.tabela_editavel', 'selectContainer', 'inputConformidades_estamparia', 'inputNaoConformidades_estamparia', 'outraCausa_estamparia');
 
     $('#inspecionarEstamparia').modal('show');

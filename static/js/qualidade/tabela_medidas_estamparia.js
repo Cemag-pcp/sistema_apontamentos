@@ -1,11 +1,3 @@
-document.querySelectorAll('.editable').forEach(cell => {
-    cell.addEventListener('input', function (e) {
-        if (!/^\d*\.?\d*$/.test(e.target.innerText)) {
-            e.target.innerText = e.target.innerText.replace(/[^\d.]/g, '');
-        }
-    });
-});
-
 function initializeCheckboxLogic(tableSelector, containerId, inputConformidadesId, inputNaoConformidadesId, inputOutraCausaId) {
     // Seleciona as linhas da tabela especificada
     document.querySelectorAll(`${tableSelector} tr`).forEach(row => {
