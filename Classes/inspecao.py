@@ -42,7 +42,7 @@ class Inspecao:
 
         print("inserir_reinspecao")
 
-    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = '', operador_estamparia=''):
+    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = '', operador_estamparia='',qtd_mortas='',motivo_mortas=''):
 
         id_inspecao = str(id_inspecao)
         if setor == 'Pintura':
@@ -58,8 +58,8 @@ class Inspecao:
             delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true', qt_inspecionada = {qtd_inspecionada} WHERE id = '{id_inspecao}'"""
             self.cur.execute(delete_table_inspecao)
 
-            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao,operadores) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s, %s)"""
-            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operador_estamparia)
+            sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao,operadores,qtd_morta,motivo_mortas) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s, %s, %s, %s)"""
+            values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operador_estamparia, qtd_mortas, motivo_mortas)
 
         elif setor == 'Solda - Cilindro' or setor == 'Solda - Tubo':
 
@@ -141,7 +141,7 @@ class Inspecao:
         elif setor == 'Solda' or setor == 'Estamparia':
 
             if n_conformidades == 0:
-
+                
                 sql_update = """UPDATE pcp.pecas_reinspecao SET nao_conformidades = %s, causa_reinspecao = %s, inspetor = %s, conjunto = %s, categoria = %s, outra_causa = %s, origem = %s, observacao = %s WHERE id = %s """
                 values_update = (n_nao_conformidades, causa_reinspecao, inspetor, conjunto_especifico, categoria, outraCausaSolda, origemInspecaoSolda, observacaoSolda, id_inspecao)
 
@@ -212,10 +212,11 @@ class Inspecao:
 
         data_inspecao = self.cur.fetchall()
 
-        inspecionados = """SELECT i.*, op.peca, op.cor, op.tipo
-                           FROM pcp.pecas_inspecionadas as i
-                           LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id::varchar
-                           WHERE i.setor = 'Pintura' and i.num_inspecao = 0"""
+        inspecionados = """SELECT  pi.id_inspecao,pi.data_inspecao,pi.total_conformidades,pi.inspetor,pi.setor,pi.num_inspecao,pi.conjunto,
+                        pi.origem,pi.observacao,pi.nao_conformidades,pi.operadores, op.peca, op.cor, op.tipo
+                           FROM pcp.pecas_inspecionadas as pi
+                           LEFT JOIN pcp.ordens_pintura as op ON pi.id_inspecao = op.id::varchar
+                           WHERE pi.setor = 'Pintura' and pi.num_inspecao = 0"""
         
         self.cur.execute(inspecionados)
         data_inspecionadas = self.cur.fetchall()
@@ -238,8 +239,9 @@ class Inspecao:
 
         data_inspecao = self.cur.fetchall()
 
-        inspecionados = """SELECT *
-                           FROM pcp.pecas_inspecionadas
+        inspecionados = """SELECT pi.id_inspecao,pi.data_inspecao,pi.total_conformidades,pi.inspetor,pi.setor,pi.num_inspecao,pi.conjunto,
+                        pi.origem,pi.observacao,pi.nao_conformidades,pi.operadores
+                           FROM pcp.pecas_inspecionadas as pi
                            WHERE setor = 'Estamparia' and num_inspecao = 0"""
         
         self.cur.execute(inspecionados)
@@ -298,7 +300,10 @@ class Inspecao:
         sql = """UPDATE pcp.pecas_reinspecao SET excluidas = 'true' WHERE id=%s"""
         self.cur.execute(sql, (id,))
 
-        query_select = """SELECT * FROM pcp.pecas_inspecionadas WHERE id_inspecao=%s"""
+        query_select = """SELECT pi.id_inspecao,pi.data_inspecao,pi.total_conformidades,pi.inspetor,pi.setor,pi.num_inspecao,pi.conjunto,
+                            pi.origem,pi.observacao,pi.nao_conformidades,pi.operadores FROM pcp.pecas_inspecionadas as pi 
+                        WHERE id_inspecao=%s"""
+        
         self.cur.execute(query_select, (id,))
         row = self.cur.fetchone()
 

@@ -122,12 +122,6 @@ $('#envio_reinspecao_estamparia').on('click', function() {
         return; // Interrompe a execução
     }
 
-    if (observacaoSolda.trim() === "" ) {
-        alert('Verifique se os campos de causa e observação estão com os valores corretos');
-        $("#loading").hide();
-        return; // Interrompe a execução
-    }
-
     $('#reinspecaoModalEstamparia').modal('hide');
 
     $('#modalConfirmacaoEstamparia').modal('show');

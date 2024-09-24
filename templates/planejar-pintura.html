@@ -28,17 +28,20 @@
         <div class="col-xl-12">
             <div class="card shadow mb-4">
                 <!-- Card Header - Dropdown -->
-                <div
-                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Planejamento</h6>
-                    <!-- <div class="form-group">
-                        <label for="dataCarga">Data da carga</label>
-                        <input type="date" name="browser" id="dataCarga" class="form-control">
-                    </div> -->
-                </div>
-                <br>
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <div class="form-row">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" onclick="changeTabPlanejamento('planejarPintura')"
+                                style="cursor: pointer;">Planejar Pintura</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="changeTabPlanejamento('historicoMontagem')"
+                                style="cursor: pointer;">Histórico Montagem</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <div class="form-row" id="filtroPlanejarPintura">
                         <div class="col-sm">
                             <div class="form-group">
                                 <label for="dataCarga">Data da carga</label>
@@ -55,10 +58,19 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row" id="filtroHistoricoMontagem" style="display: none;">
+                        <div class="col-sm">
+                            <div class="form-group">
+                                <label>Data</label>
+                                <input type="date" id="dataFinalizada" class="form-control" data-column="0">
+                            </div>
+                        </div>
+                        <button id="filtrarBtn" class="btn btn-primary mt-3">Filtrar</button>
+                    </div>
                 </div>
                 
                 <!-- Card Body -->
-                <div class="card-body">
+                <div class="card-body" id="planejarPinturaTable" style="display: block;">
                     <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
                         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                             <thead>
@@ -116,6 +128,9 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+                <div class="card-body" id="historicoMontagemTable" style="display: none;">
+                    <div id="tabelaResultado"></div>
                 </div>
                 
             </div>
@@ -193,14 +208,134 @@
 <!-- Scripts campos de filtro -->
 
 <script>
+    function changeTabPlanejamento(tabName) {
+        // Ocultar todas as tabelas
+        var tables = document.querySelectorAll('.card-body');
+        tables.forEach(function(table) {
+            table.style.display = 'none';
+        });
+        
+        if(tabName === 'planejarPintura'){
+            document.getElementById('filtroPlanejarPintura').style.display = 'flex';
+            document.getElementById('filtroHistoricoMontagem').style.display = 'none';
+        } else {
+            document.getElementById('filtroPlanejarPintura').style.display = 'none';
+            document.getElementById('filtroHistoricoMontagem').style.display = 'flex';
+            document.getElementById('filtroHistoricoMontagem').style.alignItems = 'center'
+        }
+
+        // Mostrar a tabela correspondente à aba clicada
+        document.getElementById(tabName + 'Table').style.display = 'table';
+
+        // Remover a classe "active" de todas as abas
+        var tabs = document.querySelectorAll('.nav-link');
+        tabs.forEach(function(tab) {
+            tab.classList.remove('active');
+        });
+
+        // Adicionar a classe "active" à aba clicada
+        var clickedTab = document.querySelector('[onclick="changeTabPlanejamento(\'' + tabName + '\')"]');
+        clickedTab.classList.add('active');
+    }
+
+</script>
+
+<script>
     $(document).ready(function () {
         // Obtém a data de hoje no formato 'YYYY-MM-DD'
         var today = moment().format('YYYY-MM-DD');
 
         // Define o valor padrão para o campo de data
         $('#dataCarga').val(today);
+        $('#dataFinalizada').val(today);
         // Restante do seu código...
     });
+
+    document.getElementById('filtrarBtn').addEventListener('click', function() {
+        const dataFinalizada = document.getElementById('dataFinalizada').value;
+
+        if (dataFinalizada) {
+            fetch('/planejar-pintura', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ data: dataFinalizada })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tabelaDiv = document.getElementById('tabelaResultado');
+
+                // Limpar o conteúdo anterior
+                tabelaDiv.innerHTML = '';
+
+                // Se não houver resultados, exibir uma mensagem
+                if (data.length === 0) {
+                    tabelaDiv.innerHTML = '<p>Nenhum dado encontrado para a data selecionada.</p>';
+                    return;
+                }
+
+                // Criar o cabeçalho da tabela
+                let tableHTML = `
+                    <table class="table table-bordered" id="dataTablehistoricoMontagem">
+                        <thead>
+                            <tr>
+                                <th>Data Finalizada</th>
+                                <th>Data da Carga</th>
+                                <th>Celula</th>
+                                <th>Código</th>
+                                <th>Descrição</th>
+                                <th>Qtd. Apontada</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                
+                const formatDate = (dateString) => {
+                    var data = new Date(dateString);
+                    // Ajustar para o fuso horário local
+                    data.setMinutes(data.getMinutes() - data.getTimezoneOffset());
+                    data.setDate(data.getDate() + 1); // Adicionar um dia à data
+                    var dia = ("0" + data.getDate()).slice(-2);
+                    var mes = ("0" + (data.getMonth() + 1)).slice(-2);
+                    var ano = data.getFullYear();
+                    return dia + '/' + mes + '/' + ano;
+                };
+
+                // Adicionar as linhas da tabela com os dados
+                data.forEach(item => {
+                    tableHTML += `
+                        <tr>
+                            <td>${formatDate(item[1])}</td>
+                            <td>${formatDate(item[0])}</td>
+                            <td>${item[2]}</td>
+                            <td>${item[3]}</td>
+                            <td>${item[4]}</td>
+                            <td>${item[5]}</td>
+                        </tr>`;
+                });
+
+                // Fechar a tabela
+                tableHTML += `
+                        </tbody>
+                    </table>`;
+
+                // Inserir a tabela no div
+                tabelaDiv.innerHTML = tableHTML;
+
+                $('#dataTablehistoricoMontagem').DataTable({
+                    "info":false,
+                    "aLengthMenu":[5,10,25],
+                    "iDisplayLength":10,
+                    order: [[0, 'desc']]
+                });
+
+            })
+            .catch(error => console.error('Erro ao filtrar:', error));
+        } else {
+            alert('Por favor, selecione uma data.');
+        }
+    });
+
 </script>
 
 <script>
@@ -330,7 +465,6 @@
             method: 'GET',
             success: function (data) {
                 suggestionsData = data.map(row => row[Object.keys(row)[0]]);
-                console.log('Dados brutos do Backend:', suggestionsData);
             },
             error: function (err) {
                 console.error('Erro ao obter dados brutos do backend', err);
