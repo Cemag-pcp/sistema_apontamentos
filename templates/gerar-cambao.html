@@ -433,7 +433,7 @@
                 var qt_planejada = $(this).find('td:eq(5)').text().trim();
 
                 // Verifica se qt_produzida é maior que qt_planejada ou menor que 0
-                if (qt_produzida > qt_planejada || qt_produzida < 0) {
+                if (qt_produzida < 0) {
                     // Se houver um erro, marca a variável hasError como true
                     alert('A quantidade produzida não pode ser maior que a quantidade planejada ou menor que zero.');
                     hasError = true;
