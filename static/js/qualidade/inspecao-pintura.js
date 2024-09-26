@@ -292,6 +292,23 @@ function setorCards(response) {
             
     } else {
         var foto_ficha = response[2]
+        console.log(foto_ficha)
+
+        var medidasHTML = '';
+        for (var i = 0; i < foto_ficha.length; i++) {
+            // Medidas HTML para um único conjunto de medidas
+            var medidas = '';
+
+            if (foto_ficha[i][4] !== null) medidas += `<small>Medida A: ${foto_ficha[i][4]}</small><br>`;
+            if (foto_ficha[i][5] !== null) medidas += `<small>Medida B: ${foto_ficha[i][5]}</small><br>`;
+            if (foto_ficha[i][6] !== null) medidas += `<small>Medida C: ${foto_ficha[i][6]}</small><br>`;
+            if (foto_ficha[i][7] !== null) medidas += `<small>Medida D: ${foto_ficha[i][7]}</small><br>`;
+
+            // Adiciona um espaçamento entre os conjuntos de medidas
+            if (medidas) {
+                medidasHTML += `${medidas}<br>`;
+            }
+        }
 
         for (var i = 0; i < historico.length; i++) {
 
@@ -311,19 +328,24 @@ function setorCards(response) {
             
             if(i == 0){
                 var content = `
-                <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">${item[9]}</h6>
-                    <div class="d-flex flex-column align-items-end text-right">
-                        <div class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Opções</a>
-                            <div class="dropdown-menu drop">
-                                <a class="dropdown-item option1" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Visualizar causas da não conformidade</a>
+                <div class="row">
+                    <div class="col-sm-7">
+                        <h6 class="mb-1">${item[9]}</h6>
+                        ${medidasHTML}
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="d-flex flex-column align-items-end text-right">
+                            <div class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Opções</a>
+                                <div class="dropdown-menu drop">
+                                    <a class="dropdown-item option1" data-item='${JSON.stringify(item)}' style='cursor:pointer'>Visualizar causas da não conformidade</a>
+                                </div>
                             </div>
+                            <small>Conformidade : ${item[2]}</small>
+                            <small>Não Conformidade : ${item[10]}</small>
+                            <small>Inspetor : ${item[3]}</small>
+                            <small>Exec.:  ${item[5]}</small>
                         </div>
-                        <small>Conformidade : ${item[2]}</small>
-                        <small>Não Conformidade : ${item[10]}</small>
-                        <small>Inspetor : ${item[3]}</small>
-                        <small>Exec.:  ${item[5]}</small>
                     </div>
                 </div>
                 <p class="mb-1" style="font-size: small;"><strong>Data Inspeção:</strong> ${formatarDataBrComHora(item[1],3)}</p>
