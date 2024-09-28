@@ -1241,7 +1241,8 @@ def inspecao_estamparia():
         # conn.close()
 
         return jsonify("Success")
-        
+
+    classe_inspecao = Inspecao(DB_NAME, DB_USER, DB_PASS, DB_HOST, UPLOAD_FOLDER, UPLOAD_FOLDER_TOKEN)
     inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar_estamparia()
 
     return render_template('inspecao-estamparia.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
