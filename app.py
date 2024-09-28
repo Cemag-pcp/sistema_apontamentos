@@ -1143,6 +1143,44 @@ def inspecao_solda():
     
     return render_template('inspecao-solda.html',a_inspecionar_solda=a_inspecionar_solda,inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda,lista_soldadores=lista_soldadores)
 
+def dados_inspecionar_reinspecionar_estamparia():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    inspecao = """SELECT * FROM pcp.pecas_inspecao WHERE excluidas = 'false' AND setor = 'Estamparia' ORDER BY id desc"""
+    cur.execute(inspecao)
+
+    data_inspecao = cur.fetchall()
+
+    inspecionados = """SELECT pi.id_inspecao,pi.data_inspecao,pi.total_conformidades,pi.inspetor,pi.setor,pi.num_inspecao,pi.conjunto,
+                    pi.origem,pi.observacao,pi.nao_conformidades,pi.operadores
+                        FROM pcp.pecas_inspecionadas as pi
+                        WHERE setor = 'Estamparia' and num_inspecao = 0"""
+    
+    cur.execute(inspecionados)
+    data_inspecionadas = cur.fetchall()
+
+    reinspecao = """SELECT pr.id,pr.data_reinspecao,pr.nao_conformidades,pr.causa_reinspecao,pr.inspetor,pr.setor,pr.conjunto,pr.categoria,
+                        pr.outra_causa,pr.origem,pr.observacao,pr.excluidas, pi.qt_apontada, pi2.operadores, pi2.inspetor, pi2.num_inspecao
+                    FROM pcp.pecas_reinspecao pr
+                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id = pr.id
+                    LEFT JOIN pcp.pecas_inspecionadas pi2 ON pi.id = pi2.id_inspecao
+                    INNER JOIN (
+                        SELECT pi2.id_inspecao, MAX(pi2.num_inspecao) AS max_num_inspecao
+                        FROM pcp.pecas_inspecionadas pi2
+                        GROUP BY pi2.id_inspecao
+                    ) max_pi2 ON pi.id = max_pi2.id_inspecao AND pi2.num_inspecao = max_pi2.max_num_inspecao
+                    WHERE pr.setor = 'Estamparia' AND pr.excluidas IS NOT true
+                    ORDER BY pi2.num_inspecao DESC;
+                """
+    
+    cur.execute(reinspecao)
+    data_reinspecao = cur.fetchall()
+
+    return data_inspecao, data_reinspecao, data_inspecionadas
+
 @app.route('/inspecao-estamparia',methods=['GET','POST'])
 def inspecao_estamparia():
 
@@ -1242,7 +1280,7 @@ def inspecao_estamparia():
 
         return jsonify("Success")
 
-    inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar_estamparia()
+    inspecoes,reinspecoes,inspecionadas = dados_inspecionar_reinspecionar_estamparia()
 
     return render_template('inspecao-estamparia.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
