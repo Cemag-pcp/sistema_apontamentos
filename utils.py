@@ -105,10 +105,8 @@ def atualizar_saldo(itens_json):
             VALUES (%s, %s, %s, %s)
         """, (almoxarifado, codigo, descricao, quantidade))
 
-
     # Commit para salvar as mudanças no banco
-    # conn.commit()
-
+    conn.commit()
 
 def consulta_consumo_carretas(setor):
 
@@ -412,7 +410,7 @@ def verificar_estoque(df_planilha_saldo, conjuntos, conn, cur):
     # Fazer uma consulta única para todos os conjuntos
     query = """ SELECT DISTINCT conjunto, codigo, descricao, quantidade
                 FROM pcp.tb_base_carretas_explodidas
-                WHERE conjunto IN %s """
+                WHERE conjunto IN %s and setor = 'Montagem' """
     
     cur.execute(query, (tuple(conjuntos),))  # Usar uma tupla para o operador IN
     pecas = cur.fetchall()
