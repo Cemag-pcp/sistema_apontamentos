@@ -65,7 +65,6 @@ def ajustar_para_sexta(data):
         data -= timedelta(1)  # Subtrai um dia
     return data
 
-
 def dados_finalizar_cambao():
     """
     Função para buscar os dados gerados pelo gerador de cambão
@@ -87,7 +86,6 @@ def dados_finalizar_cambao():
     df['data_carga'] = pd.to_datetime(df['data_carga']).dt.strftime("%d/%m/%Y")
 
     return df
-
 
 def dados_sequenciamento():
     """
@@ -1145,6 +1143,44 @@ def inspecao_solda():
     
     return render_template('inspecao-solda.html',a_inspecionar_solda=a_inspecionar_solda,inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda,lista_soldadores=lista_soldadores)
 
+def dados_inspecionar_reinspecionar_estamparia():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    inspecao = """SELECT * FROM pcp.pecas_inspecao WHERE excluidas = 'false' AND setor = 'Estamparia' ORDER BY id desc"""
+    cur.execute(inspecao)
+
+    data_inspecao = cur.fetchall()
+
+    inspecionados = """SELECT pi.id_inspecao,pi.data_inspecao,pi.total_conformidades,pi.inspetor,pi.setor,pi.num_inspecao,pi.conjunto,
+                    pi.origem,pi.observacao,pi.nao_conformidades,pi.operadores
+                        FROM pcp.pecas_inspecionadas as pi
+                        WHERE setor = 'Estamparia' and num_inspecao = 0"""
+    
+    cur.execute(inspecionados)
+    data_inspecionadas = cur.fetchall()
+
+    reinspecao = """SELECT pr.id,pr.data_reinspecao,pr.nao_conformidades,pr.causa_reinspecao,pr.inspetor,pr.setor,pr.conjunto,pr.categoria,
+                        pr.outra_causa,pr.origem,pr.observacao,pr.excluidas, pi.qt_apontada, pi2.operadores, pi2.inspetor, pi2.num_inspecao
+                    FROM pcp.pecas_reinspecao pr
+                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id = pr.id
+                    LEFT JOIN pcp.pecas_inspecionadas pi2 ON pi.id = pi2.id_inspecao
+                    INNER JOIN (
+                        SELECT pi2.id_inspecao, MAX(pi2.num_inspecao) AS max_num_inspecao
+                        FROM pcp.pecas_inspecionadas pi2
+                        GROUP BY pi2.id_inspecao
+                    ) max_pi2 ON pi.id = max_pi2.id_inspecao AND pi2.num_inspecao = max_pi2.max_num_inspecao
+                    WHERE pr.setor = 'Estamparia' AND pr.excluidas IS NOT true
+                    ORDER BY pi2.num_inspecao DESC;
+                """
+    
+    cur.execute(reinspecao)
+    data_reinspecao = cur.fetchall()
+
+    return data_inspecao, data_reinspecao, data_inspecionadas
+
 @app.route('/inspecao-estamparia',methods=['GET','POST'])
 def inspecao_estamparia():
 
@@ -1243,8 +1279,8 @@ def inspecao_estamparia():
         # conn.close()
 
         return jsonify("Success")
-        
-    inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar_estamparia()
+
+    inspecoes,reinspecoes,inspecionadas = dados_inspecionar_reinspecionar_estamparia()
 
     return render_template('inspecao-estamparia.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
@@ -2078,47 +2114,6 @@ def api_planejamento_pintura_csv():
 
     # Retorna o arquivo CSV como resposta
     return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='planejamento_pintura.csv')
-
-@app.route("/api/apontamento/pintura")
-def api_apontamento_pintura_csv():
-
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    # Lógica para obter dados da tabela
-    query = """SELECT DISTINCT t1.*, t2.celula as celula_nova
-                FROM pcp.ordens_pintura AS t1
-                LEFT JOIN (
-                    SELECT DISTINCT codigo, celula
-                    FROM pcp.gerador_ordens_pintura
-                    WHERE celula NOT IN ('QUALIDADE','CILINDRO')
-                ) AS t2
-                ON t1.codigo = t2.codigo
-                WHERE t1.data_carga > '2024-02-29' ORDER BY id;
-            """
-
-    df = pd.read_sql_query(query, conn)
-
-    df['celula_nova'] = df['celula_nova'].astype(str)
-    df['data_carga'] = pd.to_datetime(
-        df['data_carga'], format="%Y-%m-%d").dt.strftime("%d%m%Y")
-
-    df['codificacao'] = df.apply(lambda row: 'EIS' if 'EIXO SIMPLES' in row['celula_nova'] else (
-        'EIC' if 'EIXO COMPLETO' in row['celula_nova'] else row['celula_nova'][:3]), axis=1) + df['data_carga'].str.replace('-', '')
-
-    df['data_carga'] = pd.to_datetime(
-        df['data_carga'], format="%d%m%Y").dt.strftime("%Y-%m-%d")
-
-    # Fecha a conexão com o PostgreSQL
-    conn.close()
-
-    # Salva os dados em um arquivo CSV temporário
-    temp_file_path = 'apontamento_pintura.csv'
-    df.to_csv(temp_file_path, index=False)
-
-    # Retorna o arquivo CSV como resposta
-    return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='apontamento_pintura.csv')
 
 @app.route("/api/pecas-em-processo/montagem", methods=['POST'])
 def api_pecas_em_processo_montagem():
@@ -5519,6 +5514,47 @@ def adicionar_operador_bases():
         conn.commit()
 
         return jsonify({'verificacao_insert':"Cadastrado com sucesso!"})
+
+
+### api para consulta de dados de apontamento
+
+@app.route("/api/apontamento/pintura")
+def api_apontamento_pintura_csv():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                    password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Lógica para obter dados da tabela
+    query = """SELECT DISTINCT t1.*, t2.celula as celula_nova
+                FROM pcp.ordens_pintura AS t1
+                LEFT JOIN (
+                    SELECT DISTINCT codigo, celula
+                    FROM pcp.gerador_ordens_pintura
+                    WHERE celula NOT IN ('QUALIDADE','CILINDRO')
+                ) AS t2
+                ON t1.codigo = t2.codigo
+                WHERE t1.data_carga > '2024-02-29' ORDER BY id;
+            """
+    
+    df = pd.read_sql_query(query, conn)
+
+    df['celula_nova'] = df['celula_nova'].astype(str)
+    df['data_carga'] = pd.to_datetime(df['data_carga'],format="%Y-%m-%d").dt.strftime("%d%m%Y")
+
+    df['codificacao'] = df.apply(lambda row: 'EIS' if 'EIXO SIMPLES' in row['celula_nova'] else ('EIC' if 'EIXO COMPLETO' in row['celula_nova'] else row['celula_nova'][:3]), axis=1) + df['data_carga'].str.replace('-', '')
+
+    df['data_carga'] = pd.to_datetime(df['data_carga'],format="%d%m%Y").dt.strftime("%Y-%m-%d")
+
+    # Fecha a conexão com o PostgreSQL
+    conn.close()
+
+    # Salva os dados em um arquivo CSV temporário
+    temp_file_path = 'apontamento_pintura.csv'
+    df.to_csv(temp_file_path, index=False)
+
+    # Retorna o arquivo CSV como resposta
+    return send_file(temp_file_path, mimetype='text/csv', as_attachment=True, download_name='apontamento_pintura.csv')
 
 
 
