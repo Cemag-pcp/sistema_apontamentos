@@ -4872,7 +4872,7 @@ def retrabalho_pintura():
                                         FROM pcp.pecas_reinspecao as r
                                     LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
                                     LEFT JOIN pcp.pecas_retrabalho_em_processo as prep ON prep.id = r.id
-                                    WHERE r.setor = 'Pintura' AND r.excluidas <> true AND r.status_pintura = true AND prep.em_processo = false
+                                    WHERE r.setor = 'Pintura' AND r.status_pintura = true AND prep.em_processo = false
                                     ORDER BY r.data_reinspecao DESC
                                     LIMIT 5
                                 """

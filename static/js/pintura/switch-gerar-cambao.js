@@ -52,7 +52,7 @@ for (const row of tableBody.getElementsByTagName('tr')) {
             corCell.style.backgroundColor = '#e1e1e1';
         } else if (cor === 'LC') { 
             corCell.textContent = 'Laranja';
-            corCell.style.backgroundColor = 'lightorange';
+            corCell.style.backgroundColor = '#ffcc6e';
         } else if (cor === 'VJ') {
             corCell.textContent = 'Verde'; 
             corCell.style.backgroundColor = '#bbffbb';
@@ -62,7 +62,7 @@ for (const row of tableBody.getElementsByTagName('tr')) {
             corCell.style.color = 'white';
         } else if (cor === 'AV') { 
             corCell.textContent = 'Amarelo';
-            corCell.style.backgroundColor = 'lightyellow';
+            corCell.style.backgroundColor = '#ffff94';
         }
     }
 }
