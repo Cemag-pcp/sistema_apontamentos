@@ -421,22 +421,22 @@ def receber_dados_finalizar_cambao():
 
             #  Construir e executar a consulta UPDATE
 
-            # query = ("UPDATE pcp.ordens_pintura SET status = 'OK', operador_final = %s WHERE id = %s")
-            # cursor.execute(query, (dado['operador'],str(dado['chave'])))
+            query = ("UPDATE pcp.ordens_pintura SET status = 'OK', operador_final = %s WHERE id = %s")
+            cursor.execute(query, (dado['operador'],str(dado['chave'])))
     
-            # sql = """INSERT INTO pcp.pecas_inspecao 
-            #          (id, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
-            #          VALUES (%s, NOW(),%s, %s, %s, %s, %s, 'Pintura')"""
-            # values = (
-            #     dado['chave'],
-            #     dado['codigo'],
-            #     dado['descricao'],
-            #     dado['cor'],
-            #     dado['prod'],
-            #     dado['tipo']
-            # )
+            sql = """INSERT INTO pcp.pecas_inspecao 
+                     (id, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
+                     VALUES (%s, NOW(),%s, %s, %s, %s, %s, 'Pintura')"""
+            values = (
+                dado['chave'],
+                dado['codigo'],
+                dado['descricao'],
+                dado['cor'],
+                dado['prod'],
+                dado['tipo']
+            )
             
-            # cursor.execute(sql, values)
+            cursor.execute(sql, values)
                 
             itens_json = {
                         'codigo':dado[0]['codigo'],
