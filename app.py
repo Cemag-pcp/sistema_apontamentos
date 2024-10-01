@@ -439,9 +439,9 @@ def receber_dados_finalizar_cambao():
             cursor.execute(sql, values)
                 
             itens_json = {
-                        'codigo':dado[0]['codigo'],
-                        'descricao':dado[0]['descricao'],
-                        'quantidade':dado[0]['prod'],
+                        'codigo':dado['codigo'],
+                        'descricao':dado['descricao'],
+                        'quantidade':dado['prod'],
                         'almoxarifado':'Almox pintura'
                         }
             
