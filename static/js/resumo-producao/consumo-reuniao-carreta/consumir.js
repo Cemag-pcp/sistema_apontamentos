@@ -58,9 +58,12 @@ function handleConsumirTudo(itens,dataInicial,dataFinal) {
                 console.error('Erro:', error);
                 hideLoading();
             });
+
         } else {
             // Lógica para quando o usuário cancelar
             console.log('Consumir cancelado para:', dataConsumo(dataInicial));
+            hideLoading();
+
         }
     } else {
         confirmed = confirm(`Você deseja consumir tudo entre as data: ${dataConsumo(dataInicial)} e ${dataConsumo(dataFinal)}?`);
