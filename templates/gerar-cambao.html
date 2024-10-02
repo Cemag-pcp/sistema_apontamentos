@@ -9,30 +9,6 @@
 <link rel="stylesheet" type="text/css"
     href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
 
-<style>
-    
-.custom-switch.custom-switch-md .custom-control-label {
-    padding-left: 1rem;
-    padding-bottom: 1.5rem;
-}
-
-.custom-switch.custom-switch-md .custom-control-label::before {
-    height: 1.5rem;
-    width: calc(2rem + 0.75rem);
-    border-radius: 3rem;
-}
-
-.custom-switch.custom-switch-md .custom-control-label::after {
-    width: calc(1.5rem - 4px);
-    height: calc(1.5rem - 4px);
-    border-radius: calc(2rem - (1.5rem / 2));
-}
-
-.custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
-    transform: translateX(calc(1.5rem - 0.25rem));
-}
-</style>
-
 {% endblock %}
 
 {% block containerFluid %}
@@ -62,12 +38,13 @@
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#exampleModal">Peça fora
                         do sequenciamento</button>
                 </div>
+                <br>
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <div class="form-row">
                         <div class="col-sm">
                             <div class="form-group">
-                                <label for="dataCarga">Data planejada</label>
-                                <input type="date" id="dataCarga" class="form-control" data-column="2">
+                                <label for="dataCarga">Data da carga</label>
+                                <input type="date" id="dataCarga" class="form-control" data-column="1">
                             </div>
                         </div>
                         <div class="col-sm">
@@ -78,18 +55,6 @@
                                 <datalist id="listaCor">
                                 </datalist>
                             </div>
-                        </div>
-                    </div>
-                    <div class="p-2">
-                        <div class="custom-control custom-switch custom-switch-md">
-                            <input type="checkbox" class="custom-control-input" id="customSwitch1" checked>
-                            <label class="custom-control-label" for="customSwitch1">PÓ</label>
-                        </div>
-                        
-                        <!-- Switch 2 -->
-                        <div class="custom-control custom-switch custom-switch-md">
-                            <input type="checkbox" class="custom-control-input" id="customSwitch2">
-                            <label class="custom-control-label" for="customSwitch2">PU</label>
                         </div>
                     </div>
                 </div>
@@ -109,7 +74,7 @@
                                     <th>Cor</th>
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
-                                    <th style="display: none;">Tipo</th>
+                                    <th>Tipo</th>
                                     <th>Codificação</th>
                                 </tr>
                             </thead>
@@ -124,14 +89,14 @@
                                     <th>Cor</th>
                                     <th>Qt. produzida</th>
                                     <th>Cambão</th>
-                                    <th style="display: none;">Tipo</th>
+                                    <th>Tipo</th>
                                     <th>Codificação</th>
                                 </tr>
                             </tfoot>
-                            <tbody id="tableBody">
+                            <tbody>
                                 {% if sheet_data %}
                                 {% for data in sheet_data %}
-                                <tr data-type="{{ data[9] }}">
+                                <tr>
                                     <td style="display: none;">{{ data[0] }}</td>
                                     <td>{{ data[1] }}</td>
                                     <td>{{ data[2] }}</td>
@@ -142,15 +107,22 @@
                                     <td>
                                         <input class="form-control" id='prod' type="number">
                                     </td>
-                                    <td><input class="form-control" id='cambao' type="number">
+                                    <td><input class="form-control" id='cambao' type="number" value="{{ data[7] }}">
                                     </td>
-                                    <td class="typePintura" style="display: none;">{{ data[9] }}</td>
+                                    <td>
+                                        <select class="form-control" id='tipo' type="text" value="">
+                                            <option value=""></option>
+                                            <option value="PÓ">PÓ</option>
+                                            <option value="PU">PU</option>
+                                        </select>
+                                    </td>
                                     <td>{{ data[10] }}</td>
                                 </tr>
                                 {% endfor %}
+
                                 {% else %}
                                 <tr>
-                                    <td colspan="11">Nenhum dado disponível</td>
+                                    <td colspan="7">Nenhum dado disponível</td>
                                 </tr>
                                 {% endif %}
                             </tbody>
@@ -258,7 +230,6 @@
                                     <option value=""></option>
                                     <option value="Lucas">Lucas</option>
                                     <option value="Fábio">Fábio</option>
-                                    <option value="Paulo Pedro">Paulo Pedro</option>
                                 </select>
                             </div>
                         </div>
@@ -311,7 +282,6 @@
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="static/js/demo/datatables-demo.js"></script>
-<script src="static/js/pintura/switch-gerar-cambao.js"></script>
 
 <!-- Scripts campos de filtro -->
 
@@ -357,7 +327,7 @@
         function applyDateFilter() {
             var columnIndex = $('#dataCarga').data('column');
             var filterValue = $('#dataCarga').val();
-            
+
 
             // Formata a data usando Moment.js
             if (filterValue === '') {
@@ -370,8 +340,6 @@
             table.column(columnIndex).search(filterValue).draw();
 
             populateDatalistOptions('listaCor', 6);
-            // Inicialize a tabela com base no estado inicial dos switches
-            filterTable();
         }
 
         function applyColorFilter() {
@@ -413,102 +381,90 @@
 
 <script>
     $(document).ready(function () {
-    // Adicione um manipulador de clique ao botão de envio
-    $('.btn-success').on('click', function () {
-        // Variável para controlar se há erros
-        var hasError = false;
+        // Adicione um manipulador de clique ao botão de envio
+        $('.btn-success').on('click', function () {
+            // Obtém as linhas com a coluna 5 diferente de vazio
+            var linhas = [];
 
-        // Obtém as linhas com a coluna 5 diferente de vazio
-        var linhas = [];
-        var operador = $('#selectOperadorIniciarCambao').val();
+            var operador = $('#selectOperadorIniciarCambao').val();
+            var hasError = false;
 
-        if (operador === '') {
-            alert('Insira um operador');
-            return;
-        } else {
-            showLoading();
-
-            $('#dataTable tbody tr').each(function () {
-                var qt_produzida = $(this).find('td:eq(7) input').val(); // Obtém o valor da coluna 5
-                var qt_planejada = $(this).find('td:eq(5)').text().trim();
-
-                // Verifica se qt_produzida é maior que qt_planejada ou menor que 0
-                // if (qt_produzida > qt_planejada || qt_produzida < 0) {
-                if (qt_produzida < 0) {
-                    // Se houver um erro, marca a variável hasError como true
-                    alert('A quantidade produzida não pode ser maior que a quantidade planejada ou menor que zero.');
-                    hasError = true;
-                    return false;  // Sai do loop
-                }
-
-                if (qt_produzida !== '') {
-                    // Obtém os valores das outras colunas se necessário
-                    var chave = $(this).find('td:eq(0)').text().trim();
-                    var data = $(this).find('td:eq(1)').text().trim();
-                    var codigo = $(this).find('td:eq(3)').text().trim();
-                    var descricao = $(this).find('td:eq(4)').text().trim();
-                    var cor = $(this).find('td:eq(6)').text().trim();
-                    
-                    // Conversão da cor para código
-                    switch (cor) {
-                        case 'Azul': cor = 'AN'; break;
-                        case 'Cinza': cor = 'CO'; break;
-                        case 'Laranja': cor = 'LC'; break;
-                        case 'Verde': cor = 'VJ'; break;
-                        case 'Vermelho': cor = 'VM'; break;
-                        case 'Amarelo': cor = 'AV'; break;
+            if (operador === '') {
+                alert('Insira um operador');
+                return;
+            } else {
+                showLoading();
+            
+                $('#dataTable tbody tr').each(function () {
+                    var qt_produzida = $(this).find('td:eq(7) input').val(); // Obtém o valor da coluna 5
+                    if (qt_produzida < 0) {
+                        // Se houver um erro, marca a variável hasError como true
+                        alert('A quantidade produzida não pode ser menor que zero.');
+                        hasError = true;
+                        return false;  // Sai do loop
                     }
+                    if (qt_produzida !== '') {
+                        // Obtém os valores das outras colunas se necessário
+                        var chave = $(this).find('td:eq(0)').text().trim();
+                        var data = $(this).find('td:eq(1)').text().trim();
+                        var codigo = $(this).find('td:eq(3)').text().trim();
+                        var descricao = $(this).find('td:eq(4)').text().trim();
+                        var qt_planejada = $(this).find('td:eq(5)').text().trim();
+                        var cor = $(this).find('td:eq(6)').text().trim();
+                        if (cor === 'Azul') {
+                            cor = 'AN';
+                        } else if (cor === 'Cinza') {
+                            cor = 'CO';
+                        } else if (cor === 'Laranja') {
+                            cor = 'LC';
+                        } else if (cor === 'Verde') {
+                            cor = 'VJ'
+                        } else if (cor === 'Vermelho') {
+                            cor = 'VM'
+                        } else if (cor === 'Amarelo') {
+                            cor = 'AV'
+                        }
+                        var cambao = $(this).find('td:eq(8) input').val().trim();
+                        var tipo = $(this).find('td:eq(9) select').val();
+                        var celula = $(this).find('td:eq(10)').text().trim();
 
-                    var cambao = $(this).find('td:eq(8) input').val().trim();
-                    var tipo = $(this).find('td:eq(9)').text().trim();
-                    var celula = $(this).find('td:eq(10)').text().trim();
-
-                    // Adiciona os dados da linha ao array
-                    linhas.push({
-                        data: data,
-                        codigo: codigo,
-                        descricao: descricao,
-                        cor: cor,
-                        qt_itens: qt_planejada,
-                        prod: qt_produzida,
-                        cambao: cambao,
-                        tipo: tipo,
-                        celula: celula,
-                        chave: chave,
-                        operador: operador
-                    });
-                }
-            });
-
-            // Se houve um erro, não envia os dados para o backend
-            if (hasError) {
-                hideLoading(); // Esconde o loading caso haja um erro
-                return; // Sai da função
-            }
-
-            // Envia os dados para o backend, caso não tenha erros
-            if (linhas.length > 0) {
-                $.ajax({
-                    type: 'POST',
-                    url: '/gerar-cambao-pintura',
-                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
-                    data: JSON.stringify({ linhas: linhas }),
-                    success: function (data) {
-                        hideLoading();
-                        showAndHideSuccessAlert('Salvo.', 2000);
-                        console.log(data);
-                        location.reload();
-                    },
-                    error: function (error) {
-                        console.error('Erro na solicitação POST:', error);
-                        hideLoading();
+                        // Adiciona os dados da linha ao array
+                        linhas.push({ data: data, codigo: codigo, descricao: descricao, cor: cor, qt_itens: qt_planejada, prod: qt_produzida, cambao: cambao, tipo: tipo, celula: celula, chave: chave, operador: operador });
+                    }
+                    else {
+                        return;
                     }
                 });
+                if (hasError) {
+                    hideLoading(); // Esconde o loading caso haja um erro
+                    return; // Sai da função
+                }
+                // Envia os dados para o backend
+                if(linhas.length > 0){
+                    $.ajax({
+                        type: 'POST',
+                        url: '/gerar-cambao-pintura',
+                        contentType: 'application/json',  // Define o tipo de conteúdo como JSON
+                        data: JSON.stringify({ linhas: linhas }),
+                        success: function (data) {
+                            hideLoading();
+                            showAndHideSuccessAlert('Salvo.', 2000);
+                            console.log(data);
+                            location.reload();
+                        },
+                        error: function (error) {
+                            console.error('Erro na solicitação POST:', error);
+                            // Adiciona um pequeno atraso antes de chamar hideLoading()
+                            hideLoading();
+                            // location.reload();
+                        }
+                    });
+                }
             }
-        }
-    });
-});
 
+
+        });
+    });
 
 </script>
 

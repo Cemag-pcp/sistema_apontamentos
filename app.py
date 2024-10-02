@@ -324,16 +324,23 @@ def gerar_cambao():
     Rota para página de gerar cambão
     """
 
-    table = dados_planejamento_pintura()
+    table = dados_sequenciamento()
     table['qt_produzida'] = ''
     table['cambao'] = ''
+    table['tipo'] = ''
     table['data_carga'] = pd.to_datetime(
         table['data_carga']).dt.strftime("%d/%m/%Y")
-    table['data_planejamento'] = pd.to_datetime(
-        table['data_planejamento']).dt.strftime("%d/%m/%Y")
-    table = table[table['qt_planejada']>0]
-    table = table[['id', 'data_carga', 'data_planejamento', 'codigo', 'peca',
-                   'qt_planejada', 'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
+    table['codificacao'] = table.apply(criar_codificacao, axis=1)
+    table = table[table['restante'] > 0]
+    table['data_planejada'] = pd.to_datetime(
+        table['data_carga'], format="%d/%m/%Y") - timedelta(1)
+
+    # Aplica a função de ajuste para cada valor na coluna 'data_planejada'
+    table['data_planejada'] = table['data_planejada'].apply(ajustar_para_sexta)
+    table['data_planejada'] = table['data_planejada'].dt.strftime("%d/%m/%Y")
+
+    table = table[['id', 'data_carga', 'data_planejada', 'codigo', 'peca',
+                   'restante', 'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
     sheet_data = table.values.tolist()
 
     return render_template('gerar-cambao.html', sheet_data=sheet_data)
@@ -843,47 +850,47 @@ def limpar_cache_historico():
     return render_template('historico-pintura.html')
 
 
-@app.route('/planejar-pintura', methods=['GET', 'POST'])
-def planejar_pintura():
-    """
-    Rota para página de gerar cambão
-    """
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+# @app.route('/planejar-pintura', methods=['GET', 'POST'])
+# def planejar_pintura():
+#     """
+#     Rota para página de gerar cambão
+#     """
+#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+#                             password=DB_PASS, host=DB_HOST)
+#     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    if request.method == 'GET':
+#     if request.method == 'GET':
 
-        table = dados_sequenciamento()
-        table['qt_produzida'] = ''
-        table['cambao'] = ''
-        table['tipo'] = ''
-        table['data_carga'] = pd.to_datetime(
-            table['data_carga']).dt.strftime("%d/%m/%Y")
-        table['codificacao'] = table.apply(criar_codificacao, axis=1)
-        table = table[table['restante']>0]
-        table = table[['data_carga', 'codigo', 'peca', 'restante',
-                    'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
-        sheet_data = table.values.tolist()
+#         table = dados_sequenciamento()
+#         table['qt_produzida'] = ''
+#         table['cambao'] = ''
+#         table['tipo'] = ''
+#         table['data_carga'] = pd.to_datetime(
+#             table['data_carga']).dt.strftime("%d/%m/%Y")
+#         table['codificacao'] = table.apply(criar_codificacao, axis=1)
+#         table = table[table['restante']>0]
+#         table = table[['data_carga', 'codigo', 'peca', 'restante',
+#                     'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
+#         sheet_data = table.values.tolist()
 
-        return render_template('planejar-pintura.html', sheet_data=sheet_data)
+#         return render_template('planejar-pintura.html', sheet_data=sheet_data)
     
-    elif request.method == 'POST':
+#     elif request.method == 'POST':
 
-        data = request.json.get('data')
+#         data = request.json.get('data')
 
-        print(data)
+#         print(data)
 
-        query = """SELECT data_carga, data_finalizacao, celula, codigo, peca, SUM(qt_apontada) AS total_apontada
-                    FROM pcp.ordens_montagem
-                WHERE data_finalizacao = %s
-                GROUP BY data_carga, data_finalizacao, celula, codigo, peca;"""
+#         query = """SELECT data_carga, data_finalizacao, celula, codigo, peca, SUM(qt_apontada) AS total_apontada
+#                     FROM pcp.ordens_montagem
+#                 WHERE data_finalizacao = %s
+#                 GROUP BY data_carga, data_finalizacao, celula, codigo, peca;"""
         
-        cur.execute(query,(data,))
+#         cur.execute(query,(data,))
 
-        ordens_montagem = cur.fetchall()
+#         ordens_montagem = cur.fetchall()
     
-        return jsonify(ordens_montagem)
+#         return jsonify(ordens_montagem)
 
 # --------- INICIO INSPEÇÃO -----------
 

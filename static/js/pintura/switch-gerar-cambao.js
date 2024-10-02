@@ -38,7 +38,7 @@ switch2.addEventListener('change', function () {
 // Percorre cada linha do tbody
 for (const row of tableBody.getElementsByTagName('tr')) {
     // Seleciona a célula da coluna de cor (6ª coluna, índice 5)
-    const corCell = row.cells[6];
+    const corCell = row.cells[5];
     
     if (corCell) {
         let cor = corCell.textContent.trim();
@@ -46,23 +46,22 @@ for (const row of tableBody.getElementsByTagName('tr')) {
         // Substitui o valor de cor pelo valor correspondente
         if (cor === 'AN') {
             corCell.textContent = 'Azul'; 
-            corCell.style.backgroundColor = 'lightblue';
+            // corCell.style.backgroundColor = 'lightblue';
         } else if (cor === 'CO') { 
             corCell.textContent = 'Cinza';
-            corCell.style.backgroundColor = '#e1e1e1';
+            // corCell.style.backgroundColor = '#e1e1e1';
         } else if (cor === 'LC') { 
             corCell.textContent = 'Laranja';
-            corCell.style.backgroundColor = '#ffcc6e';
+            // corCell.style.backgroundColor = '#ffcc6e';
         } else if (cor === 'VJ') {
             corCell.textContent = 'Verde'; 
-            corCell.style.backgroundColor = '#bbffbb';
+            // corCell.style.backgroundColor = '#bbffbb';
         } else if (cor === 'VM') {
             corCell.textContent = 'Vermelho'; 
-            corCell.style.backgroundColor = '#ff00006e';
-            corCell.style.color = 'white';
+            // corCell.style.backgroundColor = '#ff00006e';
         } else if (cor === 'AV') { 
             corCell.textContent = 'Amarelo';
-            corCell.style.backgroundColor = '#ffff94';
+            // corCell.style.backgroundColor = '#ffff94';
         }
     }
 }

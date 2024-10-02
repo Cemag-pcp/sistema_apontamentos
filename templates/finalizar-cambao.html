@@ -9,6 +9,30 @@
 <link rel="stylesheet" type="text/css"
     href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
 
+<style>
+
+    .custom-switch.custom-switch-md .custom-control-label {
+        padding-left: 1rem;
+        padding-bottom: 1.5rem;
+    }
+    
+    .custom-switch.custom-switch-md .custom-control-label::before {
+        height: 1.5rem;
+        width: calc(2rem + 0.75rem);
+        border-radius: 3rem;
+    }
+    
+    .custom-switch.custom-switch-md .custom-control-label::after {
+        width: calc(1.5rem - 4px);
+        height: calc(1.5rem - 4px);
+        border-radius: calc(2rem - (1.5rem / 2));
+    }
+    
+    .custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
+        transform: translateX(calc(1.5rem - 0.25rem));
+    }
+</style>
+
 {% endblock %}
 
 {% block containerFluid %}
@@ -55,6 +79,18 @@
                             </div>
                         </div>
                     </div>
+                    <div class="p-2">
+                        <div class="custom-control custom-switch custom-switch-md">
+                            <input type="checkbox" class="custom-control-input" id="customSwitch1" checked>
+                            <label class="custom-control-label" for="customSwitch1">PÓ</label>
+                        </div>
+                        
+                        <!-- Switch 2 -->
+                        <div class="custom-control custom-switch custom-switch-md">
+                            <input type="checkbox" class="custom-control-input" id="customSwitch2">
+                            <label class="custom-control-label" for="customSwitch2">PU</label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Card Body -->
@@ -91,10 +127,10 @@
                                     <th>Status</th>
                                 </tr>
                             </tfoot>
-                            <tbody>
+                            <tbody id="tableBody">
                                 {% if sheet_data %}
                                 {% for data in sheet_data %}
-                                <tr>
+                                <tr data-type="{{ data[7] }}">
                                     <td>{{ data[0] }}</td>
                                     <td>{{ data[8] }}</td>
                                     <td>{{ data[1] }}</td>
@@ -103,7 +139,7 @@
                                     <td>{{ data[4] }}</td>
                                     <td>{{ data[5] }}</td>
                                     <td>{{ data[6] }}</td>
-                                    <td>{{ data[7] }}</td>
+                                    <td class="typePintura">{{ data[7] }}</td>
                                     <td>{{ data[11] }}</td>
                                     <td>
                                         <input type="checkbox" class="form-control">
@@ -186,6 +222,7 @@
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="static/js/demo/datatables-demo.js"></script>
+<script src="/static/js/pintura/switch-gerar-cambao.js"></script>
 
 <!-- Script para abrir modal de finalizar cambão -->
 
@@ -272,6 +309,7 @@
             applyColorFilter();
             populateDatalistOptions('listaCor', 5);
         });
+        filterTable();
     });
 
     $('#dataTable').dataTable({
