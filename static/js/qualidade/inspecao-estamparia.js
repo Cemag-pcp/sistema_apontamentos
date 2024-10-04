@@ -163,6 +163,12 @@ $('#envio_inspecao_estamparia').on('click',function() {
         return; // Interrompe a execução
     }
 
+    if(inspecao_total === null){
+        alert('Preencha o campo "Necessita realizar a inspeção 100%?"');
+        $("#loading").hide();
+        return; // Interrompe a execução
+    }
+
     console.log(typeof qtd_pecas_mortas)
     console.log(qtd_pecas_mortas)
     if(qtd_pecas_mortas < 0 || isNaN(qtd_pecas_mortas)) {
