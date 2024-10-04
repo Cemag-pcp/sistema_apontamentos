@@ -6,14 +6,18 @@ from flask import request
 
 class Inspecao:
 
-    def __init__(self, db_name, db_user, db_pass, db_host, upload_folder,upload_folder_token):
-
-        self.conn = psycopg2.connect(dbname=db_name, user=db_user, password=db_pass, host=db_host)
+    def __init__(self, db_name, db_user, db_pass, db_host, upload_folder, upload_folder_token):
+        self.db_name = db_name
+        self.db_user = db_user
+        self.db_pass = db_pass
+        self.db_host = db_host
         self.upload_folder = upload_folder
         self.upload_folder_token = upload_folder_token
+        self.conectar()  # Inicializa a conexão
 
     def inserir_reinspecao(self, id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico='', categoria='', outraCausaSolda='', origemInspecaoSolda='', observacaoSolda=''):
         
+        self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
 
             id_inspecao = str(id_inspecao)
@@ -46,6 +50,7 @@ class Inspecao:
 
     def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = '', operador_estamparia='',qtd_mortas='',motivo_mortas=''):
 
+        self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             id_inspecao = str(id_inspecao)
             if setor == 'Pintura':
@@ -79,6 +84,7 @@ class Inspecao:
 
     def alterar_reinspecao(self, id_inspecao, n_nao_conformidades, qtd_produzida, n_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico='', categoria='', outraCausaSolda='', origemInspecaoSolda='', observacaoSolda='', operadores=''):
         
+        self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
 
             id_inspecao = str(id_inspecao)
@@ -213,6 +219,7 @@ class Inspecao:
 
     def dados_inspecionar_reinspecionar_pintura(self):
 
+        self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
 
             inspecao = """SELECT * FROM pcp.pecas_inspecao WHERE excluidas = 'false' AND setor = 'Pintura' ORDER BY id desc"""
@@ -242,6 +249,7 @@ class Inspecao:
     
     def dados_inspecionar_reinspecionar_estamparia(self):
 
+        self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
 
             inspecao = """SELECT * FROM pcp.pecas_inspecao WHERE excluidas = 'false' AND setor = 'Estamparia' ORDER BY id desc"""
@@ -278,6 +286,7 @@ class Inspecao:
 
     def dados_reteste_tubos_cilindros(self):
 
+        self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
 
             inspecao = """SELECT * FROM pcp.pecas_reinspecao WHERE excluidas = 'false' AND (setor = 'Solda - Cilindro' or setor = 'Solda - Tubo') ORDER BY id desc"""
@@ -304,6 +313,7 @@ class Inspecao:
 
     def executando_reteste(self,id,reteste_status1,reteste_status2,reteste_status3):
 
+        self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             query = """INSERT INTO pcp.inspecao_reteste (id,reteste_1,reteste_2,reteste_3) VALUES (%s,%s,%s,%s)"""
             values = (id, reteste_status1, reteste_status2, reteste_status3)
@@ -338,6 +348,7 @@ class Inspecao:
 
     def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= '',tipos_causas_estamparia='',list_quantidade=[]):
 
+        self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             if tipos_causas_estamparia == '':
                 for i in range(1, n_nao_conformidades + 1):
@@ -461,6 +472,7 @@ class Inspecao:
 
     def processar_ficha_inspecao(self,id_inspecao,ficha_completa=''):
 
+        self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             if ficha_completa != '':
                 filename = secure_filename(ficha_completa.filename)
@@ -499,6 +511,13 @@ class Inspecao:
         
         self.conn.commit()
         print("processar_ficha_inspecao")
+
+    def conectar(self):
+        self.conn = psycopg2.connect(dbname=self.db_name, user=self.db_user, password=self.db_pass, host=self.db_host)
+
+    def verificar_conexao(self):
+        if self.conn.closed:  # Verifica se a conexão está fechada
+            self.conectar()
 
     # def fechar_conexao(self):
     #     self.cur.close()
