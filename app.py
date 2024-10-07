@@ -168,10 +168,6 @@ def dados_sequenciamento_montagem():
     Função para buscar os dados do sequenciamento de montagem
     """
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     sql = """SELECT
                 gerador_ordens_montagem.*,
                 COALESCE(ordens_montagem.qt_apontada, 0) as qt_apontada,
@@ -191,7 +187,7 @@ def dados_sequenciamento_montagem():
             ON
                 concat(gerador_ordens_montagem.data_carga, gerador_ordens_montagem.codigo) = concat(ordens_montagem.data_carga, ordens_montagem.codigo)
             order by id desc
-            LIMIT 5000;"""
+            LIMIT 1000;"""
 
     df = pd.read_sql_query(sql, conn)
 
