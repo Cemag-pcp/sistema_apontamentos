@@ -401,18 +401,26 @@ class DashboardInspecao:
                 SELECT ano_mes,
                     conjunto,
                     causa,
-                    SUM(total_quantidade) as total_quantidade
+                    SUM(total_quantidade) AS total_quantidade
                 FROM (
-                    SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
-                                    pi.codigo || '-' ||pi.peca as conjunto,
-                                    foto.causa,
-                                    foto.quantidade::INTEGER as total_quantidade
+                    SELECT DISTINCT 
+                        foto.id,
+                        TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
+                        pi.codigo || '-' || pi.peca AS conjunto,
+                        foto.causa,
+                        foto.quantidade::INTEGER AS total_quantidade
                     FROM pcp.inspecao_foto foto
                     LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
-                    WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Estamparia'
+                    WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                    AND foto.num_inspecao = (
+                        SELECT MAX(f2.num_inspecao)
+                        FROM pcp.inspecao_foto f2
+                        WHERE f2.id = foto.id
+                    )
+                    AND pi.setor = 'Estamparia'
                 ) AS subquery
                 GROUP BY ano_mes, conjunto, causa
-                ORDER BY ano_mes desc;
+                ORDER BY ano_mes DESC;
             """
         cur.execute(query_total_causas)
         total_causas = cur.fetchall()
