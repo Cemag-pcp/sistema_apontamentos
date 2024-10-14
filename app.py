@@ -187,7 +187,7 @@ def dados_sequenciamento_montagem():
             ON
                 concat(gerador_ordens_montagem.data_carga, gerador_ordens_montagem.codigo) = concat(ordens_montagem.data_carga, ordens_montagem.codigo)
             order by id desc
-            LIMIT 1000;"""
+            LIMIT 1100;"""
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
