@@ -189,6 +189,9 @@ def dados_sequenciamento_montagem():
             order by id desc
             LIMIT 1000;"""
 
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+
     df = pd.read_sql_query(sql, conn)
 
     return df
