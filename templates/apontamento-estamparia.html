@@ -1005,6 +1005,16 @@
                         return;
                     }
 
+                    if (!validateInput(pecaInput.attr('id'))) {
+                        hideLoading();
+                        showAndHideAlert('Por favor, selecione uma peça válida da lista de sugestões.', 2000);
+                        console.log('Campo inválido');
+                        return;
+                    } else {
+                        // Coloque aqui a lógica para salvar o planejamento se o input for válido
+                        console.log('Válido');
+                    }
+
                     var pecaSplit = peca_.split(' - ');
                     var codigo = pecaSplit[0];
                     var descricao = pecaSplit.slice(1).join(' - ');
@@ -1029,26 +1039,26 @@
                 }
 
                 // Enviar dados para o backend
-                $.ajax({
-                    url: '/api/planejar-pecas/estamparia',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(pecas),
-                    success: function (response) {
-                        console.log(response);
-                        hideLoading();
-                        showAndHideSuccessAlert('Salvo.', 2000);
-                        $('#modalPecaFora').modal('hide');
+                // $.ajax({
+                //     url: '/api/planejar-pecas/estamparia',
+                //     method: 'POST',
+                //     contentType: 'application/json',
+                //     data: JSON.stringify(pecas),
+                //     success: function (response) {
+                //         console.log(response);
+                //         hideLoading();
+                //         showAndHideSuccessAlert('Salvo.', 2000);
+                //         $('#modalPecaFora').modal('hide');
 
-                        // Limpa todos os campos após o envio
-                        $('.campo_dinamico').find('input, select').val('');
-                        location.reload(); // Atualiza a página após salvar
-                    },
-                    error: function (err) {
-                        console.error('Erro ao enviar dados para o backend', err);
-                        hideLoading();
-                    }
-                });
+                //         // Limpa todos os campos após o envio
+                //         $('.campo_dinamico').find('input, select').val('');
+                //         location.reload(); // Atualiza a página após salvar
+                //     },
+                //     error: function (err) {
+                //         console.error('Erro ao enviar dados para o backend', err);
+                //         hideLoading();
+                //     }
+                // });
             });
         });
     </script>

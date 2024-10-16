@@ -145,3 +145,14 @@ function fetchSuggestion() {
         }
     });
 }
+
+function validateInput(inputId) {
+    const inputValue = $(`#${inputId}`).val();
+    const isValid = suggestionsDataPecaModal.some(suggestion => suggestion.toLowerCase() === inputValue.toLowerCase());
+
+    if (!isValid) {
+        return false;
+    }
+
+    return true;
+}
