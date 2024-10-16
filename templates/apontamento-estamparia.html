@@ -868,7 +868,7 @@
                     }
                 });
 
-                // Envia os dados para o backend
+                // Envia os dados para o backend CORREÇÃO
                 $.ajax({
                     type: 'POST',
                     url: '/salvar-apontamento-montagem',
@@ -1038,27 +1038,27 @@
                     return;
                 }
 
-                // Enviar dados para o backend
-                // $.ajax({
-                //     url: '/api/planejar-pecas/estamparia',
-                //     method: 'POST',
-                //     contentType: 'application/json',
-                //     data: JSON.stringify(pecas),
-                //     success: function (response) {
-                //         console.log(response);
-                //         hideLoading();
-                //         showAndHideSuccessAlert('Salvo.', 2000);
-                //         $('#modalPecaFora').modal('hide');
+                // Enviar dados para o backend CORREÇÃO
+                $.ajax({
+                    url: '/api/planejar-pecas/estamparia',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(pecas),
+                    success: function (response) {
+                        console.log(response);
+                        hideLoading();
+                        showAndHideSuccessAlert('Salvo.', 2000);
+                        $('#modalPecaFora').modal('hide');
 
-                //         // Limpa todos os campos após o envio
-                //         $('.campo_dinamico').find('input, select').val('');
-                //         location.reload(); // Atualiza a página após salvar
-                //     },
-                //     error: function (err) {
-                //         console.error('Erro ao enviar dados para o backend', err);
-                //         hideLoading();
-                //     }
-                // });
+                        // Limpa todos os campos após o envio
+                        $('.campo_dinamico').find('input, select').val('');
+                        location.reload(); // Atualiza a página após salvar
+                    },
+                    error: function (err) {
+                        console.error('Erro ao enviar dados para o backend', err);
+                        hideLoading();
+                    }
+                });
             });
         });
     </script>
