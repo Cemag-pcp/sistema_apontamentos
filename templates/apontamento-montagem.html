@@ -1759,8 +1759,8 @@
                     origem: origem
                 }
 
-                if (inputQuantidadeRealizada === '') {
-                    showAndHideAlert('Por favor informe a quantidade.', 2000);
+                if (inputQuantidadeRealizada === '' || inputQuantidadeRealizada > quantidadePlanejada) {
+                    showAndHideAlert('Por favor informe a quantidade correta.', 2000);
                     return;
                 };
 
@@ -1771,7 +1771,7 @@
 
                 showAndHideSuccessAlert('Enviado!', 2000);
                 $('#modalExecucaoApontamento').modal('hide');
-
+                console.log("TESTE")
                 $.ajax({
                     type: 'POST',
                     url: '/finalizar-peca-em-processo',
