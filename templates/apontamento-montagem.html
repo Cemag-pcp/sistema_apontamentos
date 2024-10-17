@@ -1528,7 +1528,7 @@
                 let cardHtml;
                 // Aqui você pode continuar com o processamento dos dados e a criação dos cards
                 cardHtml = `
-                            <div class="col-sm-6 mb-2">
+                            <div class="col-sm-6 mb-2" data-id="${peca[0]}">
                                 <div class="card shadow mb-4" name="${peca[8]}">
                                     <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                         <h6 class="m-0 font-weight-bold text-secondary"><small>${peca[1] + " - " + peca[2]}</small></h6>
@@ -1733,17 +1733,18 @@
         $(document).ready(function () {
             $('#btnFinalizarOrdem').on('click', function () {
 
-                pecaFinalizada = $('#nomePecaApontada').val();
-                quantidadePlanejada = $('#inputQuantidadePlanejada').val();
-                codificacao = $('#codificacaoOrdem').val();
-                celula = $('#celulaOrdem').val();
-                textAreaObservacao = $('#textAreaObservacao_').val();
-                dataHoraInicio = $('#dataHoraInicio').val();
-                operadorInputModal_1 = $('#operadorInputModal_1').val();
-                inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
-                dataCarga = $('#dataCargaFinalizacao').val();
-                idPecaEmProcesso = $('#idPecaEmProcesso').val();
-                origem = $('#origemPecaEmProcesso').val();
+
+                let pecaFinalizada = $('#nomePecaApontada').val();
+                let quantidadePlanejada = $('#inputQuantidadePlanejada').val();
+                let codificacao = $('#codificacaoOrdem').val();
+                let celula = $('#celulaOrdem').val();
+                let textAreaObservacao = $('#textAreaObservacao_').val();
+                let dataHoraInicio = $('#dataHoraInicio').val();
+                let operadorInputModal_1 = $('#operadorInputModal_1').val();
+                let inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
+                let dataCarga = $('#dataCargaFinalizacao').val();
+                let idPecaEmProcesso = $('#idPecaEmProcesso').val();
+                let origem = $('#origemPecaEmProcesso').val();
 
                 dados = {
                     codigo: pecaFinalizada,
@@ -1759,7 +1760,7 @@
                     origem: origem
                 }
 
-                if (inputQuantidadeRealizada === '' || inputQuantidadeRealizada > quantidadePlanejada) {
+                if (inputQuantidadeRealizada === '' || parseInt(inputQuantidadeRealizada) > parseInt(quantidadePlanejada)) {
                     showAndHideAlert('Por favor informe a quantidade correta.', 2000);
                     return;
                 };
@@ -1769,9 +1770,13 @@
                     return;
                 }
 
+                if (idPecaEmProcesso) {
+                    // Encontra o card com o data-id correspondente e o remove do DOM
+                    $(`[data-id="${idPecaEmProcesso}"]`).css('display','none');
+                }
                 showAndHideSuccessAlert('Enviado!', 2000);
                 $('#modalExecucaoApontamento').modal('hide');
-                console.log("TESTE")
+        
                 $.ajax({
                     type: 'POST',
                     url: '/finalizar-peca-em-processo',
