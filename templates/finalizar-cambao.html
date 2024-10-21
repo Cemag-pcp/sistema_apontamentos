@@ -65,91 +65,80 @@
                     <div class="form-row">
                         <!-- <div class="col-sm">
                             <div class="form-group">
-                                <label for="dataCarga">Data da carga</label>
-                                <input type="date" id="dataCarga" class="form-control" data-column="1">
+                                <label for="cor">Cor</label>
+                                <input list="listaCor" id="cor" class="form-control" data-column="5">
+                                <datalist id="listaCor"></datalist>
                             </div>
                         </div> -->
-                        <div class="col-sm">
-                            <div class="form-group">
-                                <label for="cor">Cor</label>
-                                <!-- <input type="text" class="form-control" id="cor" onclick="mostrarLista()" onblur="ocultarLista()"> -->
-                                <input list="listaCor" id="cor" class="form-control" data-column="5">
-                                <datalist id="listaCor">
-                                </datalist>
-                            </div>
-                        </div>
                     </div>
                     <div class="p-2">
+                        <!-- Switch para PÓ -->
                         <div class="custom-control custom-switch custom-switch-md">
-                            <input type="checkbox" class="custom-control-input" id="customSwitch1" checked>
-                            <label class="custom-control-label" for="customSwitch1">PÓ</label>
+                            <input type="checkbox" class="custom-control-input" id="switchPo">
+                            <label class="custom-control-label" for="switchPo">PÓ</label>
                         </div>
-                        
-                        <!-- Switch 2 -->
+                        <!-- Switch para PU -->
                         <div class="custom-control custom-switch custom-switch-md">
-                            <input type="checkbox" class="custom-control-input" id="customSwitch2">
-                            <label class="custom-control-label" for="customSwitch2">PU</label>
+                            <input type="checkbox" class="custom-control-input" id="switchPu">
+                            <label class="custom-control-label" for="switchPu">PU</label>
                         </div>
                     </div>
                 </div>
-
+                
                 <!-- Card Body -->
                 <div class="card-body">
                     <div class="table-responsive" style="max-height: 100%; overflow-y: auto;">
                         <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Data da carga</th>
-                                    <th>Código</th>
-                                    <th>Descrição</th>
-                                    <th>Qt. planejada</th>
-                                    <th>Cor</th>
-                                    <th>Qt. produzida</th>
                                     <th>Cambão</th>
-                                    <th>Tipo</th>
-                                    <th>Codificação</th>
-                                    <th>Status</th>
                                 </tr>
                             </thead>
-                            <tfoot>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Data da carga</th>
-                                    <th>Código</th>
-                                    <th>Descrição</th>
-                                    <th>Qt. planejada</th>
-                                    <th>Cor</th>
-                                    <th>Qt. produzida</th>
-                                    <th>Cambão</th>
-                                    <th>Tipo</th>
-                                    <th>Codificação</th>
-                                    <th>Status</th>
-                                </tr>
-                            </tfoot>
+                            <!-- Tabela com Peças -->
                             <tbody id="tableBody">
                                 {% if sheet_data %}
-                                {% for data in sheet_data %}
-                                <tr data-type="{{ data[7] }}">
-                                    <td>{{ data[0] }}</td>
-                                    <td>{{ data[8] }}</td>
-                                    <td>{{ data[1] }}</td>
-                                    <td>{{ data[2] }}</td>
-                                    <td>{{ data[3] }}</td>
-                                    <td>{{ data[4] }}</td>
-                                    <td>{{ data[5] }}</td>
-                                    <td>{{ data[6] }}</td>
-                                    <td class="typePintura">{{ data[7] }}</td>
-                                    <td>{{ data[11] }}</td>
-                                    <td>
-                                        <input type="checkbox" class="form-control">
-                                    </td>
-                                </tr>
-                                {% endfor %}
+                                    {% for cambao, tipos in sheet_data.items() %}
+                                    <!-- Linha do Cambão -->
+                                    <tr class="cambao-row" data-cambao="{{ cambao }}" data-tipo="{{ tipos.keys() | join(',') }}">
+                                        <td colspan="2"><strong>Cambão:</strong> {{ cambao }}</td>
+                                    </tr>
+                            
+                                    {% for tipo, info in tipos.items() %}
+                                    <tr class="button-row" data-tipo="{{ tipo }}">
+                                        <td colspan="2">
+                                            <button 
+                                                class="btn btn-primary btn-sm" 
+                                                onclick="toggleTipo('{{ cambao }}', '{{ tipo }}')">
+                                                Mostrar Peças (Tipo: {{ tipo }})
+                                            </button>
+                                            <button 
+                                                class="btn btn-success btn-sm" 
+                                                onclick="abrirModal('{{ cambao }}', '{{ tipo }}')">
+                                                Finalizar
+                                            </button>
+                                        </td>
+                                    </tr>
+                            
+                                    {% for i in range(info['pecas'] | length) %}
+                                    <tr 
+                                        class="peca-row cambao-{{ cambao }} tipo-{{ tipo }}" 
+                                        style="display: none;" 
+                                        data-tipo="{{ tipo }}">
+                                        <td colspan="2">
+                                            <div style="display: none;"><strong style="display: none;">Id:</strong> {{ info['id'][i] }} - </div>
+                                            <strong>Código:</strong> {{ info['codigo'][i] }} -
+                                            <strong>Peça:</strong> {{ info['pecas'][i] }} - 
+                                            <strong>Quantidade:</strong> {{ info['quantidade'][i] }}
+                                            <strong>Cor:</strong> {{ info['cor'][i] }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% endfor %}
+                                    {% endfor %}
                                 {% else %}
-                                <tr>
-                                    <td colspan="7">Nenhum dado disponível</td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="2">Nenhum dado disponível</td>
+                                    </tr>
                                 {% endif %}
                             </tbody>
                         </table>
@@ -179,8 +168,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="operadorFinalizarCambaoLabel">Operador
-                    </h5>
+                    <h5 class="modal-title" id="operadorFinalizarCambaoLabel">Operador</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -199,7 +187,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="btnFinalizarCambao" type="button" class="btn btn-success">Finalizar</button>
+                    <button id="btnFinalizarCambao" type="button" class="btn btn-success" 
+                            onclick="enviarDados()">Finalizar</button>
                 </div>
             </div>
         </div>
@@ -213,197 +202,6 @@
 
 </div>
 
-{% endblock %}
-
-{% block scripts %}
-
-<!-- Script tabela JQuery -->
-
-<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
-<script src="static/js/demo/datatables-demo.js"></script>
-<script src="/static/js/pintura/switch-gerar-cambao.js"></script>
-
-<!-- Script para abrir modal de finalizar cambão -->
-
-<script>
-    document.getElementById('abrirModalOperadorFinalizarCambao').addEventListener('click', function () {
-        $('#operadorFinalizarCambao').modal('show');
-    })
-</script>
-
-<!-- Script campos de filtro -->
-
-<script>
-    $(document).ready(function () {
-
-
-        var table = $('#dataTable').DataTable();
-
-        // Função para obter valores únicos de uma coluna
-        function getUniqueColumnValues(columnIndex) {
-            return table.column(columnIndex, { search: 'applied' }).data().unique().sort().toArray();
-        }
-
-        // Função para popular as opções de um datalist
-        function populateDatalistOptions(datalistId, columnIndex) {
-            var datalist = $('#' + datalistId);
-            datalist.empty(); // Limpa as opções existentes
-
-            var uniqueValues = getUniqueColumnValues(columnIndex);
-
-            // Adiciona as opções ao datalist
-            uniqueValues.forEach(function (value) {
-                datalist.append('<option value="' + value + '">');
-            });
-
-            console.log(uniqueValues);
-        }
-
-        // // Função para aplicar o filtro com base na data
-        // function applyDateFilter() {
-        //     var columnIndex = $('#dataCarga').data('column');
-        //     var filterValue = $('#dataCarga').val();
-
-        //     console.log('Column Index:', columnIndex);
-        //     console.log('Filter Value:', filterValue);
-
-        //     // Formata a data usando Moment.js
-        //     // if (filterValue === '') {
-        //     //     filterValue = moment().format('DD/MM/YYYY');
-        //     // } else {
-        //     //     filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
-        //     // }
-
-        //     filterValue = moment(filterValue, 'YYYY-MM-DD').format('DD/MM/YYYY');
-
-        //     // Define o filtro na coluna específica
-        //     table.column(columnIndex).search(filterValue).draw();
-
-        //     populateDatalistOptions('listaCor', 5);
-        // }
-
-        function applyColorFilter() {
-            var columnIndex = $('#cor').data('column');
-            var filterValue = $('#cor').val();
-
-            console.log('Column Index:', columnIndex);
-            console.log('Filter Value:', filterValue);
-
-            // Define o filtro na coluna específica
-            table.column(columnIndex).search(filterValue).draw();
-        }
-
-        // Carrega as opções do datalist quando a página é carregada
-        populateDatalistOptions('listaCor', 5);
-
-        // Aplica o filtro ao carregar a página
-        // applyDateFilter();
-
-        // Adiciona campos de entrada para filtrar por coluna
-        // $('#dataCarga').on('input', function () {
-        //     applyDateFilter();
-        // });
-
-        $('#cor').on('input', function () {
-            applyColorFilter();
-            populateDatalistOptions('listaCor', 5);
-        });
-        filterTable();
-    });
-
-    $('#dataTable').dataTable({
-        'iDisplayLength': 1000
-    });
-</script>
-
-<!-- Script botão de enviar -->
-
-<script>
-    $(document).ready(function () {
-        // Adicione um manipulador de clique ao botão de envio
-        $('#btnFinalizarCambao').on('click', function () {
-
-            var operador = $('#selectOperadorFinalizarCambao').val();
-
-            if (operador === '') {
-                alert('Insira um operador');
-                return;
-            } else {
-
-                // Obtém as linhas com a coluna 5 diferente de vazio
-                showLoading();
-                $('#operadorFinalizarCambao').modal('hide');
-                var linhas = [];
-                $('#dataTable tbody tr').each(function () {
-                    // var qt_produzida = $(this).find('td:eq(9) input').val().trim(); // Obtém o valor da coluna 5
-                    // console.log(qt_produzida);
-                    if ($(this).find('td:eq(10) input').prop('checked')) {
-                        // Obtém os valores das outras colunas se necessário
-                        var chave = $(this).find('td:eq(0)').text().trim();
-                        var data = $(this).find('td:eq(1)').text().trim();
-                        var codigo = $(this).find('td:eq(2)').text().trim();
-                        var descricao = $(this).find('td:eq(3)').text().trim();
-                        var qt_planejada = $(this).find('td:eq(4)').text().trim();
-                        var cor = $(this).find('td:eq(5)').text().trim();
-                        if (cor === 'Azul') {
-                            cor = 'AN';
-                        } else if (cor === 'Cinza') {
-                            cor = 'CO';
-                        } else if (cor === 'Laranja') {
-                            cor = 'LC';
-                        } else if (cor === 'Verde') {
-                            cor = 'VJ'
-                        } else if (cor === 'Vermelho') {
-                            cor = 'VM'
-                        } else if (cor === 'Amarelo') {
-                            cor = 'AV'
-                        }
-
-                        var qt_produzida = $(this).find('td:eq(6)').text().trim();
-                        var cambao = $(this).find('td:eq(7)').text().trim();
-                        var tipo = $(this).find('td:eq(8)').text().trim();
-
-                        // Adiciona os dados da linha ao array
-                        linhas.push({ chave: chave, data: data, codigo: codigo, descricao: descricao, cor: cor, qt_itens: qt_planejada, prod: qt_produzida, cambao: cambao, tipo: tipo, operador:operador });
-
-                    }
-                    else {
-                        return;
-                    }
-                });
-
-                // Envia os dados para o backend
-                $.ajax({
-                    type: 'POST',
-                    url: '/receber-dados-finalizar-cambao',
-                    contentType: 'application/json',  // Define o tipo de conteúdo como JSON
-                    data: JSON.stringify({ linhas: linhas }),
-                    success: function (data) {
-                        hideLoading();
-                        showAndHideSuccessAlert('Salvo.', 2000);
-                        location.reload();
-                    },
-                    error: function (error) {
-                        console.error('Erro na solicitação POST:', error);
-                        // Adiciona um pequeno atraso antes de chamar hideLoading()
-                        hideLoading();
-                        // location.reload();
-                    }
-                });
-            
-            }
-        });
-    });
-
-</script>
-
-<!-- Script tratar data -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-
-<!-- Script tela de carregamento -->
-
 <script>
     function showLoading() {
         $('#loading').show();
@@ -412,34 +210,143 @@
     function hideLoading() {
         $('#loading').hide();
     }
-
 </script>
 
-<!-- Script de alertas (Depois jogar em um arquivo.js) -->
-
 <script>
-    function showAndHideAlert(message, duration) {
-        const alertBox = $('#alertBox');
-        alertBox.html(`<strong>Danger!</strong> ${message}`);
-        alertBox.slideDown();
+    let dadosSelecionados = []; // Armazena as peças e dados selecionados
 
-        setTimeout(function () {
-            alertBox.slideUp();
-        }, duration);
+    function abrirModal(cambao, tipo) {
+        // Seleciona todas as linhas de peças correspondentes ao cambão e tipo
+        const pecaRows = document.querySelectorAll(`.peca-row.cambao-${cambao}.tipo-${tipo}`);
+
+        dadosSelecionados = Array.from(pecaRows).map(row => {
+            const textoCompleto = row.querySelector('td').innerText;
+
+            // Extrai os valores usando regex ou split
+            const id = textoCompleto.match(/Id:\s(.*?)\s-/)?.[1] || null;
+            const codigo = textoCompleto.match(/Código:\s(.*?)\s-/)?.[1] || null;
+            const peca = textoCompleto.match(/Peça:\s(.*?)\s-/)?.[1] || null;
+            const quantidade = textoCompleto.match(/Quantidade:\s(\d+)/)?.[1] || null;
+            const cor = textoCompleto.match(/Cor:\s(.*)/)?.[1] || null;
+
+            return {
+                id: id,
+                codigo: codigo,
+                peca: peca,
+                quantidade: quantidade ? parseInt(quantidade) : null,
+                cor: cor,
+                cambao: cambao,
+                tipo: tipo
+            };
+        });
+
+        console.log(dadosSelecionados); // Verifica se os dados estão corretos
+
+        // Exibe o modal
+        $('#operadorFinalizarCambao').modal('show');
+    }
+
+    function enviarDados() {
+        
+        showLoading();
+
+        const operador = document.getElementById('selectOperadorFinalizarCambao').value;
+
+        if (!operador) {
+            alert('Por favor, selecione um operador.');
+            return;
+        }
+
+        // Adiciona o operador às informações selecionadas
+        const dadosComOperador = dadosSelecionados.map(item => ({
+            ...item,
+            operador: operador
+        }));
+
+        // Envio dos dados via AJAX
+        fetch('/receber-dados-finalizar-cambao', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ linhas: dadosComOperador, operador: operador })
+        })
+        .then(response => {
+            if (response.ok) {
+                $('#operadorFinalizarCambao').modal('hide'); // Fecha o modal
+                window.location.reload(); // Recarrega a página
+                hideLoading();
+            } else {
+                alert('Erro ao finalizar o cambão.');
+                hideLoading();
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao enviar os dados.');
+            hideLoading();
+        });
     }
 
 </script>
 
 <script>
-    function showAndHideSuccessAlert(message, duration) {
-        const successAlert = $('#successAlert');
-        successAlert.html(message);
-        successAlert.slideDown();
+document.addEventListener('DOMContentLoaded', () => {
+    // Seleciona automaticamente o switch PÓ ao carregar a página
+    document.getElementById('switchPo').checked = true;
+    switchTipo('PÓ');
+});
 
-        setTimeout(function () {
-            successAlert.slideUp();
-        }, duration);
+// Adiciona eventos aos switches
+document.getElementById('switchPo').addEventListener('change', () => switchTipo('PÓ'));
+document.getElementById('switchPu').addEventListener('change', () => switchTipo('PU'));
+
+function switchTipo(tipoSelecionado) {
+    // Desativa o outro switch automaticamente
+    if (tipoSelecionado === 'PÓ') {
+        document.getElementById('switchPu').checked = false;
+        console.log("PÓ");
+    } else if (tipoSelecionado === 'PU') {
+        document.getElementById('switchPo').checked = false;
     }
+
+    // Exibir apenas os cambões do tipo selecionado
+    const cambaoRows = document.querySelectorAll('.cambao-row');
+    cambaoRows.forEach(row => {
+        const tipos = row.getAttribute('data-tipo').split(',');
+        row.style.display = tipos.includes(tipoSelecionado) ? '' : 'none';
+    });
+
+    // Exibir apenas os botões do tipo selecionado
+    const buttonRows = document.querySelectorAll('.button-row');
+    buttonRows.forEach(row => {
+        const tipo = row.getAttribute('data-tipo');
+        row.style.display = tipo === tipoSelecionado ? '' : 'none';
+    });
+
+    // Exibir apenas as peças do tipo selecionado
+    // const pecaRows = document.querySelectorAll('.peca-row');
+    // pecaRows.forEach(row => {
+    //     const tipo = row.getAttribute('data-tipo');
+    //     row.style.display = tipo === tipoSelecionado ? '' : 'none';
+    // });
+}
+
+function toggleTipo(cambao, tipo) {
+    const rows = document.querySelectorAll(`.cambao-${cambao}.tipo-${tipo}`);
+    let isHidden = Array.from(rows).every(row => row.style.display === 'none');
+
+    // Alterna a visibilidade das peças
+    rows.forEach(row => {
+        row.style.display = isHidden ? '' : 'none';
+    });
+
+    // Altera o texto do botão
+    const button = event.target;
+    button.textContent = isHidden ? 'Esconder Peças' : `Mostrar Peças (Tipo: ${tipo})`;
+}
+
 </script>
+
 
 {% endblock %}

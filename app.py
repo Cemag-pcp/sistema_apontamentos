@@ -396,18 +396,36 @@ def gerar_planilha():
 @app.route('/finalizar-cambao', methods=['GET', 'POST'])
 def finalizar_cambao():
     """
-    Rota para mostrar página de finalizar cambão
+    Rota para mostrar página de finalizar cambão agrupada por cambão e tipo
     """
 
+    # Obter dados
     table = dados_finalizar_cambao()
+
+    # Adicionar coluna de codificação, se aplicável
     if len(table) > 0:
         table['codificacao'] = table.apply(criar_codificacao, axis=1)
     else:
-        table['codificacao'] = ''
+        table = pd.DataFrame(columns=['id','cambao', 'tipo', 'peca', 'qt_planejada', 'codificacao'])
 
-    sheet_data = table.values.tolist()
+    # Agrupar por cambão e tipo
+    resultado = {}
+    grouped = table.groupby(['cambao', 'tipo'])
 
-    return render_template('finalizar-cambao.html', sheet_data=sheet_data)
+    for (cambao, tipo), group in grouped:
+        if cambao not in resultado:
+            resultado[cambao] = {}
+
+        resultado[cambao][tipo] = {
+            'id': group['id'].tolist(),
+            'codigo': group['codigo'].tolist(),
+            'pecas': group['peca'].tolist(),
+            'quantidade': group['qt_planejada'].tolist(),
+            'cor':group['cor'].tolist()
+        }
+
+    # Enviar resultado para o template
+    return render_template('finalizar-cambao.html', sheet_data=resultado)
 
 
 @app.route("/receber-dados-finalizar-cambao", methods=['POST'])
@@ -417,28 +435,28 @@ def receber_dados_finalizar_cambao():
     """
 
     dados_recebidos = request.json['linhas']
-
-    print(dados_recebidos)
+    operador = request.json['operador']
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
+    
     with conn.cursor() as cursor:
         for dado in dados_recebidos:
 
             #  Construir e executar a consulta UPDATE
 
             query = ("UPDATE pcp.ordens_pintura SET status = 'OK', operador_final = %s WHERE id = %s")
-            cursor.execute(query, (dado['operador'],str(dado['chave'])))
+            cursor.execute(query, (operador,str(dado['id'])))
     
             sql = """INSERT INTO pcp.pecas_inspecao 
                      (id, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
                      VALUES (%s, NOW(),%s, %s, %s, %s, %s, 'Pintura')"""
             values = (
-                dado['chave'],
+                dado['id'],
                 dado['codigo'],
-                dado['descricao'],
+                dado['peca'],
                 dado['cor'],
-                dado['prod'],
+                dado['quantidade'],
                 dado['tipo']
             )
             
@@ -446,8 +464,8 @@ def receber_dados_finalizar_cambao():
                 
             itens_json = {
                         'codigo':dado['codigo'],
-                        'descricao':dado['descricao'],
-                        'quantidade':dado['prod'],
+                        'descricao':dado['peca'],
+                        'quantidade':dado['quantidade'],
                         'almoxarifado':'Almox pintura'
                         }
             
