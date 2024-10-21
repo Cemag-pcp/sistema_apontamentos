@@ -1872,21 +1872,6 @@
 
         }
 
-        function retornarModalPadrao(id) {
-
-
-
-            $('#retornarPecaProducao').val(id);
-            var botaoRetornar = document.getElementById('retornarPecaProducao');
-
-            var botaoRetornar = document.getElementById('confimarRetornoProducao');
-            botaoRetornar.style.display = 'block';
-
-            var botaoIniciar = document.getElementById('confimarInicioProducao');
-            botaoIniciar.style.display = 'none';
-
-        }
-
         $(document).ready(function () {
             $('#confimarRetornoProducao').on('click', function () {
                 idPecaRetornar = $('#retornarPecaProducao').val();
