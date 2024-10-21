@@ -640,6 +640,7 @@
                         <option>Aguardando Soldagem</option>
                         <option>Aguardando Resfriamento da peça</option>
                         <option>Retrabalho</option>
+                        <option>Realizando outra atividade</option>
                     </select>
                 </div>
                 <div class="modal-footer">
@@ -1429,6 +1430,11 @@
             var rowData = $(this).closest('tr').find('td').map(function () {
                 return $(this).text();
             }).get();
+
+            document.getElementById('modalConfirmarInicioProducaoLabel').textContent = 'Iniciar';
+            document.getElementById('labelConfirmar').textContent = 'Confirmar início da produção?';
+
+            document.getElementById('retornarPecaProducao').style.display = 'none';
 
             var botaoRetornar = document.getElementById('confimarRetornoProducao');
             botaoRetornar.style.display = 'none';
