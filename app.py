@@ -420,7 +420,7 @@ def finalizar_cambao():
             'id': group['id'].tolist(),
             'codigo': group['codigo'].tolist(),
             'pecas': group['peca'].tolist(),
-            'quantidade': group['qt_planejada'].tolist(),
+            'quantidade': group['qt_apontada'].tolist(),
             'cor':group['cor'].tolist()
         }
 
