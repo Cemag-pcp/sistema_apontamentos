@@ -1001,10 +1001,14 @@
                     return;
                 }
 
+                let pecaSplit = peca.split(' - ');
+                let codigo = pecaSplit[0];
+                let descricao = pecaSplit.slice(1).join(' - ');
+
                 // Criar objeto com os dados
                 const dados = {
-                    peca: peca.split(' - ')[0],
-                    descricao: peca.split(' - ')[1],
+                    peca: codigo,
+                    descricao: descricao,
                     dataCarga: dataCarga,
                     qtPlanejada: quantidade,
                     codificacao: '',
@@ -1021,10 +1025,11 @@
                     data: JSON.stringify(dados),
                     success: function (response) {
                         // Tratar a resposta do backend, se necessário
-                        console.log(response);
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         $('#modalPecaFora').modal('hide');
+                        chamarAPI();
+                        chamarAPIInterrompidas();
                     },
                     error: function (err) {
                         console.error('Erro ao enviar dados para o backend', err);
