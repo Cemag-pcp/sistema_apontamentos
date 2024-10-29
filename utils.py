@@ -67,17 +67,13 @@ def buscar_planilha_saldo():
 
     return tabela_saldo_mont
 
-def atualizar_saldo(itens_json):
+def atualizar_saldo(itens_json,cur,conn):
 
     codigo = itens_json['codigo']
     descricao = itens_json['descricao']
     almoxarifado = itens_json['almoxarifado']
     quantidade = float(itens_json['quantidade'])
     
-    # conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-    #                     password=DB_PASS, host=DB_HOST)
-    # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     # Verifica se o item já existe no saldo_recurso
     cur.execute("""
         SELECT saldo FROM pcp.saldo_recurso 
