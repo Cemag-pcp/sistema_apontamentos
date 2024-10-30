@@ -469,7 +469,7 @@ def receber_dados_finalizar_cambao():
                         'almoxarifado':'Almox pintura'
                         }
             
-            atualizar_saldo(itens_json,)
+            atualizar_saldo(itens_json,cursor,conn)
 
         # Commit para aplicar as alterações
         conn.commit()
@@ -2310,7 +2310,7 @@ def finalizar_peca_em_processo_montagem():
                 'almoxarifado':'Almox Mont Carretas'
                 }
 
-    atualizar_saldo(itens_json,)
+    atualizar_saldo(itens_json,cur,conn)
 
     return 'sucess'
 
@@ -4863,9 +4863,6 @@ def retrabalho_pintura():
         cur.execute(query_update_em_processo, (data['id'],))
 
         conn.commit()
-
-        cur.close()
-        conn.close()
 
         return jsonify({"message":"Liberada para reinspecionar"})
 
