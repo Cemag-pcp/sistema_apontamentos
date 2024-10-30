@@ -116,6 +116,23 @@
                                                 onclick="abrirModal('{{ cambao }}', '{{ tipo }}')">
                                                 Finalizar
                                             </button>
+                                            {% if tipo == 'PÓ' %}
+
+                                                {% if cambao == '1' %}
+                                                    CINZA
+                                                {% elif cambao == '2' %}
+                                                    VERMELHO
+                                                {% elif cambao == '3' %}
+                                                    LARANJA
+                                                {% elif cambao == '4' %}
+                                                    VERDE
+                                                {% elif cambao == '5' %}
+                                                    AZUL
+                                                {% elif cambao == '6' %}
+                                                    AMARELO    
+                                                {% endif %}
+
+                                            {% endif %}
                                         </td>
                                     </tr>
                             
