@@ -925,6 +925,7 @@ def inspecao_pintura():
         list_causas = json.loads(request.form.get('list_causas'))
         list_quantidade = json.loads(request.form.get('list_quantidade'))
         tipos_causas_pintura = int(request.form.get('tipos_causas_pintura'))
+        setor = 'Pintura'
 
         print(list_causas)
 
@@ -932,7 +933,7 @@ def inspecao_pintura():
             list_quantidade = [None]
 
         if list_causas != [None]:
-            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_pintura,list_quantidade)
+            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas, setor,'',tipos_causas_pintura,list_quantidade)
         
         data_inspecao = request.form.get('data_inspecao')
         data_inspecao_obj = datetime.strptime(data_inspecao, "%d/%m/%Y")
@@ -942,7 +943,6 @@ def inspecao_pintura():
         inspetor = request.form.get('inspetor')
         qtd_produzida = request.form.get('qtd_produzida')
         modal_reinspecao = request.form.get('reinspecao')
-        setor = 'Pintura'
 
         if modal_reinspecao != 'False':
             classe_inspecao.alterar_reinspecao(id_inspecao,n_nao_conformidades,qtd_produzida,n_conformidades,list_causas,inspetor,setor)
@@ -1006,7 +1006,7 @@ def modal_historico():
     
     query_caminho_foto = f"""SELECT *
                         FROM pcp.inspecao_foto
-                        WHERE id = '{idinspecao}'
+                        WHERE id = '{idinspecao}' and setor = '{setor}'
                         ORDER BY num_inspecao ASC
                         """
     
@@ -1040,6 +1040,7 @@ def inspecao_solda():
         id_inspecao = request.form.get('id_inspecao')
         list_causas = json.loads(request.form.get('list_causas'))
         list_quantidade = json.loads(request.form.get('list_quantidade'))
+        setor = 'Solda'
 
         if list_quantidade == ['']:
             list_quantidade = [None]
@@ -1054,7 +1055,7 @@ def inspecao_solda():
         print(list_causas)
 
         if list_causas != [None]:
-            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_solda,list_quantidade)
+            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas, setor,'',tipos_causas_solda,list_quantidade)
 
         data_inspecao = request.form.get('data_inspecao')
 
@@ -1074,7 +1075,6 @@ def inspecao_solda():
         num_pecas = request.form.get('num_pecas')
         reinspecao = request.form.get('reinspecao')
 
-        setor = 'Solda'
 
         if reinspecao == "True":
 
@@ -1219,6 +1219,7 @@ def inspecao_estamparia():
         list_causas = json.loads(request.form.get('list_causas'))
         list_quantidade = json.loads(request.form.get('list_quantidade'))
         tabela_dados = request.form.getlist('tabela_dados')  # Note o getlist para listas
+        setor = 'Estamparia'
 
         # Avalia a string JSON para listas e pega apenas os primeiros quatro valores de cada item
         tabela_dados = [json.loads(item)[:4] for item in tabela_dados]
@@ -1237,7 +1238,7 @@ def inspecao_estamparia():
                 list_causas[i] = outraCausaSolda
 
         if list_causas != [None]:
-            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas,'',tipos_causas_estamparia,list_quantidade)
+            classe_inspecao.processar_fotos_inspecao(id_inspecao, n_nao_conformidades, list_causas, setor,'',tipos_causas_estamparia,list_quantidade)
 
         data_inspecao = request.form.get('data_inspecao')
 
@@ -1269,7 +1270,6 @@ def inspecao_estamparia():
         num_pecas = request.form.get('num_pecas')
         reinspecao = request.form.get('reinspecao')
 
-        setor = 'Estamparia'
 
         if reinspecao == "True":
 
@@ -1325,12 +1325,13 @@ def atualizar_conformidade():
     list_causas = json.loads(request.form.get('list_causas'))
     list_quantidade = json.loads(request.form.get('list_quantidade'))
     tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
+    setor = 'Solda'
 
     if list_quantidade == ['']:
         list_quantidade = [None]
 
     if list_causas != [None]:
-        classe_inspecao.processar_fotos_inspecao(id_edicao, nao_conformidades, list_causas,num_execucao,tipos_causas_solda,list_quantidade)
+        classe_inspecao.processar_fotos_inspecao(id_edicao, nao_conformidades, list_causas, setor,num_execucao,tipos_causas_solda,list_quantidade)
 
     atualizar_historico = f"""UPDATE pcp.pecas_inspecionadas
                              SET total_conformidades = '{conformidade_atualizada}', nao_conformidades = '{num_nao_conformidade}' 
@@ -1364,7 +1365,6 @@ def atualizar_conformidade():
         observacao = valores_p_reinspecao[0][5]
  
 
-        setor = 'Solda'
         criar_reinspecao = """INSERT INTO pcp.pecas_reinspecao 
                         (id, data_reinspecao, nao_conformidades, causa_reinspecao, inspetor, setor, conjunto, categoria, outra_causa, origem, observacao) 
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, '', %s, %s)"""
@@ -1421,6 +1421,8 @@ def inspecao_tubos_cilindros():
         n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
         list_causas = json.loads(request.form.get('list_causas'))
         list_quantidade = json.loads(request.form.get('list_quantidade'))
+        setor = request.form.get('setor')
+        setor_final = f"Solda - {setor}"
 
         if list_quantidade == ['']:
             list_quantidade = [None]
@@ -1430,7 +1432,7 @@ def inspecao_tubos_cilindros():
         tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
 
         if list_causas != [None]:
-            classe_inspecao.processar_fotos_inspecao(id_inspecao_solda, n_nao_conformidades, list_causas,'',tipos_causas_solda,list_quantidade)
+            classe_inspecao.processar_fotos_inspecao(id_inspecao_solda, n_nao_conformidades, list_causas, setor_final,'',tipos_causas_solda,list_quantidade)
 
         data_inspecao = request.form.get('data_inspecao')
 
@@ -1459,8 +1461,6 @@ def inspecao_tubos_cilindros():
         num_pecas = request.form.get('num_pecas')
         operador = request.form.get('operador')
 
-        setor = request.form.get('setor')
-        setor_final = f"Solda - {setor}"
 
         query_inspecao = """INSERT INTO pcp.pecas_inspecao (id,data_finalizada,codigo,peca,qt_inspecionada,setor,celula,qt_apontada,excluidas) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
 
