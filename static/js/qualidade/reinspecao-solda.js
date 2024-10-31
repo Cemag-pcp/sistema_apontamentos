@@ -88,12 +88,6 @@ $('#envio_reinspecao_Solda').on('click',function() {
         return; // Interrompe a execução
     }
 
-    if (observacaoSolda.trim() === "" ) {
-        alert('Verifique se os campos de causa e observação estão com os valores corretos');
-        $("#loading").hide();
-        return; // Interrompe a execução
-    }
-
     $('#reinspecaoModalSolda').modal('hide');
 
     $('#modalConfirmacaoSolda').modal('show');

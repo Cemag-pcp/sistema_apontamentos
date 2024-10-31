@@ -48,7 +48,7 @@ class Inspecao:
 
         print("inserir_reinspecao")
 
-    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = '', operador_estamparia='',qtd_mortas='',motivo_mortas=''):
+    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = '', operador_estamparia='',qtd_mortas=None,motivo_mortas=''):
 
         self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
@@ -346,7 +346,7 @@ class Inspecao:
 
         self.conn.commit()
 
-    def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, num_inspecao= '',tipos_causas_estamparia='',list_quantidade=[]):
+    def processar_fotos_inspecao(self, id_inspecao, n_nao_conformidades, list_causas, setor, num_inspecao= '',tipos_causas_estamparia='',list_quantidade=[]):
 
         self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
@@ -373,16 +373,16 @@ class Inspecao:
                                                 BEGIN
                                                     IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
                                                         INSERT INTO pcp.inspecao_foto
-                                                            (id, caminho_foto, causa, num_inspecao) 
+                                                            (id, caminho_foto, causa, setor, num_inspecao) 
                                                         VALUES 
-                                                            (%s, %s, %s,
+                                                            (%s, %s, %s, %s,
                                                                 (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
                                                             );
                                                     ELSE
                                                         INSERT INTO pcp.inspecao_foto
-                                                            (id, caminho_foto, causa, num_inspecao) 
+                                                            (id, caminho_foto, causa, setor, num_inspecao) 
                                                         VALUES 
-                                                            (%s, %s, %s, 0);
+                                                            (%s, %s, %s, %s, 0);
                                                     END IF;
                                                 END $$;
                                             """
@@ -391,17 +391,20 @@ class Inspecao:
                                     id_inspecao,
                                     arquivos,
                                     list_causas[i - 1],
+                                    setor,
                                     id_inspecao,
                                     id_inspecao,
                                     arquivos,
-                                    list_causas[i - 1]
+                                    list_causas[i - 1],
+                                    setor
                                 )
                         else:
-                            query_fotos = """INSERT INTO pcp.inspecao_foto (id, caminho_foto, causa, num_inspecao) VALUES (%s, %s, %s, %s); """
+                            query_fotos = """INSERT INTO pcp.inspecao_foto (id, caminho_foto, causa, setor, num_inspecao) VALUES (%s, %s, %s, %s, %s); """
                             values_fotos = (
                                     id_inspecao,
                                     arquivos,
                                     list_causas[i - 1],
+                                    setor,
                                     num_inspecao
                                 )
 
@@ -429,16 +432,16 @@ class Inspecao:
                                                 BEGIN
                                                     IF EXISTS (SELECT 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s) THEN
                                                         INSERT INTO pcp.inspecao_foto
-                                                            (id, caminho_foto, causa, quantidade,num_inspecao) 
+                                                            (id, caminho_foto, causa, quantidade, setor, num_inspecao) 
                                                         VALUES 
-                                                            (%s, %s, %s, %s,
+                                                            (%s, %s, %s, %s, %s,
                                                                 (SELECT COALESCE(MAX(num_inspecao), 0) + 1 FROM pcp.pecas_inspecionadas WHERE id_inspecao = %s)
                                                             );
                                                     ELSE
                                                         INSERT INTO pcp.inspecao_foto
-                                                            (id, caminho_foto, causa, quantidade, num_inspecao) 
+                                                            (id, caminho_foto, causa, quantidade, setor, num_inspecao) 
                                                         VALUES 
-                                                            (%s, %s, %s, %s, 0);
+                                                            (%s, %s, %s, %s, %s, 0);
                                                     END IF;
                                                 END $$;
                                             """
@@ -448,22 +451,25 @@ class Inspecao:
                                     arquivos,
                                     list_causas[i],
                                     list_quantidade[i],
+                                    setor,
                                     id_inspecao,
                                     id_inspecao,
                                     arquivos,
                                     list_causas[i],
-                                    list_quantidade[i]
+                                    list_quantidade[i],
+                                    setor
                                 )
                         else:
 
                             print("Entrou no Else")
-                            query_fotos = """INSERT INTO pcp.inspecao_foto (id, caminho_foto, causa, num_inspecao, quantidade) VALUES (%s, %s, %s, %s, %s); """
+                            query_fotos = """INSERT INTO pcp.inspecao_foto (id, caminho_foto, causa, num_inspecao, quantidade, setor) VALUES (%s, %s, %s, %s, %s, %s); """
                             values_fotos = (
                                     id_inspecao,
                                     arquivos,
                                     list_causas[i],
                                     num_inspecao,
-                                    list_quantidade[i]
+                                    list_quantidade[i],
+                                    setor
                                 )
 
                         cur.execute(query_fotos, values_fotos)

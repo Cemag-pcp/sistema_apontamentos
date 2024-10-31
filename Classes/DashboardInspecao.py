@@ -66,10 +66,11 @@ class DashboardInspecao:
                     SUM(total_quantidade) as total_quantidade
                 FROM (
                     SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                                    pi.tipo,
                                     foto.causa,
                                     foto.quantidade::INTEGER as total_quantidade
                     FROM pcp.inspecao_foto foto
-                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                     WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Pintura'
                 ) AS subquery
                 GROUP BY ano_mes, causa
@@ -83,10 +84,11 @@ class DashboardInspecao:
             SELECT SUM(total_quantidade) as soma_total
             FROM (
                 SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                    pi.tipo,
                     foto.causa,
                     foto.quantidade::INTEGER as total_quantidade
                 FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Pintura'
             ) AS subquery;
         """
@@ -97,8 +99,8 @@ class DashboardInspecao:
         query_total_liquida = f"""
             SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
                 FROM pcp.pecas_inspecao pi
-            LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar
-            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PU' AND foto.causa NOTNULL
+            LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar AND pi.setor = foto.setor
+            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PU' AND foto.num_inspecao = 0 AND foto.causa NOTNULL
         """
         cur.execute(query_total_liquida)
         total_liquida = cur.fetchall()
@@ -108,8 +110,8 @@ class DashboardInspecao:
             FROM (
                 SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
                     FROM pcp.pecas_inspecao pi
-                LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar
-                WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PU' AND foto.causa NOTNULL
+                LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar AND pi.setor = foto.setor
+                WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PU' AND foto.num_inspecao = 0 AND foto.causa NOTNULL
             ) AS subquery;
         """
 
@@ -119,8 +121,8 @@ class DashboardInspecao:
         query_total_po = f"""
             SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
                 FROM pcp.pecas_inspecao pi
-            LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar
-            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PÓ' AND pi.setor = 'Pintura' AND foto.causa NOTNULL
+            LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar AND pi.setor = foto.setor
+            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PÓ' AND foto.num_inspecao = 0 AND pi.setor = 'Pintura' AND foto.causa NOTNULL
         """
         cur.execute(query_total_po)
         total_po = cur.fetchall()
@@ -130,8 +132,8 @@ class DashboardInspecao:
             FROM (
                 SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
                     FROM pcp.pecas_inspecao pi
-                LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar
-                WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PÓ' AND pi.setor = 'Pintura' AND foto.causa NOTNULL
+                LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar AND pi.setor = foto.setor
+                WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PÓ' AND foto.num_inspecao = 0 AND pi.setor = 'Pintura' AND foto.causa NOTNULL
             ) AS subquery;
         """
 
@@ -145,7 +147,7 @@ class DashboardInspecao:
         query_fotos = f"""
                 SELECT TO_CHAR(pi2.data_finalizada, 'YYYY-Month') as ano_mes,caminho_foto,foto.causa
                     FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi2 ON foto.id = pi2.id
+                LEFT JOIN pcp.pecas_inspecao pi2 ON foto.id = pi2.id AND foto.setor = pi2.setor
                 WHERE pi2.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND caminho_foto NOTNULL AND pi2.setor = 'Pintura'
                 ORDER BY ano_mes DESC
             """
@@ -219,7 +221,7 @@ class DashboardInspecao:
                                     foto.causa,
                                     foto.quantidade::INTEGER as total_quantidade
                     FROM pcp.inspecao_foto foto
-                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                     WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Solda'
                 ) AS subquery
                 GROUP BY ano_mes, conjunto, causa
@@ -236,7 +238,7 @@ class DashboardInspecao:
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
                 FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Solda'
             ) AS subquery;
         """
@@ -258,7 +260,7 @@ class DashboardInspecao:
                                             inspecionadas.origem,
                                             foto.quantidade::INTEGER AS total_quantidade
                             FROM pcp.inspecao_foto foto
-                            LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                            LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                             LEFT JOIN pcp.pecas_inspecionadas inspecionadas ON pi.id = inspecionadas.id_inspecao
                             WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
                             AND foto.num_inspecao = 0
@@ -279,7 +281,7 @@ class DashboardInspecao:
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
                 FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
                 AND foto.num_inspecao = 0 AND pi.setor = 'Solda - Tubo'
             ) AS subquery;
@@ -302,7 +304,7 @@ class DashboardInspecao:
                                             inspecionadas.origem,
                                             foto.quantidade::INTEGER AS total_quantidade
                             FROM pcp.inspecao_foto foto
-                            LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                            LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                             LEFT JOIN pcp.pecas_inspecionadas inspecionadas ON pi.id = inspecionadas.id_inspecao
                             WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
                             AND foto.num_inspecao = 0
@@ -322,7 +324,7 @@ class DashboardInspecao:
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
                 FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
                 AND foto.num_inspecao = 0 AND pi.setor = 'Solda - Cilindro'
             ) AS subquery;
@@ -338,7 +340,7 @@ class DashboardInspecao:
         query_fotos = f"""
                 SELECT TO_CHAR(pi2.data_finalizada, 'YYYY-Month') as ano_mes,caminho_foto,foto.causa
                     FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi2 ON foto.id = pi2.id
+                LEFT JOIN pcp.pecas_inspecao pi2 ON foto.id = pi2.id AND pi2.setor = foto.setor
                 WHERE pi2.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND caminho_foto NOTNULL AND pi2.setor = 'Solda' AND foto.causa NOTNULL
                 ORDER BY ano_mes DESC
             """
@@ -410,12 +412,12 @@ class DashboardInspecao:
                         foto.causa,
                         foto.quantidade::INTEGER AS total_quantidade
                     FROM pcp.inspecao_foto foto
-                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                     WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
                     AND foto.num_inspecao = (
                         SELECT MAX(f2.num_inspecao)
                         FROM pcp.inspecao_foto f2
-                        WHERE f2.id = foto.id
+                        WHERE f2.id = foto.id 
                     )
                     AND pi.setor = 'Estamparia'
                 ) AS subquery
@@ -433,7 +435,7 @@ class DashboardInspecao:
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
                 FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id
+                LEFT JOIN pcp.pecas_inspecao pi ON pi.id = foto.id AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Estamparia'
             ) AS subquery;
         """
@@ -448,7 +450,7 @@ class DashboardInspecao:
         query_fotos = f"""
                 SELECT TO_CHAR(pi2.data_finalizada, 'YYYY-Month') as ano_mes,caminho_foto,foto.causa
                     FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi2 ON foto.id = pi2.id
+                LEFT JOIN pcp.pecas_inspecao pi2 ON foto.id = pi2.id AND pi2.setor = foto.setor
                 WHERE pi2.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND caminho_foto NOTNULL AND pi2.setor = 'Estamparia' AND foto.causa NOTNULL
                 ORDER BY ano_mes DESC
             """
