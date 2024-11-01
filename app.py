@@ -406,22 +406,28 @@ def finalizar_cambao():
     if len(table) > 0:
         table['codificacao'] = table.apply(criar_codificacao, axis=1)
     else:
-        table = pd.DataFrame(columns=['id','cambao', 'tipo', 'peca', 'qt_planejada', 'codificacao'])
+        table = pd.DataFrame(columns=['id','cambao', 'tipo', 'peca', 'qt_planejada', 'codificacao', 'data_carga'])
 
-    # Agrupar por cambão e tipo
+    # Agrupar por cambão, tipo e data_carga
     resultado = {}
     grouped = table.groupby(['cambao', 'tipo'])
+
+    print(table)
 
     for (cambao, tipo), group in grouped:
         if cambao not in resultado:
             resultado[cambao] = {}
+        if tipo not in resultado[cambao]:  
+            resultado[cambao][tipo] = {}
 
+        # Monta o dicionário `resultado` para os dados agrupados
         resultado[cambao][tipo] = {
             'id': group['id'].tolist(),
             'codigo': group['codigo'].tolist(),
             'pecas': group['peca'].tolist(),
-            'quantidade': group['qt_apontada'].tolist(),
-            'cor':group['cor'].tolist()
+            'quantidade': group['qt_planejada'].tolist(),
+            'cor': group['cor'].tolist(),
+            'data_carga': group['data_carga'].tolist()
         }
 
     # Enviar resultado para o template
