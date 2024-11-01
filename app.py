@@ -1917,6 +1917,31 @@ def api_apontamento_montagem():
 
     return jsonify(data)
 
+@app.route("/api/publica/apontamento/montagem-historico", methods=['GET'])
+def montagem_historico_api():
+    """
+    Rota para página de apontamento de montagem
+    """
+
+    table = dados_sequenciamento_montagem()
+    table['qt_produzida'] = ''
+    table['data_carga'] = pd.to_datetime(
+        table['data_carga']).dt.strftime("%d/%m/%Y")
+    table['codificacao'] = table.apply(criar_codificacao, axis=1)
+    table['data_planejada'] = pd.to_datetime(
+        table['data_carga'], format="%d/%m/%Y") - timedelta(3)
+
+    # Aplica a função de ajuste para cada valor na coluna 'data_planejada'
+    table['data_planejada'] = table['data_planejada'].apply(ajustar_para_sexta)
+    table['data_planejada'] = table['data_planejada'].dt.strftime("%d/%m/%Y")
+
+    table = table[['data_carga', 'data_planejada', 'celula', 'codigo',
+                   'peca', 'qt_planejada', 'qt_produzida','restante', 'codificacao', 'id']]
+
+    sheet_data = table.values.tolist()
+    
+    return jsonify(sheet_data)
+
 @app.route("/api/publica/apontamento/estamparia")
 def api_apontamento_estamparia():
 
