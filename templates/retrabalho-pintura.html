@@ -47,6 +47,7 @@
                                     <th>Tipo</th>
                                     <th>Inspetor</th>
                                     <th>Retrabalho</th>
+                                    <th>Motivos</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -61,6 +62,7 @@
                                     <th>Tipo</th>
                                     <th>Inspetor</th>
                                     <th>Retrabalho</th>
+                                    <th>Motivos</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -79,6 +81,11 @@
                                     <td data-title="Exec"> 
                                         <button class="btn btn-primary" data-toggle="modal" style="cursor: pointer;" onclick="iniciarProcesso('{{data[0]}}')">
                                             Iniciar
+                                        </button>
+                                    </td>
+                                    <td data-title="Motivos">
+                                        <button class="btn btn-secondary" data-toggle="modal" style="cursor: pointer;" onclick="motivosNaoConformidades('{{data[0]}}')">
+                                            Motivos
                                         </button>
                                     </td>
                                 </tr>
@@ -228,6 +235,25 @@
         </div>
     </div>
 
+    <div class="modal fade" data-backdrop="static" id="visualizacaoCausasRetrabalhoModal" tabindex="-1" role="dialog"
+     aria-labelledby="visualizacaoCausasRetrabalhoModalLabel" aria-hidden="true" style="overflow-y: auto;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="visualizacaoCausasRetrabalhoModalLabel">Causas do Retrabalho</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
+                    <!-- Aplicando a classe list-group na lista -->
+                    <ul id="lista_nao_ordenada" class="list-group" style="padding: 0;">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 {% endblock %}
@@ -314,6 +340,33 @@ function iniciarProcesso(id) {
         console.log("Ação cancelada pelo usuário.");
     }
 }
+
+function motivosNaoConformidades(id) {
+    // Requisição AJAX para buscar causas do ID
+    $('#loading').show();
+    $.ajax({
+        url: `/buscar_causas_retrabalho/${id}`,  // URL que define o endpoint do Flask
+        method: 'GET',
+        success: function(response) {
+            // Limpar o conteúdo anterior do modal
+            $('#lista_nao_ordenada').empty();
+
+            // Adicionar as causas retornadas no modal como itens list-group
+            response.causas.forEach(function(causa) {
+                $('#lista_nao_ordenada').append('<li class="list-group-item">' + causa + '</li>');
+            });
+
+            // Mostrar o modal
+            $('#visualizacaoCausasRetrabalhoModal').modal('show');
+            $('#loading').hide();
+        },
+        error: function(error) {
+            console.log('Erro ao carregar as causas:', error);
+            $('#loading').hide();
+        }
+    });
+}
+
 </script>
 
 {% endblock %}

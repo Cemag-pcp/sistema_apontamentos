@@ -4956,6 +4956,29 @@ def retrabalho_em_processo():
 
     return jsonify({"message":"Em processo"})
 
+@app.route('/buscar_causas_retrabalho/<id>', methods=['GET'])
+def buscar_causas(id):
+    """
+    Função para buscar as causas de retrabalho pelo ID fornecido.
+    """
+    # Conectando ao banco de dados
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Consulta SQL para buscar as causas
+    sql = """
+        SELECT causa 
+        FROM pcp.inspecao_foto 
+        WHERE num_inspecao = 0 AND id = %s AND setor = 'Pintura'
+    """
+    
+    cur.execute(sql, (id,))
+    causas = cur.fetchall()
+
+    # Extrair causas para uma lista simples
+    causas_lista = [causa['causa'] for causa in causas]
+    return jsonify({'causas': causas_lista})
+
 @app.route('/consumir-tudo', methods=['POST'])
 def consumir_tudo():
     
