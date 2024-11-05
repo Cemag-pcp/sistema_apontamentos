@@ -1,8 +1,21 @@
 import psycopg2
 import psycopg2.extras
 import os
+import boto3
 from werkzeug.utils import secure_filename
 from flask import request
+from dotenv import load_dotenv
+
+load_dotenv('.env')
+
+AWS_BUCKET_NAME = "sistema-apontamento"
+AWS_REGION = "sa-east-1"
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+    region_name=AWS_REGION
+)
 
 class Inspecao:
 
@@ -14,6 +27,16 @@ class Inspecao:
         self.upload_folder = upload_folder
         self.upload_folder_token = upload_folder_token
         self.conectar()  # Inicializa a conexão
+
+    def upload_to_s3(self, file_path, filename,path):
+        s3_key = f'{path}/{filename}'
+        try:
+            s3_client.upload_file(file_path, AWS_BUCKET_NAME, s3_key)
+            file_url = f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{s3_key}"
+            return file_url
+        except Exception as e:
+            print(f"Erro ao fazer upload para S3: {e}")
+            return None
 
     def inserir_reinspecao(self, id_inspecao, n_nao_conformidades, causa_reinspecao, inspetor, setor, conjunto_especifico='', categoria='', outraCausaSolda='', origemInspecaoSolda='', observacaoSolda=''):
         
@@ -361,9 +384,13 @@ class Inspecao:
                         if foto != '':
                             filename = secure_filename(foto.filename)
                             file_path = os.path.join(self.upload_folder, filename)
-                            arquivos = file_path
-                            arquivos = arquivos.replace('\\', '/')
                             foto.save(file_path)
+
+                            # Enviar para o S3 e obter a URL
+                            arquivos = self.upload_to_s3(file_path, filename,'fotos_causas')
+                            if arquivos is None:
+                                print("Falha ao carregar a foto para o S3")
+                                continue
                         else:
                             arquivos = None
 
@@ -420,9 +447,13 @@ class Inspecao:
                         if foto != '':
                             filename = secure_filename(foto.filename)
                             file_path = os.path.join(self.upload_folder, filename)
-                            arquivos = file_path + ";"
-                            arquivos = arquivos.replace('\\', '/')
                             foto.save(file_path)
+
+                            # Enviar para o S3 e obter a URL
+                            arquivos = self.upload_to_s3(file_path, filename,'fotos_causas')
+                            if arquivos is None:
+                                print("Falha ao carregar a foto para o S3")
+                                continue
                         else:
                             arquivos = None
 
@@ -483,9 +514,12 @@ class Inspecao:
             if ficha_completa != '':
                 filename = secure_filename(ficha_completa.filename)
                 file_path = os.path.join(self.upload_folder_token, filename)
-                arquivos = file_path + ";"
-                arquivos = arquivos.replace('\\', '/')
                 ficha_completa.save(file_path)
+
+                # Enviar para o S3 e obter a URL
+                arquivos = self.upload_to_s3(file_path, filename,'fotos_ficha')
+                if arquivos is None:
+                    print("Falha ao carregar a foto para o S3")
 
                 query_ficha_completa = """DO $$
                             BEGIN
