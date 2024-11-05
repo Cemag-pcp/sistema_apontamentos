@@ -406,7 +406,7 @@ def finalizar_cambao():
     if len(table) > 0:
         table['codificacao'] = table.apply(criar_codificacao, axis=1)
     else:
-        table = pd.DataFrame(columns=['id','cambao', 'tipo', 'peca', 'qt_planejada', 'codificacao', 'data_carga'])
+        table = pd.DataFrame(columns=['id','cambao', 'tipo', 'peca', 'qt_apontada', 'codificacao', 'data_carga'])
 
     # Agrupar por cambão, tipo e data_carga
     resultado = {}
@@ -425,7 +425,7 @@ def finalizar_cambao():
             'id': group['id'].tolist(),
             'codigo': group['codigo'].tolist(),
             'pecas': group['peca'].tolist(),
-            'quantidade': group['qt_planejada'].tolist(),
+            'quantidade': group['qt_apontada'].tolist(),
             'cor': group['cor'].tolist(),
             'data_carga': group['data_carga'].tolist()
         }
