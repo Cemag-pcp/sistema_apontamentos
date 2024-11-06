@@ -1,17 +1,10 @@
 $(document).ready(function () {
     $('#btnFinalizarOrdemParcial').on('click', function () {
-        pecaFinalizada = $('#nomePecaApontada').val();
-        quantidadePlanejada = parseInt($('#inputQuantidadePlanejada').val());
-        codificacao = $('#codificacaoOrdem').val();
-        celula = $('#celulaOrdem').val();
-        textAreaObservacao = $('#textAreaObservacao_').val();
-        dataHoraInicio = $('#dataHoraInicio').val();
-        operadorInputModal_1 = $('#operadorInputModal_1').val();
-        inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
-        inputQuantidadeMorta = $('#inputQuantidadeMorta').val();
-        dataCarga = $('#dataCargaFinalizacao').val();
-        idPecaEmProcesso = $('#idPecaEmProcesso').val();
-        origem = $('#origemPecaEmProcesso').val();
+        var pecaFinalizada = $('#nomePecaApontada').val();
+        var maquinaOrigem = $('#maquinaOrigem').val();
+        var operadorInputModal_1 = $('#operadorInputModal_1').val();
+        var inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
+        var inputQuantidadeMorta = $('#inputQuantidadeMorta').val();
 
         if (pecaFinalizada.split(' - ')[1]) {
             descricao = pecaFinalizada.split(' - ')[1];
@@ -37,6 +30,11 @@ $(document).ready(function () {
 
         if (operadorInputModal_1 === '') {
             showAndHideAlert('Por favor informar o operador.', 2000);
+            return;
+        }
+
+        if (maquinaOrigem === null) {
+            showAndHideAlert('Por favor informar a máquina origem.', 2000);
             return;
         }
 
@@ -66,6 +64,7 @@ $(document).ready(function () {
         var dataCarga = $('#dataCargaFinalizacao').val();
         var idPecaEmProcesso = $('#idPecaEmProcesso').val();
         var origem = $('#origemPecaEmProcesso').val();
+        var maquinaOrigem = $('#maquinaOrigem').val();
 
         quantidadePlanejada = quantidadePlanejada - inputQuantidadeRealizada;
     
@@ -87,6 +86,7 @@ $(document).ready(function () {
             dataCarga: formatarData(dataCarga),
             idPecaEmProcesso: idPecaEmProcesso,
             origem: origem,
+            maquinaOrigem: maquinaOrigem,
             parcial:"Parcial"
         }
     

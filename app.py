@@ -2723,6 +2723,7 @@ def finalizar_peca_em_processo_estamparia():
     data_finalizacao = datetime.now().date().strftime("%Y-%m-%d")
     origem = data['origem']
     parcial = data['parcial']
+    maquinaOrigem = data['maquinaOrigem']
 
     print(parcial)
     print(parcial != "")
@@ -2731,12 +2732,12 @@ def finalizar_peca_em_processo_estamparia():
         enviar_parcialmenete(chave,cur,conn)
 
     query = """ 
-            INSERT INTO pcp.ordens_estamparia (celula,codigo,descricao,qt_apontada,data_planejamento,data_finalizacao,operador,observacao,chave,origem,data_hora_atual,qt_morta)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            INSERT INTO pcp.ordens_estamparia (celula,codigo,descricao,qt_apontada,data_planejamento,data_finalizacao,operador,observacao,chave,origem,data_hora_atual,qt_morta,maquinaOrigem)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
 
     cur.execute(query, (celula, codigo, descricao, inputQuantidadeRealizada, dataCarga,
-                data_finalizacao, operadorInputModal_1, textAreaObservacao, chave, origem, dataHoraInicio,inputQuantidadeMorta))
+                data_finalizacao, operadorInputModal_1, textAreaObservacao, chave, origem, dataHoraInicio,inputQuantidadeMorta,maquinaOrigem))
 
     conn.commit()
 
