@@ -2732,7 +2732,7 @@ def finalizar_peca_em_processo_estamparia():
         enviar_parcialmenete(chave,cur,conn)
 
     query = """ 
-            INSERT INTO pcp.ordens_estamparia (celula,codigo,descricao,qt_apontada,data_planejamento,data_finalizacao,operador,observacao,chave,origem,data_hora_atual,qt_morta,maquinaOrigem)
+            INSERT INTO pcp.ordens_estamparia (celula,codigo,descricao,qt_apontada,data_planejamento,data_finalizacao,operador,observacao,chave,origem,data_hora_atual,qt_morta,maquina)
             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
 
