@@ -2725,9 +2725,6 @@ def finalizar_peca_em_processo_estamparia():
     parcial = data['parcial']
     maquinaOrigem = data['maquinaOrigem']
 
-    print(parcial)
-    print(parcial != "")
-
     if parcial != "":
         enviar_parcialmenete(chave,cur,conn)
 
