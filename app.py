@@ -406,27 +406,26 @@ def finalizar_cambao():
     if len(table) > 0:
         table['codificacao'] = table.apply(criar_codificacao, axis=1)
     else:
-        table = pd.DataFrame(columns=['id','cambao', 'tipo', 'peca', 'qt_apontada', 'codificacao', 'data_carga'])
+        table = pd.DataFrame(columns=['id','cambao', 'tipo','cor', 'peca', 'qt_apontada', 'codificacao', 'data_carga'])
 
     # Agrupar por cambão, tipo e data_carga
     resultado = {}
-    grouped = table.groupby(['cambao', 'tipo'])
+    grouped = table.groupby(['cambao', 'tipo', 'cor'])
 
-    print(table)
-
-    for (cambao, tipo), group in grouped:
+    for (cambao, tipo, cor), group in grouped:
         if cambao not in resultado:
             resultado[cambao] = {}
         if tipo not in resultado[cambao]:  
             resultado[cambao][tipo] = {}
+        if cor not in resultado[cambao][tipo]:  
+            resultado[cambao][tipo][cor] = {}
 
         # Monta o dicionário `resultado` para os dados agrupados
-        resultado[cambao][tipo] = {
+        resultado[cambao][tipo][cor] = {
             'id': group['id'].tolist(),
             'codigo': group['codigo'].tolist(),
             'pecas': group['peca'].tolist(),
             'quantidade': group['qt_apontada'].tolist(),
-            'cor': group['cor'].tolist(),
             'data_carga': group['data_carga'].tolist()
         }
 
@@ -465,7 +464,8 @@ def receber_dados_finalizar_cambao():
                 dado['quantidade'],
                 dado['tipo']
             )
-            
+            print(values)
+
             cursor.execute(sql, values)
                 
             itens_json = {
@@ -475,7 +475,7 @@ def receber_dados_finalizar_cambao():
                         'almoxarifado':'Almox pintura'
                         }
             
-            atualizar_saldo(itens_json,cursor,conn)
+            # atualizar_saldo(itens_json,cursor,conn)
 
         # Commit para aplicar as alterações
         conn.commit()
