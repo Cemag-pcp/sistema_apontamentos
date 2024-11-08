@@ -475,7 +475,7 @@ def receber_dados_finalizar_cambao():
                         'almoxarifado':'Almox pintura'
                         }
             
-            # atualizar_saldo(itens_json,cursor,conn)
+            atualizar_saldo(itens_json,cursor,conn)
 
         # Commit para aplicar as alterações
         conn.commit()
