@@ -2,6 +2,7 @@ import psycopg2
 import psycopg2.extras
 import os
 import boto3
+import uuid
 from werkzeug.utils import secure_filename
 from flask import request
 from dotenv import load_dotenv
@@ -382,7 +383,8 @@ class Inspecao:
                         fotos.append('')
                     for foto in fotos:
                         if foto != '':
-                            filename = secure_filename(foto.filename)
+                            unique_id = uuid.uuid4()
+                            filename = f"{unique_id}_{secure_filename(foto.filename)}"
                             file_path = os.path.join(self.upload_folder, filename)
                             foto.save(file_path)
 
@@ -445,7 +447,8 @@ class Inspecao:
                         fotos.append('')
                     for foto in fotos:
                         if foto != '':
-                            filename = secure_filename(foto.filename)
+                            unique_id = uuid.uuid4()
+                            filename = f"{unique_id}_{secure_filename(foto.filename)}"
                             file_path = os.path.join(self.upload_folder, filename)
                             foto.save(file_path)
 
@@ -512,7 +515,8 @@ class Inspecao:
         self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
             if ficha_completa != '':
-                filename = secure_filename(ficha_completa.filename)
+                unique_id = uuid.uuid4()
+                filename = f"{unique_id}_{secure_filename(ficha_completa.filename)}"
                 file_path = os.path.join(self.upload_folder_token, filename)
                 ficha_completa.save(file_path)
 
