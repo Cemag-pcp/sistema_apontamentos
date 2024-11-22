@@ -417,7 +417,7 @@ def verificar_estoque(df_planilha_saldo, conjuntos, conn, cur):
 
     tabela_saldo = df_planilha_saldo
     tabela_saldo['Saldo'] = pd.to_numeric(tabela_saldo['Saldo'], errors='coerce')
-    tabela_saldo = tabela_saldo.rename(columns={'codigo_peca': 'codigo'})
+    tabela_saldo = tabela_saldo.rename(columns={'2o. Agrupamento': 'codigo'})
 
     # Fazer o merge e verificar saldo de todas as peças de uma vez
     merged_df = pd.merge(df, tabela_saldo, on='codigo', how='left')
@@ -445,6 +445,8 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
 
     # Fazer a verificação de estoque para todas as peças de todos os conjuntos de uma vez
     resultado_df = verificar_estoque(df_planilha_saldo, todos_conjuntos, conn, cur)
+    
+    print(resultado_df)
 
     # Fechar a conexão após obter os dados
     cur.close()
@@ -452,8 +454,7 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
 
     # Definir a lista de todos os processos
     all_processos = ['Chassi', 'Caçamba', 'Traseira', 'Plataforma', 'Fueiro', 'Cilindro', 'Eixo', 'Lateral',
-                     'Dianteira', 'Içamento', 'Tanque', '5ª RODA', 'Eixo simples',
-                     'Eixo completo', 'Acessórios', 'Macaco', 'Intermed.']
+                     'Dianteira', 'Içamento', 'Tanque', '5ª RODA', 'Acessórios', 'Macaco', 'Intermed.']
 
     # Iterar por cada carreta
     for index, row_carreta in df_carretas.iterrows():

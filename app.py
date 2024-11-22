@@ -4109,7 +4109,7 @@ def buscar_planilha_saldo():
     tabela_saldo_mont = tabela_saldo[tabela_saldo['1o. Agrupamento'] == 'Almox Mont Carretas']
 
     # Selecionar apenas as colunas 'codigo_peca' e 'Saldo'
-    tabela_saldo_mont = tabela_saldo_mont[['codigo_peca', 'Saldo']]
+    tabela_saldo_mont = tabela_saldo_mont[['2o. Agrupamento', 'Saldo']]
 
     return tabela_saldo_mont
 
@@ -4843,10 +4843,10 @@ def consuta_carreta_reuniao():
     df_necessidade = buscar_necessidade(df_agrupado_carretas,'Montagem')
     df_necessidade_pintura = buscar_necessidade(df_agrupado_carretas,'Pintura')
 
-    df_estoque = consulta_saldo_estoque('Almox Mont Carretas')
-    df_estoque_pintura = consulta_saldo_estoque('Almox Mont Carretas')
+    df_estoque = consulta_saldo_estoque('Almox Mont Carretas') # saldo de conjunto
+    df_estoque_pintura = consulta_saldo_estoque('Almox Mont Carretas') # saldo de conjunto
 
-    df_planilha_saldo = buscar_planilha_saldo()
+    df_planilha_saldo = buscar_planilha_saldo() # saldo de peças
     
     # Executar a simulação sem acumular déficit de estoque
     # df_carretas = df_carretas.iloc[:2,:]
