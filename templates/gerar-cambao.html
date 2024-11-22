@@ -404,7 +404,13 @@
                         return false;  // Sai do loop
                     }
                     if (qt_produzida !== '') {
+                        var tipo = $(this).find('td:eq(9) select').val();
                         // Obtém os valores das outras colunas se necessário
+                        if(tipo === ''){
+                            alert('O tipo não pode ser vazio.');
+                            hasError = true;
+                            return false;  // Sai do loop
+                        }
                         var chave = $(this).find('td:eq(0)').text().trim();
                         var data = $(this).find('td:eq(1)').text().trim();
                         var codigo = $(this).find('td:eq(3)').text().trim();

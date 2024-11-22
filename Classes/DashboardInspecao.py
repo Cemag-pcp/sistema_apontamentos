@@ -65,7 +65,7 @@ class DashboardInspecao:
                     causa,
                     SUM(total_quantidade) as total_quantidade
                 FROM (
-                    SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                    SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                                     pi.tipo,
                                     foto.causa,
                                     foto.quantidade::INTEGER as total_quantidade
@@ -83,7 +83,7 @@ class DashboardInspecao:
         query_soma_total = f"""
             SELECT SUM(total_quantidade) as soma_total
             FROM (
-                SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                     pi.tipo,
                     foto.causa,
                     foto.quantidade::INTEGER as total_quantidade
@@ -97,7 +97,7 @@ class DashboardInspecao:
         soma_total = cur.fetchone()
 
         query_total_liquida = f"""
-            SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
+            SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
                 FROM pcp.pecas_inspecao pi
             LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar AND pi.setor = foto.setor
             WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PU' AND foto.num_inspecao = 0 AND foto.causa NOTNULL
@@ -108,7 +108,7 @@ class DashboardInspecao:
         query_soma_total_liquida = f"""
             SELECT SUM(quantidade::INTEGER) as soma_total
             FROM (
-                SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
+                SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
                     FROM pcp.pecas_inspecao pi
                 LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PU' AND foto.num_inspecao = 0 AND foto.causa NOTNULL
@@ -119,7 +119,7 @@ class DashboardInspecao:
         soma_total_liquida = cur.fetchone()
 
         query_total_po = f"""
-            SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
+            SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
                 FROM pcp.pecas_inspecao pi
             LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar AND pi.setor = foto.setor
             WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PÓ' AND foto.num_inspecao = 0 AND pi.setor = 'Pintura' AND foto.causa NOTNULL
@@ -130,7 +130,7 @@ class DashboardInspecao:
         query_soma_total_po = f"""
             SELECT SUM(quantidade::INTEGER) as soma_total
             FROM (
-                SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
+                SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
                     FROM pcp.pecas_inspecao pi
                 LEFT JOIN pcp.inspecao_foto foto ON pi.id = foto.id::varchar AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PÓ' AND foto.num_inspecao = 0 AND pi.setor = 'Pintura' AND foto.causa NOTNULL
@@ -216,7 +216,7 @@ class DashboardInspecao:
                     causa,
                     SUM(total_quantidade) as total_quantidade
                 FROM (
-                    SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                    SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                                     pi.codigo || '-' ||pi.peca as conjunto,
                                     foto.causa,
                                     foto.quantidade::INTEGER as total_quantidade
@@ -234,7 +234,7 @@ class DashboardInspecao:
         query_soma_total = f"""
             SELECT SUM(total_quantidade) as soma_total
             FROM (
-                SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
                 FROM pcp.inspecao_foto foto
@@ -253,7 +253,7 @@ class DashboardInspecao:
                             origem,
                             SUM(total_quantidade) AS total_quantidade
                         FROM (
-                            SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
+                            SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
                                             pi.codigo || '-' || pi.peca AS conjunto,
                                             foto.id,
                                             foto.causa,
@@ -276,7 +276,7 @@ class DashboardInspecao:
         query_tubos_soma_total = f"""
             SELECT COALESCE(SUM(total_quantidade),0) as soma_total
             FROM (
-                SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                                 foto.id,
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
@@ -297,7 +297,7 @@ class DashboardInspecao:
                             origem,
                             SUM(total_quantidade) AS total_quantidade
                         FROM (
-                            SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
+                            SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
                                             pi.codigo || '-' || pi.peca AS conjunto,
                                             foto.id,
                                             foto.causa,
@@ -319,7 +319,7 @@ class DashboardInspecao:
         query_cilindro_soma_total = f"""
             SELECT COALESCE(SUM(total_quantidade),0) as soma_total
             FROM (
-                SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                                 foto.id,
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
@@ -357,7 +357,7 @@ class DashboardInspecao:
                     TO_CHAR(inspecao.data_finalizada, 'YYYY-Month') AS ano_mes,
                     EXTRACT(MONTH FROM inspecao.data_finalizada) AS mes,
                     EXTRACT(YEAR FROM inspecao.data_finalizada) AS ano,
-                    COUNT(inspecionadas.setor) FILTER (WHERE inspecionadas.nao_conformidades > 0) AS total_nao_conformidades,
+                    SUM(CASE WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.nao_conformidades ELSE 0 END) AS total_nao_conformidades,
                     COUNT(inspecionadas.setor) FILTER (WHERE inspecionadas.setor = 'Estamparia') AS num_inspecoes
                 FROM pcp.pecas_inspecionadas AS inspecionadas
                 LEFT JOIN pcp.pecas_inspecao AS inspecao ON inspecao.id = inspecionadas.id_inspecao
@@ -405,7 +405,7 @@ class DashboardInspecao:
                     causa,
                     SUM(total_quantidade) AS total_quantidade
                 FROM (
-                    SELECT DISTINCT 
+                    SELECT DISTINCT ON (foto.id, foto.causa)
                         foto.id,
                         TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
                         pi.codigo || '-' || pi.peca AS conjunto,
@@ -431,7 +431,7 @@ class DashboardInspecao:
         query_soma_total = f"""
             SELECT SUM(total_quantidade) as soma_total
             FROM (
-                SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
+                SELECT DISTINCT ON (foto.id, foto.causa) TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                                 foto.causa,
                                 foto.quantidade::INTEGER as total_quantidade
                 FROM pcp.inspecao_foto foto

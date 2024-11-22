@@ -63,13 +63,20 @@
                 <br>
                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                     <div class="form-row">
-                        <!-- <div class="col-sm">
+                        <div class="col-sm">
                             <div class="form-group">
                                 <label for="cor">Cor</label>
-                                <input list="listaCor" id="cor" class="form-control" data-column="5">
-                                <datalist id="listaCor"></datalist>
+                                <select class="form-control" name="filtrarCor" id="filtrarCor" onchange="filtrarPorCor()">
+                                    <option value=""></option>
+                                    <option value="LC">Laranja</option>
+                                    <option value="VM">Vermelho</option>
+                                    <option value="AN">Azul</option>
+                                    <option value="VJ">Verde</option>
+                                    <option value="CO">Cinza</option>
+                                    <option value="AV">Amarelo</option>
+                                </select>
                             </div>
-                        </div> -->
+                        </div>
                     </div>
                     <div class="p-2">
                         <!-- Switch para PÓ -->
@@ -98,47 +105,44 @@
                             <tbody id="tableBody">
                                 {% if sheet_data %}
                                     {% for cambao, tipos in sheet_data.items() %}
-                                    <!-- Linha do Cambão -->
-                                    <tr class="cambao-row" data-cambao="{{ cambao }}" data-tipo="{{ tipos.keys() | join(',') }}">
-                                        <td colspan="2"><strong>Cambão:</strong> {{ cambao }}</td>
-                                    </tr>
-                            
-                                    {% for tipo, info in tipos.items() %}
-                                    <tr class="button-row" data-tipo="{{ tipo }}">
+                                        {% set exibido_cambao_tipo = false %}
+                                    {% for tipo, cores in tipos.items() %}
+                                    
+                                    {% for cor, info in cores.items() %}
+                                    
+                                    {% if not exibido_cambao_tipo %}
+                                        <tr class="cambao-row" data-cambao="{{ cambao }}" data-tipo="{{ tipo }}" data-cor="{{ cor }}">
+                                            <td colspan="2"><strong>Cambão:</strong> {{ cambao }} <strong>Cor: </strong><span class="corCambao">{{ cor }}</span></td>
+                                        </tr>
+                                        {% set exibido_cambao_tipo = true %}  <!-- Marca como exibido -->
+                                    {% endif %}
+                                    <tr class="button-row" data-tipo="{{ tipo }}" data-cor="{{ cor }}">
                                         <td colspan="2">
                                             <button 
                                                 class="btn btn-primary btn-sm" 
-                                                onclick="toggleTipo('{{ cambao }}', '{{ tipo }}')">
+                                                onclick="toggleTipo('{{ cambao }}', '{{ tipo }}', '{{cor}}')">
                                                 Mostrar Peças (Tipo: {{ tipo }})
                                             </button>
                                             <button 
                                                 class="btn btn-success btn-sm" 
-                                                onclick="abrirModal('{{ cambao }}', '{{ tipo }}')">
+                                                onclick="abrirModal('{{ cambao }}', '{{ tipo }}', '{{cor}}')">
                                                 Finalizar
                                             </button>
                                             {% if tipo == 'PÓ' %}
-
-                                                {% if cambao == '1' %}
-                                                    CINZA
-                                                {% elif cambao == '2' %}
-                                                    VERMELHO
-                                                {% elif cambao == '3' %}
-                                                    LARANJA
-                                                {% elif cambao == '4' %}
-                                                    VERDE
-                                                {% elif cambao == '5' %}
-                                                    AZUL
-                                                {% elif cambao == '6' %}
-                                                    AMARELO    
+                                                {% if cambao == '1' %} CINZA
+                                                {% elif cambao == '2' %} VERMELHO
+                                                {% elif cambao == '3' %} LARANJA
+                                                {% elif cambao == '4' %} VERDE
+                                                {% elif cambao == '5' %} AZUL
+                                                {% elif cambao == '6' %} AMARELO    
                                                 {% endif %}
-
                                             {% endif %}
                                         </td>
                                     </tr>
                             
                                     {% for i in range(info['pecas'] | length) %}
                                     <tr 
-                                        class="peca-row cambao-{{ cambao }} tipo-{{ tipo }}" 
+                                        class="peca-row cambao-{{ cambao }} tipo-{{ tipo }} cor-{{ cor }}" 
                                         style="display: none;" 
                                         data-tipo="{{ tipo }}">
                                         <td colspan="2">
@@ -146,10 +150,11 @@
                                             <strong>Código:</strong> {{ info['codigo'][i] }} -
                                             <strong>Peça:</strong> {{ info['pecas'][i] }} - 
                                             <strong>Quantidade:</strong> {{ info['quantidade'][i] }}
-                                            <strong>Cor:</strong> {{ info['cor'][i] }}
+                                            <strong>Cor:</strong> {{ cor }}
                                             <strong>Carga:</strong> {{ info['data_carga'][i] }}
                                         </td>
                                     </tr>
+                                    {% endfor %}
                                     {% endfor %}
                                     {% endfor %}
                                     {% endfor %}
@@ -163,19 +168,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-    </div>
-
-    <!-- Content Row -->
-    <div class="row">
-
-        <!-- Content Column -->
-        <div class="col-lg-12 mb-4">
-
-            <!-- Botão para enviar os itens apontados -->
-            <button id="abrirModalOperadorFinalizarCambao" type="button" class="btn btn-success">Enviar</button>
-
         </div>
 
     </div>
@@ -234,9 +226,9 @@
 <script>
     let dadosSelecionados = []; // Armazena as peças e dados selecionados
 
-    function abrirModal(cambao, tipo) {
+    function abrirModal(cambao, tipo, cor) {
         // Seleciona todas as linhas de peças correspondentes ao cambão e tipo
-        const pecaRows = document.querySelectorAll(`.peca-row.cambao-${cambao}.tipo-${tipo}`);
+        const pecaRows = document.querySelectorAll(`.peca-row.cambao-${cambao}.tipo-${tipo}.cor-${cor}`);
 
         dadosSelecionados = Array.from(pecaRows).map(row => {
             const textoCompleto = row.querySelector('td').innerText;
@@ -246,7 +238,6 @@
             const codigo = textoCompleto.match(/Código:\s(.*?)\s-/)?.[1] || null;
             const peca = textoCompleto.match(/Peça:\s(.*?)\s-/)?.[1] || null;
             const quantidade = textoCompleto.match(/Quantidade:\s(\d+)/)?.[1] || null;
-            const cor = textoCompleto.match(/Cor:\s(.*)/)?.[1] || null;
 
             return {
                 id: id,
@@ -342,7 +333,7 @@ function switchTipo(tipoSelecionado) {
         const tipo = row.getAttribute('data-tipo');
         row.style.display = tipo === tipoSelecionado ? '' : 'none';
     });
-
+    filtrarPorCor();
     // Exibir apenas as peças do tipo selecionado
     // const pecaRows = document.querySelectorAll('.peca-row');
     // pecaRows.forEach(row => {
@@ -351,8 +342,8 @@ function switchTipo(tipoSelecionado) {
     // });
 }
 
-function toggleTipo(cambao, tipo) {
-    const rows = document.querySelectorAll(`.cambao-${cambao}.tipo-${tipo}`);
+function toggleTipo(cambao, tipo, cor) {
+    const rows = document.querySelectorAll(`.cambao-${cambao}.tipo-${tipo}.cor-${cor}`);
     let isHidden = Array.from(rows).every(row => row.style.display === 'none');
 
     // Alterna a visibilidade das peças
@@ -363,6 +354,32 @@ function toggleTipo(cambao, tipo) {
     // Altera o texto do botão
     const button = event.target;
     button.textContent = isHidden ? 'Esconder Peças' : `Mostrar Peças (Tipo: ${tipo})`;
+}
+
+function filtrarPorCor() {
+    // Obter a cor selecionada
+    const selectedCor = document.getElementById("filtrarCor").value;
+
+    // Determinar qual tipo está ativo com base no switch
+    const tipoSelecionado = document.getElementById("switchPo").checked ? 'PÓ' : 
+                            document.getElementById("switchPu").checked ? 'PU' : null;
+
+    // Selecionar todas as linhas que contêm os atributos data-cor e data-tipo
+    const rows = document.querySelectorAll("#tableBody .cambao-row, #tableBody .button-row");
+
+    rows.forEach(row => {
+        // Verificar se a linha tem a cor e o tipo correspondente
+        const rowCor = row.getAttribute("data-cor");
+        const rowTipo = row.getAttribute("data-tipo");
+
+        // Exibir ou ocultar a linha conforme a cor e o tipo selecionados
+        if ((selectedCor === "" || rowCor === selectedCor) && 
+            (tipoSelecionado === null || rowTipo === tipoSelecionado)) {
+            row.style.display = ""; // Exibe a linha
+        } else {
+            row.style.display = "none"; // Oculta a linha
+        }
+    });
 }
 
 </script>

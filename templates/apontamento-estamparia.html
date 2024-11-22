@@ -450,7 +450,7 @@
                         </div>
                     </div>
                     <div class="row mb-2 align-items-end">
-                        <div class="col-6 mb-2">
+                        <div class="col-4 mb-2">
                             <div class="form-floating mb-3">
                                 <label for="inputQuantidadePlanejada">Quantidade planejada</label>
                                 <input class="form-control" type="number"
@@ -459,7 +459,7 @@
                                 <!-- Quantidade -->
                             </div>
                         </div>
-                        <div class="col-6 mb-2">
+                        <div class="col-4 mb-2">
                             <div class="form-floating mb-3">
                                 <label for="inputQuantidadeRealizada">Quantidade realizada</label>
                                 <input class="form-control" type="number"
@@ -467,13 +467,20 @@
                                 <!-- Quantidade -->
                             </div>
                         </div>
-                        <!-- <div class="col-4 mb-2">
+                        <div class="col-4 mb-2">
                             <div class="form-floating mb-3">
-                                <label for="inputQuantidadeMorta">Quantidade morta</label>
-                                <input class="form-control" type="number"
-                                    id="inputQuantidadeMorta">
+                                <label for="maquinaOrigem">Máquina Origem</label>
+                                <select class="form-control" name="maquinaOrigem" id="maquinaOrigem">
+                                    <option value="" selected hidden disabled></option>
+                                    <option value="Plasma">Plasma</option>
+                                    <option value="Laser">Laser</option>
+                                    <option value="Laser JYF">Laser JYF</option>
+                                    <option value="Prensa">Prensa</option>
+                                    <option value="Serra">Serra</option>
+                                    <option value="Desbobinadeira">Desbobinadeira</option>
+                                </select>
                             </div>
-                        </div> -->
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-6 mb-2">
@@ -1682,6 +1689,7 @@
                 var celula = $('#celulaOrdem').val();
                 var textAreaObservacao = $('#textAreaObservacao_').val();
                 var dataHoraInicio = $('#dataHoraInicio').val();
+                var maquinaOrigem = $('#maquinaOrigem').val();
                 var operadorInputModal_1 = $('#operadorInputModal_1').val();
                 var inputQuantidadeRealizada = $('#inputQuantidadeRealizada').val();
                 // var inputQuantidadeMorta = $('#inputQuantidadeMorta').val();
@@ -1704,6 +1712,11 @@
                     showAndHideAlert('Por favor informe a quantidade correta de peças realizadas.', 2000);
                     return;
                 };
+
+                if (maquinaOrigem === null) {
+                    showAndHideAlert('Por favor informar a máquina origem.', 2000);
+                    return;
+                }
 
                 // if (parseInt($('#inputQuantidadeMorta').val()) < 0) {
                 //     showAndHideAlert('Por favor informe a quantidade correta de peças mortas.', 2000);
@@ -1738,6 +1751,7 @@
                 var dataCarga = $('#dataCargaFinalizacao').val();
                 var idPecaEmProcesso = $('#idPecaEmProcesso').val();
                 var origem = $('#origemPecaEmProcesso').val();
+                var maquinaOrigem = $('#maquinaOrigem').val();
             
                 var partes = pecaFinalizada.split(' - ');
                 var codigo = partes[0];
@@ -1757,6 +1771,7 @@
                     dataCarga: formatarData(dataCarga),
                     idPecaEmProcesso: idPecaEmProcesso,
                     origem: origem,
+                    maquinaOrigem: maquinaOrigem,
                     parcial: ""
                 }
                 $.ajax({
