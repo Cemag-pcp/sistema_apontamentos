@@ -454,7 +454,7 @@ def receber_dados_finalizar_cambao():
             cursor.execute(query, (operador,str(dado['id'])))
     
             sql = """INSERT INTO pcp.pecas_inspecao 
-                     (id, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
+                     (fk_ordem, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
                      VALUES (%s, NOW(),%s, %s, %s, %s, %s, 'Pintura')"""
             values = (
                 dado['id'],
@@ -978,6 +978,8 @@ def modal_historico():
     idinspecao = dados['idinspecao']
     setor = dados['setor']
 
+    print(setor)
+
     if setor == 'Pintura':
 
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,i.total_conformidades,i.inspetor,
@@ -987,14 +989,15 @@ def modal_historico():
                             LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
                             WHERE i.setor = '{setor}' and i.id_inspecao = '{idinspecao}'
                             ORDER BY num_inspecao ASC"""
-    elif setor == 'Solda - Cilindro ou Tubo':
+        
+    elif setor == 'Solda - Tubo' or 'Solda - Cilindro':
 
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,reteste.reteste_1,i.inspetor,
                             i.setor,i.num_inspecao,i.operadores,reteste.reteste_2,reteste.reteste_3,i.conjunto,i.nao_conformidades,i.origem,insp.qt_inspecionada
                                 FROM pcp.pecas_inspecionadas as i
                             LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
                             LEFT JOIN pcp.inspecao_reteste reteste ON i.id_inspecao = reteste.id
-                            WHERE i.id_inspecao = '{idinspecao}'
+                            WHERE i.id_inspecao = '{idinspecao}' and i.setor = '{setor}'
                             ORDER BY num_inspecao ASC"""
         
     else: 
@@ -1313,6 +1316,40 @@ def inspecao_estamparia():
     inspecoes,reinspecoes,inspecionadas = dados_inspecionar_reinspecionar_estamparia()
 
     return render_template('inspecao-estamparia.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
+
+@app.route('/inspecao-estanqueidade',methods=['GET','POST'])
+def inspecao_estanqueidade():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # if request.method == 'POST':
+
+    #     uuid_value = uuid.uuid4().int
+
+    #     # Extrai os primeiros 6 dígitos do UUID
+    #     id_inspecao_estanqueidade = str(uuid_value)[:6]
+
+    #     n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
+    #     list_causas = json.loads(request.form.get('list_causas'))
+    #     list_quantidade = json.loads(request.form.get('list_quantidade'))
+    #     setor = request.form.get('setor')
+    #     setor_final = f"Estanqueidade - {setor}"
+
+    #     if list_quantidade == ['']:
+    #         list_quantidade = [None]
+
+    #     retrabalhoSolda = request.form.get('retrabalhoSolda')
+
+    #     tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
+
+    #     if list_causas != [None]:
+    #         classe_inspecao.processar_fotos_inspecao(id_inspecao_estanqueidade, n_nao_conformidades, list_causas, setor_final,'',tipos_causas_solda,list_quantidade)
+
+    retestes,inspecoes = classe_inspecao.dados_estanqueidade()
+
+    return render_template('inspecao-estanqueidade.html',retestes=retestes,inspecoes=inspecoes)
 
 @app.route('/atualizar-conformidade',methods=['POST'])
 def atualizar_conformidade():
@@ -2326,22 +2363,13 @@ def finalizar_peca_em_processo_montagem():
     last_id_montagem = cur.fetchone()
     last_id_montagem = last_id_montagem[0]
 
-    query_inspecao = """INSERT INTO pcp.pecas_inspecao (id,data_finalizada,codigo,peca,qt_apontada,setor,celula)
+    query_inspecao = """INSERT INTO pcp.pecas_inspecao (fk_ordem,data_finalizada,codigo,peca,qt_apontada,setor,celula)
                     VALUES (%s,%s,%s,%s,%s,'Solda',%s)
                     """
 
     cur.execute(query_inspecao, (last_id_montagem, data_finalizacao, codigo, descricao, inputQuantidadeRealizada, celula))
 
     conn.commit()
-    
-    itens_json = {
-                'codigo':codigo,
-                'descricao':descricao,
-                'quantidade':inputQuantidadeRealizada,
-                'almoxarifado':'Almox Mont Carretas'
-                }
-
-    atualizar_saldo(itens_json,cur,conn)
 
     return 'sucess'
 
@@ -2748,7 +2776,7 @@ def finalizar_peca_em_processo_estamparia():
     last_id_montagem = cur.fetchone()
     last_id_montagem = last_id_montagem[0]
 
-    query_inspecao = """INSERT INTO pcp.pecas_inspecao (id,data_finalizada,codigo,peca,qt_apontada,setor,celula)
+    query_inspecao = """INSERT INTO pcp.pecas_inspecao (fk_ordem,data_finalizada,codigo,peca,qt_apontada,setor,celula)
                     VALUES (%s,%s,%s,%s,%s,'Estamparia',%s)
                     """
 
@@ -4689,6 +4717,162 @@ def saldo_recurso_levantamento():
     
     return base_saldo_recurso
 
+def saldo_recurso_pintura_montagem():
+    scope = ['https://www.googleapis.com/auth/spreadsheets',
+         "https://www.googleapis.com/auth/drive"]
+    
+    credentials = service_account.Credentials.from_service_account_info({
+        "type": os.environ.get('GOOGLE_TYPE'),
+        "project_id": os.environ.get('GOOGLE_PROJECT_ID'),
+        "private_key_id": os.environ.get('GOOGLE_PRIVATE_KEY_ID'),
+        "private_key": os.environ.get('GOOGLE_PRIVATE_KEY'),
+        "client_email": os.environ.get('GOOGLE_CLIENT_EMAIL'),
+        "client_id": os.environ.get('GOOGLE_CLIENT_ID'),
+        "auth_uri": os.environ.get('GOOGLE_AUTH_URI'),
+        "token_uri": os.environ.get('GOOGLE_TOKEN_URI'),
+        "auth_provider_x509_cert_url": os.environ.get('GOOGLE_AUTH_PROVIDER_X509_CERT_URL'),
+        "client_x509_cert_url": os.environ.get('GOOGLE_CLIENT_X509_CERT_URL'),
+        "universe_domain": os.environ.get('GOOGLE_UNIVERSE_DOMAIN')
+    }, scopes=scope)
+
+    sheet_id = '1u2Iza-ocp6ROUBXG9GpfHvEJwLHuW7F2uiO583qqLIE'
+    sheet_id2 = '180NO52JDMnoQ4COIipTDenkYTdz3f39PfBIcNYCKQLE'
+    sheet_id3 = '1x26yfwoF7peeb59yJuJuxCQNlqjCjh65NYS1RIrC0Zc'
+    worksheet1 = 'saldo de recurso'
+    worksheet2 = 'RQ PCP 015-000 (APONTAMENTO PINTURA)'
+    worksheet3 = 'RQ PCP 002-000 (APONTAMENTO MONTAGEM)'
+
+    sa = gspread.authorize(credentials)
+    sh = sa.open_by_key(sheet_id)
+    sh2 = sa.open_by_key(sheet_id2)
+    sh3 = sa.open_by_key(sheet_id3)
+
+    wks1 = sh.worksheet(worksheet1)
+    wks2 = sh2.worksheet(worksheet2)
+    wks3 = sh3.worksheet(worksheet3)
+
+    base = wks1.get()
+    pintura = wks2.get()
+    montagem = wks3.get()
+
+    base = pd.DataFrame(base)
+    pintura = pd.DataFrame(pintura)
+    montagem = pd.DataFrame(montagem)
+
+    cabecalho = base.iloc[0:1].values.tolist()[0]
+    cabecalho_pintura = pintura.iloc[4:5].values.tolist()[0]
+    cabecalho_montagem = montagem.iloc[4:5].values.tolist()[0]
+
+    base = base.set_axis(cabecalho, axis=1).reset_index(drop=True).iloc[1:]
+    pintura = pintura.set_axis(cabecalho_pintura, axis=1).reset_index(drop=True).iloc[5:]
+    montagem = montagem.set_axis(cabecalho_montagem, axis=1).reset_index(drop=True).iloc[5:]
+
+    pintura = pintura.loc[pintura['Data da carga'].notna() & (pintura['Data da carga'] != "")]
+    montagem = montagem.loc[montagem['Data da carga'].notna() & (montagem['Data da carga'] != "")]
+
+    pintura = pintura.loc[pintura['PCP'].isna() | (pintura['PCP'] == "")]
+    montagem = montagem.loc[montagem['PCP'].isna() | (montagem['PCP'] == "")]
+
+    base_saldo_recurso = base[['1o. Agrupamento', '2o. Agrupamento', 'codigo_peca', 'Saldo']]
+    pintura_apontamento = pintura[['Código', 'Descrição', 'Qtd']]
+    montagem_apontamento = montagem[['Código', 'Descrição', 'Qtd prod']]
+
+    base_saldo_recurso.rename(columns={
+        '1o. Agrupamento': 'almoxarifado',
+        '2o. Agrupamento': 'Código',
+        'codigo_peca': 'Descrição'
+    }, inplace=True)
+
+    base_saldo_recurso = base_saldo_recurso.loc[
+        base_saldo_recurso['almoxarifado'].isin(['Almox Pintura - Embalagem', 'Almox Mont Carretas'])
+    ]
+
+    sufixos = ['CO', 'VM', 'AV', 'LC', 'AN', 'VJ', 'PF']
+    pattern = f"({'|'.join(sufixos)})$"
+    base_saldo_recurso['Código'] = base_saldo_recurso['Código'].str.replace(pattern, '', regex=True)
+
+    # Evita que concatene o valor
+    pintura_apontamento['Qtd'] = pd.to_numeric(pintura_apontamento['Qtd'], errors='coerce')
+    pintura_apontamento_agrupada = pintura_apontamento.groupby(['Código'], as_index=False).agg({'Qtd': 'sum'})
+    # Evita que concatene o valor
+    montagem_apontamento['Qtd prod'] = pd.to_numeric(montagem_apontamento['Qtd prod'], errors='coerce')
+    montagem_apontamento_agrupada = montagem_apontamento.groupby(['Código'], as_index=False).agg({'Qtd prod': 'sum'})
+
+    # Adicionando a coluna 'almoxarifado' com o valor padrão
+    pintura_apontamento_agrupada['almoxarifado'] = 'Almox Pintura - Embalagem'
+    montagem_apontamento_agrupada['almoxarifado'] = 'Almox Mont Carretas'
+
+    base_saldo_recurso['Saldo'] = base_saldo_recurso['Saldo'].str.replace(',', '.', regex=False)
+    base_saldo_recurso['Saldo'] = pd.to_numeric(base_saldo_recurso['Saldo'], errors='coerce')
+    base_saldo_recurso_agrupada = base_saldo_recurso.groupby(['almoxarifado', 'Código'], as_index=False)['Saldo'].sum()
+
+    faltando_codigos_pintura = pintura_apontamento_agrupada.loc[
+        ~pintura_apontamento_agrupada[['Código', 'almoxarifado']].apply(
+            tuple, axis=1
+        ).isin(
+            base_saldo_recurso_agrupada[['Código', 'almoxarifado']].apply(tuple, axis=1)
+        ),
+        ['Código', 'Qtd', 'almoxarifado']
+    ]
+    faltando_codigos_pintura['Saldo'] = 0
+
+    # Adicionando os registros ausentes de montagem (verificando tanto Código quanto almoxarifado)
+    faltando_codigos_montagem = montagem_apontamento_agrupada.loc[
+        ~montagem_apontamento_agrupada[['Código', 'almoxarifado']].apply(
+            tuple, axis=1
+        ).isin(
+            base_saldo_recurso_agrupada[['Código', 'almoxarifado']].apply(tuple, axis=1)
+        ),
+        ['Código', 'Qtd prod', 'almoxarifado']
+    ]
+    faltando_codigos_montagem['Saldo'] = 0
+
+    # Adicionando essas linhas na base_saldo_recurso_agrupada
+    base_saldo_recurso_agrupada = pd.concat(
+        [base_saldo_recurso_agrupada, 
+         faltando_codigos_pintura[['almoxarifado', 'Código', 'Saldo']], 
+         faltando_codigos_montagem[['almoxarifado', 'Código', 'Saldo']]], 
+        ignore_index=True
+    )
+
+    saldo_merged = pd.merge(
+        base_saldo_recurso_agrupada,
+        pintura_apontamento_agrupada,
+        how='left',
+        on=['Código', 'almoxarifado']
+    )
+
+    saldo_merged['Saldo Final'] = saldo_merged['Saldo'] + saldo_merged['Qtd'].fillna(0)
+
+    saldo_merged_montagem = pd.merge(
+        saldo_merged,
+        montagem_apontamento_agrupada.rename(columns={'Qtd prod': 'Qtd_montagem'}),
+        how='left',
+        on=['Código', 'almoxarifado']
+    )
+
+    saldo_merged_montagem['Saldo Final'] += saldo_merged_montagem['Qtd_montagem'].fillna(0)
+
+    # Selecionando as colunas finais
+    saldo_final = saldo_merged_montagem[['almoxarifado', 'Código', 'Saldo Final']]
+
+    # Criar uma nova linha como DataFrame
+    nova_linha = pd.DataFrame([{
+        'almoxarifado': 'Almox Mont Carretas',
+        'Código': '028766',
+        'Saldo Final': 5
+    }])
+
+    # Adicionar a nova linha ao saldo_final
+    saldo_final = pd.concat([saldo_final, nova_linha], ignore_index=True)
+
+    # saldo_final.loc[
+    #     (saldo_final['Código'] == '032363') & (saldo_final['almoxarifado'] == 'Almox Mont Carretas'), 
+    #     'Saldo Final'
+    # ] += 5
+
+    return saldo_final
+
 def carretas_planilha_carga(datainicio, datafim,consumo=False):
 
     data = buscar_dados()
@@ -4710,6 +4894,9 @@ def carretas_planilha_carga(datainicio, datafim,consumo=False):
         result = filtrar_data_carreta
     
     dados_lista = result[['Carreta Trat']].values.tolist()
+
+    # print("### BASE CARRETAS ###")
+    # print(result)
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -4819,14 +5006,9 @@ def consuta_carreta_reuniao():
 
             # Adiciona a nova linha à lista de linhas expandidas
             linhas_expandidas.append(nova_linha)
-    
-    # Criando um novo DataFrame com as linhas expandidas
-    df_consumido = consulta_consumo_carretas('Almox Mont Carretas')
-    df_consumido_pintura = consulta_consumo_carretas('Almox pintura')
 
     colunas = ['Chassi','Caçamba', 'Traseira', 'Plataforma','Fueiro',
-            'Cilindro', 'Eixo', 'Lateral', 'Dianteira', 'Içamento', 'Tanque','5ª RODA', 'Eixo simples',
-            'Eixo completo','Acessórios','Macaco','Intermed.']
+        'Cilindro', 'Eixo', 'Lateral', 'Dianteira', 'Içamento', 'Tanque','5ª RODA','Intermed.']
 
     # Cria o DataFrame e adiciona as colunas, transformando o índice em coluna
     df_carretas = pd.DataFrame(linhas_expandidas).assign(**{col: '' for col in colunas})
@@ -4838,18 +5020,14 @@ def consuta_carreta_reuniao():
 
     df_agrupado_carretas = df_carretas.groupby('carreta').agg({'quantidade': 'sum'}).reset_index()
 
-    df_necessidade = buscar_necessidade(df_agrupado_carretas,'Montagem')
+    # Saldo de recurso ao vivo junto com pintura e montagem (onde não foi apontado pelo rôbo)
+    saldo_final = saldo_recurso_pintura_montagem()
+
     df_necessidade_pintura = buscar_necessidade(df_agrupado_carretas,'Pintura')
-
-    df_estoque = consulta_saldo_estoque('Almox Mont Carretas') # saldo de conjunto
-    df_estoque_pintura = consulta_saldo_estoque('Almox Mont Carretas') # saldo de conjunto
-
-    df_planilha_saldo = buscar_planilha_saldo() # saldo de peças
+    df_necessidade = buscar_necessidade(df_agrupado_carretas,'Montagem')
     
     # Executar a simulação sem acumular déficit de estoque
-    # df_carretas = df_carretas.iloc[:2,:]
-    resultado_carreta_unitario = simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,df_estoque,df_estoque_pintura,
-                                                          df_agrupado_carretas,df_consumido,df_consumido_pintura,df_planilha_saldo)
+    resultado_carreta_unitario = simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,df_agrupado_carretas,saldo_final)
 
     # Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
     for processo in colunas:
@@ -4976,54 +5154,6 @@ def buscar_causas(id):
     # Extrair causas para uma lista simples
     causas_lista = [causa['causa'] for causa in causas]
     return jsonify({'causas': causas_lista})
-
-@app.route('/consumir-tudo', methods=['POST'])
-def consumir_tudo():
-    
-    datas = request.get_json()
-    datas = datas['itens']
-    
-    for data in datas:
-        resultado = consumir_db(data['numeroSerie'], data['carreta'])
-
-    return jsonify({"message":"Consumiu tudo"})
-
-@app.route('/consultar-pecas-conjuntos', methods=['GET'])
-def consultar_pecas_conjuntos():
-
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    code = request.args.get('code')  # '031290'
-    quantity = request.args.get('quantity')  # 1.0
-
-    query = """ SELECT DISTINCT codigo,descricao,quantidade
-        FROM pcp.tb_base_carretas_explodidas
-        WHERE conjunto = %s """
-    
-    cur.execute(query,(code,))
-    pecas = cur.fetchall()
-
-    df = pd.DataFrame(pecas)
-    df.columns = ['codigo', 'descricao', 'quantidade']
-    df['quantidade'] = pd.to_numeric(df['quantidade'], errors='coerce')
-
-    tabela_saldo = buscar_planilha_saldo()
-    tabela_saldo['Saldo'] = pd.to_numeric(tabela_saldo['Saldo'], errors='coerce')
-    tabela_saldo = tabela_saldo.rename(columns={'codigo_peca': 'codigo'})
-
-    merged_df = pd.merge(df, tabela_saldo, on='codigo', how='left')
-
-    merged_df.fillna(0, inplace=True)
-        
-    result = merged_df[merged_df['quantidade'] > merged_df['Saldo']]
-
-    print(result)
-
-    result_list = result.values.tolist()
-
-    return jsonify(result_list)
 
 # --------- FIM CONSUMO E CONSULTA -----------
 

@@ -143,6 +143,8 @@ function setorCards(response) {
         $(".modal-edit").on('click', function() {
             var dataItemString = $(this).data('item');
             var concatenatedPhotos = concatPhotosByCriteria(foto_causa, dataItemString[5]);
+            console.log(dataItemString)
+            console.log(concatenatedPhotos)
             if (Object.keys(concatenatedPhotos).length !== 0) {
                 $("#modalTimeline").modal('hide')
                 modalVisualizarCausas(concatenatedPhotos);
@@ -215,6 +217,8 @@ function setorCards(response) {
         $(".modal-edit").on('click', function() {
             var dataItemString = $(this).data('item');
             var concatenatedPhotos = concatPhotosByCriteria(foto_causa, dataItemString[5]);
+            console.log(dataItemString)
+            console.log(concatenatedPhotos)
             if (Object.keys(concatenatedPhotos).length !== 0) {
                 $("#modalTimeline").modal('hide')
                 modalVisualizarCausas(concatenatedPhotos);

@@ -122,3 +122,12 @@ $(document).ready(function() {
     order: [[1, 'desc']]
   });
 });
+
+$(document).ready(function() {
+  $('#dataTableEstanqueidadeTable').DataTable({
+    "info":false,
+    "aLengthMenu":[5,10,25],
+    "iDisplayLength":10,
+    order: [[1, 'desc']]
+  });
+});

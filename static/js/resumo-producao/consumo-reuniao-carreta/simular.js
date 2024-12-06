@@ -95,35 +95,7 @@ function updateSearch(dataInicial,dataFinal) {
     
             tr.appendChild(td);
         });
-        // Adiciona a coluna com o botão "Consumir" se a quarta coluna não estiver vazia
-        const tdButton = document.createElement('td');
-        if (item[3] !== '' && item[3] !== null) { // Verifica se a quarta coluna não está vazia
-            const button = document.createElement('button');
-            button.textContent = 'Consumir';
-            button.className = 'btn btn-primary';
-            button.onclick = function() {
-                handleConsumir(item);
-            };
-            tdButton.appendChild(button);
-        }
-        tr.appendChild(tdButton);
 
         tbody.appendChild(tr);
     });
-    const consumirTudoButton = document.getElementById('consumir_tudo');
-
-    if (filteredData.length > 0) {
-        consumirTudoButton.style.display = 'block';
-
-        const itensSelecionados = filteredData.map(item => ({
-            carreta: item[1],
-            numeroSerie: item[3]
-        }));
-
-        consumirTudoButton.onclick = function() {
-            handleConsumirTudo(itensSelecionados,dataInicial,dataFinal);
-        };
-    } else {
-        consumirTudoButton.style.display = 'none';
-    }
 }

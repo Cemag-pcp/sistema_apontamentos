@@ -253,8 +253,8 @@ def consumir_db(id_carreta, carreta):
                 resultado_faltante[processo].append(f"Falta {faltante} do conjunto {conjunto} no setor {setor}")
 
         # Atualiza o saldo e o consumo em batch para o setor correspondente
-        abater_saldo_batch(conn, atualizacoes_saldo)
-        registrar_consumo_batch(conn, atualizacoes_consumo)
+        # abater_saldo_batch(conn, atualizacoes_saldo)
+        # registrar_consumo_batch(conn, atualizacoes_consumo)
 
     cur.close()
     conn.close()
@@ -415,46 +415,33 @@ def verificar_estoque(df_planilha_saldo, conjuntos, conn, cur):
     df.columns = ['conjunto', 'codigo', 'descricao', 'quantidade']
     df['quantidade'] = pd.to_numeric(df['quantidade'], errors='coerce')
 
-    tabela_saldo = df_planilha_saldo
-    tabela_saldo['Saldo'] = pd.to_numeric(tabela_saldo['Saldo'], errors='coerce')
-    tabela_saldo = tabela_saldo.rename(columns={'2o. Agrupamento': 'codigo'})
+    tabela_saldo = df_planilha_saldo[df_planilha_saldo['almoxarifado'] == 'Almox Mont Carretas']
+    tabela_saldo = tabela_saldo[['Código','Saldo Final']]
+    tabela_saldo['Saldo Final'] = pd.to_numeric(tabela_saldo['Saldo Final'], errors='coerce')
+    tabela_saldo = tabela_saldo.rename(columns={'Código': 'codigo'})
 
     # Fazer o merge e verificar saldo de todas as peças de uma vez
     merged_df = pd.merge(df, tabela_saldo, on='codigo', how='left')
     merged_df.fillna(0, inplace=True)
-    
+
     # Filtrar as peças cujo saldo é menor do que a quantidade necessária
-    result = merged_df[merged_df['quantidade'] > merged_df['Saldo']]
+    result = merged_df[merged_df['quantidade'] > merged_df['Saldo Final']]
 
     return result
 
-def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,df_estoque,df_estoque_pintura,
-                            df_agrupado_carretas,df_consumido,df_consumido_pintura,df_planilha_saldo):
+def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,df_agrupado_carretas,saldo_estoque):
     
     resultado_por_carreta = []
-
-    # Conectar ao banco de dados fora do loop
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    # Criar um dicionário do saldo do estoque
-    saldo_estoque = df_estoque.set_index('conjunto')['saldo'].to_dict()
 
     # Extrair todos os conjuntos que precisam ser verificados
     todos_conjuntos = df_necessidade['conjunto'].unique()
 
     # Fazer a verificação de estoque para todas as peças de todos os conjuntos de uma vez
-    resultado_df = verificar_estoque(df_planilha_saldo, todos_conjuntos, conn, cur)
-    
-    print(resultado_df)
-
-    # Fechar a conexão após obter os dados
-    cur.close()
-    conn.close()
+    resultado_df = verificar_estoque(saldo_estoque, todos_conjuntos, conn, cur)
 
     # Definir a lista de todos os processos
     all_processos = ['Chassi', 'Caçamba', 'Traseira', 'Plataforma', 'Fueiro', 'Cilindro', 'Eixo', 'Lateral',
-                     'Dianteira', 'Içamento', 'Tanque', '5ª RODA', 'Acessórios', 'Macaco', 'Intermed.']
+                     'Dianteira', 'Içamento', 'Tanque', '5ª RODA', 'Intermed.']
 
     # Iterar por cada carreta
     for index, row_carreta in df_carretas.iterrows():
@@ -463,12 +450,14 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
         ajuste_quantidade = df_agrupado_carretas.loc[
             df_agrupado_carretas['carreta'] == row_carreta['carreta'], 'quantidade'
         ].iloc[0]
-        df_necessidade_carreta = df_necessidade[
+        df_necessidade_carreta = df_necessidade_pintura[
+            df_necessidade_pintura['carreta'] == row_carreta['carreta']
+        ].copy()
+
+        df_necessidade_carreta_montagem = df_necessidade[
             df_necessidade['carreta'] == row_carreta['carreta']
         ].copy()
-        df_consumido_carreta = df_consumido[
-            df_consumido['id_carreta'] == row_carreta['id_carreta']
-        ]
+
         df_processos = pd.DataFrame({'processo': all_processos, 'carreta': row_carreta['carreta']})
 
         df_necessidade_carreta['processo'] = df_necessidade_carreta['processo'].str.strip()
@@ -480,78 +469,85 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
         for idx, row_necessidade in df_merged.iterrows():
             processo = row_necessidade['processo']
             conjunto = row_necessidade['conjunto']
+            codigo = row_necessidade['codigo']
             necessidade_total = row_necessidade['necessidade_total']
 
             if necessidade_total == 0 or pd.isna(conjunto):
                 # Processo não existe na carreta ou conjunto inválido
                 continue
-            
+
             necessidade = necessidade_total / ajuste_quantidade
 
-            consumido = df_consumido_carreta[df_consumido_carreta['conjunto'] == conjunto]['quantidade_consumida'].sum()
-            necessidade_restante = max(0, necessidade - consumido)
+            try:
+                saldo_final_pintura = saldo_estoque[(saldo_estoque['Código'] == conjunto) & (saldo_estoque['almoxarifado'] == 'Almox Pintura - Embalagem')]['Saldo Final'].values[0]
+            except:
+                saldo_final_pintura = 0
+            try:
+                saldo_final_montagem = saldo_estoque[(saldo_estoque['Código'] == codigo) & (saldo_estoque['almoxarifado'] == 'Almox Mont Carretas')]['Saldo Final'].values[0]
+            except:
+                saldo_final_montagem = 0
 
             # Inicializar o status do processo se não estiver definido
             if processo not in status_por_processo:
-                status_por_processo[processo] = 'Pintar'  # Status padrão
+                status_por_processo[processo] = ''  # Status padrão
 
-            if necessidade_restante == 0:
+            if saldo_final_pintura >= necessidade:
                 # Conjunto já consumido na montagem
-
-                # Verificar se o conjunto já foi consumido na pintura
-                try:
-                    codigo_pintura = df_necessidade_pintura[df_necessidade_pintura['codigo'] == conjunto].reset_index(drop=True)['conjunto'][0]
-                    consumido_pintura = df_consumido_pintura[(df_consumido_pintura['conjunto'] == codigo_pintura) & (df_consumido_pintura['id_carreta'] == row_carreta['id_carreta'])]['quantidade_consumida'].sum()
-                except:
-                    consumido_pintura = 0
-                
-                if consumido_pintura == 0:
-                    status_por_processo[processo] = 'Pintar'                      
-                else:
-                    status_por_processo[processo] = 'OK'
-                        
+                status_por_processo[processo] = f'OK' 
+                # **Abater o saldo do conjunto no estoque**
+                index = saldo_estoque[
+                    (saldo_estoque['Código'] == conjunto) & 
+                    (saldo_estoque['almoxarifado'] == 'Almox Pintura - Embalagem')
+                ].index
+                saldo_estoque.loc[index, 'Saldo Final'] -= necessidade
                 continue
-            
             else:
-                saldo_atual = saldo_estoque.get(conjunto, 0)
-                if saldo_atual >= necessidade_restante:
-                    # Conjunto disponível em estoque, abater do estoque
-                    saldo_estoque[conjunto] -= necessidade_restante
-                    if saldo_estoque[conjunto] < 0:
-                        saldo_estoque[conjunto] = 0  # Evitar estoque negativo
-                    # Atualizar o status para 'Montar' se não houver faltas registradas
-                    if processo not in faltas_por_processo:
-                        status_por_processo[processo] = 'Montar'
+                try:
+                    necessidade_montagem = df_necessidade_carreta_montagem[
+                        df_necessidade_carreta_montagem['conjunto'] == codigo
+                    ]['necessidade_total'].values[0]
+
+                    necessidade_montagem = necessidade_montagem / ajuste_quantidade
+
+                except:
+                    necessidade_montagem = 0
+
+                if saldo_final_montagem >= necessidade_montagem:
+                    status_por_processo[processo] = f'Pintar' 
+                    index = saldo_estoque[
+                        (saldo_estoque['Código'] == codigo) & 
+                        (saldo_estoque['almoxarifado'] == 'Almox Mont Carretas')
+                    ].index
+
+                    saldo_estoque.loc[index, 'Saldo Final'] -= necessidade_montagem
+
+                    continue
                 else:
-                    # Há falta do conjunto, registrar as peças faltantes
-                    resultado_extra = resultado_df[resultado_df['conjunto'] == conjunto]
+                    resultado_extra = resultado_df[resultado_df['conjunto'] == codigo]
                     if not resultado_extra.empty:
-                        resultado_agrupado = resultado_extra.groupby(['codigo', 'descricao'], as_index=False).agg({'quantidade': 'sum'})
+                        resultado_agrupado = resultado_extra.groupby(['conjunto','codigo', 'descricao'], as_index=False).agg({'quantidade': 'sum'})
                         # Inicializar o dicionário para o processo, se não existir
                         if processo not in faltas_por_processo:
                             faltas_por_processo[processo] = {}
-                        # Atualizar as faltas por peça
+                        if processo == 'Chassi':
+                            print(resultado_agrupado)
                         for idx2, result in resultado_agrupado.iterrows():
-                            codigo = result['codigo']
+                            codigo_peca = result['codigo']
+                            conjunto = result['conjunto']
                             descricao_extra = result['descricao']
                             quantidade_total = result['quantidade']
+                            if conjunto not in faltas_por_processo[processo]:
+                                faltas_por_processo[processo][conjunto] = {}
                             # Se a peça já está no dicionário, somar as quantidades
                             # if codigo in faltas_por_processo[processo]:
                             #     faltas_por_processo[processo][codigo]['quantidade'] += quantidade_total
                             # else:
-                            faltas_por_processo[processo][codigo] = {
+                            faltas_por_processo[processo][conjunto][codigo_peca] = {
                                 'descricao': descricao_extra,
                                 'quantidade': quantidade_total
                             }
                     else:
-                        # Se não houver detalhes das peças faltantes, indicar que o conjunto está faltando
-                        # if processo not in faltas_por_processo:
-                        #     faltas_por_processo[processo] = {}
-                        # faltas_por_processo[processo][conjunto] = {
-                        #     'Montar'
-                        # }
-                        # Atualizar o status para indicar que há faltas
-                        status_por_processo[processo] = 'Montar'  # Indica que contém as peças em estoque mas o conjunto nao foi apontado
+                        status_por_processo[processo] = f'Montar'
 
         # Construir o resultado final para cada processo
         faltas_concatenadas = {}
@@ -564,13 +560,14 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
                     # Há peças faltantes para este processo
                     pecas = faltas_por_processo[processo]
                     resultado = ""
-                    for codigo, dados in pecas.items():
-                        descricao = dados['descricao']
-                        quantidade = dados['quantidade']
-                        resultado += f"Falta {quantidade} - {codigo} - {descricao}\n"
+                    for conjunto, pecas_conjunto in pecas.items():
+                        for codigo_peca, dados in pecas_conjunto.items():
+                            descricao = dados['descricao']
+                            quantidade = dados['quantidade']
+                            resultado += f"Falta {quantidade} - {codigo_peca} - {descricao}\n"
                     faltas_concatenadas[processo] = resultado.strip()
                 else:
-                    # Processo existe na carreta, sem peças faltantes
+                    # Processo existe na carreta, mas sem peças faltantes
                     status = status_por_processo.get(processo, 'Pintar')
                     faltas_concatenadas[processo] = status
             else:
@@ -580,20 +577,3 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
         resultado_por_carreta.append(faltas_concatenadas)
 
     return resultado_por_carreta
-
-# # Executar a simulação sem acumular déficit de estoque
-# resultado_carreta_unitario = simular_consumo_unitario(df_carretas, df_necessidade, df_estoque, df_agrupado_carretas, df_consumido)
-
-# # Adicionar os resultados ao DataFrame de carretas, apenas para os processos consumidos
-# for processo in df_necessidade['processo'].unique():
-#     df_carretas[processo] = [result.get(processo, '') for result in resultado_carreta_unitario]
-
-# st.write("Sem criar deficit de estoque (Apenas para montagem)")
-# st.dataframe(df_carretas)
-
-# resumo completo
-
-# Mostrar as peças que faltam por carreta conjunto de forma agrupada
-
-
-

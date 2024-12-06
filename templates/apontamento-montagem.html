@@ -1796,13 +1796,14 @@
                     success: function (data) {
                         hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
+                        location.reload();
                         chamarAPI();
                         chamarAPIInterrompidas();
-                        location.reload();
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
                         hideLoading();
+                        location.reload();
                     }
                 });
             });
