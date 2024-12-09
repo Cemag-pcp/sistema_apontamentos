@@ -254,7 +254,7 @@ class Inspecao:
             inspecionados = """SELECT  pi.id_inspecao,pi.data_inspecao,pi.total_conformidades,pi.inspetor,pi.setor,pi.num_inspecao,pi.conjunto,
                             pi.origem,pi.observacao,pi.nao_conformidades,pi.operadores, op.peca, op.cor, op.tipo
                             FROM pcp.pecas_inspecionadas as pi
-                            LEFT JOIN pcp.ordens_pintura as op ON pi.id_inspecao = op.id::varchar
+                            LEFT JOIN pcp.pecas_inspecao as op ON pi.id_inspecao = op.id::varchar
                             WHERE pi.setor = 'Pintura' and pi.num_inspecao = 0"""
             
             cur.execute(inspecionados)
@@ -263,7 +263,7 @@ class Inspecao:
             reinspecao = """SELECT r.id,r.data_reinspecao,r.nao_conformidades,r.causa_reinspecao,r.inspetor,r.setor,r.conjunto,r.categoria,
                                 r.outra_causa,r.origem,r.observacao,r.excluidas,op.peca, op.cor, op.tipo
                             FROM pcp.pecas_reinspecao as r
-                            LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
+                            LEFT JOIN pcp.pecas_inspecao as op ON r.id = op.id::varchar
                             WHERE r.setor = 'Pintura' AND r.excluidas IS NOT true AND r.status_pintura IS true"""
             
             cur.execute(reinspecao)
