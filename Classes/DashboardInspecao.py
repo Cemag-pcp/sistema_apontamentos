@@ -412,7 +412,7 @@ class DashboardInspecao:
                         foto.causa,
                         foto.quantidade::INTEGER AS total_quantidade
                     FROM pcp.inspecao_foto foto
-                    LEFT JOIN pcp.pecas_inspecao pi ON pi.fk_ordem::VARCHAR = foto.id AND pi.setor = foto.setor
+                    LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
                     WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
                     AND foto.num_inspecao = (
                         SELECT MAX(f2.num_inspecao)
