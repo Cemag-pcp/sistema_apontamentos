@@ -464,19 +464,9 @@ def receber_dados_finalizar_cambao():
                 dado['quantidade'],
                 dado['tipo']
             )
-            print(values)
 
             cursor.execute(sql, values)
                 
-            itens_json = {
-                        'codigo':dado['codigo'],
-                        'descricao':dado['peca'],
-                        'quantidade':dado['quantidade'],
-                        'almoxarifado':'Almox pintura'
-                        }
-            
-            atualizar_saldo(itens_json,cursor,conn)
-
         # Commit para aplicar as alterações
         conn.commit()
 
@@ -1317,39 +1307,88 @@ def inspecao_estamparia():
 
     return render_template('inspecao-estamparia.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
-@app.route('/inspecao-estanqueidade',methods=['GET','POST'])
+@app.route('/inspecao-estanqueidade-tubos-cilindros', methods=['GET'])
 def inspecao_estanqueidade():
+    
+    # Conectar ao banco
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    # Consulta 1: Informações de `pcp.inspecao_estanqueidade`
+    query_inspecao = """
+        SELECT 
+            ie.id AS inspecao_id,
+            ie.data AS data_inspecao,
+            ie.codigo,
+            ie.descricao,
+            ei.quantidade_inspecionada,
+            ei.inspetor
+        FROM 
+            pcp.inspecao_estanqueidade ie
+        INNER JOIN 
+            pcp.execucoes_inspecao_estanqueidade ei ON ei.inspecao_id = ie.id
+        WHERE ei.numero_execucao = 0;
+    """
+    cur.execute(query_inspecao)
+    inspecao_dados = cur.fetchall()
+
+    # Consulta 2: Junção de `pcp.reinspecao` com `pcp.inspecao_estanqueidade`
+    query_reinspecao = """
+        SELECT 
+            re.id AS reinspecao_id, 
+            re.data_reinspecao,
+            ie.id AS inspecao_id,
+            ie.data AS inspecao_data,
+            ie.codigo AS inspecao_codigo,
+            ie.descricao AS inspecao_descricao
+        FROM 
+            pcp.reinspecao_estanqueidade re
+        INNER JOIN 
+            pcp.inspecao_estanqueidade ie ON re.inspecao_id = ie.id;
+    """
+    cur.execute(query_reinspecao)
+    reinspecao_dados = cur.fetchall()
+    
+    # Passar os dados para o template
+    return render_template(
+        'inspecao-estanqueidade-tubos-cilindros.html',
+        inspecao_dados=inspecao_dados,
+        reinspecao_dados=reinspecao_dados
+    )
+
+@app.route('/inspecao-estanqueidade-tanque',methods=['GET','POST'])
+def inspecao_estanqueidade_tanque():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    # if request.method == 'POST':
+    if request.method == 'POST':
 
-    #     uuid_value = uuid.uuid4().int
+        uuid_value = uuid.uuid4().int
+        # Extrai os primeiros 6 dígitos do UUID
+        id_inspecao_estanqueidade = str(uuid_value)[:12]
 
-    #     # Extrai os primeiros 6 dígitos do UUID
-    #     id_inspecao_estanqueidade = str(uuid_value)[:6]
+        n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
+        list_causas = json.loads(request.form.get('list_causas'))
+        list_quantidade = json.loads(request.form.get('list_quantidade'))
+        setor = request.form.get('setor')
+        setor_final = f"Estanqueidade - {setor}"
 
-    #     n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
-    #     list_causas = json.loads(request.form.get('list_causas'))
-    #     list_quantidade = json.loads(request.form.get('list_quantidade'))
-    #     setor = request.form.get('setor')
-    #     setor_final = f"Estanqueidade - {setor}"
+        if list_quantidade == ['']:
+            list_quantidade = [None]
 
-    #     if list_quantidade == ['']:
-    #         list_quantidade = [None]
+        retrabalhoSolda = request.form.get('retrabalhoSolda')
 
-    #     retrabalhoSolda = request.form.get('retrabalhoSolda')
+        tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
 
-    #     tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
-
-    #     if list_causas != [None]:
-    #         classe_inspecao.processar_fotos_inspecao(id_inspecao_estanqueidade, n_nao_conformidades, list_causas, setor_final,'',tipos_causas_solda,list_quantidade)
+        if list_causas != [None]:
+            classe_inspecao.processar_fotos_inspecao(id_inspecao_estanqueidade, n_nao_conformidades, list_causas, setor_final,'',tipos_causas_solda,list_quantidade)
 
     retestes,inspecoes = classe_inspecao.dados_estanqueidade()
 
-    return render_template('inspecao-estanqueidade.html',retestes=retestes,inspecoes=inspecoes)
+    return render_template('inspecao-estanqueidade-tanque.html',retestes=retestes,inspecoes=inspecoes)
 
 @app.route('/atualizar-conformidade',methods=['POST'])
 def atualizar_conformidade():
@@ -5096,7 +5135,7 @@ def retrabalho_pintura():
     cur.execute(query_em_processo)
     em_processo = cur.fetchall()
 
-    query_ultimos_retrabalhos = """SELECT op.id,r.data_reinspecao, op.codigo, op.peca, op.qt_apontada,op.cor,op.tipo,r.inspetor
+    query_ultimos_retrabalhos = """SELECT op.id,prep.data_fim, op.codigo, op.peca, op.qt_apontada,op.cor,op.tipo,r.inspetor
                                         FROM pcp.pecas_reinspecao as r
                                     LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
                                     LEFT JOIN pcp.pecas_retrabalho_em_processo as prep ON prep.id = r.id

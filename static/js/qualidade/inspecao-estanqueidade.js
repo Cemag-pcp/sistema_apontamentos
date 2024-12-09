@@ -18,7 +18,7 @@ function modalCilindros() {
     $('#data_cilindro').val(today.toLocaleDateString());
 
     // Exibir o modal
-    $('#estanqueidadeCilindrosModal').modal('show');
+    $('#cilindrosModal').modal('show');
 }
 
 function modalTanque() {
