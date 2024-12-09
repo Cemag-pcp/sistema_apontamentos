@@ -97,10 +97,26 @@ class DashboardInspecao:
         soma_total = cur.fetchone()
 
         query_total_liquida = f"""
-            SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
-                FROM pcp.pecas_inspecao pi
-            LEFT JOIN pcp.inspecao_foto foto ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
-            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PU' AND foto.num_inspecao = 0 AND foto.causa NOTNULL
+            SELECT 
+                TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
+                foto.causa,
+                SUM(CAST(foto.quantidade AS INTEGER)) AS total_quantidade
+            FROM 
+                pcp.pecas_inspecao pi
+                LEFT JOIN 
+                    pcp.inspecao_foto foto 
+                    ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
+            WHERE 
+                pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                AND pi.tipo = 'PU' 
+                AND foto.num_inspecao = 0 
+                AND foto.causa IS NOT NULL
+            GROUP BY 
+                TO_CHAR(pi.data_finalizada, 'YYYY-Month'), 
+                foto.causa
+            ORDER BY 
+                ano_mes, 
+                foto.causa;
         """
         cur.execute(query_total_liquida)
         total_liquida = cur.fetchall()
@@ -119,10 +135,27 @@ class DashboardInspecao:
         soma_total_liquida = cur.fetchone()
 
         query_total_po = f"""
-            SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,foto.causa,foto.quantidade
-                FROM pcp.pecas_inspecao pi
-            LEFT JOIN pcp.inspecao_foto foto ON pi.id::VARCHAR  = foto.id AND pi.setor = foto.setor
-            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND pi.tipo = 'PÓ' AND foto.num_inspecao = 0 AND pi.setor = 'Pintura' AND foto.causa NOTNULL
+            SELECT 
+                    TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
+                    foto.causa,
+                    SUM(CAST(foto.quantidade AS INTEGER)) AS total_quantidade
+                FROM 
+                    pcp.pecas_inspecao pi
+            LEFT JOIN 
+                pcp.inspecao_foto foto 
+                ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
+            WHERE 
+                pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' 
+                AND pi.tipo = 'PÓ' 
+                AND foto.num_inspecao = 0 
+                AND pi.setor = 'Pintura' 
+                AND foto.causa IS NOT NULL
+            GROUP BY 
+                TO_CHAR(pi.data_finalizada, 'YYYY-Month'), 
+                foto.causa
+            ORDER BY 
+                ano_mes, 
+                foto.causa;
         """
         cur.execute(query_total_po)
         total_po = cur.fetchall()
