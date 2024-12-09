@@ -449,7 +449,6 @@ def receber_dados_finalizar_cambao():
         for dado in dados_recebidos:
 
             #  Construir e executar a consulta UPDATE
-
             query = ("UPDATE pcp.ordens_pintura SET status = 'OK', operador_final = %s WHERE id = %s")
             cursor.execute(query, (operador,str(dado['id'])))
     
