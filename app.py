@@ -975,7 +975,7 @@ def modal_historico():
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,i.total_conformidades,i.inspetor,
                             i.setor,i.num_inspecao,i.origem,i.observacao,i.nao_conformidades, op.peca,op.cor,op.tipo,insp.qt_apontada
                                 FROM pcp.pecas_inspecionadas as i
-                            LEFT JOIN pcp.ordens_pintura as op ON i.id_inspecao = op.id::varchar
+                            LEFT JOIN pcp.pecas_inspecao as op ON i.id_inspecao = op.id::varchar
                             LEFT JOIN pcp.pecas_inspecao insp ON i.id_inspecao = insp.id
                             WHERE i.setor = '{setor}' and i.id_inspecao = '{idinspecao}'
                             ORDER BY num_inspecao ASC"""
