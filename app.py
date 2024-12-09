@@ -441,34 +441,38 @@ def receber_dados_finalizar_cambao():
 
     dados_recebidos = request.json['linhas']
     operador = request.json['operador']
-
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-
-    with conn.cursor() as cursor:
-        for dado in dados_recebidos:
-
-            #  Construir e executar a consulta UPDATE
-
-            query = ("UPDATE pcp.ordens_pintura SET status = 'OK', operador_final = %s WHERE id = %s")
-            cursor.execute(query, (operador,str(dado['id'])))
     
-            sql = """INSERT INTO pcp.pecas_inspecao 
-                     (fk_ordem, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
-                     VALUES (%s, NOW(),%s, %s, %s, %s, %s, 'Pintura')"""
-            values = (
-                dado['id'],
-                dado['codigo'],
-                dado['peca'],
-                dado['cor'],
-                dado['quantidade'],
-                dado['tipo']
-            )
+    for dado in dados_recebidos:
+        print(dado['id'])
+        
+    # conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+    #                         password=DB_PASS, host=DB_HOST)
 
-            cursor.execute(sql, values)
+    # with conn.cursor() as cursor:
+    #     for dado in dados_recebidos:
+
+    #         #  Construir e executar a consulta UPDATE
+
+    #         query = ("UPDATE pcp.ordens_pintura SET status = 'OK', operador_final = %s WHERE id = %s")
+    #         cursor.execute(query, (operador,str(dado['id'])))
+    
+    #         sql = """INSERT INTO pcp.pecas_inspecao 
+    #                  (fk_ordem, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
+    #                  VALUES (%s, NOW(),%s, %s, %s, %s, %s, 'Pintura')"""
+            
+    #         values = (
+    #             dado['id'],
+    #             dado['codigo'],
+    #             dado['peca'],
+    #             dado['cor'],
+    #             dado['quantidade'],
+    #             dado['tipo']
+    #         )
+
+    #         cursor.execute(sql, values)
                 
-        # Commit para aplicar as alterações
-        conn.commit()
+    #     # Commit para aplicar as alterações
+    #     conn.commit()
 
     return redirect(url_for("finalizar_cambao"))
 
