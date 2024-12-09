@@ -444,7 +444,7 @@ def receber_dados_finalizar_cambao():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
-    
+
     with conn.cursor() as cursor:
         for dado in dados_recebidos:
 
@@ -464,19 +464,9 @@ def receber_dados_finalizar_cambao():
                 dado['quantidade'],
                 dado['tipo']
             )
-            print(values)
 
             cursor.execute(sql, values)
                 
-            itens_json = {
-                        'codigo':dado['codigo'],
-                        'descricao':dado['peca'],
-                        'quantidade':dado['quantidade'],
-                        'almoxarifado':'Almox pintura'
-                        }
-            
-            atualizar_saldo(itens_json,cursor,conn)
-
         # Commit para aplicar as alterações
         conn.commit()
 
