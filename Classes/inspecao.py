@@ -338,39 +338,6 @@ class Inspecao:
 
         return dado_reteste_cilindros_tubos, dado_inspecao_cilindros_tubos
 
-    def dados_estanqueidade(self):
-
-        self.verificar_conexao()
-        with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-
-            inspecao = """SELECT * 
-                        FROM pcp.pecas_reinspecao 
-                        WHERE excluidas = 'false' AND 
-                        (setor = 'Estanqueidade - Cilindro' OR setor = 'Estanqueidade - Tubo' OR setor = 'Estanqueidade - Tanque') 
-                        ORDER BY id desc"""
-            
-            cur.execute(inspecao)
-
-            dado_reteste_cilindros_tubos = cur.fetchall()
-
-            inspecao_dados = """SELECT 
-                            id_inspecao,
-                            data_inspecao,
-                            conjunto,
-                            inspetor,
-                            pi2.qt_inspecionada,
-                            pi.setor
-                        FROM pcp.pecas_inspecionadas pi
-                        LEFT JOIN pcp.pecas_inspecao pi2 ON pi.id_inspecao = pi2.id
-                        WHERE (pi.setor = 'Estanqueidade - Cilindro' OR pi.setor = 'Estanqueidade - Tubo' OR pi.setor = 'Estanqueidade - Tanque') AND num_inspecao = 0
-                        ORDER BY id_inspecao DESC;
-                    """
-            cur.execute(inspecao_dados)
-
-            dado_inspecao_cilindros_tubos = cur.fetchall()
-
-        return dado_reteste_cilindros_tubos, dado_inspecao_cilindros_tubos
-
     def executando_reteste(self,id,reteste_status1,reteste_status2,reteste_status3):
 
         self.verificar_conexao()

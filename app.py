@@ -1,6 +1,7 @@
 from flask import Flask,session,render_template, request, jsonify, redirect, url_for, flash, Blueprint, send_file, send_from_directory
 import pandas as pd
 from Classes.inspecao import Inspecao
+from Classes.inspecaoEstanqueidade import InspecaoEstanqueidade
 from Classes.DashboardInspecao import DashboardInspecao
 import time
 import uuid
@@ -32,6 +33,7 @@ warnings.filterwarnings('ignore')
 app = Flask(__name__)
 app.secret_key = "apontamentopintura"
 UPLOAD_FOLDER = 'static/fotos_causas'
+UPLOAD_FOLDER_TIGHTNESS = 'static/fotos_causas_estanqueidade'
 UPLOAD_FOLDER_TOKEN = 'static/fotos_ficha'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # socketio = SocketIO(app, async_mode=async_mode)
@@ -46,6 +48,8 @@ DB_PASS = "15512332"
 filename = "service_account.json"
 
 classe_inspecao = Inspecao(DB_NAME, DB_USER, DB_PASS, DB_HOST, UPLOAD_FOLDER, UPLOAD_FOLDER_TOKEN)
+
+classe_inspecao_estanqueidade = InspecaoEstanqueidade(DB_NAME, DB_USER, DB_PASS, DB_HOST, UPLOAD_FOLDER_TIGHTNESS)
 
 cache_historico_pintura = cachetools.LRUCache(maxsize=128)
 cache_carretas = cachetools.LRUCache(maxsize=128)
@@ -1028,6 +1032,100 @@ def modal_historico():
 
     return jsonify(historico,foto_causa,foto_ficha)
 
+@app.route('/modal-historico-estanqueidade', methods=['POST'])
+def modal_historico_estanqueidade():
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+    id = data['id']
+    inspecao = data['tipo_inspecao']
+
+    # Consultar dados históricos
+    query_historico = """
+                        SELECT 
+                            ei.id AS execucao_id,
+                            ie.id AS inspecao_id,
+                            ei.data_execucao,
+                            ie.codigo,
+                            ie.descricao,
+                            ie.inspecao,
+                            ei.inspetor,
+                            ei.quantidade_inspecionada,
+                            ei.nao_conforme + ei.nao_conforme_refugo AS nao_conformidade
+                        FROM 
+                            pcp.execucoes_inspecao_estanqueidade ei
+                        LEFT JOIN 
+                            pcp.inspecao_estanqueidade ie
+                        ON 
+                            ei.inspecao_id = ie.id
+                        WHERE 
+                            ie.id = %s AND ie.inspecao = %s;
+                        """
+    cur.execute(query_historico, (id, inspecao))
+    data_historico = cur.fetchall()
+
+    # Consultar causas
+    query_causas = """
+                    SELECT 
+                        ei.id AS execucao_id,
+                        ie.id AS inspecao_id,
+                        re.causa,
+                        re.motivo,
+                        ei.ficha,
+                        re.foto_da_causa,
+                        re.quantidade
+                    FROM 
+                        pcp.execucoes_inspecao_estanqueidade ei
+                    LEFT JOIN 
+                        pcp.inspecao_estanqueidade ie
+                    ON 
+                        ei.inspecao_id = ie.id
+                    LEFT JOIN 
+                        pcp.reteste_estanqueidade re
+                    ON 
+                        re.execucoes_inspecao_estanqueidade_id = ei.id
+                    WHERE 
+                        ie.id = %s AND ie.inspecao = %s;
+                    """
+    
+    cur.execute(query_causas, (id, inspecao))
+    data_causas = cur.fetchall()
+
+    # Organizar dados históricos por execucao_id
+    historico_agrupado = {}
+    for row in data_historico:
+        execucao_id = row['execucao_id']
+        if execucao_id not in historico_agrupado:
+            historico_agrupado[execucao_id] = {
+                'execucao_id': execucao_id,
+                'data_execucao': row['data_execucao'],
+                'quantidade_inspecionada':row['quantidade_inspecionada'],
+                'nao_conformidade':row['nao_conformidade'],
+                'codigo': row['codigo'],
+                'descricao': row['descricao'],
+                'inspecao': row['inspecao'],
+                'inspetor': row['inspetor'],
+                'causas': []  # Adicionamos um array vazio para causas
+            }
+
+    # Adicionar causas ao histórico correspondente
+    for row in data_causas:
+        execucao_id = row['execucao_id']
+        if execucao_id in historico_agrupado:
+            historico_agrupado[execucao_id]['causas'].append({
+                'causa': row['causa'],
+                'motivo': row['motivo'],
+                'ficha': row['ficha'],
+                'foto_da_causa': row['foto_da_causa'],
+                'quantidade': row['quantidade']
+            })
+
+    # Converter os dados agrupados em uma lista
+    dados_agrupados = list(historico_agrupado.values())
+
+    return jsonify({'dados_historico': dados_agrupados})
+
 @app.route('/inspecao-solda',methods=['GET','POST'])
 def inspecao_solda():
 
@@ -1323,7 +1421,8 @@ def inspecao_estanqueidade():
             ie.codigo,
             ie.descricao,
             ei.quantidade_inspecionada,
-            ei.inspetor
+            ei.inspetor,
+            ie.inspecao
         FROM 
             pcp.inspecao_estanqueidade ie
         INNER JOIN 
@@ -1335,18 +1434,40 @@ def inspecao_estanqueidade():
 
     # Consulta 2: Junção de `pcp.reinspecao` com `pcp.inspecao_estanqueidade`
     query_reinspecao = """
+        WITH MaxExecucao AS (
+            SELECT 
+                inspecao_id,
+                MAX(numero_execucao) AS max_numero_execucao
+            FROM 
+                pcp.execucoes_inspecao_estanqueidade
+            GROUP BY 
+                inspecao_id
+        )
         SELECT 
-            re.id AS reinspecao_id, 
-            re.data_reinspecao,
             ie.id AS inspecao_id,
+            re.data_reinspecao,
+            eie.nao_conforme + nao_conforme_refugo AS nao_conforme,
             ie.data AS inspecao_data,
             ie.codigo AS inspecao_codigo,
-            ie.descricao AS inspecao_descricao
+            ie.descricao AS inspecao_descricao,
+            eie.inspetor AS inspetor,
+            eie.ficha,
+            eie.numero_execucao,
+            ie.inspecao
         FROM 
             pcp.reinspecao_estanqueidade re
-        INNER JOIN 
-            pcp.inspecao_estanqueidade ie ON re.inspecao_id = ie.id;
-    """
+        LEFT JOIN 
+            pcp.inspecao_estanqueidade ie ON re.inspecao_id = ie.id
+        LEFT JOIN
+            pcp.execucoes_inspecao_estanqueidade eie ON re.inspecao_id = eie.inspecao_id
+        LEFT JOIN
+            pcp.reteste_estanqueidade rte ON re.inspecao_id = rte.id
+        INNER JOIN
+            MaxExecucao me ON eie.inspecao_id = me.inspecao_id 
+                            AND eie.numero_execucao = me.max_numero_execucao;
+
+        """
+    
     cur.execute(query_reinspecao)
     reinspecao_dados = cur.fetchall()
     
@@ -1356,6 +1477,65 @@ def inspecao_estanqueidade():
         inspecao_dados=inspecao_dados,
         reinspecao_dados=reinspecao_dados
     )
+
+@app.route('/envio-estanqueidade-tubos-cilindros', methods=['POST'])
+def envio_inspecao_estanqueidade_tubos_cilindros():
+
+    dados_inspecao_estanqueidade = request.get_json()
+
+    print(dados_inspecao_estanqueidade)
+
+    if 'codigo' in dados_inspecao_estanqueidade:
+        codigo_completo = dados_inspecao_estanqueidade['codigo']
+        codigo_split = codigo_completo.split(' - ', 1)
+        dados_inspecao_estanqueidade['codigo'] = codigo_split[0].strip()  # Parte antes do '-'
+        dados_inspecao_estanqueidade['descricao'] = codigo_split[1].strip() if len(codigo_split) > 1 else ""  # Parte depois do '-'
+
+    id_inspecao_estanqueidade = classe_inspecao_estanqueidade.inserir_inspecao_estanqueidade(dados_inspecao_estanqueidade)
+
+    if 'nao_conformidade' in dados_inspecao_estanqueidade:
+        total_nao_conformidade = dados_inspecao_estanqueidade['nao_conformidade']
+        dados_inspecao_estanqueidade['nao_conforme_retrabalho'] = dados_inspecao_estanqueidade['nao_conformidade']
+        dados_inspecao_estanqueidade['nao_conforme_refugo'] = 0
+    else:
+        total_nao_conformidade = dados_inspecao_estanqueidade['nao_conforme_retrabalho'] + dados_inspecao_estanqueidade['nao_conforme_refugo']
+
+    id_execucoes_inspecao_estanqueidade = classe_inspecao_estanqueidade.inserir_execucoes_inspecao_estanqueidade(dados_inspecao_estanqueidade,id_inspecao_estanqueidade)
+
+    ids_estanqueidade = {
+        'id_inspecao_estanqueidade': id_inspecao_estanqueidade,
+        'id_execucoes_inspecao_estanqueidade': id_execucoes_inspecao_estanqueidade
+    }
+
+    if total_nao_conformidade > 0:
+        classe_inspecao_estanqueidade.inserir_reinspecao_estanqueidade(dados_inspecao_estanqueidade,ids_estanqueidade)
+        classe_inspecao_estanqueidade.inserir_reteste_estanqueidade(dados_inspecao_estanqueidade,ids_estanqueidade)
+
+    return jsonify({"message":dados_inspecao_estanqueidade})
+
+@app.route('/reteste-estanqueidade-tubos-cilindros', methods=['POST'])
+def reteste_estanqueidade_tubos_cilindros():
+
+    dados_reinspecao_estanqueidade = request.get_json()
+
+    print(dados_reinspecao_estanqueidade)
+
+    id_execucoes_inspecao_estanqueidade = classe_inspecao_estanqueidade.inserir_execucoes_inspecao_estanqueidade(dados_reinspecao_estanqueidade,dados_reinspecao_estanqueidade['id_inspecao_estanqueidade'])
+    print(id_execucoes_inspecao_estanqueidade)
+
+    ids_estanqueidade = {
+        'id_execucoes_inspecao_estanqueidade':id_execucoes_inspecao_estanqueidade,
+        'id_inspecao_estanqueidade':dados_reinspecao_estanqueidade['id_inspecao_estanqueidade'],
+    }
+
+    if dados_reinspecao_estanqueidade['status_estanqueidade'] == 'Não Conforme':
+        # Criar linha em reinspeção e executar o reteste
+        classe_inspecao_estanqueidade.inserir_reteste_estanqueidade(dados_reinspecao_estanqueidade,ids_estanqueidade)
+    else:
+        # Exclui a linha em reinspeção, pois foi concluida após o reteste
+        classe_inspecao_estanqueidade.excluir_reinspecao_estanqueidade(ids_estanqueidade)
+
+    return jsonify({"message":dados_reinspecao_estanqueidade})
 
 @app.route('/inspecao-estanqueidade-tanque',methods=['GET','POST'])
 def inspecao_estanqueidade_tanque():
@@ -1386,9 +1566,7 @@ def inspecao_estanqueidade_tanque():
         if list_causas != [None]:
             classe_inspecao.processar_fotos_inspecao(id_inspecao_estanqueidade, n_nao_conformidades, list_causas, setor_final,'',tipos_causas_solda,list_quantidade)
 
-    retestes,inspecoes = classe_inspecao.dados_estanqueidade()
-
-    return render_template('inspecao-estanqueidade-tanque.html',retestes=retestes,inspecoes=inspecoes)
+    return render_template('inspecao-estanqueidade-tanque.html')
 
 @app.route('/atualizar-conformidade',methods=['POST'])
 def atualizar_conformidade():
@@ -5114,13 +5292,13 @@ def retrabalho_pintura():
 
 
     query = """SELECT op.id, r.data_reinspecao, op.codigo, op.peca, op.qt_apontada, r.nao_conformidades, op.cor, op.tipo, r.inspetor
-                    FROM pcp.pecas_reinspecao as r
-                LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
-                LEFT JOIN pcp.pecas_retrabalho_em_processo as prep ON prep.id = r.id
-                WHERE r.setor = 'Pintura' 
-                    AND r.excluidas = false 
-                    AND r.status_pintura = false 
-                    AND (prep.id IS NULL OR prep.em_processo <> true);
+                FROM pcp.pecas_reinspecao as r
+            LEFT JOIN pcp.pecas_inspecao as op ON r.id = op.id::varchar
+            LEFT JOIN pcp.pecas_retrabalho_em_processo as prep ON prep.id = r.id
+            WHERE r.setor = 'Pintura' 
+                AND r.excluidas = false 
+                AND r.status_pintura = false 
+                AND (prep.id IS NULL OR prep.em_processo <> true);
             """
     
     cur.execute(query)
@@ -5128,7 +5306,7 @@ def retrabalho_pintura():
 
     query_em_processo = """SELECT op.id,prep.data_inicio, op.codigo, op.peca, op.qt_apontada,op.cor,op.tipo
                         FROM pcp.pecas_retrabalho_em_processo as prep
-                        LEFT JOIN pcp.ordens_pintura as op ON prep.id = op.id::varchar
+                        LEFT JOIN pcp.pecas_inspecao as op ON prep.id = op.id::varchar
                         WHERE prep.em_processo = 'true'
                         """
     
@@ -5137,7 +5315,7 @@ def retrabalho_pintura():
 
     query_ultimos_retrabalhos = """SELECT op.id,prep.data_fim, op.codigo, op.peca, op.qt_apontada,op.cor,op.tipo,r.inspetor
                                         FROM pcp.pecas_reinspecao as r
-                                    LEFT JOIN pcp.ordens_pintura as op ON r.id = op.id::varchar
+                                    LEFT JOIN pcp.pecas_inspecao as op ON r.id = op.id::varchar
                                     LEFT JOIN pcp.pecas_retrabalho_em_processo as prep ON prep.id = r.id
                                     WHERE r.setor = 'Pintura' AND r.status_pintura = true AND prep.em_processo = false
                                     ORDER BY r.data_reinspecao DESC

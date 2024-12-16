@@ -21,7 +21,7 @@
 
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h4 mb-0 text-gray-800">Inspeção Estanqueidade Tubos, Cilindros e Tanques</h1>
+        <h1 class="h4 mb-0 text-gray-800">Inspeção Estanqueidade Tanques</h1>
         <div class="d-sm-flex flex-column mb-4" style="width: 200px;">
             <button class="btn btn-primary mb-2" style="font-size: 14px;" onclick="modalTanque()">Inspeção de estanqueidade dos tanques</i></button>
         </div>
@@ -142,138 +142,102 @@
                 aria-labelledby="tubosModalLabel" aria-hidden="true" style="overflow-y: auto;">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="tubosModalTitle">Tanque</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
-                            <div class="row">
-                                <div class="col-sm-6 mb-4">
-                                    <label>Data da Inspeção</label>
-                                    <input type="text" class="form-control" id="data_tanque" disabled>
-                                </div>
-                                <div class="col-sm-6 mb-4">
-                                    <label>Inspetor</label>
-                                    <select class="form-control" name="inspetores_tubo" id="inspetores_tubo">
-                                        <option value="" hidden selected disabled></option>
-                                        <option value="Matheus">Matheus</option>
-                                        <option value="Cauã">Cauã</option>
-                                        <option value="Paulo">Paulo</option>
-                                        <option value="Gabriel">Gabriel</option>
-                                        <option value="Leonidas">Leonidas</option>
-                                        <option value="Marcelo">Marcelo</option>
-                                        <option value="Severiano">Severiano</option>
-                                    </select>
-                                </div>
+                        <form>
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="tubosModalTitle">Tanque</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                             </div>
-                            <div class="row">
-                                <div class="col-sm-12 mb-4">
-                                    <label>Código</label>
-                                    <select class="form-control"  name="tanqueProduto" id="tanqueProduto">
-                                        <option value="" disabled hidden selected></option>
-                                        <option value="030671 TUBO HIDRÁULICO [CBHM5000 M17]">030671 TUBO HIDRÁULICO [CBHM5000 M17]</option>
-                                        <option value="031566 TUBO HIDRÁULICO [CBH6/CBHM6000-2E M17]">031566 TUBO HIDRÁULICO [CBH6/CBHM6000-2E M17]</option>
-                                        <option value="030753 TUBO HIDRÁULICO [CBH6/CBH7/CBHM6000]">030753 TUBO HIDRÁULICO [CBH6/CBH7/CBHM6000]</option>
-                                        <option value="035088 - TUBO HIDRÁULICO ESTEIRA ELEVADA INFERIOR / MCF">035088 - TUBO HIDRÁULICO ESTEIRA ELEVADA INFERIOR / MCF</option>
-                                        <option value="034029 - TUBO HIDRÁULICO ESTEIRA DIREITA /MCF">034029 - TUBO HIDRÁULICO ESTEIRA DIREITA /MCF</option>
-                                        <option value="035698 - TUBO HIDRÁULICO ESTEIRA ELEVADA SUPERIOR / MCF">035698 - TUBO HIDRÁULICO ESTEIRA ELEVADA SUPERIOR / MCF</option>
-                                        <option value="035465 - TUBO HIDRÁULICO MAIOR [CTH4500]">035465 - TUBO HIDRÁULICO MAIOR [CTH4500]</option>
-                                        <option value="035467 - TUBO HIDRÁULICO MENOR [CTH4500]">035467 - TUBO HIDRÁULICO MENOR [CTH4500]</option>
-                                        <option value="034776 - TUBO HIDRAULICO DE RETORNO DOS CILINDROS / MCF">034776 - TUBO HIDRAULICO DE RETORNO DOS CILINDROS / MCF</option>
-                                        <option value="035090 - TUBO HIDRAULICO DE RETORNO DOS MOTORES / MCF">035090 - TUBO HIDRAULICO DE RETORNO DOS MOTORES / MCF</option>
-                                        <option value="035441 - TUBO HIDRAULICO DOS CILINDROS / MCF">035441 - TUBO HIDRAULICO DOS CILINDROS / MCF</option>
-                                        <option value="035700 - TUBO HIDRAULICO DE RETORNO EST. DIR. 03 / MCF">035700 - TUBO HIDRAULICO DE RETORNO EST. DIR. 03 / MCF</option>
-                                    </select>
+                            <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
+                                <div class="row">
+                                    <div class="col-sm-6 mb-4">
+                                        <label>Data da Inspeção</label>
+                                        <input type="text" class="form-control" id="data_tanque" disabled>
+                                    </div>
+                                    <div class="col-sm-6 mb-4">
+                                        <label>Inspetor</label>
+                                        <select class="form-control" name="inspetores_tubo" id="inspetores_tubo">
+                                            <option value="" hidden selected disabled></option>
+                                            <option value="Matheus">Matheus</option>
+                                            <option value="Cauã">Cauã</option>
+                                            <option value="Paulo">Paulo</option>
+                                            <option value="Gabriel">Gabriel</option>
+                                            <option value="Leonidas">Leonidas</option>
+                                            <option value="Marcelo">Marcelo</option>
+                                            <option value="Severiano">Severiano</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-6 mb-4">
-                                    <label>Quantidade inspecionada</label>
-                                    <input type="number" class="form-control" id="qtd_inspecionada_tubo"> 
+                                <div class="row">
+                                    <div class="col-sm-12 mb-4">
+                                        <label>Código</label>
+                                        <select class="form-control" name="produto-estanqueidade-tanque" id="produto-estanqueidade-tanque">
+                                            <option value="" selected hidden disabled></option>
+                                            <option value="032591 - TANQUE SIMPLES 6500L M22">032591 - TANQUE SIMPLES 6500L M22</option>
+                                            <option value="032770 - TANQUE SIMPLES 4300L M22">032770 - TANQUE SIMPLES 4300L M22</option>
+                                            <option value="034317 - TANQUE SIMPLES 10500L M23">034317 - TANQUE SIMPLES 10500L M23</option>
+                                            <option value="000000 - TANQUE SIMPLES 12500L M23">000000 - TANQUE SIMPLES 12500L M23</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="col-sm-6 mb-4">
-                                    <label>Não conformidade</label>
-                                    <input type="number" class="form-control" id="nao_conformidade_tubo"> 
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <a class="d-flex justify-content-between list-group-item" style="border-radius: 10px;" data-toggle="collapse" href="#collapseExample0" role="button" aria-expanded="false" aria-controls="collapseExample0">
+                                            <h6 class="m-0 font-weight-bold text-primary">Teste Corpo do tanque parte inferior</h6>
+                                            <i class="fa-solid fa-plus"></i>
+                                        </a>
+                                        <div class="collapse" id="collapseExample0">
+                                            <div class="card card-body">
+                                                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-sm-4 mb-4" style="display: none;">
-                                    <label>Qtd. causas das <strong>NÃO</strong> conformidades</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control desabilitado" id="tipos_causas_tubo" value="1"
-                                            style="font-size: 12px;">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <a class="d-flex justify-content-between list-group-item" style="border-radius: 10px;" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                            <h6 class="m-0 font-weight-bold text-primary">Teste Corpo do tanque + Longarinas</h6>
+                                            <i class="fa-solid fa-plus"></i>
+                                        </a>
+                                        <div class="collapse" id="collapseExample">
+                                            <div class="card card-body">
+                                                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <a class="d-flex justify-content-between list-group-item" style="border-radius: 10px;" data-toggle="collapse" href="#collapseExample1" role="button" aria-expanded="false" aria-controls="collapseExample1">
+                                            <h6 class="m-0 font-weight-bold text-primary">Teste Corpo do tanque</h6>
+                                            <i class="fa-solid fa-plus"></i>
+                                        </a>
+                                        <div class="collapse" id="collapseExample1">
+                                            <div class="card card-body">
+                                                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <a class="d-flex justify-content-between list-group-item" style="border-radius: 10px;" data-toggle="collapse" href="#collapseExample2" role="button" aria-expanded="false" aria-controls="collapseExample2">
+                                            <h6 class="m-0 font-weight-bold text-primary">Teste Corpo do tanque + Chassi</h6>
+                                            <i class="fa-solid fa-plus"></i>
+                                        </a>
+                                        <div class="collapse" id="collapseExample2">
+                                            <div class="card card-body">
+                                                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" id="selectContainerTubos">
-                                <div class="col-sm-5 mb-4 selectBlock" id="selectBlock-0">
-                                    <label>Causas</label>
-                                    <select id="causasCilindroT-0" name="causasCilindroT-0" class="form-control">
-                                        <option value="" hidden selected disabled></option>
-                                        <option value="Vazamento">Vazamento</option>
-                                    </select>
-                                </div>
-                                <div class="col-sm-3 mb-4 quantidadeBlock" id="quantidadeBlock-0">
-                                    <label id="qtd_causa_cilindro">Qtd. de causas</label>
-                                    <input type="number" style="font-size: 14px;" class="form-control" name="quantidade_causas_cilindroT-0" id="quantidade_causas_cilindroT-0">
-                                </div>
-                                <div class="col-sm-4 mb-4 customFile customFileBlock" id="customFileBlock-0">
-                                    <div><p style="display: inline-block;margin-bottom: .5rem;">Arquivo</p></div>
-                                    <input type="file" class="custom-file-input" id="inputGroupFile_cilindroT-0" accept="image/*" multiple="true">
-                                    <label class="custom-file-label" style="top: auto;">0 arquivos</label>
-                                </div>
-                                <div class="col-sm-12 mb-4 d-none" style="display: flex; justify-content: space-between; align-items: center;">
-                                    <button class="btn btn-primary" id="addButtonTubos" style="font-size: 10px;">Adicionar causa</button>
-                                    <button class="btn btn-danger" id="removeButtonTubos" style="font-size: 10px;" disabled>Remover causa</button>
-                                </div>
-                            </div> 
-                            <div class="row">
-                                <div class="col-sm-6 mb-4" id="div_motivo_tubo">
-                                    <label>Motivo</label>
-                                    <input type="text" class="form-control" id="motivo_tubo"> 
-                                </div>
-                                <div class="col-sm-6 mb-4">
-                                    <label>Observação</label>
-                                    <input type="text" class="form-control" id="observacao_tubo"> 
-                                </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-primary" id="verificar_tubo">Inspecionar</button>
                             </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-primary" id="verificar_tubo">Inspecionar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal fade" data-backdrop="static" id="modalConfirmacaoSolda" tabindex="-1" role="dialog" aria-labelledby="modalConfirmacaoSoldaLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="m-0 font-weight-bold text-primary">
-                                <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
-                                Atenção
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <p id="p_confirmar_inspecao_tubo_cilindro"></p>
-                            <div class="row">
-                                <div class="col-sm-6 mb-4">
-                                    <label>Total Inspecionado</label>
-                                    <input type="text" class="form-control" id="confirmarConformidades" disabled>
-                                </div>
-                                <div class="col-sm-6 mb-4">
-                                    <label>Total Não Conformidade</label>
-                                    <input type="text" class="form-control" id="confirmarNaoConformidades" disabled>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarCilindro">Confirmar</button>
-                            <button type="button" class="btn btn-primary" style="display: none;" id="btnEnviarTubo">Confirmar</button>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -399,7 +363,7 @@
         <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
         <script src="static/js/demo/datatables-demo.js"></script>
         <script src="/static/js/qualidade/inspecao-pintura.js"></script>
-        <script src="/static/js/qualidade/inspecao-estanqueidade.js"></script>
+        <script src="/static/js/qualidade/inspecao_estanqueidade/modal-inspecao-estanqueidade.js"></script>
 
         <script>
             function changeTab(tabName) {
