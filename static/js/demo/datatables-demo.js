@@ -123,11 +123,21 @@ $(document).ready(function() {
   });
 });
 
+
 $(document).ready(function() {
   $('#dataTableEstanqueidadeTable').DataTable({
     "info":false,
     "aLengthMenu":[5,10,25],
     "iDisplayLength":10,
+    order: [[1, 'desc']]
+  });
+});
+
+$(document).ready(function() {
+  $('#dataTableRetrabalhoPintura').DataTable({
+    "info":false,
+    "aLengthMenu":[5,10,25],
+    "iDisplayLength":5,
     order: [[1, 'desc']]
   });
 });
