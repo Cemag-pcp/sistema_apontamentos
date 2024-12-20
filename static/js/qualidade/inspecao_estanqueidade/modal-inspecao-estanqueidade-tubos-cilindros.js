@@ -45,17 +45,6 @@ function modalCilindros() {
     $('#cilindrosModal').modal('show');
 }
 
-function modalTanque() {
-
-    const timeElapsed = Date.now();
-    const today = new Date(timeElapsed);
-
-    $('#data_tanque').val(today.toLocaleDateString());
-
-    // Exibir o modal
-    $('#estanqueidadeTanqueModal').modal('show');
-}
-
 function modalHistoricoEstanqueidade(idinspecao,inspecao) {
 
     $("#loading").show();
@@ -68,7 +57,7 @@ function modalHistoricoEstanqueidade(idinspecao,inspecao) {
         data: JSON.stringify({ 'id': idinspecao ,'tipo_inspecao':inspecao}),  // Enviando um objeto JSON
         success: function(response) {
             $("#loading").hide();
-            cardHistorico(response);
+            cardHistoricoTubosCilindros(response);
         },
         error: function(error) {
             $("#loading").hide();
@@ -78,7 +67,7 @@ function modalHistoricoEstanqueidade(idinspecao,inspecao) {
     });
 }
 
-function cardHistorico(response) {
+function cardHistoricoTubosCilindros(response) {
 
     $("#modalTimeline .modal-header h5").text("Possui " + response.dados_historico.length + " inspeções")
 
@@ -128,14 +117,14 @@ function cardHistorico(response) {
             $("#modalTimeline").modal('hide');
     
             // Configurar o modal de causas
-            modalVisualizarCausaEstanqueidade(itemData); // Passa os dados do item para o modal
+            modalVisualizarCausaEstanqueidadeTubosCilindros(itemData); // Passa os dados do item para o modal
         } else {
             alert("Não possui nenhuma causa ou foto associada.");
         }
     });
 }
 
-function modalVisualizarCausaEstanqueidade(items) {
+function modalVisualizarCausaEstanqueidadeTubosCilindros(items) {
     // Configurar o título do modal
 
     $("#visualizacaoCausasModal .modal-body").empty();

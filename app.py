@@ -1126,6 +1126,98 @@ def modal_historico_estanqueidade():
 
     return jsonify({'dados_historico': dados_agrupados})
 
+@app.route("/modal-historico-estanqueidade-tanque", methods=['POST'])
+def modal_historico_estanqueidade_tanque():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+    id = data['id']
+    inspecao = data['tipo_inspecao']
+
+    # Consultar dados históricos
+    query_historico = """
+                        SELECT 
+                            eiet.id AS execucao_id,
+                            ie.id AS inspecao_id,
+                            eiet.data_execucao,
+                            ie.codigo,
+                            ie.descricao,
+                            ie.inspecao,
+                            eiet.inspetor
+                        FROM 
+                            pcp.execucoes_inspecao_estanqueidade_tanque eiet
+                        LEFT JOIN 
+                            pcp.inspecao_estanqueidade ie
+                        ON 
+                            eiet.inspecao_id = ie.id
+                        WHERE 
+                            ie.id = %s AND ie.inspecao = %s;
+                        """
+    cur.execute(query_historico, (id, inspecao))
+    data_historico = cur.fetchall()
+
+    # Consultar causas
+    query_causas = """
+                    SELECT 
+                        eiet.id AS execucao_id,
+                        eiet.inspecao_id,
+                        eiet.data_execucao,
+                        ie.codigo,
+                        ie.descricao,
+                        dpet.pressao_inicial,
+                        dpet.pressao_final,
+                        dpet.nao_conformidade,
+                        dpet.tipo_teste,
+                        dpet.hora_execucao,
+                        eiet.inspetor 
+                    FROM 
+                        pcp.execucoes_inspecao_estanqueidade_tanque eiet
+                    LEFT JOIN 
+                        pcp.inspecao_estanqueidade ie
+                    ON 
+                        eiet.inspecao_id = ie.id
+                    LEFT JOIN 
+                        pcp.detalhes_pressao_estanqueidade_tanque dpet
+                    ON 
+                        eiet.id = dpet.execucao_id 
+                    WHERE  
+                        ie.id = %s AND ie.inspecao = %s;
+                    """
+    
+    cur.execute(query_causas, (id, inspecao))
+    data_causas = cur.fetchall()
+
+    historico_agrupado = {}
+    for row in data_historico:
+        execucao_id = row['execucao_id']
+        if execucao_id not in historico_agrupado:
+            historico_agrupado[execucao_id] = {
+                'execucao_id': execucao_id,
+                'data_execucao': row['data_execucao'],
+                'inspetor': row['inspetor'],
+                'codigo': row['codigo'],
+                'descricao': row['descricao'],
+                'detalhes_pressao': []  # Adicionamos um array vazio para causas
+            }
+
+    # Adicionar causas ao histórico correspondente
+    for row in data_causas:
+        execucao_id = row['execucao_id']
+        if execucao_id in historico_agrupado:
+            historico_agrupado[execucao_id]['detalhes_pressao'].append({
+                'pressao_inicial': row['pressao_inicial'],
+                'pressao_final': row['pressao_final'],
+                'nao_conformidade': row['nao_conformidade'],
+                'tipo_teste': row['tipo_teste'],
+                'hora_execucao': row['hora_execucao'].strftime('%H:%M')
+            })
+        
+    dados_agrupados = list(historico_agrupado.values())
+
+    return jsonify({'dados_historico': dados_agrupados})
+
 @app.route('/inspecao-solda',methods=['GET','POST'])
 def inspecao_solda():
 
@@ -1508,7 +1600,7 @@ def envio_inspecao_estanqueidade_tubos_cilindros():
     }
 
     if total_nao_conformidade > 0:
-        classe_inspecao_estanqueidade.inserir_reinspecao_estanqueidade(dados_inspecao_estanqueidade,ids_estanqueidade)
+        classe_inspecao_estanqueidade.inserir_reinspecao_estanqueidade(ids_estanqueidade)
         classe_inspecao_estanqueidade.inserir_reteste_estanqueidade(dados_inspecao_estanqueidade,ids_estanqueidade)
 
     return jsonify({"message":dados_inspecao_estanqueidade})
@@ -1537,36 +1629,183 @@ def reteste_estanqueidade_tubos_cilindros():
 
     return jsonify({"message":dados_reinspecao_estanqueidade})
 
-@app.route('/inspecao-estanqueidade-tanque',methods=['GET','POST'])
+@app.route('/inspecao-estanqueidade-tanque',methods=['GET'])
 def inspecao_estanqueidade_tanque():
 
+    # Conectar ao banco
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    # Consulta 1: Informações de `pcp.inspecao_estanqueidade`
+    query_inspecao = """
+        SELECT
+            ie.id AS inspecao_id,
+            ie.data,
+            ie.codigo,
+            ie.descricao,
+            ie.inspecao,
+            eiet.inspetor
+        FROM 
+            pcp.inspecao_estanqueidade ie
+        INNER JOIN 
+            pcp.execucoes_inspecao_estanqueidade_tanque eiet ON ie.id = eiet.inspecao_id
+        WHERE ie.inspecao = 'Tanques' and eiet.numero_execucao = 0;
+    """
+    cur.execute(query_inspecao)
+    inspecao_dados = cur.fetchall()
 
-    if request.method == 'POST':
+    # Consulta 2: Junção de `pcp.reinspecao` com `pcp.inspecao_estanqueidade`
+    query_reinspecao = """
+        WITH MaxExecucao AS (
+            SELECT 
+                inspecao_id,
+                MAX(numero_execucao) AS max_numero_execucao
+            FROM 
+                pcp.execucoes_inspecao_estanqueidade_tanque
+            GROUP BY 
+                inspecao_id
+        )
+        SELECT 
+            ie.id AS inspecao_id,
+            re.data_reinspecao,
+            ie.data AS inspecao_data,
+            ie.codigo AS inspecao_codigo,
+            ie.descricao AS inspecao_descricao,
+            eie.inspetor AS inspetor,
+            eie.numero_execucao,
+            ie.inspecao,
+            eie.id
+        FROM 
+            pcp.reinspecao_estanqueidade re
+        LEFT JOIN 
+            pcp.inspecao_estanqueidade ie ON re.inspecao_id = ie.id
+        LEFT JOIN
+            pcp.execucoes_inspecao_estanqueidade_tanque eie ON re.inspecao_id = eie.inspecao_id
+        INNER JOIN
+            MaxExecucao me ON eie.inspecao_id = me.inspecao_id 
+                            AND eie.numero_execucao = me.max_numero_execucao;
+        """
+    
+    cur.execute(query_reinspecao)
+    reinspecao_dados = cur.fetchall()
 
-        uuid_value = uuid.uuid4().int
-        # Extrai os primeiros 6 dígitos do UUID
-        id_inspecao_estanqueidade = str(uuid_value)[:12]
+    return render_template('inspecao-estanqueidade-tanque.html',inspecao_dados=inspecao_dados,reinspecao_dados=reinspecao_dados)
 
-        n_nao_conformidades = int(request.form.get('inputNaoConformidadesSolda', 0))
-        list_causas = json.loads(request.form.get('list_causas'))
-        list_quantidade = json.loads(request.form.get('list_quantidade'))
-        setor = request.form.get('setor')
-        setor_final = f"Estanqueidade - {setor}"
+@app.route('/envio-inspecao-estanqueidade-tanque',methods=['POST'])
+def envio_inspecao_estanqueidade_tanque():
 
-        if list_quantidade == ['']:
-            list_quantidade = [None]
+    dados_estanqueidade_tanque = request.get_json()
 
-        retrabalhoSolda = request.form.get('retrabalhoSolda')
+    codigo_split = dados_estanqueidade_tanque['produto'].split(' - ', 1)
+    dados_estanqueidade_tanque['codigo'] = codigo_split[0].strip()
+    dados_estanqueidade_tanque['descricao'] = codigo_split[1].strip() if len(codigo_split) > 1 else ""
 
-        tipos_causas_solda = int(request.form.get('tipos_causas_solda'))
+    list_tanques = ['032591 - TANQUE SIMPLES 6500L M22','032770 - TANQUE SIMPLES 4300L M22']
 
-        if list_causas != [None]:
-            classe_inspecao.processar_fotos_inspecao(id_inspecao_estanqueidade, n_nao_conformidades, list_causas, setor_final,'',tipos_causas_solda,list_quantidade)
+    if dados_estanqueidade_tanque['produto'] in list_tanques:
+        primeiro_teste = dados_estanqueidade_tanque['testes']['parte_inferior']
+        segundo_teste = dados_estanqueidade_tanque['testes']['corpo_longarina']
 
-    return render_template('inspecao-estanqueidade-tanque.html')
+        try:
+            primeiro_teste['pressao_inicial'] = float(primeiro_teste['pressao_inicial'])
+            primeiro_teste['pressao_final'] = float(primeiro_teste['pressao_final'])
+            segundo_teste['pressao_inicial'] = float(segundo_teste['pressao_inicial'])
+            segundo_teste['pressao_final'] = float(segundo_teste['pressao_final'])
+        except ValueError as e:
+            response = jsonify({"error": str(e)})
+            response.status_code = 400
+            return response
+
+        primeiro_teste['tipo_teste'] = 'Corpo do tanque parte inferior'
+        segundo_teste['tipo_teste'] = 'Corpo do tanque + longarinas'
+    else:
+        primeiro_teste = dados_estanqueidade_tanque['testes']['corpo_tanque']
+        segundo_teste = dados_estanqueidade_tanque['testes']['corpo_chassi']
+
+        primeiro_teste['tipo_teste'] = 'Corpo do tanque'
+        segundo_teste['tipo_teste'] = 'Corpo do tanque + chassi'
+    
+    id_inspecao_estanqueidade = classe_inspecao_estanqueidade.inserir_inspecao_estanqueidade(dados_estanqueidade_tanque)
+
+    ids_estanqueidade = {
+        'id_inspecao_estanqueidade': id_inspecao_estanqueidade,
+    }
+
+    if primeiro_teste['vazamento'] == 'Sim' or segundo_teste['vazamento'] == 'Sim':
+        classe_inspecao_estanqueidade.inserir_reinspecao_estanqueidade(ids_estanqueidade)
+
+    id_execucao_estanqueidade_tanque = classe_inspecao_estanqueidade.inserir_execucoes_inspecao_estanqueidade_tanque(dados_estanqueidade_tanque,id_inspecao_estanqueidade)
+    classe_inspecao_estanqueidade.inserir_detalhes_execucao_inspecao_estanqueidade_tanque(id_execucao_estanqueidade_tanque,primeiro_teste,segundo_teste)
+
+    return jsonify({"dados_estanqueidade_tanque":dados_estanqueidade_tanque})
+
+@app.route('/reteste-estanqueidade-tanque', methods=['POST'])
+def reteste_estanqueidade_tanque():
+
+    data = request.get_json()
+
+    # Verifica se os dados estão presentes
+    if not data:
+        return jsonify({"error": "Dados não recebidos"}), 400
+
+    if 'testes' in data:
+        teste_reinspecao = {teste:detalhes for teste, detalhes in data['testes'].items() if detalhes.get('flag') == 'true'}
+
+        list_keys = list(teste_reinspecao.keys())
+
+        testes_renomeados = {}
+        testes_renomeados['primeiro_teste'] = teste_reinspecao[list_keys[0]]
+
+        if len(list_keys) > 1:
+            testes_renomeados['segundo_teste'] = teste_reinspecao[list_keys[1]]
+        else:
+            testes_renomeados['segundo_teste'] = None
+
+        data['testes'] = testes_renomeados
+    
+    id_execucao_estanqueidade_tanque = classe_inspecao_estanqueidade.inserir_execucoes_inspecao_estanqueidade_tanque(data,data['id'])
+    
+    ids_estanqueidade = {
+        'id_inspecao_estanqueidade':data['id'],
+    }
+
+    if data['testes']['segundo_teste'] == None:
+        classe_inspecao_estanqueidade.inserir_detalhes_execucao_inspecao_estanqueidade_tanque(id_execucao_estanqueidade_tanque,data['testes']['primeiro_teste'])
+
+        if data['testes']['primeiro_teste']['vazamento'] == False:
+            classe_inspecao_estanqueidade.excluir_reinspecao_estanqueidade(ids_estanqueidade)
+    else:
+        classe_inspecao_estanqueidade.inserir_detalhes_execucao_inspecao_estanqueidade_tanque(id_execucao_estanqueidade_tanque,data['testes']['primeiro_teste'],data['testes']['segundo_teste'])
+
+        if data['testes']['primeiro_teste']['vazamento'] == False and data['testes']['segundo_teste']['vazamento'] == False:
+
+            classe_inspecao_estanqueidade.excluir_reinspecao_estanqueidade(ids_estanqueidade)
+
+    return jsonify({"status": "sucesso", "dados": data}), 200
+
+@app.route('/detalhes-estanqueindade-tanque', methods=['GET'])
+def detalhes_estanqueidade_tanque():
+    id = request.args.get('id')
+
+    query = """SELECT id, execucao_id, pressao_inicial, pressao_final, nao_conformidade, tipo_teste, hora_execucao
+               FROM pcp.detalhes_pressao_estanqueidade_tanque
+               WHERE execucao_id = %s"""
+    
+    cur.execute(query, (id,))
+    rows = cur.fetchall()
+
+    colunas = [desc[0] for desc in cur.description]
+    resultado = []
+
+    for row in rows:
+        row_dict = dict(zip(colunas, row))
+        # Converte hora_execucao para string no formato HH:MM
+        if row_dict.get('hora_execucao') is not None:
+            row_dict['hora_execucao'] = row_dict['hora_execucao'].strftime('%H:%M')
+        resultado.append(row_dict)
+
+    return jsonify({"data": resultado})
 
 @app.route('/atualizar-conformidade',methods=['POST'])
 def atualizar_conformidade():
