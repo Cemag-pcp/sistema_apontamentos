@@ -116,9 +116,9 @@ class InspecaoEstanqueidade:
             return id
 
         except Exception as e:
-            raise RuntimeError(f"Erro desconhecido na execução: {e}")
+            raise RuntimeError(f"Erro na execução: {e}")
     
-    def inserir_reinspecao_estanqueidade(self, dados_reinspecao_estanqueidade, ids_estanqueidade):
+    def inserir_reinspecao_estanqueidade(self, ids_estanqueidade):
 
         try:
             self.verificar_conexao()
@@ -137,7 +137,7 @@ class InspecaoEstanqueidade:
             print("inserir_reinspecao_estanqueidade")
 
         except Exception as e:
-            raise RuntimeError(f"Erro desconhecido na execução: {e}")
+            raise RuntimeError(f"Erro na execução: {e}")
 
     def inserir_reteste_estanqueidade(self, dados_reteste_estanqueidade,ids_estanqueidade):
 
@@ -166,26 +166,11 @@ class InspecaoEstanqueidade:
             print("inserir_reteste_estanqueidade")
 
         except Exception as e:
-            raise RuntimeError(f"Erro desconhecido na execução: {e}")
-
-    # def consultar_chave_estrangeira_execucao_estanqueidade(self,execucao_id):
-
-    #     self.verificar_conexao()
-    #     with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-
-    #         sql = """ SELECT id
-    #                 FROM pcp.execucoes_inspecao_estanqueidade
-    #                 WHERE inspecao_id = %s;"""
-            
-    #         cur.execute(sql,(execucao_id,))
-    #         inspecao_id = cur.fetchone()['id']
-
-    #     return inspecao_id
+            raise RuntimeError(f"Erro na execução: {e}")
     
     def excluir_reinspecao_estanqueidade(self,id_estanqueidade):
 
         try:
-            print(id_estanqueidade)
             self.verificar_conexao()
             with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
 
@@ -195,4 +180,91 @@ class InspecaoEstanqueidade:
 
             self.conn.commit()
         except Exception as e:
-            raise RuntimeError(f"Erro desconhecido na execução: {e}")
+            raise RuntimeError(f"Erro na execução: {e}")
+        
+    def inserir_execucoes_inspecao_estanqueidade_tanque(self,dados_estanqueidade_tanque,id_inspecao_estanqueidade_tanque):
+
+        try:
+
+            self.verificar_conexao()
+            with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+
+                sql_get_max_execucao = """
+                SELECT COALESCE(MAX(numero_execucao), -1) AS max_execucao
+                FROM pcp.execucoes_inspecao_estanqueidade_tanque
+                WHERE inspecao_id = %s;
+                """
+                cur.execute(sql_get_max_execucao, (id_inspecao_estanqueidade_tanque,))
+                max_execucao = cur.fetchone()['max_execucao']
+
+                numero_execucao = max_execucao + 1
+            
+                query = """
+                INSERT INTO pcp.execucoes_inspecao_estanqueidade_tanque 
+                (inspecao_id, numero_execucao, inspetor)
+                VALUES (%s, %s, %s)
+                RETURNING id;
+                """
+
+                values = (
+                    id_inspecao_estanqueidade_tanque,
+                    numero_execucao,
+                    dados_estanqueidade_tanque['inspetor'],
+                )
+
+                cur.execute(query, values)
+                id = cur.fetchone()['id']
+
+            self.conn.commit()
+            print("inserir_execucoes_inspecao_estanqueidade_tanque")
+
+            return id
+        
+        except Exception as e:
+            raise RuntimeError(f"Erro na execução: {e}")
+        
+    def inserir_detalhes_execucao_inspecao_estanqueidade_tanque(self,id_execucao_estanqueidade_tanque,primeiro_teste,segundo_teste=None):
+
+        try:
+
+            self.verificar_conexao()
+            with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+            
+                query = """
+                INSERT INTO pcp.detalhes_pressao_estanqueidade_tanque 
+                (execucao_id, pressao_inicial, pressao_final, nao_conformidade, tipo_teste, hora_execucao)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """
+
+                primeiro_teste['vazamento'] = True if primeiro_teste['vazamento'] == 'Sim' else False
+
+                values_primeiro = (
+                    id_execucao_estanqueidade_tanque,
+                    primeiro_teste['pressao_inicial'],
+                    primeiro_teste['pressao_final'],
+                    primeiro_teste['vazamento'],
+                    primeiro_teste['tipo_teste'],                
+                    primeiro_teste['duracao'],                
+                )
+
+                cur.execute(query, values_primeiro)
+
+                if segundo_teste != None:
+                    segundo_teste['vazamento'] = True if segundo_teste['vazamento'] == 'Sim' else False
+
+                    values_segundo = (
+                        id_execucao_estanqueidade_tanque,
+                        segundo_teste['pressao_inicial'],
+                        segundo_teste['pressao_final'],
+                        segundo_teste['vazamento'],
+                        segundo_teste['tipo_teste'],                
+                        segundo_teste['duracao'],                
+                    )
+
+                    cur.execute(query, values_segundo)
+
+            self.conn.commit()
+            print("inserir_detalhes_execucao_inspecao_estanqueidade_tanque")
+        
+        except Exception as e:
+            raise RuntimeError(f"Erro na execução: {e}")

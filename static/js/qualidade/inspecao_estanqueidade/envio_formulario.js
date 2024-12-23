@@ -17,7 +17,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (somaQuantidades > qntReinspecao && statusEstanqueidade === "Não Conforme") {
-            alert(`A soma das quantidades (${somaQuantidades}) não pode ser maior que Quant. Reinspeção (${qntReinspecao}).`);
+            Swal.fire({
+                icon: "error",
+                title: `A soma das quantidades (${somaQuantidades}) não pode ser maior que Quant. Reinspeção (${qntReinspecao}).`,
+              });
             return false;
         }
         return true;
@@ -69,8 +72,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         
         if (tipo_inspecao_estanqueidade ==='Tubos' && totalQuantidade !== nao_conforme_retrabalho + nao_conforme_refugo) {
-            $("#loading").hide();
-            alert("A soma das quantidades tem que ser igual ao valor de Não conforme retrabalho e Não conforme refugo.");
+            Swal.fire({
+                icon: "error",
+                title: `A soma das quantidades tem que ser igual ao valor de Não conforme retrabalho e Não conforme refugo.`,
+              });
             return false;
         }
 
@@ -91,11 +96,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Evento de submissão do formulário
     formReteste.addEventListener("submit", function (event) {
         event.preventDefault(); // Previne a submissão padrão
-        $("#loading").show();
 
         // Validação da soma das quantidades
         if (!validarSomaQuantidades()) {
-            $("#loading").hide();
             return; // Interrompe o envio se a validação falhar
         }
 
@@ -126,14 +129,44 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         })
         .then(data => {
-            console.log("Sucesso:", data);
-            location.reload();
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "bottom-end",
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                  toast.onmouseenter = Swal.stopTimer;
+                  toast.onmouseleave = Swal.resumeTimer;
+                }
+              });
+              Toast.fire({
+                icon: "success",
+                title: "Reteste registrado com sucesso!"
+            });
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         })
         .catch(error => {
-            $("#loading").hide();
-            console.error("Erro:", error);
-            alert("Ocorreu um erro ao enviar os dados.");
-            location.reload();
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "bottom-end",
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                  toast.onmouseenter = Swal.stopTimer;
+                  toast.onmouseleave = Swal.resumeTimer;
+                }
+              });
+              Toast.fire({
+                icon: "error",
+                title: "Erro ao enviar os dados para o servidor!"
+            });
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         });
     });
 });
@@ -146,7 +179,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const status_button_cilindro_estanqueidade = document.getElementById("status-button-cilindro-estanqueidade");
     
     form.addEventListener("submit", function (event) {
-        $("#loading").show();
         event.preventDefault(); // Prevenir o envio padrão do formulário
 
         // Capturar dados do formulário
@@ -184,8 +216,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (totalQuantidade !== naoConformidade) {
-            $("#loading").hide();
-            alert("A soma das quantidades tem que ser igual ao valor de Não Conformidade.");
+            Swal.fire({
+                icon: "error",
+                title: "A soma das quantidades tem que ser igual ao valor de Não Conformidade...",
+              });
             return;
         }
 
@@ -203,19 +237,50 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then((response) => {
             if (!response.ok) {
-                $("#loading").hide();
                 throw new Error("Erro ao enviar os dados!");
             }
             return response.json();
         })
         .then((result) => {
-            console.log("Resposta do servidor:", result);
-            location.reload()
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "bottom-end",
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                  toast.onmouseenter = Swal.stopTimer;
+                  toast.onmouseleave = Swal.resumeTimer;
+                }
+              });
+              Toast.fire({
+                icon: "success",
+                title: "Inspeção de cilindro registrada com sucesso!"
+            });
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         })
         .catch((error) => {
             console.error(error);
-            alert("Erro ao enviar o formulário.");
-            location.reload();
+            const Toast = Swal.mixin({
+                toast: true,
+                position: "bottom-end",
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                  toast.onmouseenter = Swal.stopTimer;
+                  toast.onmouseleave = Swal.resumeTimer;
+                }
+              });
+              Toast.fire({
+                icon: "error",
+                title: "Erro ao enviar os dados para o servidor!"
+            });
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         });
     });
 });
@@ -227,7 +292,6 @@ const status_button_tubo_estanqueidade = document.getElementById("status-button-
 
 // Adicionar evento de envio
 form.addEventListener('submit', async (event) => {
-    $("#loading").show();
     event.preventDefault(); // Previne o comportamento padrão de envio do formulário
 
     // Capturar os dados do formulário
@@ -248,8 +312,10 @@ form.addEventListener('submit', async (event) => {
     // Verificar se a soma de não conformidades excede a quantidade inspecionada
     const somaNaoConformes = data.nao_conforme_retrabalho + data.nao_conforme_refugo;
     if ((somaNaoConformes > data.quantidade_inspecionada)) {
-        $("#loading").hide();
-        alert("A soma de não conformidades (retrabalho e refugo) não pode ser maior que a quantidade inspecionada.");
+        Swal.fire({
+            icon: "error",
+            title: "A soma de não conformidades (retrabalho e refugo) não pode ser maior que a quantidade inspecionada...",
+        });
         return; // Impede o envio do formulário
     }
 
@@ -268,8 +334,10 @@ form.addEventListener('submit', async (event) => {
     });
 
     if ((somaNaoConformes !== somaCausas) && (somaNaoConformes !== 0)) {
-        $("#loading").hide();
-        alert("A soma das quantidades de causas deve ser igual à soma de não conformidades (retrabalho + refugo).");
+        Swal.fire({
+            icon: "error",
+            title: "A soma das quantidades de causas deve ser igual à soma de não conformidades (retrabalho + refugo)...",
+          });
         return;
     }
 
@@ -286,18 +354,49 @@ form.addEventListener('submit', async (event) => {
     })
     .then((response) => {
         if (!response.ok) {
-            $("#loading").hide();
             throw new Error("Erro ao enviar os dados!");
         }
         return response.json();
     })
     .then((result) => {
-        console.log("Resposta do servidor:", result);
-        location.reload();
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "bottom-end",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
+            }
+          });
+          Toast.fire({
+            icon: "success",
+            title: "Inspeção de tubo registrada com sucesso!"
+        });
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
     })
     .catch((error) => {
         console.error(error);
-        alert("Erro ao enviar o formulário.");
-        location.reload();
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "bottom-end",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.onmouseenter = Swal.stopTimer;
+              toast.onmouseleave = Swal.resumeTimer;
+            }
+          });
+          Toast.fire({
+            icon: "error",
+            title: "Erro ao enviar os dados para o servidor!"
+        });
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
     });
 });

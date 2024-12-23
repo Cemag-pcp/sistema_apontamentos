@@ -22,7 +22,7 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h4 mb-0 text-gray-800">Inspeção Estanqueidade Tubos e Cilindros</h1>
-        <div class="d-sm-flex flex-column mb-4" style="width: 200px;">
+        <div class="d-sm-flex flex-column mb-4">
             <button class="btn btn-primary mb-2" style="font-size: 14px;" id="button_estanqueidade_cilindro" onclick="modalCilindros()">Inspeção de estanqueidade dos cilindros</i></button>
             <button class="btn btn-primary mb-2" style="font-size: 14px;" id="button_estanqueidade_tubo" onclick="modalTubos()">Inspeção de estanqueidade dos tubos</i></button>
         </div>
@@ -107,6 +107,7 @@
                                         <th>Inspetor</th>
                                         <th>Quantidade Inspecionada</th>
                                         <th>Tipo da inspeção</th>
+                                        <th>Não conformidade</th>
                                         <th>Histórico</th>
                                     </tr>
                                 </thead>
@@ -119,6 +120,7 @@
                                         <td data-title="Inspetor">{{inspecao[5]}}</td>
                                         <td data-title="Quantidade Inspecionada">{{inspecao[4]}}</td>
                                         <td data-title="Tipo da inspeção">{{inspecao[6]}}</td>
+                                        <td data-title="Não conformidadea">{{inspecao[7]}}</td>
                                         <td data-title="Histórico">
                                             <div class="col-sm-4 d-flex justify-content-center align-items-center"
                                                 style="padding-left: 0.35rem;">
@@ -278,6 +280,8 @@
                                             <option value="Carlos Henrique">Carlos Henrique</option>
                                             <option value="Gabriel Florêncio">Gabriel Florêncio</option>
                                             <option value="Bruno Sousa">Bruno Sousa</option>
+                                            <option value="Gabriel G.">Gabriel G.</option>
+                                            <option value="Francisco Paulo">Francisco Paulo</option>
                                         </select>
                                     </div>
                                 </div>
@@ -530,7 +534,7 @@
         <script src="static/js/demo/datatables-demo.js"></script>
         <script src="/static/js/qualidade/inspecao-pintura.js"></script>
         <script src="/static/js/qualidade/inspecao_estanqueidade/events_inputs_estanqueidade.js"></script>
-        <script src="/static/js/qualidade/inspecao_estanqueidade/modal-inspecao-estanqueidade.js"></script>
+        <script src="/static/js/qualidade/inspecao_estanqueidade/modal-inspecao-estanqueidade-tubos-cilindros.js"></script>
         <script src="/static/js/qualidade/inspecao_estanqueidade/addCausasEstanqueidade.js"></script>
         <script src="/static/js/qualidade/inspecao_estanqueidade/envio_formulario.js"></script>
 
