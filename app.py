@@ -1514,7 +1514,8 @@ def inspecao_estanqueidade():
             ie.descricao,
             ei.quantidade_inspecionada,
             ei.inspetor,
-            ie.inspecao
+            ie.inspecao,
+            ei.nao_conforme + ei.nao_conforme_refugo AS nao_conformidade
         FROM 
             pcp.inspecao_estanqueidade ie
         INNER JOIN 

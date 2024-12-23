@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 toast: true,
                 position: "bottom-end",
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                   toast.onmouseenter = Swal.stopTimer;
@@ -146,14 +146,14 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             setTimeout(() => {
                 location.reload();
-            }, 1000);
+            }, 2000);
         })
         .catch(error => {
             const Toast = Swal.mixin({
                 toast: true,
                 position: "bottom-end",
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                   toast.onmouseenter = Swal.stopTimer;
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             setTimeout(() => {
                 location.reload();
-            }, 1000);
+            }, 2000);
         });
     });
 });
@@ -246,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 toast: true,
                 position: "bottom-end",
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                   toast.onmouseenter = Swal.stopTimer;
@@ -259,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             setTimeout(() => {
                 location.reload();
-            }, 1000);
+            }, 2000);
         })
         .catch((error) => {
             console.error(error);
@@ -267,7 +267,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 toast: true,
                 position: "bottom-end",
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                   toast.onmouseenter = Swal.stopTimer;
@@ -280,7 +280,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             setTimeout(() => {
                 location.reload();
-            }, 1000);
+            }, 2000);
         });
     });
 });
@@ -363,7 +363,7 @@ form.addEventListener('submit', async (event) => {
             toast: true,
             position: "bottom-end",
             showConfirmButton: false,
-            timer: 1000,
+            timer: 2000,
             timerProgressBar: true,
             didOpen: (toast) => {
               toast.onmouseenter = Swal.stopTimer;
@@ -376,7 +376,7 @@ form.addEventListener('submit', async (event) => {
         });
         setTimeout(() => {
             location.reload();
-        }, 1000);
+        }, 2000);
     })
     .catch((error) => {
         console.error(error);
@@ -384,7 +384,7 @@ form.addEventListener('submit', async (event) => {
             toast: true,
             position: "bottom-end",
             showConfirmButton: false,
-            timer: 1000,
+            timer: 2000,
             timerProgressBar: true,
             didOpen: (toast) => {
               toast.onmouseenter = Swal.stopTimer;
@@ -397,6 +397,6 @@ form.addEventListener('submit', async (event) => {
         });
         setTimeout(() => {
             location.reload();
-        }, 1000);
+        }, 2000);
     });
 });

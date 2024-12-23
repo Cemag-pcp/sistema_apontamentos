@@ -67,7 +67,7 @@ form.addEventListener('submit', async (event) => {
                 toast: true,
                 position: "bottom-end",
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                   toast.onmouseenter = Swal.stopTimer;
@@ -80,14 +80,14 @@ form.addEventListener('submit', async (event) => {
               });
             setTimeout(() => {
                 location.reload();
-            }, 1000);
+            }, 2000);
         } else {
             // Se houver erro, mostre uma mensagem de erro
             const Toast = Swal.mixin({
                 toast: true,
                 position: "bottom-end",
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 2000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
                   toast.onmouseenter = Swal.stopTimer;
@@ -100,7 +100,7 @@ form.addEventListener('submit', async (event) => {
             });
             setTimeout(() => {
                 location.reload();
-            }, 1000);
+            }, 2000);
         }
     } catch (error) {
         console.error('Erro ao enviar dados:', error);
@@ -108,7 +108,7 @@ form.addEventListener('submit', async (event) => {
             toast: true,
             position: "bottom-end",
             showConfirmButton: false,
-            timer: 1000,
+            timer: 2000,
             timerProgressBar: true,
             didOpen: (toast) => {
               toast.onmouseenter = Swal.stopTimer;
@@ -121,7 +121,7 @@ form.addEventListener('submit', async (event) => {
           });
         setTimeout(() => {
             location.reload();
-        }, 1000);
+        }, 2000);
     } 
 });
 
@@ -196,7 +196,7 @@ document.querySelector('#reinspecaoForm').addEventListener('submit', function(ev
             toast: true,
             position: "bottom-end",
             showConfirmButton: false,
-            timer: 1000,
+            timer: 2000,
             timerProgressBar: true,
             didOpen: (toast) => {
               toast.onmouseenter = Swal.stopTimer;
@@ -209,14 +209,14 @@ document.querySelector('#reinspecaoForm').addEventListener('submit', function(ev
         });
         setTimeout(() => {
             location.reload();
-        }, 1000);
+        }, 2000);
     })
     .catch((error) => {
         const Toast = Swal.mixin({
             toast: true,
             position: "bottom-end",
             showConfirmButton: false,
-            timer: 1000,
+            timer: 2000,
             timerProgressBar: true,
             didOpen: (toast) => {
               toast.onmouseenter = Swal.stopTimer;
@@ -229,7 +229,7 @@ document.querySelector('#reinspecaoForm').addEventListener('submit', function(ev
         });
         setTimeout(() => {
             location.reload();
-        }, 1000);
+        }, 2000);
     });
 });
 
