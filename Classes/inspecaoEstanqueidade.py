@@ -50,14 +50,15 @@ class InspecaoEstanqueidade:
             self.verificar_conexao()
             with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
 
-                sql = """INSERT INTO pcp.inspecao_estanqueidade (codigo, descricao, inspecao) 
-                        VALUES (%s, %s, %s)
+                sql = """INSERT INTO pcp.inspecao_estanqueidade (codigo, descricao, inspecao, data_carga) 
+                        VALUES (%s, %s, %s, %s)
                         RETURNING id;"""
                     
                 values = (
                     dados_inspecao_estanqueidade['codigo'],
                     dados_inspecao_estanqueidade['descricao'], 
-                    dados_inspecao_estanqueidade['tipo_inspecao']
+                    dados_inspecao_estanqueidade['tipo_inspecao'],
+                    dados_inspecao_estanqueidade['data_carga']
                 )
 
                 cur.execute(sql, values)

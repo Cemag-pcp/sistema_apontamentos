@@ -1,7 +1,7 @@
 {% extends 'sidebar.html' %}
 
 {% block title %}
-<title>Inspeção Estanqueidade Tubos, Cilindros e Tanques</title>
+<title>Inspeção Estanqueidade Tanques</title>
 {% endblock %}
 
 {% block links %}
@@ -75,7 +75,7 @@
                                             </a>
                                             <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                                 <a  class="dropdown-item dropdown_os"
-                                                    style="cursor: pointer;" onclick="modalTanqueReinspecao('{{reinspecao[0]}}','{{reinspecao[8]}}','{{reinspecao[3]}}','{{reinspecao[4]}}','{{reinspecao[5]}}')">
+                                                    style="cursor: pointer;" onclick="modalTanqueReinspecao('{{reinspecao[0]}}','{{reinspecao[8]}}','{{reinspecao[3]}}','{{reinspecao[4]}}','{{reinspecao[5]}}', '{{reinspecao[9]}}')">
                                                     Executar Reteste
                                                 </a>
                                             </div>
@@ -143,11 +143,15 @@
                             </div>
                             <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
                                 <div class="row">
-                                    <div class="col-sm-6 mb-4">
+                                    <div class="col-sm-4 mb-4">
                                         <label>Data da Inspeção</label>
                                         <input type="text" class="form-control" id="data_estanqueidade_tanque" disabled>
                                     </div>
-                                    <div class="col-sm-6 mb-4">
+                                    <div class="col-sm-4 mb-4">
+                                        <label>Data da Carga</label>
+                                        <input type="date" class="form-control" id="data-carga-estanqueidade-tanque" required>
+                                    </div>
+                                    <div class="col-sm-4 mb-4">
                                         <label>Inspetor</label>
                                         <select class="form-control" name="inspetores_estanqueidade_tanque" id="inspetores_estanqueidade_tanque" required>
                                             <option value="" hidden selected disabled></option>
@@ -160,8 +164,6 @@
                                             <option value="Severiano">Severiano</option>
                                         </select>
                                     </div>
-                                </div>
-                                <div class="row">
                                     <div class="col-sm-12 mb-4">
                                         <label>Código</label>
                                         <select class="form-control" name="produto-estanqueidade-tanque" id="produto-estanqueidade-tanque" required>
@@ -341,11 +343,15 @@
                                         <label>Id da Reinspeção</label>
                                         <input type="text" class="form-control" id="id_estanqueidade_tanque_reinspecao" disabled>
                                     </div>
-                                    <div class="col-sm-6 mb-4">
+                                    <div class="col-sm-4 mb-4">
                                         <label>Data da Inspeção</label>
                                         <input type="text" class="form-control" id="data_estanqueidade_tanque_reinspecao" disabled>
                                     </div>
-                                    <div class="col-sm-6 mb-4">
+                                    <div class="col-sm-4 mb-4">
+                                        <label>Data da Carga</label>
+                                        <input type="text" class="form-control" id="data-carga-estanqueidade-tanque-reinspecao" disabled>
+                                    </div>
+                                    <div class="col-sm-4 mb-4">
                                         <label>Inspetor</label>
                                         <select class="form-control" name="inspetores_estanqueidade_tanque" id="inspetores_estanqueidade_tanque_reinspecao">
                                             <option value="" hidden selected disabled></option>

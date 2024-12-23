@@ -1583,7 +1583,8 @@ def envio_inspecao_estanqueidade_tubos_cilindros():
         codigo_split = codigo_completo.split(' - ', 1)
         dados_inspecao_estanqueidade['codigo'] = codigo_split[0].strip()  # Parte antes do '-'
         dados_inspecao_estanqueidade['descricao'] = codigo_split[1].strip() if len(codigo_split) > 1 else ""  # Parte depois do '-'
-
+    
+    dados_inspecao_estanqueidade['data_carga'] = None
     id_inspecao_estanqueidade = classe_inspecao_estanqueidade.inserir_inspecao_estanqueidade(dados_inspecao_estanqueidade)
 
     if 'nao_conformidade' in dados_inspecao_estanqueidade:
@@ -1676,7 +1677,8 @@ def inspecao_estanqueidade_tanque():
             eie.inspetor AS inspetor,
             eie.numero_execucao,
             ie.inspecao,
-            eie.id
+            eie.id,
+            ie.data_carga
         FROM 
             pcp.reinspecao_estanqueidade re
         LEFT JOIN 
@@ -1697,6 +1699,9 @@ def inspecao_estanqueidade_tanque():
 def envio_inspecao_estanqueidade_tanque():
 
     dados_estanqueidade_tanque = request.get_json()
+
+    print(dados_estanqueidade_tanque)
+    print(dados_estanqueidade_tanque['data_carga'])
 
     codigo_split = dados_estanqueidade_tanque['produto'].split(' - ', 1)
     dados_estanqueidade_tanque['codigo'] = codigo_split[0].strip()

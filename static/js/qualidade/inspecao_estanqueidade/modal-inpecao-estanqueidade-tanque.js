@@ -9,11 +9,12 @@ function modalTanque() {
     $('#estanqueidadeTanqueModal').modal('show');
 }
 
-function modalTanqueReinspecao(id_inspecao,id,codigo, descricao, inspetor) {
+function modalTanqueReinspecao(id_inspecao,id,codigo, descricao, inspetor, data_carga) {
     const timeElapsed = Date.now();
     const today = new Date(timeElapsed);
 
     $('#data_estanqueidade_tanque_reinspecao').val(today.toLocaleDateString());
+    $('#data-carga-estanqueidade-tanque-reinspecao').val(formatarDataModalTanque(data_carga));
     $('#id_estanqueidade_tanque_reinspecao').val(id_inspecao);
     $('#produto-estanqueidade-tanque-reinspecao').val(codigo + " - " + descricao);
     $('#inspetores_estanqueidade_tanque_reinspecao').val(inspetor);
@@ -282,4 +283,12 @@ function modalVisualizarCausaEstanqueidadeTanque(items) {
 
     // Exibir o modal
     $("#visualizacaoCausasModal").modal('show');
+}
+
+function formatarDataModalTanque(dataString) {
+    var data = new Date(dataString);
+    var dia = String(data.getDate()).padStart(2, '0');
+    var mes = String(data.getMonth() + 1).padStart(2, '0');
+    var ano = data.getFullYear();
+    return `${dia}/${mes}/${ano}`;
 }

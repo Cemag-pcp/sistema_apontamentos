@@ -26,6 +26,8 @@ $("#reteste_status_estanqueidade").on('change', function() {
                     <option value="Carlos Henrique">Carlos Henrique</option>
                     <option value="Gabriel Florêncio">Gabriel Florêncio</option>
                     <option value="Bruno Sousa">Bruno Sousa</option>
+                    <option value="Gabriel G.">Gabriel G.</option>
+                    <option value="Francisco Paulo">Francisco Paulo</option>
                 </select>
             `);
         } else {
@@ -40,6 +42,9 @@ $("#reteste_status_estanqueidade").on('change', function() {
                     <option value="Leonidas">Leonidas</option>
                     <option value="Marcelo">Marcelo</option>
                     <option value="Severiano">Severiano</option>
+                    <option value="Carlos Henrique">Carlos Henrique</option>
+                    <option value="Bruno">Bruno</option>
+                    <option value="Gabriel G.">Gabriel G.</option>
                 </select>
             `);
         }
@@ -57,6 +62,8 @@ $("#reteste_status_estanqueidade").on('change', function() {
                     <option value="Carlos Henrique">Carlos Henrique</option>
                     <option value="Gabriel Florêncio">Gabriel Florêncio</option>
                     <option value="Bruno Sousa">Bruno Sousa</option>
+                    <option value="Gabriel G.">Gabriel G.</option>
+                    <option value="Francisco Paulo">Francisco Paulo</option>
                 </select>
             `);
         } else {
@@ -71,6 +78,9 @@ $("#reteste_status_estanqueidade").on('change', function() {
                     <option value="Leonidas">Leonidas</option>
                     <option value="Marcelo">Marcelo</option>
                     <option value="Severiano">Severiano</option>
+                    <option value="Carlos Henrique">Carlos Henrique</option>
+                    <option value="Bruno">Bruno</option>
+                    <option value="Gabriel G.">Gabriel G.</option>
                 </select>
             `);
         }

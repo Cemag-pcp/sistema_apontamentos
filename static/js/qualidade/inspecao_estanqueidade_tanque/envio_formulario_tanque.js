@@ -18,6 +18,7 @@ form.addEventListener('submit', async (event) => {
     // Capturar os dados do formulário
     const data = {
         tipo_inspecao: "Tanques",
+        data_carga: document.getElementById('data-carga-estanqueidade-tanque').value,
         inspetor: document.getElementById('inspetores_estanqueidade_tanque').value,
         produto: document.getElementById('produto-estanqueidade-tanque').value,
         testes: {
