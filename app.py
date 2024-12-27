@@ -4,6 +4,7 @@ from Classes.inspecao import Inspecao
 from Classes.inspecaoEstanqueidade import InspecaoEstanqueidade
 from Classes.DashboardInspecao import DashboardInspecao
 import time
+from datetime import datetime, time
 import uuid
 import datetime
 import psycopg2  # pip install psycopg2
@@ -1071,7 +1072,7 @@ def modal_historico_estanqueidade():
                         ei.id AS execucao_id,
                         ie.id AS inspecao_id,
                         re.causa,
-                        re.motivo,
+                        ei.motivo,
                         ei.ficha,
                         re.foto_da_causa,
                         re.quantidade
@@ -1576,8 +1577,6 @@ def envio_inspecao_estanqueidade_tubos_cilindros():
 
     dados_inspecao_estanqueidade = request.get_json()
 
-    print(dados_inspecao_estanqueidade)
-
     if 'codigo' in dados_inspecao_estanqueidade:
         codigo_completo = dados_inspecao_estanqueidade['codigo']
         codigo_split = codigo_completo.split(' - ', 1)
@@ -1585,6 +1584,7 @@ def envio_inspecao_estanqueidade_tubos_cilindros():
         dados_inspecao_estanqueidade['descricao'] = codigo_split[1].strip() if len(codigo_split) > 1 else ""  # Parte depois do '-'
     
     dados_inspecao_estanqueidade['data_carga'] = None
+    
     id_inspecao_estanqueidade = classe_inspecao_estanqueidade.inserir_inspecao_estanqueidade(dados_inspecao_estanqueidade)
 
     if 'nao_conformidade' in dados_inspecao_estanqueidade:
@@ -1700,14 +1700,11 @@ def envio_inspecao_estanqueidade_tanque():
 
     dados_estanqueidade_tanque = request.get_json()
 
-    print(dados_estanqueidade_tanque)
-    print(dados_estanqueidade_tanque['data_carga'])
-
     codigo_split = dados_estanqueidade_tanque['produto'].split(' - ', 1)
     dados_estanqueidade_tanque['codigo'] = codigo_split[0].strip()
     dados_estanqueidade_tanque['descricao'] = codigo_split[1].strip() if len(codigo_split) > 1 else ""
 
-    list_tanques = ['032591 - TANQUE SIMPLES 6500L M22','032770 - TANQUE SIMPLES 4300L M22']
+    list_tanques = ["035940 - FTC4300R", "032727 - FTC6500 M22"]
 
     if dados_estanqueidade_tanque['produto'] in list_tanques:
         primeiro_teste = dados_estanqueidade_tanque['testes']['parte_inferior']
@@ -2108,8 +2105,13 @@ def dashboard_solda():
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         # Convert the dates to datetime objects
-        start_date = datetime.strptime(start_date, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+        end_date = datetime.combine(end_date, time(23, 59, 59))
+
+        # Se você quiser também garantir que start_date tenha a hora 00:00:00 (início do dia):
+        start_date = datetime.combine(start_date, time(0, 0, 0))
 
         # Fetch data based on the provided dates
         dash = DashboardInspecao(cur, start_date, end_date)
@@ -2164,9 +2166,9 @@ def dashboard_solda():
 
         dado = {
             "ano_mes": [item[0] for item in dados_dash_pintura],
-            "num_pecas_produzidas": [item[1] for item in dados_dash_pintura],
-            "num_inspecoes": [item[2] for item in dados_dash_pintura],
-            "total_nao_conformidades": [item[3] for item in dados_dash_pintura],
+            "num_pecas_produzidas": [float(item[1]) for item in dados_dash_pintura],
+            "num_inspecoes": [float(item[2]) for item in dados_dash_pintura],
+            "total_nao_conformidades": [float(item[3]) for item in dados_dash_pintura],
             "porcentagem_inspecao": [float(item[4]) for item in dados_dash_pintura],
             "porcentagem_nao_conformidades": [float(item[5]) for item in dados_dash_pintura]
         }
