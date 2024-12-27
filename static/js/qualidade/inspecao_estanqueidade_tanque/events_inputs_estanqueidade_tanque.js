@@ -2,9 +2,10 @@ $("#produto-estanqueidade-tanque").on("change",function() {
 
     let codigoTanque = $(this).val();
 
+    // Campo para 4300 e 6500
     let listaCodigosTanque = [
-        "032591 - TANQUE SIMPLES 6500L M22",
-        "032770 - TANQUE SIMPLES 4300L M22"
+        "035940 - FTC4300R",
+        "032727 - FTC6500 M22"
     ];
 
     if (listaCodigosTanque.includes(codigoTanque)) {

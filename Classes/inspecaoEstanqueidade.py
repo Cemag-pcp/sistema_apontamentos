@@ -149,15 +149,14 @@ class InspecaoEstanqueidade:
                 for causa in dados_reteste_estanqueidade['causas']:
                     sql = """
                     INSERT INTO pcp.reteste_estanqueidade 
-                    (causa, execucoes_inspecao_estanqueidade_id, foto_da_causa, motivo, quantidade) 
-                    VALUES (%s, %s, %s, %s, %s)
+                    (causa, execucoes_inspecao_estanqueidade_id, foto_da_causa, quantidade) 
+                    VALUES (%s, %s, %s, %s)
                     """
                     foto_da_causa = causa['arquivos'][0] if causa['arquivos'] else None
                     values = (
                         causa['causa'],  # Causa
                         ids_estanqueidade['id_execucoes_inspecao_estanqueidade'],  # ID relacionado
                         foto_da_causa,  # Arquivo (foto da causa)
-                        dados_reteste_estanqueidade['motivo'],  # Motivo geral
                         causa['quantidade']  # Quantidade relacionada à causa
                     )
 

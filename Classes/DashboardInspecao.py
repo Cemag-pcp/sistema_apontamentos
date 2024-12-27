@@ -191,53 +191,73 @@ class DashboardInspecao:
     
     def dadosSolda(self,cur):
         query_dash_solda = f"""
-        WITH pecas_inspecionadas AS (
+            WITH pecas_inspecionadas AS (
+                SELECT 
+                    TO_CHAR(inspecao.data_finalizada, 'YYYY-Month') AS ano_mes,
+                    EXTRACT(MONTH FROM inspecao.data_finalizada) AS mes,
+                    EXTRACT(YEAR FROM inspecao.data_finalizada) AS ano,
+                    SUM(CASE 
+                        WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.nao_conformidades 
+                        ELSE 0 
+                    END) AS total_nao_conformidades,
+                    SUM(CASE 
+                        WHEN inspecionadas.num_inspecao = 0 AND inspecionadas.setor IN ('Solda', 'Solda - Cilindro', 'Solda - Tubo') THEN 
+                            inspecionadas.total_conformidades + inspecionadas.nao_conformidades
+                        ELSE 0 
+                    END) AS num_inspecoes
+                FROM pcp.pecas_inspecionadas AS inspecionadas
+                LEFT JOIN pcp.pecas_inspecao AS inspecao ON inspecao.id::VARCHAR = inspecionadas.id_inspecao
+                WHERE inspecionadas.setor IN ('Solda', 'Solda - Cilindro', 'Solda - Tubo')
+                AND inspecao.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                GROUP BY TO_CHAR(inspecao.data_finalizada, 'YYYY-Month'), EXTRACT(MONTH FROM inspecao.data_finalizada), EXTRACT(YEAR FROM inspecao.data_finalizada)
+            ),
+            pecas_inspecao AS (
+                SELECT 
+                    EXTRACT(MONTH FROM data_finalizada) AS mes,
+                    EXTRACT(YEAR FROM data_finalizada) AS ano,
+                    SUM(qt_apontada) FILTER (WHERE setor IN ('Solda', 'Solda - Cilindro', 'Solda - Tubo')) AS num_pecas_produzidas
+                FROM pcp.pecas_inspecao
+                WHERE setor IN ('Solda', 'Solda - Cilindro', 'Solda - Tubo')
+                AND data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
+                GROUP BY EXTRACT(MONTH FROM data_finalizada), EXTRACT(YEAR FROM data_finalizada)
+            ),
+            estanqueidade_inspecionadas AS (
+                SELECT 
+                    TO_CHAR(ins.data, 'YYYY-Month') AS ano_mes,
+                    EXTRACT(MONTH FROM ins.data) AS mes,
+                    EXTRACT(YEAR FROM ins.data) AS ano,
+                    COALESCE(SUM(exec.quantidade_inspecionada),0) AS quantidade_inspecionada,
+                    SUM(exec.nao_conforme + exec.nao_conforme_refugo) AS total_nao_conformidades,
+                    SUM(exec.quantidade_inspecionada) AS num_inspecoes
+                FROM pcp.inspecao_estanqueidade ins
+                LEFT JOIN pcp.execucoes_inspecao_estanqueidade exec ON ins.id = exec.inspecao_id
+                WHERE ins.inspecao IN ('Tubos', 'Cilindros')
+                AND ins.data BETWEEN '{self.data_inicial}' AND '{self.data_final}' and exec.numero_execucao = 0
+                GROUP BY TO_CHAR(ins.data, 'YYYY-Month'), EXTRACT(MONTH FROM ins.data), EXTRACT(YEAR FROM ins.data)
+            )
             SELECT 
-                TO_CHAR(inspecao.data_finalizada, 'YYYY-Month') AS ano_mes,
-                EXTRACT(MONTH FROM inspecao.data_finalizada) AS mes,
-                EXTRACT(YEAR FROM inspecao.data_finalizada) AS ano,
-                SUM(CASE WHEN inspecionadas.num_inspecao = 0 THEN inspecionadas.nao_conformidades ELSE 0 END) AS total_nao_conformidades,
-                SUM(CASE 
-                    WHEN inspecionadas.num_inspecao = 0 AND inspecionadas.setor = 'Solda' THEN inspecionadas.total_conformidades + inspecionadas.nao_conformidades
-                    WHEN inspecionadas.num_inspecao = 0 AND (inspecionadas.setor = 'Solda - Cilindro' OR inspecionadas.setor = 'Solda - Tubo') THEN inspecao.qt_inspecionada
-                    ELSE 0 
-                END) AS num_inspecoes
-            FROM pcp.pecas_inspecionadas AS inspecionadas
-            LEFT JOIN pcp.pecas_inspecao AS inspecao ON inspecao.id::VARCHAR = inspecionadas.id_inspecao
-            WHERE (inspecionadas.setor = 'Solda' OR inspecionadas.setor = 'Solda - Cilindro' OR inspecionadas.setor = 'Solda - Tubo')
-            AND inspecao.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-            GROUP BY TO_CHAR(inspecao.data_finalizada, 'YYYY-Month'), EXTRACT(MONTH FROM inspecao.data_finalizada), EXTRACT(YEAR FROM inspecao.data_finalizada)
-        ),
-        pecas_inspecao AS (
-            SELECT 
-                EXTRACT(MONTH FROM data_finalizada) AS mes,
-                EXTRACT(YEAR FROM data_finalizada) AS ano,
-                SUM(qt_apontada) FILTER (WHERE setor = 'Solda' OR setor = 'Solda - Cilindro' OR setor = 'Solda - Tubo') AS num_pecas_produzidas
-            FROM pcp.pecas_inspecao
-            WHERE (setor = 'Solda' OR setor = 'Solda - Cilindro' OR setor = 'Solda - Tubo')
-            AND data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-            GROUP BY EXTRACT(MONTH FROM data_finalizada), EXTRACT(YEAR FROM data_finalizada)
-        )
-        SELECT 
-            COALESCE(pi2.ano_mes, TO_CHAR(TO_DATE(pi.ano || '-' || pi.mes, 'YYYY-MM'), 'YYYY-Month' || '❌')) AS ano_mes,
-            COALESCE(pi.num_pecas_produzidas, 0) AS num_pecas_produzidas,
-            COALESCE(pi2.num_inspecoes, 0) AS num_inspecoes,
-            COALESCE(pi2.total_nao_conformidades, 0) AS total_nao_conformidades,
-            COALESCE(
-                ROUND(
-                    100.0 * COALESCE(pi2.num_inspecoes, 0) / NULLIF(COALESCE(pi.num_pecas_produzidas, 0), 0), 2
-                ), 0
-            ) AS porcentagem_inspecao,
-            COALESCE(
-                ROUND(
-                    100.0 * COALESCE(pi2.total_nao_conformidades, 0) / NULLIF(COALESCE(pi2.num_inspecoes, 0), 0), 2
-                ), 0
-            ) AS porcentagem_nao_conformidades
-        FROM pecas_inspecionadas pi2
-        FULL OUTER JOIN pecas_inspecao pi
-        ON pi2.mes = pi.mes AND pi2.ano = pi.ano
-        ORDER BY COALESCE(pi2.ano, pi.ano), COALESCE(pi2.mes, pi.mes);
-        """
+                TO_CHAR(TO_DATE(COALESCE(pi.ano, ei.ano) || '-' || COALESCE(pi.mes, ei.mes), 'YYYY-MM'), 'YYYY-Month') AS ano_mes,
+                COALESCE(SUM(pi.num_pecas_produzidas + ei.quantidade_inspecionada), SUM(pi.num_pecas_produzidas), 0) AS num_pecas_produzidas,
+                COALESCE(SUM(pi2.num_inspecoes + ei.num_inspecoes), SUM(pi2.num_inspecoes), 0) AS num_inspecoes,
+                COALESCE(SUM(pi2.total_nao_conformidades + ei.total_nao_conformidades), SUM(pi2.total_nao_conformidades), 0) AS total_nao_conformidades_totais,
+                COALESCE(
+                    ROUND(
+                        100.0 * COALESCE(SUM(pi2.num_inspecoes + ei.num_inspecoes), SUM(pi2.num_inspecoes), 0) / COALESCE(SUM(pi.num_pecas_produzidas + ei.quantidade_inspecionada), SUM(pi.num_pecas_produzidas), 0), 2
+                    ), 0
+                ) AS porcentagem_inspecao,
+                COALESCE(
+                    ROUND(
+                        100.0 * COALESCE(SUM(pi2.total_nao_conformidades + ei.total_nao_conformidades), SUM(pi2.total_nao_conformidades), 0) / COALESCE(SUM(pi2.num_inspecoes + ei.num_inspecoes), SUM(pi2.num_inspecoes), 0), 2
+                    ), 0
+                ) AS porcentagem_nao_conformidades
+            FROM pecas_inspecionadas pi2
+            FULL OUTER JOIN pecas_inspecao pi
+                ON pi2.mes = pi.mes AND pi2.ano = pi.ano
+            FULL OUTER JOIN estanqueidade_inspecionadas ei
+                ON pi2.mes = ei.mes AND pi2.ano = ei.ano
+            GROUP BY pi.ano, pi.mes, ei.ano, ei.mes
+            """
+        
         cur.execute(query_dash_solda)
         return cur.fetchall()
 
@@ -282,26 +302,27 @@ class DashboardInspecao:
         soma_total = cur.fetchone()
 
         query_tubos = f"""
-                    SELECT ano_mes,
-                            conjunto,
+                        SELECT ano_mes,
                             causa,
-                            origem,
-                            SUM(total_quantidade) AS total_quantidade
+                            codigo_descricao,
+                            motivo,
+                            quantidade as total_quantidade
                         FROM (
-                            SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
-                                            pi.codigo || '-' || pi.peca AS conjunto,
-                                            foto.id,
-                                            foto.causa,
-                                            inspecionadas.origem,
-                                            foto.quantidade::INTEGER AS total_quantidade
-                            FROM pcp.inspecao_foto foto
-                            LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
-                            LEFT JOIN pcp.pecas_inspecionadas inspecionadas ON pi.id::VARCHAR = inspecionadas.id_inspecao
-                            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-                            AND foto.num_inspecao = 0
-                            AND pi.setor = 'Solda - Tubo'
+                            SELECT TO_CHAR(ins.data, 'YYYY-Month') AS ano_mes,
+                                ins.codigo || ' - ' || ins.descricao AS codigo_descricao,
+                                re.causa,
+                                exec.motivo,
+                                exec.quantidade_inspecionada,
+                                re.quantidade
+                            FROM pcp.inspecao_estanqueidade ins
+                            LEFT JOIN pcp.execucoes_inspecao_estanqueidade exec ON ins.id = exec.inspecao_id
+                            LEFT JOIN pcp.reteste_estanqueidade re ON exec.id = re.execucoes_inspecao_estanqueidade_id
+                            WHERE ins.data BETWEEN '{self.data_inicial}' and '{self.data_final}'
+                            and ins.inspecao IN ('Tubos')
+                            and     exec.numero_execucao = 0
+                            and exec.nao_conforme + exec.nao_conforme_refugo <> 0
                         ) AS subquery
-                        GROUP BY ano_mes, conjunto, causa, origem
+                        GROUP BY ano_mes, codigo_descricao, motivo, causa, quantidade
                         ORDER BY ano_mes DESC;
                     """
         
@@ -309,16 +330,17 @@ class DashboardInspecao:
         tubos = cur.fetchall()
 
         query_tubos_soma_total = f"""
-            SELECT COALESCE(SUM(total_quantidade),0) as soma_total
+            SELECT COALESCE(SUM(total_quantidade), 0) AS soma_total
             FROM (
-                SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
-                                foto.id,
-                                foto.causa,
-                                foto.quantidade::INTEGER as total_quantidade
-                FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
-                WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-                AND foto.num_inspecao = 0 AND pi.setor = 'Solda - Tubo'
+                SELECT TO_CHAR(ins.data, 'YYYY-Month') AS ano_mes,
+                    ins.codigo || ' - ' || ins.descricao AS codigo_descricao,
+                    exec.nao_conforme + exec.nao_conforme_refugo AS total_quantidade
+                FROM pcp.inspecao_estanqueidade ins
+                LEFT JOIN pcp.execucoes_inspecao_estanqueidade exec ON ins.id = exec.inspecao_id
+                WHERE ins.data BETWEEN '{self.data_inicial}' and '{self.data_final}' 
+                AND ins.inspecao IN ('Tubos')
+                AND exec.numero_execucao = 0
+                AND exec.nao_conforme + exec.nao_conforme_refugo <> 0
             ) AS subquery;
         """
 
@@ -327,41 +349,43 @@ class DashboardInspecao:
 
         query_cilindro = f"""
                     SELECT ano_mes,
-                            conjunto,
                             causa,
-                            origem,
-                            SUM(total_quantidade) AS total_quantidade
+                            codigo_descricao,
+                            motivo,
+                            quantidade as total_quantidade
                         FROM (
-                            SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
-                                            pi.codigo || '-' || pi.peca AS conjunto,
-                                            foto.id,
-                                            foto.causa,
-                                            inspecionadas.origem,
-                                            foto.quantidade::INTEGER AS total_quantidade
-                            FROM pcp.inspecao_foto foto
-                            LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
-                            LEFT JOIN pcp.pecas_inspecionadas inspecionadas ON pi.id::VARCHAR = inspecionadas.id_inspecao
-                            WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-                            AND foto.num_inspecao = 0
-                            AND pi.setor = 'Solda - Cilindro'
+                            SELECT TO_CHAR(ins.data, 'YYYY-Month') AS ano_mes,
+                                ins.codigo || ' - ' || ins.descricao AS codigo_descricao,
+                                re.causa,
+                                exec.motivo,
+                                exec.quantidade_inspecionada,
+                                re.quantidade
+                            FROM pcp.inspecao_estanqueidade ins
+                            LEFT JOIN pcp.execucoes_inspecao_estanqueidade exec ON ins.id = exec.inspecao_id
+                            LEFT JOIN pcp.reteste_estanqueidade re ON exec.id = re.execucoes_inspecao_estanqueidade_id
+                            WHERE ins.data BETWEEN '{self.data_inicial}' and '{self.data_final}'
+                            and ins.inspecao IN ('Cilindros')
+                            and     exec.numero_execucao = 0
+                            and exec.nao_conforme + exec.nao_conforme_refugo <> 0
                         ) AS subquery
-                        GROUP BY ano_mes, conjunto, causa, origem
+                        GROUP BY ano_mes, codigo_descricao, motivo, causa, quantidade
                         ORDER BY ano_mes DESC;"""
         
         cur.execute(query_cilindro)
         cilindro = cur.fetchall()
 
         query_cilindro_soma_total = f"""
-            SELECT COALESCE(SUM(total_quantidade),0) as soma_total
+            SELECT COALESCE(SUM(total_quantidade), 0) AS soma_total
             FROM (
-                SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
-                                foto.id,
-                                foto.causa,
-                                foto.quantidade::INTEGER as total_quantidade
-                FROM pcp.inspecao_foto foto
-                LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
-                WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
-                AND foto.num_inspecao = 0 AND pi.setor = 'Solda - Cilindro'
+                SELECT TO_CHAR(ins.data, 'YYYY-Month') AS ano_mes,
+                    ins.codigo || ' - ' || ins.descricao AS codigo_descricao,
+                    exec.nao_conforme + exec.nao_conforme_refugo AS total_quantidade
+                FROM pcp.inspecao_estanqueidade ins
+                LEFT JOIN pcp.execucoes_inspecao_estanqueidade exec ON ins.id = exec.inspecao_id
+                WHERE ins.data BETWEEN '{self.data_inicial}' and '{self.data_final}' 
+                AND ins.inspecao IN ('Cilindros')
+                AND exec.numero_execucao = 0
+                AND exec.nao_conforme + exec.nao_conforme_refugo <> 0
             ) AS subquery;
         """
 
