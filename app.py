@@ -5344,20 +5344,26 @@ def carretas_planilha_carga(datainicio, datafim,consumo=False):
     filtrar_data = data[(data['PED_PREVISAOEMISSAODOC'] >= pd.to_datetime(datainicio)) &
                          (data['PED_PREVISAOEMISSAODOC'] <= pd.to_datetime(datafim))]
 
+    cores_remover = ['CO', 'VM', 'LC', 'AM', 'AN', 'VJ', 'AV']
+
     if consumo:
-        filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE','PED_NUMEROSERIE','PED_NUCLEO.CODIGO']]
+        filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','PED_RECURSO.CODIGO','PED_QUANTIDADE','PED_NUMEROSERIE','PED_NUCLEO.CODIGO']]
     else:
-        filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE']]
+        filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','PED_RECURSO.CODIGO','PED_QUANTIDADE']]
+    
+    filtrar_data_carreta['PED_RECURSO.CODIGO'] = filtrar_data_carreta['PED_RECURSO.CODIGO'].apply(
+        lambda codigo: codigo[:-2].strip() if codigo[-2:] in cores_remover else codigo
+    )
 
     filtrar_data_carreta['PED_QUANTIDADE'] = filtrar_data_carreta['PED_QUANTIDADE'].apply(lambda x: x.replace('.',"").replace(",","."))
     filtrar_data_carreta['PED_QUANTIDADE'] = filtrar_data_carreta['PED_QUANTIDADE'].astype(float)
 
     if not consumo:
-        result = filtrar_data_carreta.groupby(['PED_PREVISAOEMISSAODOC', 'Carreta Trat'], as_index=False)['PED_QUANTIDADE'].sum()
+        result = filtrar_data_carreta.groupby(['PED_PREVISAOEMISSAODOC', 'PED_RECURSO.CODIGO'], as_index=False)['PED_QUANTIDADE'].sum()
     else:
         result = filtrar_data_carreta
     
-    dados_lista = result[['Carreta Trat']].values.tolist()
+    dados_lista = result[['PED_RECURSO.CODIGO']].values.tolist()
 
     # print("### BASE CARRETAS ###")
     # print(result)
@@ -5434,7 +5440,7 @@ def consuta_carreta_reuniao():
 
     dados_explodido = dados_explodido[dados_explodido['PED_NUCLEO.CODIGO'] == 'Almox Expedição']
 
-    dados_explodido = dados_explodido[['PED_PREVISAOEMISSAODOC','Carreta Trat','PED_QUANTIDADE','PED_NUMEROSERIE']]
+    dados_explodido = dados_explodido[['PED_PREVISAOEMISSAODOC','PED_RECURSO.CODIGO','PED_QUANTIDADE','PED_NUMEROSERIE']]
 
     dados_explodido['PED_PREVISAOEMISSAODOC'] = pd.to_datetime(dados_explodido['PED_PREVISAOEMISSAODOC'])
 
@@ -5477,9 +5483,9 @@ def consuta_carreta_reuniao():
     # Cria o DataFrame e adiciona as colunas, transformando o índice em coluna
     df_carretas = pd.DataFrame(linhas_expandidas).assign(**{col: '' for col in colunas})
     
-    df_carretas = df_carretas.sort_values(by=['PED_PREVISAOEMISSAODOC','Carreta Trat'], ascending=[True, True])
+    df_carretas = df_carretas.sort_values(by=['PED_PREVISAOEMISSAODOC','PED_RECURSO.CODIGO'], ascending=[True, True])
     
-    df_carretas = df_carretas.rename(columns={'Carreta Trat':'carreta','PED_QUANTIDADE':'quantidade','PED_PREVISAOEMISSAODOC':'data',
+    df_carretas = df_carretas.rename(columns={'PED_RECURSO.CODIGO':'carreta','PED_QUANTIDADE':'quantidade','PED_PREVISAOEMISSAODOC':'data',
                                               'PED_NUMEROSERIE':'id_carreta'})
 
     df_agrupado_carretas = df_carretas.groupby('carreta').agg({'quantidade': 'sum'}).reset_index()

@@ -529,8 +529,6 @@ def simular_consumo_unitario(df_carretas,df_necessidade,df_necessidade_pintura,d
                         # Inicializar o dicionário para o processo, se não existir
                         if processo not in faltas_por_processo:
                             faltas_por_processo[processo] = {}
-                        if processo == 'Chassi':
-                            print(resultado_agrupado)
                         for idx2, result in resultado_agrupado.iterrows():
                             codigo_peca = result['codigo']
                             conjunto = result['conjunto']
