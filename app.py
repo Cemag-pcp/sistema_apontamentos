@@ -2827,13 +2827,12 @@ def finalizar_peca_em_processo_montagem():
     last_id_montagem = cur.fetchone()
     last_id_montagem = last_id_montagem[0]
 
-    query_inspecao = """INSERT INTO pcp.pecas_inspecao (fk_ordem,data_finalizada,codigo,peca,qt_apontada,setor,celula)
-                    VALUES (%s,%s,%s,%s,%s,'Solda',%s)
-                    """
-
-    cur.execute(query_inspecao, (last_id_montagem, data_finalizacao, codigo, descricao, inputQuantidadeRealizada, celula))
-
-    conn.commit()
+    if celula != "EIXO SIMPLES":
+        query_inspecao = """INSERT INTO pcp.pecas_inspecao (fk_ordem,data_finalizada,codigo,peca,qt_apontada,setor,celula)
+                        VALUES (%s,%s,%s,%s,%s,'Solda',%s)
+                        """
+        cur.execute(query_inspecao, (last_id_montagem, data_finalizacao, codigo, descricao, inputQuantidadeRealizada, celula))
+        conn.commit()
 
     return 'sucess'
 
