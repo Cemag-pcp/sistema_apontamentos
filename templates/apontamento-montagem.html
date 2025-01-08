@@ -574,8 +574,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="btnFinalizarOrdem" type="button"
-                        class="btn btn-primary">Confirmar</button>
+                    <button class="btn btn-primary" id="btnFinalizarOrdem" type="button">
+                        <span id="spinner-confirm" class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+                        <span id="spinner-button-text" role="status">Confirmar</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1744,6 +1746,11 @@
         $(document).ready(function () {
             $('#btnFinalizarOrdem').on('click', function () {
 
+                showLoading();
+
+                this.disabled = true;
+                document.getElementById("spinner-confirm").classList.remove('d-none');
+                document.getElementById("spinner-button-text").textContent = "Confirmar...";
 
                 let pecaFinalizada = $('#nomePecaApontada').val();
                 let quantidadePlanejada = $('#inputQuantidadePlanejada').val();
@@ -1773,11 +1780,13 @@
 
                 if (inputQuantidadeRealizada === '' || parseInt(inputQuantidadeRealizada) > parseInt(quantidadePlanejada)) {
                     showAndHideAlert('Por favor informe a quantidade correta.', 2000);
+                    hideLoading()
                     return;
                 };
 
                 if (operadorInputModal_1 === '') {
                     showAndHideAlert('Por favor informar o operador.', 2000);
+                    hideLoading()
                     return;
                 }
 
@@ -1785,8 +1794,6 @@
                     // Encontra o card com o data-id correspondente e o remove do DOM
                     $(`[data-id="${idPecaEmProcesso}"]`).css('display','none');
                 }
-                showAndHideSuccessAlert('Enviado!', 2000);
-                $('#modalExecucaoApontamento').modal('hide');
         
                 $.ajax({
                     type: 'POST',
@@ -1794,7 +1801,6 @@
                     contentType: 'application/json',  // Define o tipo de conteúdo como JSON
                     data: JSON.stringify(dados),
                     success: function (data) {
-                        hideLoading();
                         showAndHideSuccessAlert('Salvo.', 2000);
                         location.reload();
                         chamarAPI();
@@ -1802,7 +1808,6 @@
                     },
                     error: function (error) {
                         console.error('Erro na solicitação POST:', error);
-                        hideLoading();
                         location.reload();
                     }
                 });

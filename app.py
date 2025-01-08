@@ -2688,10 +2688,14 @@ def api_pecas_em_processo_montagem():
     codigo = data['peca']
     descricao = data['descricao']
 
+    print(data['dataCarga'])
+
     try:
-        data_carga = pd.to_datetime(data['dataCarga'], format="%d/%m/%Y")
+        data_carga = pd.to_datetime(data['dataCarga'], format="%d/%m/%Y").strftime("%Y-%m-%d")
     except ValueError:
         data_carga = data['dataCarga']
+    
+    print(data_carga)
 
     celula = data['celula']
     qt_planejada = data['qtPlanejada']
@@ -2780,61 +2784,103 @@ def finalizar_peca_em_processo_montagem():
     """
     Finalizar ordem de serviço
     """
-
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     data = request.get_json()
 
+    # Validating input data
+    required_fields = [
+        'idPecaEmProcesso', 'codigo', 'qtdePlanejada', 'codificacao',
+        'celula', 'textAreaObservacao', 'dataHoraInicio',
+        'operadorInputModal_1', 'inputQuantidadeRealizada',
+        'dataCarga', 'origem'
+    ]
+    missing_fields = [field for field in required_fields if field not in data]
+    if missing_fields:
+        return jsonify({"error": f"Missing fields: {', '.join(missing_fields)}"}), 400
+
     agora = datetime.now()
-    query_update = """update pcp.tb_pecas_em_processo set data_fim = %s where id = %s"""
-    cur.execute(query_update, (agora, data['idPecaEmProcesso']))
-    conn.commit()
+    data_fim = agora.strftime("%Y-%m-%d %H:%M:%S")
+    data_finalizacao = agora.date().strftime("%Y-%m-%d")
+    dataHoraInicio = pd.to_datetime(data['dataHoraInicio']).strftime("%Y-%m-%d %H:%M:%S")
+    dataCarga = pd.to_datetime(data['dataCarga']).strftime("%Y-%m-%d")
 
-    id = data['idPecaEmProcesso']
-    codigo = data['codigo'].split(' - ')[0]
-    descricao = data['codigo'].split(' - ')[1]
-    qt_planejada = data['qtdePlanejada']
-    codificacao = data['codificacao']
-    celula = data['celula']
-    textAreaObservacao = data['textAreaObservacao']
-    dataHoraInicio = pd.to_datetime(
-        data['dataHoraInicio']).strftime("%Y-%m-%d %H:%M:%S")
-    operadorInputModal_1 = data['operadorInputModal_1']
-    inputQuantidadeRealizada = data['inputQuantidadeRealizada']
-    dataCarga = data['dataCarga']
-    data_finalizacao = datetime.now().date().strftime("%Y-%m-%d")
-    origem = data['origem']
+    print("data_fim")
+    print(data_fim)
+    print("data_finalizacao")
+    print(data_finalizacao)
+    print("dataHoraInicio")
+    print(dataHoraInicio)
+    print("dataCarga")
+    print(dataCarga)
 
-    query = """ 
-            INSERT INTO pcp.ordens_montagem (celula,codigo,peca,qt_apontada,data_carga,data_finalizacao,operador,observacao,codificacao,origem,data_hora_inicio)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """
+    print("data['celula']")
+    print(data['celula'])
+    print("data['codigo'].split(' - ')[0]")
+    print(data['codigo'].split(' - ')[0])
+    print("data['codigo'].split(' - ')[1]")
+    print(data['codigo'].split(' - ')[1])
+    print("data['inputQuantidadeRealizada']")
+    print(data['inputQuantidadeRealizada'])
+    print("dataCarga")
+    print(dataCarga)
+    print("data_finalizacao")
+    print(data_finalizacao)
+    print("data['operadorInputModal_1']")
+    print(data['operadorInputModal_1'])
+    print("data['textAreaObservacao']")
+    print(data['textAreaObservacao'])
+    print("data['codificacao']")
+    print(data['codificacao'])
+    print("data['origem']")
+    print(data['origem'])
+    print("dataHoraInicio")
+    print(dataHoraInicio)
 
-    cur.execute(query, (celula, codigo, descricao, inputQuantidadeRealizada, dataCarga,
-                data_finalizacao, operadorInputModal_1, textAreaObservacao, codificacao, origem, dataHoraInicio))
-    
-    conn.commit()
-    
-    trazendo_id = """SELECT id
-                        FROM pcp.ordens_montagem
-                    ORDER BY id DESC
-                    LIMIT 1"""
-    
-    cur.execute(trazendo_id)
+    try:
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    last_id_montagem = cur.fetchone()
-    last_id_montagem = last_id_montagem[0]
+        # Updating the process
+        cur.execute("""
+            UPDATE pcp.tb_pecas_em_processo 
+            SET data_fim = %s 
+            WHERE id = %s
+        """, (data_fim, data['idPecaEmProcesso']))
 
-    if celula != "EIXO SIMPLES":
-        query_inspecao = """INSERT INTO pcp.pecas_inspecao (fk_ordem,data_finalizada,codigo,peca,qt_apontada,setor,celula)
-                        VALUES (%s,%s,%s,%s,%s,'Solda',%s)
-                        """
-        cur.execute(query_inspecao, (last_id_montagem, data_finalizacao, codigo, descricao, inputQuantidadeRealizada, celula))
+        # Inserting into ordens_montagem and getting the inserted ID
+        cur.execute("""
+            INSERT INTO pcp.ordens_montagem 
+            (celula, codigo, peca, qt_apontada, data_carga, data_finalizacao, operador, observacao, codificacao, origem, data_hora_inicio)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (
+            data['celula'], data['codigo'].split(' - ')[0], data['codigo'].split(' - ')[1],
+            data['inputQuantidadeRealizada'], dataCarga, data_finalizacao,
+            data['operadorInputModal_1'], data['textAreaObservacao'],
+            data['codificacao'], data['origem'], dataHoraInicio
+        ))
+
+        last_id_montagem = cur.fetchone()['id']
+
+        print("last_id_montagem")
+        print(last_id_montagem)
+
+        # Conditional insert into pecas_inspecao
+        if data['celula'] != "EIXO SIMPLES":
+            cur.execute("""
+                INSERT INTO pcp.pecas_inspecao 
+                (fk_ordem, data_finalizada, codigo, peca, qt_apontada, setor, celula)
+                VALUES (%s, %s, %s, %s, %s, 'Solda', %s)
+            """, (
+                last_id_montagem, data_finalizacao,
+                data['codigo'].split(' - ')[0], data['codigo'].split(' - ')[1],
+                data['inputQuantidadeRealizada'], data['celula']
+            ))
+
         conn.commit()
+        return jsonify({"message": "Success", "id": last_id_montagem}), 200
 
-    return 'sucess'
+    except (psycopg2.DatabaseError, Exception) as error:
+        return jsonify({"error": str(error)}), 500
 
 @app.route("/api/pecas-interrompida/montagem", methods=['POST'])
 def api_pecas_interrompida_montagem():
@@ -2842,48 +2888,59 @@ def api_pecas_interrompida_montagem():
     rota para enviar peças para status "interrompida"
     """
 
-    data_request = request.json
+    try:
+        data_request = request.get_json()
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        agora = datetime.now()
 
-    agora = datetime.now()
-    query_update = """update pcp.tb_pecas_em_processo set data_fim = %s where id = %s"""
-    cur.execute(query_update, (agora, data_request['id']))
+        # Establishing database connection
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    conn.commit()
+        # Updating process status to 'interrompida'
+        cur.execute("""
+            UPDATE pcp.tb_pecas_em_processo 
+            SET data_fim = %s 
+            WHERE id = %s
+        """, (agora, data_request['id']))
 
-    query_consulta = """select * from pcp.tb_pecas_em_processo where id = %s"""
-    cur.execute(query_consulta, (data_request['id'],))
-    data = cur.fetchall()
+        # Fetching updated process data
+        cur.execute("""
+            SELECT * 
+            FROM pcp.tb_pecas_em_processo 
+            WHERE id = %s
+        """, (data_request['id'],))
+        data = cur.fetchone()
 
-    print(data)
-    data = data[0]
-    print(data)
+        if not data:
+            return jsonify({"error": "Peça não encontrada."}), 404
 
-    codigo = data[1]
-    descricao = data[2]
-    codificacao = data[4]
-    data_carga = data[5]
-    setor = 'Montagem'
-    qt_planejada = data[7]
-    celula = data[8]
-    status = 'Interrompida'
-    chave = data[11]
-    motivo = data_request['motivo']
-    origem = data[13]
+        # Extracting relevant data
+        codigo = data['codigo']
+        descricao = data['descricao']
+        codificacao = data['codificacao']
+        data_carga = data['data_carga']
+        setor = 'Montagem'
+        qt_planejada = data['qt_planejada']
+        celula = data['celula']
+        status = 'Interrompida'
+        chave = data['chave']
+        origem = data['origem']
+        motivo = data_request['motivo']
 
-    query = """ 
-            INSERT INTO pcp.tb_pecas_em_processo (codigo,descricao,codificacao,data_carga,setor,qt_planejada,celula,status,chave,motivo_interrompido,origem) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """
+        # Inserting new record with 'interrompida' status
+        cur.execute("""
+            INSERT INTO pcp.tb_pecas_em_processo 
+            (codigo, descricao, codificacao, data_carga, setor, qt_planejada, celula, status, chave, motivo_interrompido, origem)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (codigo, descricao, codificacao, data_carga, setor, qt_planejada, celula, status, chave, motivo, origem))
 
-    cur.execute(query, (codigo, descricao, codificacao, data_carga,
-                setor, qt_planejada, celula, status, chave, motivo, origem))
+        conn.commit()
 
-    conn.commit()
+        return jsonify({"message": "Peça atualizada com sucesso."}), 200
 
-    return 'sucess'
+    except (psycopg2.DatabaseError, Exception) as error:
+        return jsonify({"error": str(error)}), 500
 
 @app.route("/api/pecas-retornou/montagem", methods=['POST'])
 def api_pecas_retornou_montagem():
