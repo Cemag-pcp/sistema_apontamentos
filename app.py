@@ -1295,10 +1295,27 @@ def inspecao_solda():
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query_a_inspecionar = """SELECT *
-                                FROM pcp.pecas_inspecao
-                            WHERE excluidas = 'false' AND setor = 'Solda'
-                            ORDER BY id desc"""
+    query_a_inspecionar = """SELECT 
+                                pi.id, 
+                                pi.data_finalizada, 
+                                pi.codigo, pi.peca, 
+                                pi.cor, pi.qt_apontada, 
+                                pi.tipo, 
+                                pi.setor, 
+                                pi.excluidas, 
+                                pi.celula, 
+                                pi.qt_inspecionada, 
+                                pi.fk_ordem
+                            FROM 
+                                pcp.pecas_inspecao pi
+                            INNER JOIN 
+                                pcp.conjuntos_inspecionados ci
+                            ON 
+                                pi.codigo = ci.codigo
+                            WHERE 
+                                pi.setor = 'Solda'
+                                AND pi.excluidas = false;
+                            """
     
     cur.execute(query_a_inspecionar)
 
