@@ -1,0 +1,193 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Conjuntos Inspecionados de Solda</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+{% endblock %}
+
+
+{% block containerFluid %}
+
+<div class="container-fluid f-14">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h4 mb-0 text-gray-800">Lista de conjuntos inspecionados</h1>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalAddConjunto"><i
+            class="fas fa-plus fa-sm text-white-50"></i> Adicionar novo conjunto</button>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTableConjuntosInspecionadosSolda" width="100%" cellspacing="0">
+                            <thead class="cf">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Código</th>
+                                    <th>Descrição</th>
+                                    <th>Remover</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for conjunto in conjuntos_inspecionados %}
+                                <tr>
+                                    <td data-title="#">{{ conjunto[0] }}</td>
+                                    <td data-title="Data Finalizada">{{ conjunto[1] }}</td>
+                                    <td data-title="Código">{{ conjunto[2] }}</td>
+                                    <td data-title="Exec">
+                                        <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
+                                            <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
+                                                <i class="fa-solid fa-angle-down"></i>
+                                            </a>
+                                            <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                <a class="dropdown-item dropdown_os remover-conjunto" data-id="{{ conjunto[0] }}" style="cursor: pointer;">
+                                                    Remover Conjunto
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" data-backdrop="static" id="modalAddConjunto" tabindex="-1" role="dialog" aria-labelledby="modalAddConjuntoLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="m-0 font-weight-bold text-primary">Adicionar Conjunto</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="conjuntoForm" action="{{ url_for('conjuntos_inspecionados_solda') }}" method="post">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-4 mb-4">
+                                <label for="codigo_conjunto_inspecao">Código</label>
+                                <input type="text" name="codigo_conjunto_inspecao" id="codigo_conjunto_inspecao"
+                                    class="form-control" required>
+                            </div>
+                            <div class="col-sm-8 mb-4">
+                                <label for="descricao_conjunto_inspecao">Descrição</label>
+                                <input type="text" name="descricao_conjunto_inspecao" id="descricao_conjunto_inspecao"
+                                    class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="envio-conjuntos-inspecao" class="btn btn-success" type="submit">
+                            <span id="spinner-border" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            Enviar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmRemoveModal" tabindex="-1" role="dialog" aria-labelledby="confirmRemoveModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmRemoveModalLabel">Confirmar Remoção</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Tem certeza de que deseja remover este conjunto?
+                </div>
+                <div class="modal-footer">
+                    <button id="confirmRemoveBtn" class="btn btn-danger" type="submit">
+                        <span id="spinner-border-remove" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                        Remover
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="/static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="/static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="/static/js/demo/datatables-demo.js"></script>
+
+<script>
+
+document.getElementById('conjuntoForm').addEventListener('submit', function(event) {
+    // Exibir spinner
+    const spinner = document.getElementById('spinner-border');
+    const envioConjuntosInspecao = document.getElementById('envio-conjuntos-inspecao');
+    spinner.classList.remove('d-none');
+    envioConjuntosInspecao.disabled = true;
+});
+
+let selectedConjuntoId = null;
+
+document.querySelectorAll('.remover-conjunto').forEach(function(element) {
+    element.addEventListener('click', function() {
+        selectedConjuntoId = this.getAttribute('data-id');
+        $('#confirmRemoveModal').modal('show');
+    });
+});
+
+document.getElementById('confirmRemoveBtn').addEventListener('click', function() {
+    const spinner = document.getElementById('spinner-border-remove');
+    const envioConjuntosInspecao = document.getElementById('confirmRemoveBtn');
+    spinner.classList.remove('d-none');
+    envioConjuntosInspecao.disabled = true;
+
+    if (selectedConjuntoId) {
+        fetch(`/excluir-conjuntos-inspecionados-solda`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id: selectedConjuntoId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            $('#confirmRemoveModal').modal('hide');
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao remover o conjunto.');
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+        });
+    }
+});
+
+</script>
+
+</script>
+
+{% endblock %}

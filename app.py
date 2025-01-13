@@ -1374,6 +1374,67 @@ def inspecao_solda():
     
     return render_template('inspecao-solda.html',a_inspecionar_solda=a_inspecionar_solda,inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda,lista_soldadores=lista_soldadores)
 
+@app.route('/conjuntos-inspecionados-solda',methods=['GET','POST'])
+def conjuntos_inspecionados_solda():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    if request.method == 'GET':
+
+        query = """ SELECT *
+                FROM pcp.conjuntos_inspecionados;"""
+
+        cur.execute(query)
+        conjuntos_inspecionados = cur.fetchall()
+
+        return render_template('conjuntos-inspecionados-solda.html',conjuntos_inspecionados=conjuntos_inspecionados)
+    else:
+        codigo = request.form.get('codigo_conjunto_inspecao')
+        descricao = request.form.get('descricao_conjunto_inspecao')
+        sql = """INSERT INTO pcp.conjuntos_inspecionados 
+                (codigo,descricao) 
+                VALUES (%s, %s)"""
+        
+        values = (codigo,descricao)
+
+        cur.execute(sql,values)
+
+        conn.commit()
+
+        return redirect(url_for('conjuntos_inspecionados_solda'))
+
+@app.route('/excluir-conjuntos-inspecionados-solda', methods=['POST'])
+def excluir_conjuntos_inspecionados_solda():
+    # Obter o ID do conjunto a ser excluído
+    data = request.get_json()
+    conjunto_id = data.get('id')
+
+    if not conjunto_id:
+        return jsonify({'success': False, 'message': 'ID do conjunto não fornecido'}), 400
+
+    # Conectar ao banco de dados
+    try:
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Executar a consulta de exclusão
+        delete_query = """
+        DELETE FROM pcp.conjuntos_inspecionados
+        WHERE id = %s
+        """
+        cur.execute(delete_query, (conjunto_id,))
+        conn.commit()
+
+        if cur.rowcount > 0:
+            return jsonify({'success': True, 'message': 'Conjunto removido com sucesso'})
+        else:
+            return jsonify({'success': False, 'message': 'Conjunto não encontrado'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Erro ao excluir o conjunto', 'error': str(e)}), 500
+    
 def dados_inspecionar_reinspecionar_estamparia():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,

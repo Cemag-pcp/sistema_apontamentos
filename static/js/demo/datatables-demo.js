@@ -150,3 +150,12 @@ $(document).ready(function() {
     order: [[1, 'desc']]
   });
 });
+
+$(document).ready(function() {
+  $('#dataTableConjuntosInspecionadosSolda').DataTable({
+    "info":false,
+    "aLengthMenu":[5,10,25],
+    "iDisplayLength":10,
+    order: [[0, 'asc']]
+  });
+});
