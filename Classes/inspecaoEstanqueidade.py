@@ -181,6 +181,21 @@ class InspecaoEstanqueidade:
             self.conn.commit()
         except Exception as e:
             raise RuntimeError(f"Erro na execução: {e}")
+    
+    def alterado_status_da_inspecao_para_excluida(self,id_estanqueidade):
+        """ A flag da tabela inspecao_estanqueidade, chamada de excluidas é alterada para True """
+
+        try:
+            self.verificar_conexao()
+            with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+                cur.execute("""
+                    UPDATE pcp.inspecao_estanqueidade
+                    SET excluidas = TRUE
+                    WHERE id = %s;
+                """, (id_estanqueidade,))
+            self.conn.commit()
+        except Exception as e:
+            raise RuntimeError(f"Erro na execução: {e}")
         
     def inserir_execucoes_inspecao_estanqueidade_tanque(self,dados_estanqueidade_tanque,id_inspecao_estanqueidade_tanque):
 

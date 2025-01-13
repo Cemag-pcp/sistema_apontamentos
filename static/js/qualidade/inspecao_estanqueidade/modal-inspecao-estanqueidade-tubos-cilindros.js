@@ -1,11 +1,12 @@
-function modalTubos() {
+function modalTubos(id,data,codigo,qtd_apontada) {
 
-    const timeElapsed = Date.now();
-    const today = new Date(timeElapsed);
+    $('#id_tubo').val(id)
 
+    $('#data_tubo').val(formatarDataModal(data));
 
-    $('#data_tubo').val(today.toLocaleDateString());
-   
+    $('#produto_tubo_estanqueidade').val(codigo);
+    $('#qtd_inspecionada_tubo_estanqueidade').val(qtd_apontada);
+
     // Exibir o modal
     $('#estanqueidadeTubosModal').modal('show');
 }
@@ -34,15 +35,30 @@ function modalReteste(id, descricao, data, ficha,quantidade_reinspecao, tubos) {
     $('#modalReteste').modal('show');
 }
 
-function modalCilindros() {
+function modalCilindros(id,data,codigo,qtd_apontada) {
 
-    const timeElapsed = Date.now();
-    const today = new Date(timeElapsed);
+    
+    $('#id_cilindro').val(id)
 
-    $('#data_cilindro').val(today.toLocaleDateString());
+    $('#data_cilindro').val(formatarDataModal(data));
+
+    $('#produtoEstanqueidade_cilindro').val(codigo);
+    $('#qtd_inspecionada_cilindro').val(qtd_apontada);
 
     // Exibir o modal
     $('#cilindrosModal').modal('show');
+}
+
+function formatarDataModal(data) {
+    let date = new Date(data);
+
+    // Obtém o dia, mês e ano
+    let dia = String(date.getDate()).padStart(2, '0');
+    let mes = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() retorna de 0 a 11
+    let ano = date.getFullYear();
+
+    // Formata a data como dd/mm/YYYY
+    return `${dia}/${mes}/${ano}`;
 }
 
 function modalHistoricoEstanqueidade(idinspecao,inspecao) {

@@ -22,10 +22,6 @@
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h4 mb-0 text-gray-800">Inspeção Estanqueidade Tubos e Cilindros</h1>
-        <div class="d-sm-flex flex-column mb-4">
-            <button class="btn btn-primary mb-2" style="font-size: 14px;" id="button_estanqueidade_cilindro" onclick="modalCilindros()">Inspeção de estanqueidade dos cilindros</i></button>
-            <button class="btn btn-primary mb-2" style="font-size: 14px;" id="button_estanqueidade_tubo" onclick="modalTubos()">Inspeção de estanqueidade dos tubos</i></button>
-        </div>
     </div>
 
     <!-- Content Row -->
@@ -37,17 +33,117 @@
                 <div class="card-header">
                     <ul class="nav nav-tabs">
                         <li class="nav-item">
-                            <a class="nav-link active" onclick="changeTab('reteste')"
-                                style="cursor: pointer;">Reinspeção</a>
+                            <a class="nav-link active" onclick="changeTab('inspecao')"
+                                style="cursor: pointer;">Inspecao</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" onclick="changeTab('Estanqueidade')"
                                 style="cursor: pointer;">Inspecionados</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" onclick="changeTab('reteste')"
+                                style="cursor: pointer;">Reinspeção</a>
+                        </li>
                     </ul>
                 </div>
+                
+                <div class="card-body" id="inspecaoTable" style="display: block;">
+                    <div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTableInspecaoSolda" width="100%"
+                                cellspacing="0">
+                                <thead class="cf">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Data da Inspecao</th>
+                                        <th>Código - Descrição</th>
+                                        <th>Qtd. Apontada</th>
+                                        <th>Tipo Inspecão</th>
+                                        <th>Executar Inspeção</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-inspecao">
+                                    {% for inspecao in inspecao_dados %}
+                                    <tr>
+                                        <td data-title="#">{{inspecao[0]}}</td>
+                                        <td data-title="Data da Inspecao" class="data-inspecao">{{inspecao[1]}}</td>
+                                        <td data-title="Código - Descrição">{{inspecao[2]}} - {{inspecao[3]}}</td>
+                                        <td data-title="Qtd. Apontada">{{inspecao[4]}}</td>
+                                        <td data-title="Tipo Inspecão">{{inspecao[5]}}</td>
+                                        <td data-title="Exec">
+                                            <div class="col-sm-4 d-flex justify-content-center align-items-center"
+                                                style="padding-left: 0.35rem;">
+                                                <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                                    style="cursor: pointer;">
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </a>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                    <a  class="dropdown-item dropdown_os"
+                                                        style="cursor: pointer;" {% if inspecao[5] == 'Cilindros'  %} onclick="modalCilindros('{{inspecao[0]}}','{{inspecao[1]}}','{{inspecao[2]}}','{{inspecao[4]}}')" {% else %} onclick="modalTubos('{{inspecao[0]}}','{{inspecao[1]}}','{{inspecao[2]}}','{{inspecao[4]}}')" {% endif %}>
+                                                        Executar Inspeção
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
-                <div class="card-body" id="retesteTable" style="display: block;">
+                <!-- Card tabela inspecionados -->
+                <div class="card-body" id="EstanqueidadeTable" style="display: none;">
+                    <div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTableEstanqueidadeTable" width="100%" cellspacing="0">
+                                <thead class="cf">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Data da Inspeção</th>
+                                        <th>Código - Descrição</th>
+                                        <th>Inspetor</th>
+                                        <th>Quantidade Inspecionada</th>
+                                        <th>Tipo da inspeção</th>
+                                        <th>Não conformidade</th>
+                                        <th>Histórico</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-inspecoes">
+                                    {% for historico in inspecao_dados_historico %}
+                                    <tr>
+                                        <td data-title="#">{{historico[0]}}</td>
+                                        <td data-title="Data da Inspeção" class="data-inspecao">{{historico[1]}}</td>
+                                        <td data-title="Código - Descrição">{{historico[2]}} - {{historico[3]}}</td>
+                                        <td data-title="Inspetor">{{historico[5]}}</td>
+                                        <td data-title="Quantidade Inspecionada">{{historico[4]}}</td>
+                                        <td data-title="Tipo da inspeção">{{historico[6]}}</td>
+                                        <td data-title="Não conformidadea">{{historico[7]}}</td>
+                                        <td data-title="Histórico">
+                                            <div class="col-sm-4 d-flex justify-content-center align-items-center"
+                                                style="padding-left: 0.35rem;">
+                                                <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                                    style="cursor: pointer;">
+                                                    <i class="fa-solid fa-angle-down"></i>
+                                                </a>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                                    <a  class="dropdown-item dropdown_os"
+                                                        style="cursor: pointer;" onclick="modalHistoricoEstanqueidade('{{historico[0]}}','{{historico[6]}}')">
+                                                        Histórico de Inspeção
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body" id="retesteTable" style="display: none;">
                     <div>
                         <div class="table-responsive">
                             <table class="table table-bordered" id="dataTableRetesteSolda" width="100%"
@@ -94,55 +190,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Card tabela inspecionados -->
-                <div class="card-body" id="EstanqueidadeTable" style="display: none;">
-                    <div>
-                        <div class="table-responsive">
-                            <table class="table table-bordered" id="dataTableEstanqueidadeTable" width="100%" cellspacing="0">
-                                <thead class="cf">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Data da Inspeção</th>
-                                        <th>Código - Descrição</th>
-                                        <th>Inspetor</th>
-                                        <th>Quantidade Inspecionada</th>
-                                        <th>Tipo da inspeção</th>
-                                        <th>Não conformidade</th>
-                                        <th>Histórico</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabela-inspecoes">
-                                    {% for inspecao in inspecao_dados %}
-                                    <tr>
-                                        <td data-title="#">{{inspecao[0]}}</td>
-                                        <td data-title="Data da Inspeção" class="data-inspecao">{{inspecao[1]}}</td>
-                                        <td data-title="Código - Descrição">{{inspecao[2]}} - {{inspecao[3]}}</td>
-                                        <td data-title="Inspetor">{{inspecao[5]}}</td>
-                                        <td data-title="Quantidade Inspecionada">{{inspecao[4]}}</td>
-                                        <td data-title="Tipo da inspeção">{{inspecao[6]}}</td>
-                                        <td data-title="Não conformidadea">{{inspecao[7]}}</td>
-                                        <td data-title="Histórico">
-                                            <div class="col-sm-4 d-flex justify-content-center align-items-center"
-                                                style="padding-left: 0.35rem;">
-                                                <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                                    style="cursor: pointer;">
-                                                    <i class="fa-solid fa-angle-down"></i>
-                                                </a>
-                                                <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                                    <a  class="dropdown-item dropdown_os"
-                                                        style="cursor: pointer;" onclick="modalHistoricoEstanqueidade('{{inspecao[0]}}','{{inspecao[6]}}')">
-                                                        Histórico de Inspeção
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="modal fade" data-backdrop="static" id="cilindrosModal" tabindex="-1" role="dialog"
@@ -158,6 +205,10 @@
                             </div>
                             <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
                                 <div class="row">
+                                    <div class="col-sm-6 mb-4" style="display: none;">
+                                        <label>ID</label>
+                                        <input type="hidden" class="form-control" id="id_cilindro" disabled>
+                                    </div>
                                     <div class="col-sm-6 mb-4">
                                         <label>Data da Inspeção</label>
                                         <input type="text" class="form-control" id="data_cilindro" disabled>
@@ -182,20 +233,20 @@
                                 <div class="row">
                                     <div class="col-sm-12 mb-4">
                                         <label>Código</label>
-                                        <select class="form-control"  name="produtoEstanqueidade_cilindro" id="produtoEstanqueidade_cilindro" required>
+                                        <select class="form-control"  name="produtoEstanqueidade_cilindro" id="produtoEstanqueidade_cilindro" disabled>
                                             <option value="" disabled hidden selected></option>
-                                            <option value="034550 - CILINDRO HIDRÁULICO [CBH5/CBHM5000]">034550 - CILINDRO HIDRÁULICO [CBH5/CBHM5000]</option>
-                                            <option value="034830 - CILINDRO HIDRÁULICO [CBH7/CBHM6000]">034830 - CILINDRO HIDRÁULICO [CBH7/CBHM6000]</option>
-                                            <option value="034630 - CILINDRO HIDRÁULICO [CBHM6000 CAFEEIRA]">034630 - CILINDRO HIDRÁULICO [CBHM6000 CAFEEIRA]</option>
-                                            <option value="240471 - CILINDRO TELESCÓPICO CBH 6T 10 OC NV">240471 - CILINDRO TELESCÓPICO CBH 6T 10 OC NV</option>
-                                            <option value="035262 - CILINDRO HIDRÁULICO LARANJA [MCF16 M24]">035262 - CILINDRO HIDRÁULICO LARANJA [MCF16 M24]</option>
+                                            <option value="034550">034550 - CILINDRO HIDRÁULICO [CBH5/CBHM5000]</option>
+                                            <option value="034830">034830 - CILINDRO HIDRÁULICO [CBH7/CBHM6000]</option>
+                                            <option value="034630">034630 - CILINDRO HIDRÁULICO [CBHM6000 CAFEEIRA]</option>
+                                            <option value="240471">240471 - CILINDRO TELESCÓPICO CBH 6T 10 OC NV</option>
+                                            <option value="035262">035262 - CILINDRO HIDRÁULICO LARANJA [MCF16 M24]</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 mb-4">
                                         <label>Quantidade inspecionada</label>
-                                        <input type="number" min="1" class="form-control" id="qtd_inspecionada_cilindro" required> 
+                                        <input type="number" min="1" class="form-control" id="qtd_inspecionada_cilindro" disabled> 
                                     </div>
                                     <div class="col-sm-6 mb-4">
                                         <label>Não conformidade</label>
@@ -244,7 +295,7 @@
                                 <div class="row">
                                     <div class="col-sm-12 mb-4">
                                         <label>Ficha</label>
-                                        <input type="text" class="form-control" id="ficha_cilindro" required> 
+                                        <input type="text" class="form-control" id="ficha_cilindro"> 
                                     </div>
                                 </div>
                             </div>
@@ -260,7 +311,7 @@
             </div>
 
             <div class="modal fade" data-backdrop="static" id="estanqueidadeTubosModal" tabindex="-1" role="dialog"
-                aria-labelledby="tubosModalLabel" aria-hidden="true" style="overflow-y: auto;">
+                aria-labelledby="tubosModalLabel" style="overflow-y: auto;">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <form>
@@ -272,6 +323,10 @@
                             </div>
                             <div class="modal-body p-4" style="font-size: 14px; overflow-y: auto; max-height: 650px;">
                                 <div class="row">
+                                    <div class="col-sm-6 mb-4" style="display: none;">
+                                        <label>ID</label>
+                                        <input type="hidden" class="form-control" id="id_tubo" disabled>
+                                    </div>
                                     <div class="col-sm-6 mb-4">
                                         <label>Data da Inspeção</label>
                                         <input type="text" class="form-control" id="data_tubo" disabled>
@@ -291,28 +346,27 @@
                                 <div class="row">
                                     <div class="col-sm-12 mb-4">
                                         <label>Código</label>
-                                        <select class="form-control produto_tubo_estanqueidade" id="produto_tubo_estanqueidade" required>
+                                        <select class="form-control produto_tubo_estanqueidade" id="produto_tubo_estanqueidade" disabled>
                                             <option value="" disabled hidden selected></option>
-                                            <option value="030671 - TUBO HIDRÁULICO [CBHM5000 M17]">030671 - TUBO HIDRÁULICO [CBHM5000 M17]</option>
-                                            <option value="031566 - TUBO HIDRÁULICO [CBH6/CBHM6000-2E M17]">031566 - TUBO HIDRÁULICO [CBH6/CBHM6000-2E M17]</option>
-                                            <option value="030753 - TUBO HIDRÁULICO [CBH6/CBH7/CBHM6000]">030753 - TUBO HIDRÁULICO [CBH6/CBH7/CBHM6000]</option>
-                                            <option value="030671 - TUBO HIDRÁULICO [CBHM5000 M17]">030671 - TUBO HIDRÁULICO [CBHM5000 M17]</option>
-                                            <option value="035088 - TUBO HIDRÁULICO ESTEIRA ELEVADA INFERIOR / MCF">035088 - TUBO HIDRÁULICO ESTEIRA ELEVADA INFERIOR / MCF</option>
-                                            <option value="034029 - TUBO HIDRÁULICO ESTEIRA DIREITA /MCF">034029 - TUBO HIDRÁULICO ESTEIRA DIREITA /MCF</option>
-                                            <option value="035698 - TUBO HIDRÁULICO ESTEIRA ELEVADA SUPERIOR / MCF">035698 - TUBO HIDRÁULICO ESTEIRA ELEVADA SUPERIOR / MCF</option>
-                                            <option value="035465 - TUBO HIDRÁULICO MAIOR [CTH4500]">035465 - TUBO HIDRÁULICO MAIOR [CTH4500]</option>
-                                            <option value="035467 - TUBO HIDRÁULICO MENOR [CTH4500]">035467 - TUBO HIDRÁULICO MENOR [CTH4500]</option>
-                                            <option value="034776 - TUBO HIDRAULICO DE RETORNO DOS CILINDROS / MCF">034776 - TUBO HIDRAULICO DE RETORNO DOS CILINDROS / MCF</option>
-                                            <option value="035090 - TUBO HIDRAULICO DE RETORNO DOS MOTORES / MCF">035090 - TUBO HIDRAULICO DE RETORNO DOS MOTORES / MCF</option>
-                                            <option value="035441 - TUBO HIDRAULICO DOS CILINDROS / MCF">035441 - TUBO HIDRAULICO DOS CILINDROS / MCF</option>
-                                            <option value="035700 - TUBO HIDRAULICO DE RETORNO EST. DIR. 03 / MCF">035700 - TUBO HIDRAULICO DE RETORNO EST. DIR. 03 / MCF</option>
+                                            <option value="030671">030671 - TUBO HIDRÁULICO [CBHM5000 M17]</option>
+                                            <option value="031566">031566 - TUBO HIDRÁULICO [CBH6/CBHM6000-2E M17]</option>
+                                            <option value="030753">030753 - TUBO HIDRÁULICO [CBH6/CBH7/CBHM6000]</option>
+                                            <option value="035088">035088 - TUBO HIDRÁULICO ESTEIRA ELEVADA INFERIOR / MCF</option>
+                                            <option value="034029">034029 - TUBO HIDRÁULICO ESTEIRA DIREITA /MCF</option>
+                                            <option value="035698">035698 - TUBO HIDRÁULICO ESTEIRA ELEVADA SUPERIOR / MCF</option>
+                                            <option value="035465">035465 - TUBO HIDRÁULICO MAIOR [CTH4500]</option>
+                                            <option value="035467">035467 - TUBO HIDRÁULICO MENOR [CTH4500]</option>
+                                            <option value="034776">034776 - TUBO HIDRAULICO DE RETORNO DOS CILINDROS / MCF</option>
+                                            <option value="035090">035090 - TUBO HIDRAULICO DE RETORNO DOS MOTORES / MCF</option>
+                                            <option value="035441">035441 - TUBO HIDRAULICO DOS CILINDROS / MCF</option>
+                                            <option value="035700">035700 - TUBO HIDRAULICO DE RETORNO EST. DIR. 03 / MCF</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="row align-items-baseline">
                                     <div class="col-4 mb-4">
                                         <label>Quantidade inspecionada</label>
-                                        <input type="number" min="1" class="form-control qtd_inspecionada_tubo_estanqueidade" id="qtd_inspecionada_tubo_estanqueidade" required> 
+                                        <input type="number" min="1" class="form-control qtd_inspecionada_tubo_estanqueidade" id="qtd_inspecionada_tubo_estanqueidade" disabled> 
                                     </div>
                                     <div class="col-4 mb-4">
                                         <label>Não conforme retrabalho</label>
@@ -365,7 +419,7 @@
                                     </div>
                                     <div class="col-sm-6 mb-4">
                                         <label>Ficha</label>
-                                        <input type="text" class="form-control" id="ficha_tubo_estanqueidade" required> 
+                                        <input type="text" class="form-control" id="ficha_tubo_estanqueidade"> 
                                     </div>
                                 </div>
                             </div>
