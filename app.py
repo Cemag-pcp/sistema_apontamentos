@@ -363,6 +363,9 @@ def gerar_planilha():
                     password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+    print("dados_recebidos")
+    print(dados_recebidos)
+
     # Lista de tuplas contendo os dados a serem inseridos
     values = [(linha['codigo'], linha['descricao'], linha['qt_itens'], linha['cor'], linha['prod'], linha['cambao'],
                 linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(),
