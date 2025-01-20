@@ -408,6 +408,10 @@ def verificar_estoque(df_planilha_saldo, conjuntos, conn, cur):
                 FROM pcp.tb_base_carretas_explodidas
                 WHERE conjunto IN %s and setor = 'Montagem' """
     
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
     cur.execute(query, (tuple(conjuntos),))  # Usar uma tupla para o operador IN
     pecas = cur.fetchall()
 

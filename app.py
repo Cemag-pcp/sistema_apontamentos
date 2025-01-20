@@ -5547,9 +5547,9 @@ def carretas_planilha_carga(datainicio, datafim,consumo=False):
     # print("### BASE CARRETAS ###")
     # print(result)
 
-    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
-                            password=DB_PASS, host=DB_HOST)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    # conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+    #                         password=DB_PASS, host=DB_HOST)
+    # cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # Transformar a lista de listas em uma lista simples
     carretas_filtro = [item for sublist in dados_lista for item in sublist]
