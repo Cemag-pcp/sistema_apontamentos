@@ -174,26 +174,25 @@ def dados_sequenciamento_montagem():
     """
 
     sql = """SELECT
-            gerador_ordens_montagem.*,
-            COALESCE(ordens_montagem.qt_apontada, 0) as qt_apontada,
-            gerador_ordens_montagem.qt_planejada - COALESCE(ordens_montagem.qt_apontada, 0) as restante
-        FROM
-            pcp.gerador_ordens_montagem
-        LEFT JOIN (
-            SELECT
-                data_carga,
-                codigo,
-                peca,
-                SUM(qt_apontada) as qt_apontada
+                gerador_ordens_montagem.*,
+                COALESCE(ordens_montagem.qt_apontada, 0) as qt_apontada,
+                gerador_ordens_montagem.qt_planejada - COALESCE(ordens_montagem.qt_apontada, 0) as restante
             FROM
-                pcp.ordens_montagem
-            GROUP BY
-                data_carga, codigo, peca 
-        ) ordens_montagem
-        ON
-            concat(gerador_ordens_montagem.data_carga, gerador_ordens_montagem.codigo, gerador_ordens_montagem.peca) = concat(ordens_montagem.data_carga, ordens_montagem.codigo, ordens_montagem.peca)
-        order by id desc
-        LIMIT 1100;"""
+                pcp.gerador_ordens_montagem
+            LEFT JOIN (
+                SELECT
+                    data_carga,
+                    codigo,
+                    SUM(qt_apontada) as qt_apontada
+                FROM
+                    pcp.ordens_montagem
+                GROUP BY
+                    data_carga, codigo
+            ) ordens_montagem
+            ON
+                concat(gerador_ordens_montagem.data_carga, gerador_ordens_montagem.codigo) = concat(ordens_montagem.data_carga, ordens_montagem.codigo)
+            order by id desc
+            LIMIT 1100;"""
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
