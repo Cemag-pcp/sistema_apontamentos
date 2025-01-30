@@ -72,7 +72,7 @@ class Inspecao:
 
         print("inserir_reinspecao")
 
-    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = '', operador_estamparia='',qtd_mortas=None,motivo_mortas=''):
+    def inserir_inspecionados(self, id_inspecao, n_conformidades,n_nao_conformidades, inspetor, setor, conjunto_especifico='', origemInspecaoSolda='', observacaoSolda='', qtd_inspecionada = '', operador_estamparia='',qtd_mortas=None,motivo_mortas='',destinoInspecao='',inspecao_total=False):
 
         self.verificar_conexao()
         with self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
@@ -90,8 +90,8 @@ class Inspecao:
                 delete_table_inspecao = f"""UPDATE pcp.pecas_inspecao SET excluidas = 'true', qt_inspecionada = {qtd_inspecionada} WHERE id = '{id_inspecao}'"""
                 cur.execute(delete_table_inspecao)
 
-                sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao,operadores,qtd_morta,motivo_mortas) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s, %s, %s, %s)"""
-                values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operador_estamparia, qtd_mortas, motivo_mortas)
+                sql = """INSERT INTO pcp.pecas_inspecionadas (id_inspecao, total_conformidades, nao_conformidades, inspetor, setor, num_inspecao, conjunto, origem, observacao,operadores,qtd_morta,motivo_mortas,destino,inspecao_completa) VALUES (%s, %s, %s, %s, %s, 0, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                values = (id_inspecao, n_conformidades, n_nao_conformidades, inspetor, setor, conjunto_especifico, origemInspecaoSolda, observacaoSolda, operador_estamparia, qtd_mortas, motivo_mortas, destinoInspecao, inspecao_total)
 
             elif setor == 'Solda - Cilindro' or setor == 'Solda - Tubo':
 

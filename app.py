@@ -988,7 +988,7 @@ def modal_historico():
                             WHERE i.setor = '{setor}' and i.id_inspecao = '{idinspecao}'
                             ORDER BY num_inspecao ASC"""
         
-    elif setor == 'Solda - Tubo' or 'Solda - Cilindro':
+    elif setor == 'Solda - Tubo' or setor == 'Solda - Cilindro':
 
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,reteste.reteste_1,i.inspetor,
                             i.setor,i.num_inspecao,i.operadores,reteste.reteste_2,reteste.reteste_3,i.conjunto,i.nao_conformidades,i.origem,insp.qt_inspecionada
@@ -1017,6 +1017,8 @@ def modal_historico():
                         ORDER BY num_inspecao ASC
                         """
     
+    print(query_historico)
+
     if setor == 'Estamparia': 
 
         query_caminho_ficha = f"""SELECT *
@@ -1541,6 +1543,7 @@ def inspecao_estamparia():
         num_pecas = request.form.get('num_pecas')
         reinspecao = request.form.get('reinspecao')
 
+        destinoInspecao = request.form.get('destinoInspecao')
 
         if reinspecao == "True":
 
@@ -1553,14 +1556,14 @@ def inspecao_estamparia():
             return jsonify("Success")
         
         else:
-            if inspecao_total == "Sim":
+            if int(num_nao_conformidades) > 0 and destinoInspecao == "Retrabalho":
                 classe_inspecao.inserir_reinspecao(id_inspecao,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
                                    inputCategoria,outraCausaSolda)
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas,destinoInspecao=destinoInspecao,inspecao_total=inspecao_total)
             else:
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas,destinoInspecao=destinoInspecao,inspecao_total=inspecao_total)
                 
             insert_ficha_inspecao = """
             INSERT INTO pcp.ficha_inspecao (id,num_inspecao,medida_a,medida_b,medida_c,medida_d) 
