@@ -1590,30 +1590,8 @@ def inspecao_estanqueidade():
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    # Consulta 1: Informações de `pcp.inspecao_estanqueidade` com execucoes_inspecao_estanqueidade
+    # Consulta 1: Informações de `pcp.inspecao_estanqueidade`
     query_inspecao = """
-        SELECT 
-            ie.id AS inspecao_id,
-            ie.data AS inspecao_data,
-            ie.codigo AS inspecao_codigo,
-            ie.descricao AS inspecao_descricao,
-            om.qt_apontada,
-            ie.inspecao,
-            ie.data_carga AS inspecao_data_carga
-        FROM 
-            pcp.inspecao_estanqueidade ie
-        LEFT JOIN 
-            pcp.ordens_montagem om
-        ON 
-            ie.ordem_montagem_id = om.id
-        where (ie.inspecao = 'Cilindros' or ie.inspecao = 'Tubos') and ie.excluidas = False;
-    """
-    cur.execute(query_inspecao)
-    inspecao_dados = cur.fetchall()
-
-    # Consulta 2: Informações de `pcp.inspecao_estanqueidade`
-
-    query_inspecao_historico = """
         SELECT 
             ie.id AS inspecao_id,
             ie.data AS data_inspecao,
@@ -1621,18 +1599,17 @@ def inspecao_estanqueidade():
             ie.descricao,
             ei.quantidade_inspecionada,
             ei.inspetor,
-            ie.inspecao,
-            ei.nao_conforme + ei.nao_conforme_refugo AS nao_conformidade
+            ie.inspecao
         FROM 
             pcp.inspecao_estanqueidade ie
         INNER JOIN 
             pcp.execucoes_inspecao_estanqueidade ei ON ei.inspecao_id = ie.id
         WHERE ei.numero_execucao = 0;
     """
-    cur.execute(query_inspecao_historico)
-    inspecao_dados_historico = cur.fetchall()
+    cur.execute(query_inspecao)
+    inspecao_dados = cur.fetchall()
 
-    # Consulta 3: Junção de `pcp.reinspecao` com `pcp.inspecao_estanqueidade`
+    # Consulta 2: Junção de `pcp.reinspecao` com `pcp.inspecao_estanqueidade`
     query_reinspecao = """
         WITH MaxExecucao AS (
             SELECT 
@@ -1675,7 +1652,6 @@ def inspecao_estanqueidade():
     return render_template(
         'inspecao-estanqueidade-tubos-cilindros.html',
         inspecao_dados=inspecao_dados,
-        inspecao_dados_historico=inspecao_dados_historico,
         reinspecao_dados=reinspecao_dados
     )
 
@@ -1692,8 +1668,7 @@ def envio_inspecao_estanqueidade_tubos_cilindros():
     
     dados_inspecao_estanqueidade['data_carga'] = None
     
-    id_inspecao_estanqueidade = dados_inspecao_estanqueidade['id_inspecao']
-    classe_inspecao_estanqueidade.alterado_status_da_inspecao_para_excluida(id_inspecao_estanqueidade)
+    id_inspecao_estanqueidade = classe_inspecao_estanqueidade.inserir_inspecao_estanqueidade(dados_inspecao_estanqueidade)
 
     if 'nao_conformidade' in dados_inspecao_estanqueidade:
         total_nao_conformidade = dados_inspecao_estanqueidade['nao_conformidade']
