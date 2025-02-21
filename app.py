@@ -2638,6 +2638,56 @@ def painel_montagem():
 
     return render_template("painel-montagem.html", alert_flags=alert_flags)
 
+@app.route("/api/publica/apontamento/tempo-processo-montagem")
+def api_tempo_processo_montagem():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = """
+    WITH ranked_rows AS (
+        SELECT
+            tpep.id,
+            tpep.chave,
+            tpep.codigo,
+            tpep.descricao,
+            tpep.data_inicio,
+            tpep.data_fim - INTERVAL '3 hours' AS data_fim_tratada,
+            tpep.data_carga,
+            tpep.qt_planejada,
+            tpep.celula,
+            tpep.status,
+            ROW_NUMBER() OVER (
+            PARTITION BY tpep.id, tpep.chave, tpep.data_inicio, tpep.data_fim
+        ORDER BY tpep.data_carga DESC
+        ) AS row_num
+        FROM pcp.tb_pecas_em_processo tpep
+        JOIN pcp.ordens_montagem om
+        ON tpep.codigo = om.codigo
+        AND tpep.data_carga = om.data_carga
+        WHERE
+            setor = 'Montagem'
+            AND om.qt_apontada > 0
+            AND tpep.data_fim IS NOT NULL
+            -- AND tpep.chave = '107008'
+        )
+        SELECT *
+        FROM ranked_rows
+        WHERE row_num = 1
+        ORDER BY chave, data_inicio asc;
+"""
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    for linha in data:
+        linha[5] = linha[5].strftime("%d/%m/%Y")
+        linha[6] = linha[6].strftime("%d/%m/%Y")
+        linha[3] = linha[3] if linha[3] != '' else "Cadastrar descrição"
+
+    return jsonify(data)
+
 @app.route("/atualizar-painel-montagem", methods=['GET','POST'])
 def atualizar_painel_montagem():
     """
