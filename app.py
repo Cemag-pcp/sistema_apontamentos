@@ -2681,10 +2681,11 @@ def api_tempo_processo_montagem():
     cur.execute(sql)
     data = cur.fetchall()
 
-    # for linha in data:
-    #     linha[5] = linha[5].strftime("%d/%m/%Y")
-    #     linha[6] = linha[6].strftime("%d/%m/%Y")
-    #     linha[3] = linha[3] if linha[3] != '' else "Cadastrar descrição"
+    for linha in data:
+        linha[2] = "0"+str(linha[2]) if len(str(linha[2])) == 5 else str(linha[2])
+        # linha[4] = linha[4].strftime("%d/%m/%Y %H:%M:%S")
+
+
 
     return jsonify(data)
 
