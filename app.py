@@ -1787,7 +1787,7 @@ def envio_inspecao_estanqueidade_tanque():
     dados_estanqueidade_tanque['codigo'] = codigo_split[0].strip()
     dados_estanqueidade_tanque['descricao'] = codigo_split[1].strip() if len(codigo_split) > 1 else ""
 
-    list_tanques = ["035940 - FTC4300R", "032727 - FTC6500 M22"]
+    list_tanques = ["035939 - FTC4300R", "032731 - FTC6500 M22"]
 
     if dados_estanqueidade_tanque['produto'] in list_tanques:
         primeiro_teste = dados_estanqueidade_tanque['testes']['parte_inferior']
