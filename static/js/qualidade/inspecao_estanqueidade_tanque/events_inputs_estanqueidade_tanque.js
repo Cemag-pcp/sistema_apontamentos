@@ -4,8 +4,8 @@ $("#produto-estanqueidade-tanque").on("change",function() {
 
     // Campo para 4300 e 6500
     let listaCodigosTanque = [
-        "035940 - FTC4300R",
-        "032727 - FTC6500 M22"
+        "035939 - FTC4300R",
+        "032731 - FTC6500 M22"
     ];
 
     if (listaCodigosTanque.includes(codigoTanque)) {

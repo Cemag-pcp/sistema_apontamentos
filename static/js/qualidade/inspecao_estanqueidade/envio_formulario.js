@@ -184,7 +184,6 @@ document.addEventListener("DOMContentLoaded", function () {
         // Capturar dados do formulário
         const naoConformidade = parseInt(document.getElementById("nao_conformidade_cilindro").value) || 0;
         const data = {
-            id_inspecao: document.getElementById("id_cilindro").value,
             data_inspecao: document.getElementById("data_cilindro").value,
             tipo_inspecao: "Cilindros",
             inspetor: document.getElementById("inspetores_cilindro").value,
@@ -297,7 +296,6 @@ form.addEventListener('submit', async (event) => {
 
     // Capturar os dados do formulário
     const data = {
-        id_inspecao: document.getElementById("id_tubo").value,
         data_inspecao: document.querySelector('#data_tubo').value,
         tipo_inspecao: "Tubos",
         inspetor: form.querySelector('.inspetor_tubo_estanqueidade').value,

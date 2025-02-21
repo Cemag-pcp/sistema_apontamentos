@@ -988,7 +988,7 @@ def modal_historico():
                             WHERE i.setor = '{setor}' and i.id_inspecao = '{idinspecao}'
                             ORDER BY num_inspecao ASC"""
         
-    elif setor == 'Solda - Tubo' or 'Solda - Cilindro':
+    elif setor == 'Solda - Tubo' or setor == 'Solda - Cilindro':
 
         query_historico = f"""SELECT i.id_inspecao,i.data_inspecao,reteste.reteste_1,i.inspetor,
                             i.setor,i.num_inspecao,i.operadores,reteste.reteste_2,reteste.reteste_3,i.conjunto,i.nao_conformidades,i.origem,insp.qt_inspecionada
@@ -1017,6 +1017,8 @@ def modal_historico():
                         ORDER BY num_inspecao ASC
                         """
     
+    print(query_historico)
+
     if setor == 'Estamparia': 
 
         query_caminho_ficha = f"""SELECT *
@@ -1541,6 +1543,7 @@ def inspecao_estamparia():
         num_pecas = request.form.get('num_pecas')
         reinspecao = request.form.get('reinspecao')
 
+        destinoInspecao = request.form.get('destinoInspecao')
 
         if reinspecao == "True":
 
@@ -1553,14 +1556,14 @@ def inspecao_estamparia():
             return jsonify("Success")
         
         else:
-            if inspecao_total == "Sim":
+            if int(num_nao_conformidades) > 0 and destinoInspecao == "Retrabalho":
                 classe_inspecao.inserir_reinspecao(id_inspecao,num_nao_conformidades,list_causas,inspetoresSolda,setor,inputConjunto,
                                    inputCategoria,outraCausaSolda)
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas,destinoInspecao=destinoInspecao,inspecao_total=inspecao_total)
             else:
                 classe_inspecao.inserir_inspecionados(id_inspecao,num_conformidades,n_nao_conformidades,inspetoresSolda,setor,inputConjunto,
-                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas)
+                                      origemInspecaoSolda,observacaoSolda,num_pecas,operador_estamparia=operador_estamparia,qtd_mortas=qtd_mortas,motivo_mortas=motivo_mortas,destinoInspecao=destinoInspecao,inspecao_total=inspecao_total)
                 
             insert_ficha_inspecao = """
             INSERT INTO pcp.ficha_inspecao (id,num_inspecao,medida_a,medida_b,medida_c,medida_d) 
@@ -1587,30 +1590,8 @@ def inspecao_estanqueidade():
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    # Consulta 1: Informações de `pcp.inspecao_estanqueidade` com execucoes_inspecao_estanqueidade
+    # Consulta 1: Informações de `pcp.inspecao_estanqueidade`
     query_inspecao = """
-        SELECT 
-            ie.id AS inspecao_id,
-            ie.data AS inspecao_data,
-            ie.codigo AS inspecao_codigo,
-            ie.descricao AS inspecao_descricao,
-            om.qt_apontada,
-            ie.inspecao,
-            ie.data_carga AS inspecao_data_carga
-        FROM 
-            pcp.inspecao_estanqueidade ie
-        LEFT JOIN 
-            pcp.ordens_montagem om
-        ON 
-            ie.ordem_montagem_id = om.id
-        where (ie.inspecao = 'Cilindros' or ie.inspecao = 'Tubos') and ie.excluidas = False;
-    """
-    cur.execute(query_inspecao)
-    inspecao_dados = cur.fetchall()
-
-    # Consulta 2: Informações de `pcp.inspecao_estanqueidade`
-
-    query_inspecao_historico = """
         SELECT 
             ie.id AS inspecao_id,
             ie.data AS data_inspecao,
@@ -1618,18 +1599,17 @@ def inspecao_estanqueidade():
             ie.descricao,
             ei.quantidade_inspecionada,
             ei.inspetor,
-            ie.inspecao,
-            ei.nao_conforme + ei.nao_conforme_refugo AS nao_conformidade
+            ie.inspecao
         FROM 
             pcp.inspecao_estanqueidade ie
         INNER JOIN 
             pcp.execucoes_inspecao_estanqueidade ei ON ei.inspecao_id = ie.id
         WHERE ei.numero_execucao = 0;
     """
-    cur.execute(query_inspecao_historico)
-    inspecao_dados_historico = cur.fetchall()
+    cur.execute(query_inspecao)
+    inspecao_dados = cur.fetchall()
 
-    # Consulta 3: Junção de `pcp.reinspecao` com `pcp.inspecao_estanqueidade`
+    # Consulta 2: Junção de `pcp.reinspecao` com `pcp.inspecao_estanqueidade`
     query_reinspecao = """
         WITH MaxExecucao AS (
             SELECT 
@@ -1672,7 +1652,6 @@ def inspecao_estanqueidade():
     return render_template(
         'inspecao-estanqueidade-tubos-cilindros.html',
         inspecao_dados=inspecao_dados,
-        inspecao_dados_historico=inspecao_dados_historico,
         reinspecao_dados=reinspecao_dados
     )
 
@@ -1689,8 +1668,7 @@ def envio_inspecao_estanqueidade_tubos_cilindros():
     
     dados_inspecao_estanqueidade['data_carga'] = None
     
-    id_inspecao_estanqueidade = dados_inspecao_estanqueidade['id_inspecao']
-    classe_inspecao_estanqueidade.alterado_status_da_inspecao_para_excluida(id_inspecao_estanqueidade)
+    id_inspecao_estanqueidade = classe_inspecao_estanqueidade.inserir_inspecao_estanqueidade(dados_inspecao_estanqueidade)
 
     if 'nao_conformidade' in dados_inspecao_estanqueidade:
         total_nao_conformidade = dados_inspecao_estanqueidade['nao_conformidade']
@@ -1809,7 +1787,7 @@ def envio_inspecao_estanqueidade_tanque():
     dados_estanqueidade_tanque['codigo'] = codigo_split[0].strip()
     dados_estanqueidade_tanque['descricao'] = codigo_split[1].strip() if len(codigo_split) > 1 else ""
 
-    list_tanques = ["035940 - FTC4300R", "032727 - FTC6500 M22"]
+    list_tanques = ["035939 - FTC4300R", "032731 - FTC6500 M22"]
 
     if dados_estanqueidade_tanque['produto'] in list_tanques:
         primeiro_teste = dados_estanqueidade_tanque['testes']['parte_inferior']

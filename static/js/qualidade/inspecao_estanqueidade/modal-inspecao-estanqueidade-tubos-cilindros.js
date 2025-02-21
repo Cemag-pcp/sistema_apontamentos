@@ -1,12 +1,5 @@
-function modalTubos(id,data,codigo,qtd_apontada) {
-
-    $('#id_tubo').val(id)
-
-    $('#data_tubo').val(formatarDataModal(data));
-
-    $('#produto_tubo_estanqueidade').val(codigo);
-    $('#qtd_inspecionada_tubo_estanqueidade').val(qtd_apontada);
-
+function modalTubos() {
+   
     // Exibir o modal
     $('#estanqueidadeTubosModal').modal('show');
 }
@@ -35,30 +28,10 @@ function modalReteste(id, descricao, data, ficha,quantidade_reinspecao, tubos) {
     $('#modalReteste').modal('show');
 }
 
-function modalCilindros(id,data,codigo,qtd_apontada) {
-
-    
-    $('#id_cilindro').val(id)
-
-    $('#data_cilindro').val(formatarDataModal(data));
-
-    $('#produtoEstanqueidade_cilindro').val(codigo);
-    $('#qtd_inspecionada_cilindro').val(qtd_apontada);
+function modalCilindros() {
 
     // Exibir o modal
     $('#cilindrosModal').modal('show');
-}
-
-function formatarDataModal(data) {
-    let date = new Date(data);
-
-    // Obtém o dia, mês e ano
-    let dia = String(date.getDate()).padStart(2, '0');
-    let mes = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() retorna de 0 a 11
-    let ano = date.getFullYear();
-
-    // Formata a data como dd/mm/YYYY
-    return `${dia}/${mes}/${ano}`;
 }
 
 function modalHistoricoEstanqueidade(idinspecao,inspecao) {
@@ -73,7 +46,7 @@ function modalHistoricoEstanqueidade(idinspecao,inspecao) {
         data: JSON.stringify({ 'id': idinspecao ,'tipo_inspecao':inspecao}),  // Enviando um objeto JSON
         success: function(response) {
             $("#loading").hide();
-            cardHistoricoTubosCilindros(response);
+            cardHistorico(response);
         },
         error: function(error) {
             $("#loading").hide();
@@ -83,7 +56,7 @@ function modalHistoricoEstanqueidade(idinspecao,inspecao) {
     });
 }
 
-function cardHistoricoTubosCilindros(response) {
+function cardHistorico(response) {
 
     $("#modalTimeline .modal-header h5").text("Possui " + response.dados_historico.length + " inspeções")
 
@@ -133,14 +106,14 @@ function cardHistoricoTubosCilindros(response) {
             $("#modalTimeline").modal('hide');
     
             // Configurar o modal de causas
-            modalVisualizarCausaEstanqueidadeTubosCilindros(itemData); // Passa os dados do item para o modal
+            modalVisualizarCausaEstanqueidade(itemData); // Passa os dados do item para o modal
         } else {
             alert("Não possui nenhuma causa ou foto associada.");
         }
     });
 }
 
-function modalVisualizarCausaEstanqueidadeTubosCilindros(items) {
+function modalVisualizarCausaEstanqueidade(items) {
     // Configurar o título do modal
 
     $("#visualizacaoCausasModal .modal-body").empty();
