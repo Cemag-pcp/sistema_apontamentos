@@ -5417,7 +5417,8 @@ def saldo_recurso_pintura_montagem():
     montagem = montagem.loc[montagem['PCP'].isna() | (montagem['PCP'] == "")]
 
     base_saldo_recurso = base[['1o. Agrupamento', '2o. Agrupamento', 'codigo_peca', 'Saldo']]
-    pintura_apontamento = pintura[['Código', 'Descrição', 'Qtd']]
+    pintura_apontamento = pintura[['Codificação', 'Descrição', 'Qtd']]
+    pintura_apontamento = pintura_apontamento.rename(columns={'Codificação':'Código'})
     montagem_apontamento = montagem[['Código', 'Descrição', 'Qtd prod']]
 
     base_saldo_recurso.rename(columns={
@@ -5430,7 +5431,9 @@ def saldo_recurso_pintura_montagem():
         base_saldo_recurso['almoxarifado'].isin(['Almox Pintura - Embalagem', 'Almox Mont Carretas'])
     ]
 
-    sufixos = ['CO', 'VM', 'AV', 'LC', 'AN', 'VJ', 'PF']
+    # sufixos = ['CO', 'VM', 'AV', 'LC', 'AN', 'VJ', 'PF']
+    sufixos = []
+
     pattern = f"({'|'.join(sufixos)})$"
     base_saldo_recurso['Código'] = base_saldo_recurso['Código'].str.replace(pattern, '', regex=True)
 
@@ -5523,7 +5526,8 @@ def carretas_planilha_carga(datainicio, datafim,consumo=False):
     filtrar_data = data[(data['PED_PREVISAOEMISSAODOC'] >= pd.to_datetime(datainicio)) &
                          (data['PED_PREVISAOEMISSAODOC'] <= pd.to_datetime(datafim))]
 
-    cores_remover = ['CO', 'VM', 'LC', 'AM', 'AN', 'VJ', 'AV']
+    # cores_remover = ['CO', 'VM', 'LC', 'AM', 'AN', 'VJ', 'AV']
+    cores_remover = []
 
     if consumo:
         filtrar_data_carreta = filtrar_data[['PED_PREVISAOEMISSAODOC','PED_RECURSO.CODIGO','PED_QUANTIDADE','PED_NUMEROSERIE','PED_NUCLEO.CODIGO']]
@@ -5591,7 +5595,8 @@ def verificarConjuntosFaltantes(id,carreta):
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    query_conjuntos_faltantes = """SELECT DISTINCT tb2.conjunto, tb2.processo, tb2.conjunto_desc, tb2.qt_conjunto
+    query_conjuntos_faltantes = """
+        SELECT DISTINCT tb2.conjunto, tb2.processo, tb2.conjunto_desc, tb2.qt_conjunto
         FROM pcp.tb_base_carretas_explodidas tb2
         LEFT JOIN pcp.consumo_carretas tb1
             ON tb1.conjunto = tb2.conjunto
