@@ -2480,7 +2480,7 @@ def api_apontamento_pintura():
     for linha in data:
         linha[8] = linha[8].strftime("%d/%m/%Y")
         linha[9] = linha[9].strftime("%d/%m/%Y")
-        linha[2] = linha[2] if linha[2] == '' else "Cadastrar descrição"
+        linha[2] = linha[2] if linha[2] != '' else "Cadastrar descrição"
 
 
     return jsonify(data)
@@ -2500,7 +2500,7 @@ def api_apontamento_montagem():
     for linha in data:
         linha[5] = linha[5].strftime("%d/%m/%Y")
         linha[6] = linha[6].strftime("%d/%m/%Y")
-        linha[3] = linha[3] if linha[3] == '' else "Cadastrar descrição"
+        linha[3] = linha[3] if linha[3] != '' else "Cadastrar descrição"
 
     return jsonify(data)
 
@@ -2544,7 +2544,7 @@ def api_apontamento_estamparia():
     for linha in data:
         linha[5] = linha[5].strftime("%d/%m/%Y")
         linha[6] = linha[6].strftime("%d/%m/%Y")
-        linha[3] = linha[3] if linha[3] == '' else "Cadastrar descrição"
+        linha[3] = linha[3] if linha[3] != '' else "Cadastrar descrição"
 
     return jsonify(data)
 
