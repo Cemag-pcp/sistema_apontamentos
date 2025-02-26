@@ -116,7 +116,7 @@ $('#envio_reinspecao_estamparia').on('click', function() {
 
     let isFicha100Visible = $("#ficha_100").css("display") !== "none";
 
-    if (inputConformidadesSolda === "" || inspetoresSolda === null || retrabalhoSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0 || (isFicha100Visible && ficha_completa_reinspecao === "")) {
+    if (inputConformidadesSolda === "" || inspetoresSolda === null || retrabalhoSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
         alert('Verifique se os campos estão corretos');
         $("#loading").hide();
         return; // Interrompe a execução
