@@ -2645,71 +2645,76 @@ def api_tempo_processo_montagem():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     sql = """
-    WITH ranked_rows AS (
+        WITH ranked_rows AS (
         SELECT
-            tpep.id,
-            tpep.chave,
-            tpep.codigo,
-            tpep.descricao,
-            tpep.data_inicio,
-            tpep.data_fim - INTERVAL '3 hours' AS data_fim_tratada,
-            tpep.data_carga,
-            tpep.qt_planejada,
-            tpep.celula,
-            tpep.status,
-            ROW_NUMBER() OVER (
-                PARTITION BY tpep.id, tpep.chave, tpep.data_inicio, tpep.data_fim
-                ORDER BY tpep.data_carga DESC
-            ) AS row_num
+        tpep.id,
+        tpep.chave,
+        tpep.codigo,
+        tpep.descricao,
+        tpep.data_inicio,
+        tpep.data_fim - INTERVAL '3 hours' AS data_fim_tratada,
+        tpep.data_carga,
+        tpep.qt_planejada,
+        tpep.celula,
+        tpep.status,
+        ROW_NUMBER() OVER (
+        PARTITION BY tpep.id, tpep.chave, tpep.data_inicio, tpep.data_fim
+        ORDER BY tpep.data_carga DESC
+        ) AS row_num
         FROM pcp.tb_pecas_em_processo tpep
         JOIN pcp.ordens_montagem om
         ON tpep.codigo = om.codigo
         AND tpep.data_carga = om.data_carga
         WHERE
-            setor = 'Montagem'
-            AND om.qt_apontada > 0
-            AND tpep.data_fim IS NOT NULL
-    )
-    SELECT *
-    FROM ranked_rows
-    WHERE row_num = 1
-    ORDER BY chave, data_inicio ASC;
+        setor = 'Montagem'
+        AND om.qt_apontada > 0
+        AND tpep.data_fim IS NOT NULL
+        -- AND tpep.chave = '107008'
+        )
+        SELECT *
+        FROM ranked_rows
+        WHERE row_num = 1
+        ORDER BY chave, data_inicio asc;
     """
 
     cur.execute(sql)
     data = cur.fetchall()
 
-    resultado = []
     for linha in data:
-        linha_dict = dict(linha)  # Converte para dicionário para manipular os valores
+        linha[4] = linha[4].strftime("%d/%m/%Y %H:%M:%S")
+        linha[5] = linha[5].strftime("%d/%m/%Y %H:%M:%S")
+        linha[6] = linha[6].strftime("%d/%m/%Y")
+
+    # resultado = []
+    # for linha in data:
+    #     linha_dict = dict(linha)  # Converte para dicionário para manipular os valores
         
-        # Garantir que código tenha 6 dígitos
-        linha_dict["codigo"] = "0" + str(linha_dict["codigo"]) if len(str(linha_dict["codigo"])) == 5 else str(linha_dict["codigo"])
+    #     # Garantir que código tenha 6 dígitos
+    #     linha_dict["codigo"] = "0" + str(linha_dict["codigo"]) if len(str(linha_dict["codigo"])) == 5 else str(linha_dict["codigo"])
 
-        # Garantir que os campos de data são do tipo datetime antes de formatar
-        if isinstance(linha_dict["data_inicio"], str):
-            try:
-                linha_dict["data_inicio"] = datetime.fromisoformat(linha_dict["data_inicio"])
-            except ValueError:
-                linha_dict["data_inicio"] = None  # Se não conseguir converter, assume None
+    #     # Garantir que os campos de data são do tipo datetime antes de formatar
+    #     if isinstance(linha_dict["data_inicio"], str):
+    #         try:
+    #             linha_dict["data_inicio"] = datetime.fromisoformat(linha_dict["data_inicio"])
+    #         except ValueError:
+    #             linha_dict["data_inicio"] = None  # Se não conseguir converter, assume None
 
-        if isinstance(linha_dict["data_fim_tratada"], str):
-            try:
-                linha_dict["data_fim_tratada"] = datetime.fromisoformat(linha_dict["data_fim_tratada"])
-            except ValueError:
-                linha_dict["data_fim_tratada"] = None
+    #     if isinstance(linha_dict["data_fim_tratada"], str):
+    #         try:
+    #             linha_dict["data_fim_tratada"] = datetime.fromisoformat(linha_dict["data_fim_tratada"])
+    #         except ValueError:
+    #             linha_dict["data_fim_tratada"] = None
 
-        # Formatar as datas corretamente
-        linha_dict["data_inicio"] = linha_dict["data_inicio"].strftime("%d/%m/%Y %H:%M:%S") if linha_dict["data_inicio"] else None
-        linha_dict["data_fim_tratada"] = linha_dict["data_fim_tratada"].strftime("%d/%m/%Y %H:%M:%S") if linha_dict["data_fim_tratada"] else None
+    #     # Formatar as datas corretamente
+    #     linha_dict["data_inicio"] = linha_dict["data_inicio"].strftime("%d/%m/%Y %H:%M:%S") if linha_dict["data_inicio"] else None
+    #     linha_dict["data_fim_tratada"] = linha_dict["data_fim_tratada"].strftime("%d/%m/%Y %H:%M:%S") if linha_dict["data_fim_tratada"] else None
 
-        resultado.append(linha_dict)
+    #     resultado.append(linha_dict)
 
     cur.close()
     conn.close()
 
-    return jsonify(resultado)
-
+    return jsonify(data)
 
 @app.route("/atualizar-painel-montagem", methods=['GET','POST'])
 def atualizar_painel_montagem():
