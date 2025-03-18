@@ -3219,7 +3219,7 @@ def api_tempo_processo_estamparia():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     sql = """
-                WITH ranked_rows AS (
+        WITH ranked_rows AS (
         SELECT
         tpep.id,
         tpep.chave,
@@ -3227,6 +3227,7 @@ def api_tempo_processo_estamparia():
         tpep.descricao,
         tpep.data_inicio,
         tpep.data_fim - INTERVAL '3 hours' AS data_fim_tratada,
+        tpep.data_carga,
         tpep.qt_planejada,
         tpep.celula,
         tpep.status,
@@ -3253,6 +3254,7 @@ def api_tempo_processo_estamparia():
     for linha in data:
         linha[4] = linha[4].strftime("%d/%m/%Y %H:%M:%S")
         linha[5] = linha[5].strftime("%d/%m/%Y %H:%M:%S")
+        linha[6] = linha[6].strftime("%d/%m/%Y")
 
     cur.close()
     conn.close()
