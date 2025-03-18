@@ -3212,6 +3212,54 @@ def api_pecas_em_processo_estamparia():
 
     return 'sucess'
 
+@app.route("/api/publica/apontamento/tempo-processo-estamparia")
+def api_tempo_processo_estamparia():
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    sql = """
+                WITH ranked_rows AS (
+        SELECT
+        tpep.id,
+        tpep.chave,
+        tpep.codigo,
+        tpep.descricao,
+        tpep.data_inicio,
+        tpep.data_fim - INTERVAL '3 hours' AS data_fim_tratada,
+        tpep.qt_planejada,
+        tpep.celula,
+        tpep.status,
+        ROW_NUMBER() OVER (
+        PARTITION BY tpep.id, tpep.chave, tpep.data_inicio, tpep.data_fim
+        ) AS row_num
+        FROM pcp.tb_pecas_em_processo tpep
+        JOIN pcp.ordens_estamparia om
+        ON tpep.chave = om.chave
+        WHERE
+        setor = 'Estamparia'
+        AND om.qt_apontada > 0
+        AND tpep.data_fim IS NOT NULL
+        )
+        SELECT *
+        FROM ranked_rows
+        WHERE row_num = 1
+        ORDER BY chave, data_inicio asc;
+    """
+
+    cur.execute(sql)
+    data = cur.fetchall()
+
+    for linha in data:
+        linha[4] = linha[4].strftime("%d/%m/%Y %H:%M:%S")
+        linha[5] = linha[5].strftime("%d/%m/%Y %H:%M:%S")
+
+    cur.close()
+    conn.close()
+
+    return jsonify(data)
+
+
 @app.route("/api/pecas-em-processo-planejamento/estamparia", methods=['POST'])
 def api_pecas_em_processo_planejamento_estamparia():
     """
