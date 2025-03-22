@@ -3253,9 +3253,9 @@ def api_tempo_processo_estamparia():
     data = cur.fetchall()
 
     for linha in data:
-        linha[4] = linha[4].strftime("%d/%m/%Y %H:%M:%S")
         linha[5] = linha[5].strftime("%d/%m/%Y %H:%M:%S")
-        linha[6] = linha[6].strftime("%d/%m/%Y")
+        linha[6] = linha[6].strftime("%d/%m/%Y %H:%M:%S")
+        linha[7] = linha[7].strftime("%d/%m/%Y")
 
     cur.close()
     conn.close()
