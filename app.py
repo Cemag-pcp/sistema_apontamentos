@@ -3225,6 +3225,7 @@ def api_tempo_processo_estamparia():
         tpep.chave,
         tpep.codigo,
         tpep.descricao,
+        om.operador,
         tpep.data_inicio,
         tpep.data_fim - INTERVAL '3 hours' AS data_fim_tratada,
         tpep.data_carga,
