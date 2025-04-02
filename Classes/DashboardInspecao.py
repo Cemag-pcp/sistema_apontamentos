@@ -68,7 +68,10 @@ class DashboardInspecao:
                     SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                                     pi.tipo,
                                     foto.causa,
-                                    foto.quantidade::INTEGER as total_quantidade
+                                    CASE 
+                                        WHEN foto.quantidade ~ '^\d+$' THEN foto.quantidade::INTEGER
+                                        ELSE 0
+                                    END as total_quantidade
                     FROM pcp.inspecao_foto foto
                     LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
                     WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Pintura'
@@ -86,7 +89,10 @@ class DashboardInspecao:
                 SELECT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                     pi.tipo,
                     foto.causa,
-                    foto.quantidade::INTEGER as total_quantidade
+                    CASE 
+					    WHEN foto.quantidade ~ '^\d+$' THEN foto.quantidade::INTEGER
+					    ELSE 0
+					END as total_quantidade
                 FROM pcp.inspecao_foto foto
                 LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Pintura'
@@ -273,7 +279,10 @@ class DashboardInspecao:
                                     pi.codigo || '-' ||pi.peca as conjunto,
                                     pi.id,
                                     foto.causa,
-                                    foto.quantidade::INTEGER as total_quantidade
+                                    CASE 
+                                        WHEN foto.quantidade ~ '^\d+$' THEN foto.quantidade::INTEGER
+                                        ELSE 0
+                                    END as total_quantidade
                     FROM pcp.inspecao_foto foto
                     LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
                     WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Solda'
@@ -291,7 +300,10 @@ class DashboardInspecao:
                 SELECT DISTINCT TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                                 pi.id,
                                 foto.causa,
-                                foto.quantidade::INTEGER as total_quantidade
+                                CASE 
+                                    WHEN foto.quantidade ~ '^\d+$' THEN foto.quantidade::INTEGER
+                                    ELSE 0
+                                END as total_quantidade
                 FROM pcp.inspecao_foto foto
                 LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Solda'
@@ -469,7 +481,10 @@ class DashboardInspecao:
                         TO_CHAR(pi.data_finalizada, 'YYYY-Month') AS ano_mes,
                         pi.codigo || '-' || pi.peca AS conjunto,
                         foto.causa,
-                        foto.quantidade::INTEGER AS total_quantidade
+                        CASE 
+                            WHEN foto.quantidade ~ '^\d+$' THEN foto.quantidade::INTEGER
+                            ELSE 0
+                        END as total_quantidade
                     FROM pcp.inspecao_foto foto
                     LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
                     WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}'
@@ -492,7 +507,10 @@ class DashboardInspecao:
             FROM (
                 SELECT DISTINCT ON (foto.id, foto.causa) TO_CHAR(pi.data_finalizada, 'YYYY-Month') as ano_mes,
                                 foto.causa,
-                                foto.quantidade::INTEGER as total_quantidade
+                                CASE 
+                                    WHEN foto.quantidade ~ '^\d+$' THEN foto.quantidade::INTEGER
+                                    ELSE 0
+                                END as total_quantidade
                 FROM pcp.inspecao_foto foto
                 LEFT JOIN pcp.pecas_inspecao pi ON pi.id::VARCHAR = foto.id AND pi.setor = foto.setor
                 WHERE pi.data_finalizada BETWEEN '{self.data_inicial}' AND '{self.data_final}' AND foto.num_inspecao = 0 AND pi.setor = 'Estamparia'

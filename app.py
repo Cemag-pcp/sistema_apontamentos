@@ -2183,7 +2183,7 @@ def dashboard_solda():
         data = request.get_json()
         start_date = data.get('startDate')
         end_date = data.get('endDate')
-
+        
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
