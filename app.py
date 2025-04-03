@@ -2644,46 +2644,72 @@ def api_tempo_processo_montagem():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = """
+    sql = sql = """
         WITH ranked_rows AS (
-        SELECT
-        tpep.id,
-        tpep.chave,
-        tpep.codigo,
-        tpep.descricao,
-        tpep.data_inicio,
-        tpep.data_fim - INTERVAL '3 hours' AS data_fim_tratada,
-        tpep.data_carga,
-        tpep.qt_planejada,
-        tpep.celula,
-        tpep.status,
-        ROW_NUMBER() OVER (
-        PARTITION BY tpep.id, tpep.chave, tpep.data_inicio, tpep.data_fim
-        ORDER BY tpep.data_carga DESC
-        ) AS row_num
-        FROM pcp.tb_pecas_em_processo tpep
-        JOIN pcp.ordens_montagem om
-        ON tpep.codigo = om.codigo
-        AND tpep.data_carga = om.data_carga
-        WHERE
-        setor = 'Montagem'
-        AND om.qt_apontada > 0
-        AND tpep.data_fim IS NOT NULL
-        -- AND tpep.chave = '107008'
+            SELECT
+                tpep.id,
+                tpep.chave,
+                tpep.codigo,
+                tpep.descricao,
+                tpep.data_inicio,
+                tpep.data_fim - INTERVAL '3 hours' AS data_fim_tratada,
+                tpep.data_carga,
+                tpep.qt_planejada,
+                tpep.celula,
+                tpep.status,
+                ROW_NUMBER() OVER (
+                    PARTITION BY tpep.chave
+                    ORDER BY tpep.data_carga DESC
+                ) AS row_num
+            FROM pcp.tb_pecas_em_processo tpep
+            LEFT JOIN pcp.ordens_montagem om
+            ON tpep.codigo = om.codigo
+            AND tpep.data_carga = om.data_carga
+            WHERE
+                setor = 'Montagem'
+                AND (om.qt_apontada > 0 OR om.qt_apontada IS NULL)
+                AND tpep.data_fim IS NOT NULL
         )
-        SELECT *
+        SELECT 
+            id,
+            chave,
+            codigo,
+            descricao,
+            data_inicio,
+            data_fim_tratada,
+            data_carga,
+            qt_planejada,
+            celula,
+            status
         FROM ranked_rows
         WHERE row_num = 1
-        ORDER BY chave, data_inicio asc;
+
+        UNION ALL
+
+        SELECT 
+            id,
+            chave,
+            codigo,
+            descricao,
+            data_inicio,
+            NULL AS data_fim_tratada,
+            data_carga,
+            qt_planejada,
+            celula,
+            status
+        FROM pcp.tb_pecas_em_processo tpep
+        WHERE setor = 'Montagem' AND data_fim IS NULL
+
+        ORDER BY chave, data_inicio ASC;
     """
 
     cur.execute(sql)
     data = cur.fetchall()
 
     for linha in data:
-        linha[4] = linha[4].strftime("%d/%m/%Y %H:%M:%S")
-        linha[5] = linha[5].strftime("%d/%m/%Y %H:%M:%S")
-        linha[6] = linha[6].strftime("%d/%m/%Y")
+        linha[4] = linha[4].strftime("%d/%m/%Y %H:%M:%S") if linha[4] else ''
+        linha[5] = linha[5].strftime("%d/%m/%Y %H:%M:%S") if linha[5] else ''
+        linha[6] = linha[6].strftime("%d/%m/%Y") if linha[6] else ''
 
     # resultado = []
     # for linha in data:
