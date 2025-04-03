@@ -95,6 +95,15 @@ $('#envio_inspecao_solda').on('click',function() {
     let tipos_causas_solda = $('#tipos_causas_solda').val();
     let qtd_causas = 0
 
+    for (var i = 0; i < tipos_causas_solda; i++) {
+        let causas = $("#causasSolda-" + i).val();
+
+        if (causas === '' || causas === null) {
+            $("#loading").hide();
+            return alert("causa é obrigatório.");
+        }
+    }
+
     if (inputConformidadesSolda === "" || inspetoresSolda === null || inputConformidadesSolda > inputPecasInspecionadasSolda || inputConformidadesSolda < 0) {
         alert('Verifique se o campo de conformidades está com valor correto');
         $("#loading").hide();
@@ -157,6 +166,12 @@ $('#btnEnviarSolda').on('click',function() {
 
     for (var i = 0; i < tipos_causas_solda; i++) {
         let causas = $("#causasSolda-" + i).val();
+
+        if (causas === '' || causas === null) {
+            $("#loading").hide();
+            return alert("causa é obrigatório.");
+        };
+
         let quantidade = $("#quantidade_causas_solda-" + i).val();
         let inputId = '#inputGroupFile_solda-' + i;
         let files = $(inputId)[0].files;
