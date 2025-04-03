@@ -2906,7 +2906,6 @@ def api_pecas_em_processo_montagem():
 
     return 'success'
 
-
 @app.route("/api/consulta-pecas-em-processo/montagem", methods=['GET'])
 def api_consulta_pecas_em_processo_montagem():
     """
