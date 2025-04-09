@@ -368,13 +368,13 @@ def gerar_planilha():
 
     # Lista de tuplas contendo os dados a serem inseridos
     values = [(linha['codigo'], linha['descricao'], linha['qt_itens'], linha['cor'], linha['prod'], linha['cambao'],
-                linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'), datetime.now().date(),
+                linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'),
                 linha['celula'], linha['chave'], linha['operador']) for linha in dados_recebidos]
 
     print(values)
 
     # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
-    query = """INSERT INTO pcp.ordens_pintura (codigo, peca, qt_planejada, cor, qt_apontada, cambao, tipo, data_carga, data_finalizada, celula, chave, operador) VALUES %s"""
+    query = """INSERT INTO pcp.ordens_pintura (codigo, peca, qt_planejada, cor, qt_apontada, cambao, tipo, data_carga, celula, chave, operador) VALUES %s"""
 
     # Use execute_values para inserir várias linhas de uma vez
     execute_values(cur, query, values)
@@ -457,8 +457,8 @@ def receber_dados_finalizar_cambao():
         for dado in dados_recebidos:
 
             #  Construir e executar a consulta UPDATE
-            query = ("UPDATE pcp.ordens_pintura SET status = 'OK', operador_final = %s WHERE id = %s")
-            cursor.execute(query, (operador,str(dado['id'])))
+            query = ("UPDATE pcp.ordens_pintura SET status = 'OK', data_finalizada = %s, operador_final = %s WHERE id = %s")
+            cursor.execute(query, (datetime.now().date(),operador,str(dado['id'])))
     
             sql = """INSERT INTO pcp.pecas_inspecao 
                      (fk_ordem, data_finalizada,codigo, peca, cor, qt_apontada, tipo, setor) 
