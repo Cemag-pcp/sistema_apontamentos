@@ -2470,14 +2470,15 @@ def api_apontamento_pintura():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select * from pcp.ordens_pintura where data_carga > '2024-01-01' order by id asc"
+    sql = "select * from pcp.ordens_pintura where data_carga > '2024-01-01' and status = 'OK' order by data_finalizada asc"
 
     cur.execute(sql)
     data = cur.fetchall()
 
     for linha in data:
         linha[8] = linha[8].strftime("%d/%m/%Y")
-        linha[9] = linha[9].strftime("%d/%m/%Y")
+        linha[9] = linha[9].strftime("%d/%m/%Y") if linha[9] else None
+        linha[17] = linha[17].strftime("%d/%m/%Y") if linha[17] else None
         linha[2] = linha[2] if linha[2] != '' else "Cadastrar descrição"
 
 
@@ -2489,103 +2490,24 @@ def api_tempo_processo_pintura():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = sql = """
-        WITH ranked_rows AS (
-            SELECT
-                tpep.id,
-                tpep.chave,
-                tpep.codigo,
-                tpep.descricao,
-                tpep.data_inicio,
-                tpep.data_fim - INTERVAL '3 hours' AS data_fim_tratada,
-                tpep.data_carga,
-                tpep.qt_planejada,
-                tpep.celula,
-                tpep.status,
-                ROW_NUMBER() OVER (
-                    PARTITION BY tpep.chave
-                    ORDER BY tpep.data_carga DESC
-                ) AS row_num
-            FROM pcp.tb_pecas_em_processo tpep
-            LEFT JOIN pcp.ordens_montagem om
-            ON tpep.codigo = om.codigo
-            AND tpep.data_carga = om.data_carga
-            WHERE
-                setor = 'Montagem'
-                AND (om.qt_apontada > 0 OR om.qt_apontada IS NULL)
-                AND tpep.data_fim IS NOT NULL
-        )
-        SELECT 
-            id,
-            chave,
-            codigo,
-            descricao,
-            data_inicio,
-            data_fim_tratada,
-            data_carga,
-            qt_planejada,
-            celula,
-            status
-        FROM ranked_rows
-        WHERE row_num = 1
-
-        UNION ALL
-
-        SELECT 
-            id,
-            chave,
-            codigo,
-            descricao,
-            data_inicio,
-            NULL AS data_fim_tratada,
-            data_carga,
-            qt_planejada,
-            celula,
-            status
-        FROM pcp.tb_pecas_em_processo tpep
-        WHERE setor = 'Montagem' AND data_fim IS NULL
-
-        ORDER BY chave, data_inicio ASC;
+    sql = """
+    select * from pcp.ordens_pintura where data_carga > '2024-01-01' order by data_finalizada asc
     """
 
     cur.execute(sql)
     data = cur.fetchall()
 
     for linha in data:
-        linha[4] = linha[4].strftime("%d/%m/%Y %H:%M:%S") if linha[4] else ''
-        linha[5] = linha[5].strftime("%d/%m/%Y %H:%M:%S") if linha[5] else ''
-        linha[6] = linha[6].strftime("%d/%m/%Y") if linha[6] else ''
-
-    # resultado = []
-    # for linha in data:
-    #     linha_dict = dict(linha)  # Converte para dicionário para manipular os valores
-        
-    #     # Garantir que código tenha 6 dígitos
-    #     linha_dict["codigo"] = "0" + str(linha_dict["codigo"]) if len(str(linha_dict["codigo"])) == 5 else str(linha_dict["codigo"])
-
-    #     # Garantir que os campos de data são do tipo datetime antes de formatar
-    #     if isinstance(linha_dict["data_inicio"], str):
-    #         try:
-    #             linha_dict["data_inicio"] = datetime.fromisoformat(linha_dict["data_inicio"])
-    #         except ValueError:
-    #             linha_dict["data_inicio"] = None  # Se não conseguir converter, assume None
-
-    #     if isinstance(linha_dict["data_fim_tratada"], str):
-    #         try:
-    #             linha_dict["data_fim_tratada"] = datetime.fromisoformat(linha_dict["data_fim_tratada"])
-    #         except ValueError:
-    #             linha_dict["data_fim_tratada"] = None
-
-    #     # Formatar as datas corretamente
-    #     linha_dict["data_inicio"] = linha_dict["data_inicio"].strftime("%d/%m/%Y %H:%M:%S") if linha_dict["data_inicio"] else None
-    #     linha_dict["data_fim_tratada"] = linha_dict["data_fim_tratada"].strftime("%d/%m/%Y %H:%M:%S") if linha_dict["data_fim_tratada"] else None
-
-    #     resultado.append(linha_dict)
+        linha[8] = linha[8].strftime("%d/%m/%Y")
+        linha[9] = linha[9].strftime("%d/%m/%Y") if linha[9] else None
+        linha[17] = linha[17].strftime("%d/%m/%Y") if linha[17] else None
+        linha[2] = linha[2] if linha[2] != '' else "Cadastrar descrição"
 
     cur.close()
     conn.close()
 
     return jsonify(data)
+
 
 @app.route("/api/publica/apontamento/montagem", methods=['GET'])
 def api_apontamento_montagem():
