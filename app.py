@@ -126,7 +126,7 @@ def dados_sequenciamento():
                             t1.qt_planejada,
                             t1.cor,
                             t1.celula
-                order by t1.data_carga desc limit 500) as t3"""
+                order by t1.data_carga desc limit 1000) as t3"""
 
     df = pd.read_sql_query(sql, conn)
 
@@ -370,8 +370,6 @@ def gerar_planilha():
     values = [(linha['codigo'], linha['descricao'], linha['qt_itens'], linha['cor'], linha['prod'], linha['cambao'],
                 linha['tipo'], datetime.strptime(linha['data'],'%d/%m/%Y').strftime('%Y-%m-%d'),
                 linha['celula'], linha['chave'], linha['operador'], datetime.now().date()) for linha in dados_recebidos]
-
-    print(values)
 
     # Sua string de consulta com marcadores de posição (%s) adequados para cada valor
     query = """INSERT INTO pcp.ordens_pintura (codigo, peca, qt_planejada, cor, qt_apontada, cambao, tipo, data_carga, celula, chave, operador, data_inicio) VALUES %s"""
@@ -2485,8 +2483,8 @@ def api_apontamento_pintura():
 
     return jsonify(data)
 
-@app.route("/api/publica/apontamento/tempo-processo-montagem")
-def api_tempo_processo_montagem():
+@app.route("/api/publica/apontamento/tempo-processo-pintura")
+def api_tempo_processo_pintura():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
