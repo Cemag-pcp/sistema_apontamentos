@@ -2508,7 +2508,6 @@ def api_tempo_processo_pintura():
 
     return jsonify(data)
 
-
 @app.route("/api/publica/apontamento/montagem", methods=['GET'])
 def api_apontamento_montagem():
 
@@ -2668,7 +2667,7 @@ def api_tempo_processo_montagem():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = sql = """
+    sql = """
         WITH ranked_rows AS (
             SELECT
                 tpep.id,
@@ -2684,16 +2683,17 @@ def api_tempo_processo_montagem():
                 ROW_NUMBER() OVER (
                     PARTITION BY tpep.chave
                     ORDER BY tpep.data_carga DESC
-                ) AS row_num
+                ) AS row_num,
+                om.qt_apontada
             FROM pcp.tb_pecas_em_processo tpep
             LEFT JOIN pcp.ordens_montagem om
-            ON tpep.codigo = om.codigo
-            AND tpep.data_carga = om.data_carga
+                ON tpep.codigo = om.codigo AND tpep.data_carga = om.data_carga
             WHERE
-                setor = 'Montagem'
+                tpep.setor = 'Montagem'
                 AND (om.qt_apontada > 0 OR om.qt_apontada IS NULL)
                 AND tpep.data_fim IS NOT NULL
         )
+
         SELECT 
             id,
             chave,
@@ -2704,25 +2704,31 @@ def api_tempo_processo_montagem():
             data_carga,
             qt_planejada,
             celula,
-            status
+            status,
+            qt_apontada
         FROM ranked_rows
         WHERE row_num = 1
 
         UNION ALL
 
         SELECT 
-            id,
-            chave,
-            codigo,
-            descricao,
-            data_inicio,
+            tpep.id,
+            tpep.chave,
+            tpep.codigo,
+            tpep.descricao,
+            tpep.data_inicio,
             NULL AS data_fim_tratada,
-            data_carga,
-            qt_planejada,
-            celula,
-            status
+            tpep.data_carga,
+            tpep.qt_planejada,
+            tpep.celula,
+            tpep.status,
+            om.qt_apontada
         FROM pcp.tb_pecas_em_processo tpep
-        WHERE setor = 'Montagem' AND data_fim IS NULL
+        LEFT JOIN pcp.ordens_montagem om
+            ON tpep.codigo = om.codigo AND tpep.data_carga = om.data_carga
+        WHERE
+            tpep.setor = 'Montagem'
+            AND tpep.data_fim IS NULL
 
         ORDER BY chave, data_inicio ASC;
     """
