@@ -2491,7 +2491,7 @@ def api_tempo_processo_pintura():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     sql = """
-    select * from pcp.ordens_pintura where data_carga > '2024-01-01' order by data_finalizada asc
+    select * from pcp.ordens_pintura where data_carga > '2025-01-01' order by data_finalizada asc
     """
 
     cur.execute(sql)
