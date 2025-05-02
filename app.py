@@ -629,7 +629,7 @@ def apontar_montagem():
 
     sheet_data = table.values.tolist()
     
-    return render_template('apontamento-montagem.html', sheet_data=sheet_data)
+    return render_template('apontamento-montagem-new.html', sheet_data=sheet_data)
 
 @app.route('/editar-montagem', methods=['POST'])
 def editar_montagem():
