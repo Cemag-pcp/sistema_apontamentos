@@ -16,7 +16,7 @@ except Exception as e:
     print("Erro ao conectar ao banco de dados:", e)
     exit()
 
-df_conjuntos_inspecionados = pd.read_csv('RQ CQ-012-000 (Controle de Inspeção da Solda) - LISTA DE PEÇAS _ CONJUNTOS.csv')
+df_conjuntos_inspecionados = pd.read_csv('RQ CQ-012-000 (Controle de Inspeção da Solda) - LISTA DE PEÇAS _ CONJUNTOS.csv', sep=';')
 
 # Listas para armazenar os resultados das inserções
 success = []

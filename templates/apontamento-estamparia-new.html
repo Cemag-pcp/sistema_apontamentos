@@ -1,0 +1,24 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Apontamento Montagem</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.15/css/bootstrap-multiselect.css" />
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<p>Acesse o novo sistema: <a href="https://www.apontamentousinagem.onrender.com" target="_blank">www.apontamentousinagem.onrender.com</a></p>
+
+{% endblock %}

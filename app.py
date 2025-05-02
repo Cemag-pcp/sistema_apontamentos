@@ -347,7 +347,7 @@ def gerar_cambao():
                    'restante', 'cor', 'qt_produzida', 'cambao', 'tipo', 'codificacao']]
     sheet_data = table.values.tolist()
 
-    return render_template('gerar-cambao.html', sheet_data=sheet_data)
+    return render_template('gerar-cambao-new.html', sheet_data=sheet_data)
 
 @app.route('/gerar-cambao-pintura', methods=['POST'])
 def gerar_planilha():
@@ -689,7 +689,7 @@ def tela_estamparia():
     Rota para tela de estamparia
     """
 
-    return render_template('apontamento-estamparia.html') #async_mode=socketio.async_mode)
+    return render_template('apontamento-estamparia-new.html') #async_mode=socketio.async_mode)
 
 
 @app.route('/salvar-apontamento-montagem', methods=['GET', 'POST'])
