@@ -1578,7 +1578,7 @@ def inspecao_estamparia():
 
     inspecoes,reinspecoes,inspecionadas = dados_inspecionar_reinspecionar_estamparia()
 
-    return render_template('inspecao-estamparia.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
+    return render_template('inspecao-estamparia-new.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
 @app.route('/inspecao-estanqueidade-tubos-cilindros', methods=['GET'])
 def inspecao_estanqueidade():

@@ -1,0 +1,23 @@
+{% extends 'sidebar.html' %}
+
+{% block title %}
+<title>Inspeção Estamparia</title>
+{% endblock %}
+
+{% block links %}
+<!-- Custom styles for this page -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+<link rel="stylesheet" type="text/css"
+    href="{{ url_for('static',filename='vendor/datatables/dataTables.bootstrap4.min.css') }}">
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+{% endblock %}
+
+{% block containerFluid %}
+
+<p>Acesse o novo sistema: <a href="https://apontamentousinagem.onrender.com/core/login/?next=/" target="_blank">https://apontamentousinagem.onrender.com/core/login/?next=/</a></p>
+
+
+{% endblock %}
