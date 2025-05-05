@@ -961,7 +961,7 @@ def inspecao_pintura():
 
     inspecoes,reinspecoes,inspecionadas = classe_inspecao.dados_inspecionar_reinspecionar_pintura()
 
-    return render_template('inspecao.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
+    return render_template('inspecao-pintura-new.html',inspecoes=inspecoes,reinspecoes=reinspecoes,inspecionadas=inspecionadas)
 
 @app.route('/modal-historico', methods=['POST'])
 def modal_historico():
@@ -1375,7 +1375,7 @@ def inspecao_solda():
         if isinstance(item[1], datetime):
             item[1] = formatar_data(item[1])
     
-    return render_template('inspecao-solda.html',a_inspecionar_solda=a_inspecionar_solda,inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda,lista_soldadores=lista_soldadores)
+    return render_template('inspecao-solda-new.html',a_inspecionar_solda=a_inspecionar_solda,inspecoes_solda=inspecoes_solda,reinspecoes_solda=reinspecoes_solda,lista_soldadores=lista_soldadores)
 
 @app.route('/conjuntos-inspecionados-solda',methods=['GET','POST'])
 def conjuntos_inspecionados_solda():
